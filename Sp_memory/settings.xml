@@ -1,0 +1,15 @@
+<settings>
+  <Show>1</Show>
+  <Alert>1</Alert>
+  <Precomp>0</Precomp>
+  <Fix>1</Fix>
+  <AutoName>1</AutoName>
+  <OnlyEffect>1</OnlyEffect>
+  <Selection>1</Selection>
+  <SubItems>0</SubItems>
+  <ListItems>
+    <Name>Effects</Name>
+    <Name>tempTest</Name>
+    <Name>Transition circle pack 1</Name>
+  </ListItems>
+</settings>
