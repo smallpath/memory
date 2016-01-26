@@ -14,12 +14,10 @@
     
 
 
-    gv.limitText = sp.getSetting ("limitText")==="false" ? false : true;
+    gv.limitText = sp.getSettingAsBool ("limitText");
     gv.showText = sp.showThumbValue ;
     gv.version =  parseInt(app.version.split(".")[0])==12?"CC":"CC2014";
     
-    
-
 
     gv.rightClick = function(event) {
                     var alt = event.altKey;
@@ -27,7 +25,7 @@
                     if(alt == false && key.ctrlKey == false){
                              fns.shortMenu(event);
                          }else if (key.ctrlKey == false){
-//~                                 newFunc.gen2(event);
+                                fns.newItem(event);
                              }else if (key.ctrlKey == true){
 //~                                  currentPosition=[event.screenX-152,event.screenY];
 //~                                  newFunc.ud2(currentPosition);
@@ -35,11 +33,12 @@
     }
 
 
-//~     gv.leftDoubleClick = function(event) {newFunc.leftDoubleClick ()}
+    gv.leftDoubleClick = fns.newLayer;
     droplist.onChange = fns.droplistChange;
-    win.onResize =win.onResizing =fns.winResize;
     sp.reloadDroplist();
     droplist.selection = parseInt(sp.getSetting("thisSelection"));
+    
+    win.onResize =win.onResizing =fns.winResize;
     
     if(win instanceof Panel){    // show Panel
             win.layout.layout(1);         
@@ -49,6 +48,7 @@
             win.size=sp.getSetting ("winSize").split(",");
             win.onClose= fns.winClose;
     }
+
     win.onResize();
 
     
@@ -60,7 +60,7 @@
                   },
             
             this.newLayer  = function(){
-                  
+
                   }
           
             this.deleteItem  = function(){
@@ -68,7 +68,7 @@
                   },
             
             this.newItem  = function(){
-                  
+
                   },
           
             this.importImage  = function(){
@@ -359,7 +359,7 @@
             ShortMenu._7.onClick = function() {
                 isCheckBoxClicked = false;
                 ShortMenu.close();
-                sp.fns.newLayer();
+                sp.fns.newItem();
             }
       
             ShortMenu._8.onClick = function() {
@@ -371,7 +371,7 @@
             ShortMenu._9.onClick = function() {
                 isCheckBoxClicked = false;
                 ShortMenu.close();
-                sp.fns.newItem();
+                sp.fns.newLayer();
             }
       
             ShortMenu._10.onClick = function() {
