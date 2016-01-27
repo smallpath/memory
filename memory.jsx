@@ -1,5 +1,6 @@
 ﻿try{
 (function(global){
+    #include 'Sp_memory/lib/StringResource.jsx'
     #include 'Sp_memory/lib/GridView.jsx'
     #include 'Sp_memory/lib/UIParser.jsx'
     #include 'Sp_memory/lib/HelperScripts.jsx'
@@ -20,26 +21,11 @@
     gv.version =  parseInt(app.version.split(".")[0])==12?"CC":"CC2014";
     
 
-    gv.rightClick = function(event) {
-                    var alt = event.altKey;
-                    var key = ScriptUI.environment.keyboardState;
-                    if(alt == false && key.ctrlKey == false){
-                             fns.shortMenu(event);
-                         }else if (key.ctrlKey == false){
-                                fns.newItem(event);
-                             }else if (key.ctrlKey == true){
-                                 currentPosition=[event.screenX-152,event.screenY];
-                                 upAndDownWindow(currentPosition)
-
-                                 }
-    }
-
-
+    gv.rightClick = fns.rightClick;
     gv.leftDoubleClick = fns.newLayer;
     droplist.onChange = fns.droplistChange;
     sp.reloadDroplist();
     droplist.selection = parseInt(sp.getSetting("thisSelection"));
-    
     win.onResize =win.onResizing =fns.winResize;
     
     if(win instanceof Panel){    // show Panel
@@ -56,6 +42,7 @@
     
 
     function fns(){
+           var keepRef = this;
           
             this.cover  = function(){
                   
@@ -281,6 +268,19 @@
                     var thisStr = win.location[0].toString()+","+win.location[1].toString();
                     sp.saveSetting ("winLocation",thisStr);
                 },
+                this.rightClick=function(event) {
+                                var alt = event.altKey;
+                                var key = ScriptUI.environment.keyboardState;
+                                if(alt == false && key.ctrlKey == false){
+                                         keepRef.shortMenu(event);
+                                     }else if (key.ctrlKey == false){
+                                            keepRef.newItem(event);
+                                         }else if (key.ctrlKey == true){
+                                             currentPosition=[event.screenX-152,event.screenY];
+                                             upAndDownWindow(currentPosition)
+
+                                             }
+                }
             //~ the function called by right clicking
             this.shortMenu = function(event){
                     if (!event) return;
@@ -326,8 +326,8 @@ this,
     sp.prototype = {
             
             scriptName: "Sp_memory",
-            scriptVersion:"2.3",
-            version: 2.3,
+            scriptVersion:"2.1",
+            version: 2.1,
             slash: "/", 
             
             setting:app.settings,
@@ -376,20 +376,8 @@ this,
             materialFolder: new Folder(File($.fileName).parent.fsName +sp.prototype.slash +  "tempFile"),
             settingsFile: new File(File($.fileName).parent.fsName + sp.prototype.slash +  "Sp_memory"+ sp.prototype.slash + "settings.xml"),
             imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash +  "Sp_memory"+ sp.prototype.slash + "image"),
+            roamingFolder:new  Folder(Folder.userData.fullName + "/Aescripts/Sp_memory"),
             
-            //~     check whether an object is like array
-            isArrayLike: function (o) {
-                if (o &&                               
-                    typeof o === "object" &&            
-                    isFinite(o.length) &&               
-                    o.length >= 0 &&                   
-                    o.length===Math.floor(o.length) &&  
-                    o.length < 4294967296)             
-                    return true;                        // Then o is array-like
-                else
-                    return false;                       // Otherwise it is not
-            },
-        
         
             haveSetting: function(keyName){
                     return this.setting.haveSetting (this.scriptName, keyName);
@@ -500,7 +488,11 @@ this,
     
         //~  added in 2016.1.21
         sp.prototype.extend(sp.prototype,{
-              
+                    swap: function(a, b) {
+                        tempA = a.text;
+                        a.text = b.text;
+                        b.text = tempA;
+                    },
                     lookUpTextInChildren:function(text,children){
                             var len = children.length;
                             for(var i=0;i<len;i++){
@@ -758,10 +750,9 @@ this,
       sp.offsetKeyframeValue = sp.getSettingAsBool ("offsetKeyframe");
       
     
-      sp.roamingFolder = Folder(Folder.userData.fullName + "/Aescripts/Sp_memory");
       !sp.roamingFolder.exists && sp.roamingFolder.create();
+      !sp.materialFolder.exists && sp.materialFolder.create();
        
-//~      sp.saveSetting ("language","ch");
      var loc = function(string){
             if(sp.lang === 0)
                     sp.lang = sp.getSetting ("language");

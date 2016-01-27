@@ -1,4 +1,325 @@
-﻿var upAndDown=function (isUp,isW){
+﻿var settingsButtonFunc=function () {
+      
+var _ = UIParser(global);
+
+var UIJson = 
+          {
+            newWin:{type:'palette',text:sp.scriptName+' v'+sp.scriptVersion,margins:10,children:{
+                        
+                        group1:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                          helpText:{type:'edittext',properties:{multiline:true,scrolling:false},preferredSize:[150,300],text:'',enabled:1},
+                                          wlist:{type:'listbox',preferredSize:[150,300]}
+                                    }},
+                        group2:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                          deleteFolder:{type:'Button',preferredSize:[165,27],text:loc(sp.deleteFolder),enabled:1},
+                                          changeGroupName:{type:'Button',preferredSize:[165,27],text:loc(sp.changeGroupName),enabled:1}
+                                    }},
+                        group3:{type:'group',alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],children:{
+                                          output:{type:'Button',text:loc(sp.output),enabled:1},
+                                    }},                    
+                        group4:{type:'group',orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                    g0:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                        gr1:{type:'group',children:{
+                                                    limitText:{type:'checkbox',text:loc(sp.limitText)}
+                                                    }},
+                                        gr2:{type:'group',children:{
+                                                    coverChange:{type:'checkbox',text:loc(sp.coverChange)}
+                                                    }}
+                                    }},
+                                    gr1:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                        gr1:{type:'group',children:{
+                                                    thumbType:{type:'checkbox',text:loc(sp.thumbType)}
+                                                    }}
+                                    }},
+                                    gr0:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                                gr2:{type:'group',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                                            folderName:{type:'statictext',text:loc(sp.folderName)},
+                                                            folderNameText:{type:'edittext',text:"",justify:'center',characters:17},
+                                                }}
+                                    }},
+                                    gr3:{type:'group',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                                      effectName:{type:'statictext',text:loc(sp.effectName)},
+                                                      effectNameText:{type:'edittext',text:"",characters:18}
+                                    }},
+                        
+                        }},//end of group4
+                        group5:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                          ch:{type:'Button',text:'中文',enabled:0},
+                                          en:{type:'Button',text:'English',enabled:0}
+                                    }},
+                        group6:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                          ui1:{type:'Button',text:loc(sp.ui1),enabled:0},
+                                          ui2:{type:'Button',text:loc(sp.ui2),enabled:0}
+                                    }},
+                        group7:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                          checkVersion:{type:'Button',text:loc(sp.checkVersion),enabled:1},
+                                          openLink:{type:'Button',text:loc(sp.link),enabled:1}
+                                    }},
+                              
+                        }}//end of newWin
+                        
+          };
+
+        
+var win = _.newWindow(UIJson)[0];
+
+_('*').each(function(e){
+            switch(e.id){
+                  case 'helpText': e.text = loc(sp.about);
+                                          e.onChange = e.onChanging = function(){this.text = loc(sp.about)};
+                                          break;
+                  case 'wlist': sp.xmlFileNames.forEach(function(item,index){
+                                                            this.add("item",item)
+                                                            },e)
+                  case 'deleteFolder': e.onClick = function(){
+                                                      var folder = sp.materialFolder;
+                                                      function deleteThisFolder(folder) {
+                                                          var waitClFile = folder.getFiles();
+                                                          for (var waitA = 0; waitA < waitClFile.length; waitA++) {
+                                                              if (waitClFile[waitA] instanceof Folder) {
+                                                                  deleteThisFolder(waitClFile[waitA]);
+                                                                  waitClFile[waitA].remove();
+                                                              } else {
+                                                                  waitClFile[waitA].remove();
+                                                              }
+                                                          }
+                                                      }
+                                                      deleteThisFolder(folder);
+                                                      alert(loc(sp.deleteOk));
+                              
+                                                };break;
+                  case 'changeGroupName': e.onClick = function(){
+                                                                        var wlist = _('#wlist')[0];
+                                                                        if(!wlist.selection) return;
+                                                                        var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
+                                                                        if(!newGroupName) return;
+                                                                        if(sp.lookUpTextInChildren(newGroupName,wlist.items)){alert(loc(sp.existName));return;}
+                                                                        var file = sp.getFileByName(wlist.selection.text);
+                                                                        file.rename(newGroupName+".xml");
+                                                                        var xml = new XML(sp.settingsFile.readd());
+                                                                        xml.ListItems.insertChildAfter(xml.ListItems.child(wlist.selection.index),
+                                                                                                                    new XML("<Name>" + newGroupName.toString() + "</Name>"));
+                                                                        xml.ListItems.child(wlist.selection.index).setLocalName("waitToDelete");
+                                                                        delete xml.ListItems.waitToDelete;
+                                                                        sp.settingsFile.writee(xml);
+                                                                        var folder = sp.getImageFolderByName(wlist.selection.text);
+                                                                        if(folder.exists)
+                                                                              folder.rename(newGroupName);
+                                                                        wlist.items[wlist.selection.index].text = newGroupName;
+                                                                        sp.droplist.items[wlist.selection.index].text = newGroupName;
+                                                                        sp.xmlFileNames[wlist.selection.index] = newGroupName;
+                                                                        sp.droplist.notify("onChange"); 
+                                                                        };break;
+                  case 'output':e.onClick =  function(){outputWindow()};
+                                      break;
+                  case 'limitText': e.value = sp.getSettingAsBool("limitText");
+                                          e.onClick = function(){sp.saveSetting("limitText",this.value.toString())}
+                                          break;
+                  case 'coverChange': e.value = sp.getSettingAsBool("coverChange");
+                                                e.onClick = function(){sp.saveSetting("coverChange",this.value.toString())}
+                                                break;
+                  case 'thumbType':   e.value = sp.getSettingAsBool("thumbType");
+                                                e.onClick = function(){sp.saveSetting("thumbType",this.value.toString())}
+                                                break;
+                  case 'folderNameText':   e.text = sp.getSetting("folderName");
+                                                      e.onChange = function(){sp.saveSetting("folderName",this.text)}
+                                                      break;
+                  case 'effectNameText':    e.text = sp.getSetting("effectName");
+                                                      e.onChange = function(){sp.saveSetting("effectName",this.text)}
+                                                      break;
+                  case 'ch':    e.enabled = sp.lang =="en"? true: false;
+                                    e.onClick = function(){
+                                               sp.saveSetting("language","ch");
+                                               alert("请重新打开脚本,语言会将自动变更为中文.");
+                                               _('#en')[0].enabled = true;
+                                               _('#ch')[0].enabled = false;
+                                          }
+                                    break;
+                  case 'en':    e.enabled = sp.lang =="ch"? true: false;
+                                    e.onClick = function(){
+                                               sp.saveSetting("language","en");
+                                               alert("Please restart script,language will be changed into English.");
+                                               _('#en')[0].enabled = false;
+                                               _('#ch')[0].enabled = true;
+                                          }
+                                    break;
+                  case 'checkVersion':       if(sp.lang == "en")
+                                                            e.size = _('#openLink')[0].size = [211,27];
+                                                      e.onClick = function(){
+                                                                 var latest = parseFloat(sp.getVersion("Sp_memory"));
+                                                                 var nowVersion = sp.version;
+                                                                 if(latest > nowVersion){
+                                                                        alert(loc(sp.newVersionFind)+latest.toString());
+                                                                        if ( confirm (loc(sp.isDown))){ 
+                                                                            sp.openLink(sp.downloadLink+" v"+latest.toString()+".jsxbin");
+                                                                            }
+                                                                     }else{
+                                                                         alert(loc(sp.newVersionNotFind));
+                                                                         }
+                                                            };break;
+                  case 'openLink':e.onClick = function(){
+                                                sp.openLink(sp.weiboLink);
+                                          };break;
+                  
+                  
+                  }
+      })
+
+
+
+        var warpDrop = function(a, b, index1, index2) {
+            var tempD = a.text;
+            a.text = b.text;
+            b.text = tempD;
+            var tempXML = sp.xmlFileNames[index1];
+            sp.xmlFileNames[index1] = sp.xmlFileNames[index2];
+            sp.xmlFileNames[index2] = tempXML;
+        }
+
+
+        var exchange= function(isUp,wXML) {
+            if (isUp == true) {
+                var aic = _('#wlist')[0].selection.index;
+                var name = sp.droplist.selection.text;
+                var wupxml = new XML(wXML.ListItems.child(aic));
+                wXML.ListItems.insertChildBefore(wXML.ListItems.child(aic - 1), wupxml);
+                wXML.ListItems.child(aic + 1).setLocalName("waitToDelete");
+                delete wXML.ListItems.waitToDelete;
+                sp.settingsFile.writee(wXML);
+                sp.swap(_('#wlist')[0].items[aic - 1], _('#wlist')[0].items[aic]);
+                warpDrop(sp.droplist.items[aic - 1], sp.droplist.items[aic], aic - 1, aic);
+                sp.droplist.selection = sp.droplist.find(name);
+                sp.droplist.notify("onChange");
+                sp.gv.refresh();
+            } else {
+                var aic = _('#wlist')[0].selection.index;
+                var name = sp.droplist.selection.text;
+                var wdownxml = new XML(wXML.ListItems.child(aic));
+                wXML.ListItems.insertChildAfter(wXML.ListItems.child(aic + 1), wdownxml);
+                wXML.ListItems.child(aic).setLocalName("waitToDelete");
+                delete wXML.ListItems.waitToDelete;
+                wxmlFile.writee(wXML);
+                sp.swap(_('#wlist')[0].items[aic + 1], _('#wlist')[0].items[aic]);
+                warpDrop(sp.droplist.items[aic + 1], sp.droplist.items[aic], aic + 1, aic);
+                sp.droplist.selection = sp.droplist.find(name);
+                sp.droplist.notify("onChange");
+                sp.gv.refresh();
+            }
+        }
+
+
+        var  handleKey = function(key, control) {
+            var wXML = new XML(sp.settingsFile.readd());
+            switch (key.keyName) {
+                case "Up":
+                    if (_('#wlist')[0].selection != null && _('#wlist')[0].selection.index > 0) {
+                        exchange(true,wXML);
+                    };
+                    break;
+                case "Down":
+                    if (_('#wlist')[0].selection != null && _('#wlist')[0].selection.index < _('#wlist')[0].items.length - 1) {
+                        exchange(false,wXML);
+                    };
+                    break;
+            }
+        }
+  
+_('#wlist')[0].addEventListener("keydown", function(k) {
+            handleKey(k, this);
+        });
+  
+win.location = [200,300];
+win.show();
+                        
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function outputWindow () {
+            var outWin = new Window("window", "Export", undefined, { resizeable: 0, maximizeButton: 0 });
+            outRes = """Group{
+            orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
+                            wlist:ListBox{properties:{multiselect:1}},
+                            oc:Group{
+                                ok:Button{text:'"""+loc(sp.ok)+"""'},
+                                cancel:Button{text:'"""+loc(sp.cancel)+"""'}
+                            }}""";
+                try{outRes=outWin.add(outRes);}catch(err){alert(err)}
+                    var scriptsFile = sp.scriptFile;
+                    wfolder = sp.settingsFolder;
+                    wxmlFile = sp.settingsFile;
+                    wcontent = wxmlFile.readd();
+                    wXML = new XML(wcontent);
+                    for (var bPoint = 0; bPoint < wXML.ListItems.children().length(); bPoint++) {
+                        outRes.wlist.add("item", wXML.ListItems.child(bPoint).toString());
+                    }
+                outRes.wlist.size = [200,500];
+                outWin.show();
+                
+                outRes.oc.ok.onClick=function(){
+                        if(outRes.wlist.selection!=null){
+                              var exportFolder = Folder.selectDialog("Please select folder");
+                               if (exportFolder != null && exportFolder instanceof Folder) {
+                                for(var i=0;i<outRes.wlist.selection.length;i++){
+
+
+                                    var sourceFile = sp.getFileByName(outRes.wlist.selection[i].text);
+                                    var targetFile = File(exportFolder.toString() + sp.slash + outRes.wlist.selection[i].text + ".xml");
+                                    if(targetFile.exists) {continue;}
+                                    
+                                    var images= sp.getImageFolderByName(outRes.wlist.selection[i].text).getFiles();
+                                    var picXml = new XML("<pic></pic>");
+                                    images.forEach(function(item,index){
+                                                  if(item.name.indexOf(".png") !=1){
+                                                              item.open("r");
+                                                              item.encoding = "binary";
+                                                              var str = encodeURIComponent (item.read());
+                                                              item.close();
+                                                              var tempXmlBigHere=new XML("<imgName>"+encodeURIComponent(item.name)+"</imgName>");
+                                                              var tempXmlHeres=new XML("<img>"+str+"</img>");
+                                                              var guluTempA=new XML("<imgInfo></imgInfo>");
+                                                              guluTempA.appendChild(tempXmlBigHere);
+                                                              guluTempA.appendChild(tempXmlHeres);
+                                                              picXml.appendChild (guluTempA);
+                                                        }
+                                          });
+                                    var xml = new XML(sourceFile.readd());
+                                    if(picXml.children().length()>0){
+                                                xml.appendChild (picXml);
+                                          }
+                                    if(xml.children().length()==0){
+                                                xml = "<tree></tree>"
+                                          }
+                                    targetFile.writee(xml);
+                                }  // for loop
+                                    clearOutput();
+                                    writeLn("Complete!");
+                            } // not null
+                    }   //last 
+                outRes.oc.cancel.onClick=function(){
+                        outWin.close();
+                    }
+
+           }
+}
+
+
+var upAndDown=function (isUp,isW){
                 var file = sp.getFileByName(sp.droplist.selection.text);
                 var xml = new XML(file.readd());
         if (isUp == true &&sp.gv.lastSelectedItem != null &&sp.gv.lastSelectedItem.index > 0) {
@@ -142,419 +463,5 @@ var presetWindow = function () {
                     jinWin.show();
                 }
     
-    var settingsButtonFunc=function () {
-        listWin = new Window("palette", sp.scriptName+" "+sp.version, undefined);
-        listres =
-        "group{\
-            orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-            text:EditText{properties:{multiline:true,scrolling: false},preferredSize:[150,300],text:'',enabled:1},\
-            wlist:ListBox{preferredSize:[150,300]},\
-            }";
-        listWin.res = listWin.add(listres);
-        listWin.res.text.text = loc(sp.about);
-        listWin.res.text.onChange = listWin.res.text.onChanging = function () {
-            this.text = loc(sp.about);
-        }
-        listres2 =
-        "group{\
-            orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-            cl:Button{preferredSize:[165,27],text:'" + loc(sp.deleteFolder) + "',enabled:1},\
-            change:Button{preferredSize:[165,27],text:'" + loc(sp.changeGroupName) + "',enabled:1},\
-            }";
-        listWin.res2 = listWin.add(listres2);
-        listWin.res2.cl.onClick = function () {
-            waitCl = Folder(sp.scriptFolder.toString() + "/tempFile");
-            var deleteThisFolder = function (folder) {
-                var waitClFile = folder.getFiles();
-                for (var waitA = 0; waitA < waitClFile.length; waitA++) {
-                    if (waitClFile[waitA] instanceof Folder) {
-                        deleteThisFolder(waitClFile[waitA]);
-                        waitClFile[waitA].remove();
-                    } else {
-                        waitClFile[waitA].remove();
-                    }
-                }
-            }
-            deleteThisFolder(waitCl);
-            alert(loc(sp.deleteOk));
-        }
-        listWin.res2.change.onClick = function () {
-            if (listWin.res.wlist.selection != null) {
-                newGrName = prompt(loc(sp.setName), listWin.res.wlist.selection.text);
-                isEx = true;
-                if (newGrName != null) {
-                    for (caca = 0; caca < listWin.res.wlist.items.length; caca++) {
-                        if (listWin.res.wlist.items[caca].text == newGrName.toString()) {
-                            if (caca != listWin.res.wlist.selection.index) {
-                                isEx = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (newGrName != null) {
-                    if (newGrName.toString() != "" && isEx == true && newGrName.toString() != listWin.res.wlist.selection.text) {
-                        var thisXml = File(sp.xmlPaths[listWin.res.wlist.selection.index].toString());
-                        var imagesFolder = Folder(File(sp.xmlPaths[listWin.res.wlist.selection.index].toString()).parent.toString() + "/image/" + File(sp.xmlPaths[listWin.res.wlist.selection.index].toString()).displayName.split(".")[0].toString());
-                        thisXml.rename(newGrName.toString() + ".xml");
-                        try {
-                            ccc = sp.xmlFile.readd();
-                            newC = XML(ccc);
-                            newC.ListItems.insertChildAfter(newC.ListItems.child(listWin.res.wlist.selection.index), XML("<Name>" + newGrName.toString() + "</Name>"));
-                            newC.ListItems.child(listWin.res.wlist.selection.index).setLocalName("waitToDelete");
-                            delete newC.ListItems.waitToDelete;
-                            sp.xmlFile.writee(newC);
-                        } catch (err) { }
-                        if (imagesFolder.exists) {
-                            imagesFolder.rename(newGrName.toString());
-                        }
-                        listWin.res.wlist.selection.text = newGrName.toString();
-                        if (sp.ui == 2)
-                            gui.droplist.items[listWin.res.wlist.selection.index].text = newGrName.toString();
-                        else
-                            sp.drop.items[listWin.res.wlist.selection.index].text = newGrName.toString();
-                        sp.xmlPaths[listWin.res.wlist.selection.index] = File(sp.scriptsFile.parent.fsName + "/Sp_memory/" + newGrName.toString() + ".xml").toString();
-                        if (sp.ui == 2){
-                            gui.droplist.notify("onChange");
-                        }else{
-                            sp.drop.notify("onChange");
-                            }
-                    } else if (newGrName.toString() == "") {
-                        alert(loc(sp.blankName));
-                    } else if (isEx == false) {
-                        alert(loc(sp.existName));
-                    }
-                }
-            }
-        }
-        outPutRes = "group{\
-       alignment:['fill','fill'],\
-        alignChildren:['fill','fill'],\
-       output:Button{text:'"+ loc(sp.output) + "'}\
-       }";
-        listWin.out = listWin.add(outPutRes);
-
-        listWin.out.output.onClick = function () {
-            var outWin = new Window("window", "Export", undefined, { resizeable: 0, maximizeButton: 0 });
-            outRes = """Group{
-            orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
-                            wlist:ListBox{properties:{multiselect:1}},
-                            oc:Group{
-                                ok:Button{text:'"""+loc(sp.ok)+"""'},
-                                cancel:Button{text:'"""+loc(sp.cancel)+"""'}
-                            }}""";
-                try{outRes=outWin.add(outRes);}catch(err){alert(err)}
-                    var scriptsFile = sp.scriptsFile;
-                    wfolder = sp.settingsFolder;
-                    wxmlFile = sp.settingsFile;
-                    wcontent = wxmlFile.readd();
-                    wXML = new XML(wcontent);
-                    for (var bPoint = 0; bPoint < wXML.ListItems.children().length(); bPoint++) {
-                        outRes.wlist.add("item", wXML.ListItems.child(bPoint).toString());
-                    }
-                outRes.wlist.size = [200,500];
-                outWin.show();
-                
-                outRes.oc.ok.onClick=function(){
-                        if(outRes.wlist.selection!=null){
-                              var exportFolder = Folder.selectDialog("Please select folder");
-                               if (exportFolder != null && exportFolder instanceof Folder) {
-                                var preSelection = gui.droplist.selection.index;
-                                for(var iai=0;iai<outRes.wlist.selection.length;iai++){
-                                        var thisSelection=outRes.wlist.selection[iai].index;
-                                        gui.droplist.selection= thisSelection;
-                                        gui.droplist.notify("onChange");
-                                        var scriptsFile = new File($.fileName);
-                                            if (!File(exportFolder.toString() + "/" + sp.inXmlFile.name).exists) {
-                                                sp.inXmlFile.copy(exportFolder.toString() + "/" + sp.inXmlFile.name);
-                                                var thisFile=File(exportFolder.toString() + "/" + sp.inXmlFile.name);
-                                                var thisCon=thisFile.readd();
-                                                var thisXml=new XML(thisCon);
-                                                var imgFolder=Folder(sp.folder.toString()+"/image"+"/"+sp.inXmlFile.name.replace(".xml",""));
-                                                if(imgFolder.exists){
-                                                var picXml=new XML("<pic></pic>");
-                                                var filesHere=imgFolder.getFiles ();
-                                                var isYou=false;
-                                                for(var i=0;i<filesHere.length;i++){
-                                                        if(filesHere[i].name.indexOf(".png")!=-1){
-                                                            isYou=true;
-                                                                filesHere[i].open("r");
-                                                                filesHere[i].encoding="BINARY";
-                                                                encodeStr=encodeURIComponent(filesHere[i].read());
-                                                                filesHere[i].close();
-                                                                tempXmlBigHere=new XML("<imgName>"+encodeURIComponent(filesHere[i].name)+"</imgName>");
-                                                                tempXmlHeres=new XML("<img>"+encodeStr+"</img>");
-                                                                guluTempA=new XML("<imgInfo></imgInfo>");
-                                                                guluTempA.appendChild(tempXmlBigHere);
-                                                                guluTempA.appendChild(tempXmlHeres);
-                                                                picXml.appendChild (guluTempA);
-                                                            }
-                                                    }
-                                                    if(isYou==true){
-                                                            thisXml.appendChild (picXml);
-                                                            thisFile.writee(thisXml);
-                                                        }
-                                                }
-                                            } else {
-                                                clearOutput();
-                                                writeLn(loc(sp.overWritten));
-                                            }
-                                    }
-                                gui.droplist.selection = preSelection;
-                                gui.droplist.notify("onChange");
-                                alert(loc(sp.complete));
-                                outWin.close();
-                                }
-                            }
-                    }
-                outRes.oc.cancel.onClick=function(){
-                        outWin.close();
-                    }
-
-           }
-        var str1 = 
-            """group{
-            orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],
-            g0:Group{
-             orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],
-                gr1:Group{c:Checkbox{text:""}},
-                gr2:Group{c:Checkbox{text:""}},
-            },
-            gr1:Group{
-                orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],
-                gr1:Group{c:Checkbox{text:""}},
-            }
-            gr0:Group{
-            orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],
-            gr2:Group{alignment:['fill','fill'],alignChildren:['fill','fill'],st:StaticText{text:""},ed:EditText{text:"",justify:'center',characters:17}},
-            },
-            gr3:Group{alignment:['fill','fill'],alignChildren:['fill','fill'],st:StaticText{text:""},ed:EditText{text:"",characters:18}}
-            }""";
-            
-
-            var str = listWin.add(str1);
-            str.gr1.gr1.c.text = loc(sp.thumbType);
-            str.g0.gr1.c.text = loc(sp.limitText);
-            str.g0.gr2.c.text = loc(sp.coverChange)
-            str.gr0.gr2.st.text =loc(sp.folderName);
-            str.gr3.st.text =loc(sp.effectName);
-            
-            if (parseInt(app.version.split(".")[0])<11){
-                    str.gr1.gr1.c.enabled =false;
-                }
-
-            str.gr1.gr1.c.value = (sp.getSetting("thumbType")=="false")?false:true;
-            str.gr1.gr1.c.onClick = function(){
-                               sp.saveSetting("thumbType",this.value.toString());
-                }
-            
-            str.g0.gr1.c.value = (sp.getSetting ("limitText")=="false")?false:true;
-            str.g0.gr1.c.onClick = function(){
-                    sp.saveSetting ("limitText",this.value.toString());
-                    sp.gv.limitText = this.value;
-                    sp.gv.refresh();
-                }
-            str.g0.gr2.c.value = (sp.getSetting ("coverChange")=="false")?false:true;
-            str.g0.gr2.c.onClick = function(){
-                    sp.saveSetting ("coverChange",this.value.toString());
-                }
-            str.gr0.gr2.ed.text = sp.getSetting ("folderName");
-            str.gr0.gr2.ed.onChange = function(){
-                    sp.saveSetting ("folderName",this.text);
-                }
-            str.gr3.ed.text = sp.getSetting ("effectName");
-            str.gr3.ed.onChange = function(){
-                    sp.saveSetting ("effectName",this.text);
-                }
-       
-        listres1 =
-            "group{\
-            orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-            ch:Button{text:'中文',enabled:0},\
-            en:Button{text:'English',enabled:0},\
-            }";
-        listWin.res1 = listWin.add(listres1);
-        if (sp.getSetting("language") == "ch") {
-            listWin.res1.ch.enabled = false;
-            listWin.res1.en.enabled = true;
-        } else {
-            listWin.res1.ch.enabled = true;
-            listWin.res1.en.enabled = false;
-        }
-        listWin.res1.ch.onClick = function() {
-            sp.saveSetting("language","ch")
-            alert("请重新打开脚本,语言会将自动变更为中文.");
-            listWin.res1.ch.enabled = false;
-            listWin.res1.en.enabled = true;
-        }
-        listWin.res1.en.onClick = function() {
-            sp.saveSetting("language","en")
-            alert("Please restart script,language will be changed into English.");
-            listWin.res1.en.enabled = false;
-            listWin.res1.ch.enabled = true;
-        }
-        listres2 =
-            "group{\
-            orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-            ch:Button{text:'"+loc(sp.ui1)+"',enabled:0},\
-            en:Button{text:'"+loc(sp.ui2)+"',enabled:0},\
-            }";
-        listWin.res2 = listWin.add(listres2);
-        if(sp.getSetting("ui")=="1"){
-                listWin.res2.ch.enabled = 0;
-                listWin.res2.en.enabled = 0;
-            }else{
-                listWin.res2.ch.enabled = 0;
-                listWin.res2.en.enabled = 0;
-                }
-
-            
-         listWin.res2.ch.onClick = function(){
-                alert(loc(sp.uiC));
-                sp.saveSetting("ui","1");
-                listWin.res2.ch.enabled = 0;
-                listWin.res2.en.enabled = 1;
-             }
-         listWin.res2.en.onClick = function(){
-                alert(loc(sp.uiC));
-                sp.saveSetting("ui","2");
-                listWin.res2.ch.enabled = 1;
-                listWin.res2.en.enabled = 0;
-             }
-        listres3 =
-            "group{\
-            orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-            ch:Button{text:'"+loc(sp.checkVersion)+"',enabled:1},\
-            en:Button{text:'"+loc(sp.link)+"',enabled:1},\
-            }";
-        listWin.res3 = listWin.add(listres3);
-        if (sp.lang == "ch"){
-        listWin.res3.ch.size = listWin.res3.en.size = (sp.lang == "ch")?[165,27]:[211,27];
-        listWin.res3.en.onClick = function(){
-                sp.openLink(sp.weiboLink);
-            }
-        }else{
-                listWin.res3.remove(listWin.res3.en);
-            }
-        listWin.res3.ch.onClick = function(){
-                try{
-                 var latest = parseFloat(sp.getVersion());
-                 var nowVersion = parseFloat(sp.version);
-                 if(latest > nowVersion){
-                        alert(loc(sp.newVersionFind)+latest.toString());
-                        if (confirm (loc(sp.isDown))){ 
-                                sp.openLink(sp.downloadLink+" v"+latest.toString()+".jsxbin");
-                            }
-                     }else{
-                            alert(loc(sp.newVersionNotFind));
-                         }
-                     }catch(err){err.printa()}
-            }
     
-        var scriptsFile = sp.scriptsFile;
-        wfolder = sp.settingsFolder;
-        wxmlFile = sp.settingsFile;
-        wcontent = wxmlFile.readd();
-        wXML = new XML(wcontent);
-        for (var bPoint = 0; bPoint < wXML.ListItems.children().length(); bPoint++) {
-            listWin.res.wlist.add("item", wXML.ListItems.child(bPoint).toString());
-        }
-
-        var  handleKey = function(key, control) {
-            switch (key.keyName) {
-                case "Up":
-                    if (listWin.res.wlist.selection != null && listWin.res.wlist.selection.index > 0) {
-                        if (sp.ui == 2)
-                        exchange(true)
-                        else
-                        exchange2(true);
-                    };
-                    break;
-                case "Down":
-                    if (listWin.res.wlist.selection != null && listWin.res.wlist.selection.index < listWin.res.wlist.items.length - 1) {
-                        if (sp.ui == 2)
-                        exchange(false);
-                        else
-                        exchange2(false);
-                    };
-                    break;
-            }
-        }
-
-        var exchange= function(isUp) {
-            if (isUp == true) {
-                var aic = listWin.res.wlist.selection.index;
-                mingzi = gui.droplist.selection.text;
-                var wupxml = new XML(wXML.ListItems.child(aic));
-                wXML.ListItems.insertChildBefore(wXML.ListItems.child(aic - 1), wupxml);
-                wXML.ListItems.child(aic + 1).setLocalName("waitToDelete");
-                delete wXML.ListItems.waitToDelete;
-                wxmlFile.writee(wXML);
-                warpBig(listWin.res.wlist.items[aic - 1], listWin.res.wlist.items[aic]);
-                warpDrop(gui.droplist.items[aic - 1], gui.droplist.items[aic], aic - 1, aic);
-                gui.droplist.selection = gui.droplist.find(mingzi);
-            } else {
-                var aic = listWin.res.wlist.selection.index;
-                mingzi = gui.droplist.selection.text;
-                var wdownxml = new XML(wXML.ListItems.child(aic));
-                wXML.ListItems.insertChildAfter(wXML.ListItems.child(aic + 1), wdownxml);
-                wXML.ListItems.child(aic).setLocalName("waitToDelete");
-                delete wXML.ListItems.waitToDelete;
-                wxmlFile.writee(wXML);
-                warpBig(listWin.res.wlist.items[aic + 1], listWin.res.wlist.items[aic]);
-                warpDrop(gui.droplist.items[aic + 1], gui.droplist.items[aic], aic + 1, aic);
-                gui.droplist.selection = gui.droplist.find(mingzi);
-            }
-        }
-
-        var exchange2= function(isUp) {
-            if (isUp == true) {
-                var aic = listWin.res.wlist.selection.index;
-                mingzi = sp.drop.selection.text;
-                var wupxml = new XML(wXML.ListItems.child(aic));
-                wXML.ListItems.insertChildBefore(wXML.ListItems.child(aic - 1), wupxml);
-                wXML.ListItems.child(aic + 1).setLocalName("waitToDelete");
-                delete wXML.ListItems.waitToDelete;
-                wxmlFile.writee(wXML);
-                warpBig(listWin.res.wlist.items[aic - 1], listWin.res.wlist.items[aic]);
-                warpDrop(sp.drop.items[aic - 1], sp.drop.items[aic], aic - 1, aic);
-                sp.drop.selection = sp.drop.find(mingzi);
-                sp.drop.notify("onChange");
-                sp.gv.refresh();
-            } else {
-                var aic = listWin.res.wlist.selection.index;
-                mingzi = sp.drop.selection.text;
-                var wdownxml = new XML(wXML.ListItems.child(aic));
-                wXML.ListItems.insertChildAfter(wXML.ListItems.child(aic + 1), wdownxml);
-                wXML.ListItems.child(aic).setLocalName("waitToDelete");
-                delete wXML.ListItems.waitToDelete;
-                wxmlFile.writee(wXML);
-                warpBig(listWin.res.wlist.items[aic + 1], listWin.res.wlist.items[aic]);
-                warpDrop(sp.drop.items[aic + 1], sp.drop.items[aic], aic + 1, aic);
-                sp.drop.selection = sp.drop.find(mingzi);
-                sp.drop.notify("onChange");
-                sp.gv.refresh();
-            }
-        }
-
-        var warpBig = function(a, b) {
-            tempA = a.text;
-            a.text = b.text;
-            b.text = tempA;
-        }
-
-        var warpDrop = function(a, b, index1, index2) {
-            tempD = a.text;
-            a.text = b.text;
-            b.text = tempD;
-            tempXML = sp.xmlPaths[index1];
-            sp.xmlPaths[index1] = sp.xmlPaths[index2];
-            sp.xmlPaths[index2] = tempXML;
-        }
-        listWin.res.wlist.addEventListener("keydown", function(k) {
-            handleKey(k, this);
-        });
-        listWin.center();
-        listWin.show();
-    }
     
