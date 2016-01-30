@@ -857,76 +857,56 @@ function cut(layer){
     }
 /*************************************批量自动保存每一层为新Item**************************************/
 function autoSave(){
-            try{
-                   var a=confirm(loc(sp.auto));
-                        if(a==false) return;
+                        if(confirm(loc(sp.auto))==false) return;
+                        if(!(app.project.activeItem instanceof CompItem)) return;
                         try{
-                            preRenameValue=gui.rename.value;
-                            gui.rename.value=true;
+                            var preRenameValue=sp.autoNameValue;
+                            sp.autoNameValue=true;
                             for(var i=0;i<app.project.activeItem.numLayers;i++){
                                   for (var j= 1; j <=app.project.activeItem.numLayers; j++){
                                     app.project.activeItem.layer(j).selected = false;
                                   }
                                 app.project.activeItem.layer(i+1).selected = true;
-                                if(sp.ui == 2)
-                                gui.addElement.notify("onClick");
-                                else
-                                newFunc.gen2();
+                                sp.fns.newItem();
                                 app.project.activeItem.layer(i+1).selected = false;
                                 }
-                            gui.rename.value=preRenameValue;
+                            sp.autoNameValue=preRenameValue;
                             }catch(err){}
-                            sp.drop.notify("onChange");
+                            sp.droplist.notify("onChange");
                             sp.gv.refresh();
-                        }catch(err){alert(err.line)}
 }
 
 /*************************************自动重载图片**************************************/
 function reloadPic(){
-                var a=confirm (loc(sp.refresh));
-                    if(a==false)  return;
+                    if(confirm (loc(sp.refresh))==false)  return;
                     try{
-                            preRenameValue=gui.rename.value;
-                            gui.rename.value=true;
-                            preCompValue=gui.pre.value
-                            gui.pre.value=false;
-                              if(sp.ui == 2){
-                        for(var i=0;i<gui.listbox.items.length;i++){
-                            gui.listbox.selection=i;
-                            gui.create.notify("onClick");
-                            for(var j=0;j<thisComp.selectedLayers.length;j++){
-                                thisComp.selectedLayers[j].selected = false;
-                                }
-                            for(var j=0;j<sp.thisIndexArr.length;j++){
-                                try{thisComp.layer(sp.thisIndexArr[j]).selected = true;}catch(err){}
-                                }
-                            gui.cover.notify("onClick");
-                            for(var j=sp.thisIndexArr.length-1;j>=0;j--){
-                                try{thisComp.layer(sp.thisIndexArr[j]).remove();}catch(err){}
-                                }
-                            }
-                            }else{
+                            var preRenameValue=sp.autoNameValue;
+                            sp.autoNameValue=true;
+                            var preCompValue=sp.preComposeValue;
+                            sp.preComposeValue=false;
                         for(var i=0;i<sp.gv.children.length;i++){
                             try{
                             sp.gv.children[i].selected = true;
+                            try{
+                              sp.gv.children[i-1].selected = true;
+                            }catch(err){}
                             sp.gv.lastSelectedItem = sp.gv.children[i];
-                            newFunc.create2();
+                            var layerArr = sp.fns.newLayer();
                             for(var j=0;j<thisComp.selectedLayers.length;j++){
                                 thisComp.selectedLayers[j].selected = false;
                                 }
-                            for(var j=0;j<sp.thisIndexArr.length;j++){
-                                try{thisComp.layer(sp.thisIndexArr[j]).selected = true;}catch(err){}
+                            for(var j=0;j<layerArr.length;j++){
+                                try{thisComp.layer(layerArr[j]).selected = true;}catch(err){}
                                 }
-                            newFunc.cover2();
-                            for(var j=sp.thisIndexArr.length-1;j>=0;j--){
-                                try{thisComp.layer(sp.thisIndexArr[j]).remove();}catch(err){}
+                           sp.fns.cover();
+                            for(var j=layerArr.length-1;j>=0;j--){
+                                try{thisComp.layer(layerArr[j]).remove();}catch(err){}
                                 }
                                 sp.gv.children[i].selected = false;
                                 }catch(err){alert(err.line)}
                             }
-                                }
-                            gui.rename.value=preRenameValue;
-                            gui.pre.value=preCompValue;
+                            sp.autoNameValue=preRenameValue;
+                            sp.preComposeValue=preCompValue;
                             sp.gv.refresh();
                         }catch(err){}
                     }

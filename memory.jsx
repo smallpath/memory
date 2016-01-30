@@ -383,7 +383,7 @@ this,
                     return this.setting.haveSetting (this.scriptName, keyName);
                 },
             
-            saveSetting: function( keyName, value){
+            saveSetting: function(keyName,value){
                     this.setting.saveSetting (this.scriptName, keyName, value);
             },
         
@@ -680,11 +680,11 @@ this,
 //~ save presets and load presets file and parse them
 (function(sp){
 
-    var keyName = [];
+    var keyNameArr = [];
     var valueArr = [];
     
         for (var i = 1; i<= 9; i++) {
-                keyName.push( "_1_" + i);
+                keyNameArr.push( "_1_" + i);
                 if (i == 1 || i == 2 || i == 5) {
                     valueArr.push("1");
                 } else {
@@ -693,11 +693,11 @@ this,
             }        
         
         for (var i = 1;i <= 9; i++) {
-                keyName.push( "_2_" + i);
+                keyNameArr.push( "_2_" + i);
                 valueArr.push("0");
             }
         
-    keyName.pushh("thisSelection")
+    keyNameArr.pushh("thisSelection")
                  .pushh("limitText")
                  .pushh("thumbType")
                  .pushh("winLocation")
@@ -715,7 +715,7 @@ this,
                  .pushh("language")
                  .pushh("showThumb")
                  
-    valueArr.pushh(1)
+    valueArr.pushh("1")
                 .pushh("true")
                 .pushh("false")
                 .pushh("200,500") 
@@ -733,7 +733,7 @@ this,
                 .pushh("ch")
                 .pushh("true")
 
-    keyName.forEach (function(item, index){
+    keyNameArr.forEach (function(item, index){
             function(item, value){
                 if(sp.haveSetting (item)==false)
                     sp.saveSetting (item, value);
@@ -769,18 +769,10 @@ this,
                     },
             });
     
-       if (sp.haveSetting("version") == false) {
+       if (sp.haveSetting("version") == false || sp.getSetting("version")<sp.version) {
             alert(loc(sp.versionUpdateInfo));
             sp.saveSetting("version", sp.version);
-        }else{
-                if(sp.getSetting("version")<sp.version){
-                        alert(loc(sp.versionUpdateInfo));
-                        sp.saveSetting("version", sp.version);
-                    }
-            }
-        
-        
-
+        }
     
     
     if (!(sp.settingsFile.exists)||sp.settingsFile.length==0) {
@@ -853,10 +845,6 @@ this,
         getProperties: function(){
             
              },
-      
-        recursiveScanLayer: function(){
-              
-              },
         
         addToLastChild: function(){
               
@@ -868,12 +856,12 @@ this,
         
         
         //~         get the xml-based data of layer
-        toXML: function(){
+        toXML: function(name){
             
             },
         
         //~         get the json-based data of layer
-        toJSON: function(){
+        toJSON: function(name){
             
             },
       
