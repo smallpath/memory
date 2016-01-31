@@ -55,8 +55,8 @@
                                                ,folderName
                                                ,sp.preComposeValue
                                                ,sp.onlyEffectValue
-                                               ,cleanGroupValue
-                                               ,offsetKeyframeValue)
+                                               ,sp.cleanGroupValue
+                                               ,sp.offsetKeyframeValue)
 
                   },
             
