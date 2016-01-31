@@ -260,11 +260,12 @@
                     if(sp.lookUpTextInChildren(newEleName,sp.gv.children)){alert(loc(sp.existName));return;}
                     
                     var file = sp.getFileByName(sp.droplist.selection.text);
+                    var xml = new XML(file.readd());
                     var image = sp.getImage(sp.droplist.selection.text,sp.gv.lastSelectedItem.text);
            
-                    if (sp.gv.lastSelectedItem.text === decodeURIComponent(sp.inXml.child(sp.gv.lastSelectedItem.index).@name)) {
-                        sp.inXml.child(sp.gv.lastSelectedItem.index).@name = encodeURIComponent(newEleName.toString());
-                        file.writee(sp.inXml);
+                    if (sp.gv.lastSelectedItem.text === decodeURIComponent(xml.child(sp.gv.lastSelectedItem.index).@name)) {
+                        xml.child(sp.gv.lastSelectedItem.index).@name = encodeURIComponent(newEleName.toString());
+                        file.writee(xml);
                     }
                     
                     var targetImage = sp.noImage;
@@ -285,17 +286,41 @@
                     var text = this.selection.text;
                     var file = sp.getFileByName(text);
                     if(file ==-1) return;
-                    var xml = new XML(file.readd());
-                    sp.inXml = xml;
-                    sp.gv.removeAll();
-                    sp.forEach(xml,function(item,index){
-                            var name = decodeURIComponent (item.@name);
-                            var imageFile = sp.getImage(text,name);
-                            this.add(name,imageFile)
-                        },sp.gv);
+                    var content = file.readd();
+                    
+                        var indexArr=[];
+                        var j=-1;
+                        var offset=0;
+                        try{
+                              var thisStr="<Element name=\"" 
+                              j=content.indexOf(thisStr);
+                        }catch(err){alert(err);}
+                        while(j != -1){
+                                var inputStr="";
+                                var k=0;
+                                while(content[j+thisStr.length+k]!="\""){
+                                        inputStr+=content[j+thisStr.length+k];
+                                        k++;
+                                    }
+                                indexArr.push(inputStr);
+                                j=content.indexOf(thisStr,j+thisStr.length);
+                            }
+                        sp.gv.removeAll();
+                        for(var i=0;i<indexArr.length;i++){
+                                   sp.gv.add(decodeURIComponent(indexArr[i]),sp.getImage(this.selection.text,indexArr[i]));
+                        }
+                     
+                    
+                    /*
+                          sp.forEach(xml,function(item,index){
+                                  var name = decodeURIComponent (item.@name);
+                                  var imageFile = sp.getImage(text,name);
+                                  this.add(name,imageFile)
+                              },sp.gv);
+                        */
                     sp.saveSetting("thisSelection",this.selection.index.toString());
                     var arr = sp.getSetting ("effectName").split(",");
-                    if(sp.lookUpInArray(sp.droplist.selection.text,arr))
+                    if(sp.lookUpInArray(this.selection.text,arr))
                         sp.onlyEffectValue = true;
                     else
                         sp.onlyEffectValue = false;
@@ -668,7 +693,7 @@ this,
                                                 newXml.insertChildAfter(newXml.child(position), newInsertxml);
                                                 newXml.child(position).setLocalName("waitToDelete");
                                                 newXml.child(newXml.children().length() - 1).setLocalName("waitToDelete");
-                                                delete sp.inXml.waitToDelete;
+                                                delete newXml.waitToDelete;
                                                  }
                                            file.writee(newXml);
                                     },
