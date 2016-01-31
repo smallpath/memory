@@ -42,19 +42,71 @@
     
 
     function fns(){
-           var keepRef = this;
-          
-            this.cover  = function(){
-                  
-                  },
+            var keepRef = this;
             
             this.newLayer  = function(){
+                        if(!sp.gv.lastSelectedItem) return;
+                        if(!(app.project.activeItem instanceof CompItem)) return;
+                        
+                        var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
+                        var folderName = sp.getSetting("folderName");
+                        
+                        sp.doMagic(xml
+                                               ,folderName
+                                               ,sp.preComposeValue
+                                               ,sp.onlyEffectValue
+                                               ,cleanGroupValue
+                                               ,offsetKeyframeValue)
 
+                  },
+            
+
+            this.cover  = function(){
+                        if(!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length ==0) return;
+                        var thisComp = app.project.activeItem;
+                        if(!sp.gv.lastSelectedItem) return;
+                        var itemName = sp.gv.lastSelectedItem.text;
+                        
+                              app.beginSuppressDialogs();
+                              app.beginUndoGroup("Undo save");
+                              
+                              var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
+                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml,sp.gv.lastSelectedItem.index);
+                              
+                              sp.gv.lastSelectedItem.image = null;
+                              sp.gv.lastSelectedItem.image = sp.getImage(sp.droplist.selection.text,itemName);
+                              sp.gv.refresh();
+                              
+
+                              app.endUndoGroup();
+                              app.endSuppressDialogs(false);
                   },
 
             this.newItem  = function(){
+                        if(!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length ==0) return;
+                        var thisComp = app.project.activeItem;
+                        if(sp.autoNameValue == false) 
+                              var itemName = prompt(loc(sp.setName), "Name");
+                        else
+                              var itemName = thisComp.selectedLayers[0].name.replace("/", "_").replace(".", "_");
+                        if(sp.autoNameValue == false && itemName == "" || itemName == null) return;
+                        
+                              app.beginSuppressDialogs();
+                              app.beginUndoGroup("Undo save");
+                              
+                              var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
+                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
+                              
+                              sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
+                              sp.gv.refresh();
+                              
 
+                              app.endUndoGroup();
+                              app.endSuppressDialogs(false);
                   },
+           
 
             this.deleteItem  = function(){
                           if(sp.gv.selection.length == 0) return;
@@ -268,7 +320,7 @@
                     var thisStr = win.location[0].toString()+","+win.location[1].toString();
                     sp.saveSetting ("winLocation",thisStr);
                 },
-                this.rightClick=function(event) {
+             this.rightClick=function(event) {
                                 var alt = event.altKey;
                                 var key = ScriptUI.environment.keyboardState;
                                 if(alt == false && key.ctrlKey == false){
@@ -280,7 +332,7 @@
                                              upAndDownWindow(currentPosition)
 
                                              }
-                }
+                },
             //~ the function called by right clicking
             this.shortMenu = function(event){
                     if (!event) return;
@@ -486,6 +538,9 @@ this,
 
         })
     
+    
+      
+    
         //~  added in 2016.1.21
         sp.prototype.extend(sp.prototype,{
                     swap: function(a, b) {
@@ -599,6 +654,34 @@ this,
                               },
                 
             });
+      
+      sp.prototype.extend(sp.prototype,{
+                                    doMagic : function(xml,folderName,isPrecompose,isOnlyEffect,isCleanProperty,isKeyframeOffset){
+                                          
+                                          },
+                                    saveItemToFile : function(file,xml,position){
+                                          var newXml = new XML(file.readd());
+                                          if(!position){
+                                                newXml.appendChild(xml);
+                                           }else{
+                                                var newInsertxml = new XML(newXml.child(newXml.children().length() - 1));
+                                                newXml.insertChildAfter(newXml.child(position), newInsertxml);
+                                                newXml.child(position).setLocalName("waitToDelete");
+                                                newXml.child(newXml.children().length() - 1).setLocalName("waitToDelete");
+                                                delete sp.inXml.waitToDelete;
+                                                 }
+                                           file.writee(newXml);
+                                    },
+                              
+                                    getXmlFromLayers : function(layers,elementName){
+                                                var newXml = new XML("<Element name=\""+elementName+"\"></Element>")
+                                                layers.forEach(function(item,index){
+                                                            var xml = new $.layer(item).toXML();
+                                                            newXml.appendChild (xml);
+                                                      });
+                                                return newXml;
+                                      },
+            })
 
     sp.prototype.init.prototype = sp.prototype;
     $.global.sp = sp();
