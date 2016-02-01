@@ -683,6 +683,26 @@ this,
       sp.prototype.extend(sp.prototype,{
                                     doMagic : function(xml,folderName,isPrecompose,isOnlyEffect,isCleanProperty,isKeyframeOffset){
                                           
+                                                  app.beginUndoGroup("Undo once");
+                                                  app.beginSuppressDialogs();
+                                                  
+                                                if( isOnlyEffect=== false ){
+                                                      /*生成层*/
+                                                      
+                                                      }else{
+                                                            /*生成效果*/
+                                                            
+                                                            }
+                                                      
+                                                    app.endUndoGroup();
+                                                    
+                                                    /*translate sp.lastExp*/
+                                                    
+                                                   /*set parent with jump*/      
+                                                   
+                                                   /*precompose layers and cut its length*/
+                                                   
+            
                                           },
                                     saveItemToFile : function(file,xml,position){
                                           var newXml = new XML(file.readd());
