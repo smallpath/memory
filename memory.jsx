@@ -7,7 +7,7 @@
     #include 'Sp_memory/lib/SubSystems.jsx'
     #include 'Sp_memory/lib/RightClickMenu.jsx'
     var fns = sp.fns = new fns();
-    
+ 
     var win = global instanceof Panel ? global : new Window("window",sp.scriptName, undefined, {resizeable: true});
     var group1 = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}");
     var group11 = group1.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}");
@@ -31,9 +31,10 @@
     if(win instanceof Panel){    // show Panel
             win.layout.layout(1);         
         }else{                            // show Palette
-            win.location=sp.getSetting("winLocation").split(",");
+
+            win.location= sp.getSetting("winLocation").split(",");
             win.show();      
-            win.size=sp.getSetting ("winSize").split(",");
+            win.size= sp.getSetting ("winSize").split(",");
             win.onClose= fns.winClose;
     }
 
@@ -49,15 +50,78 @@
                         if(!(app.project.activeItem instanceof CompItem)) return;
                         
                         var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
-                        var folderName = sp.getSetting("folderName");
                         
-                        sp.doMagic(xml
-                                               ,folderName
-                                               ,sp.preComposeValue
-                                               ,sp.onlyEffectValue
-                                               ,sp.cleanGroupValue
-                                               ,sp.offsetKeyframeValue)
+                        sp.clearHelperArr();
+                        
+                        if(sp.onlyEffectValue == false){
+                                    /*
+                                              *Create new layers using given xml
+                                              */
+                                    var folderName = sp.getSetting("folderName");
+                                    var text = sp.droplist.selection.text;
+                                    var compFolder = app.project.items.addFolder(text+".sp");
+                                    var sourceFolder = app.project.items.addFolder("Sources");
+                                    
+                                    var resultArr = sp.lookUpInItem(folderName,app.project.items);
+                                    if(resultArr[0]){
+                                            var parentFolder = resultArr[1];
+                                            compFolder.parentFolder = parentFolder;
+                                          }else{
+                                              var parentFolder = app.project.items.addFolder(folderName);
+                                              compFolder.parentFolder = parentFolder;
+                                                }
+                                    sourceFolder.parentFolder = compFolder;
+                                    
+                                    var currentTime = app.project.activeItem.time;
+                                    
+                                    sp.newLayers(xml
+                                                              ,folderName
+                                                              ,sp.preComposeValue
+                                                              ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
+                                                              ,sp.expPropertyArr
+                                                              ,sp.layerArr,sp.layerParentNameArr);
+               
+                                    app.project.activeItem.time = currentTime;      
+                                    
+                                    sourceFolder.numItems == 0 && sourceFolder.remove();
+                                    compFolder.numItems == 0 && compFolder.remove();
+                        }else{
+                                    /*
+                                              *Create new properties using given xml and layer
+                                              */     
+                                    sp.newProperties(xml
+                                                                   ,folderName
+                                                                   ,sp.preComposeValue
+                                                                   ,sp.cleanGroupValue
+                                                                   ,sp.offsetKeyframeValue
+                                                                   ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
+                                                                   ,sp.expPropertyArr
+                                                                   ,sp.layerArr,sp.layerParentNameArr); 
+                              
+                              }
+                                    
+                               sp.layerTypePropertyArr.forEach(function(item,index){
+                                           item.setValue(sp.layerTypePropertyValueArr[index]);
+                                    });
+                                   
+                               var translatedExpPropertyArr = [];
+                               sp.expPropertyArr.forEach(function(item,index){
+                                         try{
+                                                 app.beginSuppressDialogs();
+                                                  try {
+                                                     item.expressionEnabled = true;
+                                                     var testItsValue = item.valueAtTime(0, false);
+                                                     item.expressionEnabled == false && translatedExpPropertyArr.push(item);
+                                                   } catch (eer) {};
+                                                   app.endSuppressDialogs(false);
+                                             }catch(err){}
+                                     });
+                                 translatedExpPropertyArr.length !=0 &&translate(this,sp.lastExp);
 
+                                    
+
+                        
+                        
                   },
             
 
@@ -66,12 +130,13 @@
                         var thisComp = app.project.activeItem;
                         if(!sp.gv.lastSelectedItem) return;
                         var itemName = sp.gv.lastSelectedItem.text;
+                        var helperObj = {elementArr:[]};
                         
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
                               
                               var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
-                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml,sp.gv.lastSelectedItem.index);
                               
                               sp.gv.lastSelectedItem.image = null;
@@ -84,6 +149,7 @@
                   },
 
             this.newItem  = function(){
+                  try{
                         if(!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length ==0) return;
                         var thisComp = app.project.activeItem;
                         if(sp.autoNameValue == false) 
@@ -94,9 +160,10 @@
                         
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
+                              var helperObj = {elementArr:[]};
                               
                               var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
-                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
                               sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
@@ -105,6 +172,7 @@
 
                               app.endUndoGroup();
                               app.endSuppressDialogs(false);
+                          }catch(err){err.printc();err.printa()}
                   },
            
 
@@ -400,7 +468,7 @@ this,
         return new sp.prototype.init();
     }
 
-    sp.prototype = {
+      sp.prototype = {
             
             scriptName: "Sp_memory",
             scriptVersion:"2.1",
@@ -422,14 +490,13 @@ this,
             
             xmlFileNames : [],
             
-            lastSetProp : [],
-            lastSetPropValue : [],
+            layerTypePropertyArr : [],
+            layerTypePropertyValueArr : [],
             
-            lastLayer: [],
-            lastLayerIndex: [],
+            expPropertyArr: [],
             
-            lastExpProp: [],
-            lastExp:[],
+            layerArr: [],
+            layerParentNameArr:[],
             
             init: function(){
                     return this;
@@ -444,8 +511,8 @@ this,
     },
 
 
-    //~     added in 2016.1.20
-    sp.prototype.extend(sp.prototype,{
+      //~  added in 2016.1.20
+      sp.prototype.extend(sp.prototype,{
         
                    
             scriptFile: new File($.fileName),
@@ -566,8 +633,8 @@ this,
     
       
     
-        //~  added in 2016.1.21
-        sp.prototype.extend(sp.prototype,{
+      //~  added in 2016.1.21
+      sp.prototype.extend(sp.prototype,{
                     swap: function(a, b) {
                         tempA = a.text;
                         a.text = b.text;
@@ -583,12 +650,20 @@ this,
                         },
                   
                     lookUpInArray:function(text,arr){
-                            var len = arr.length
+                            var len = arr.length;
                             for(var i=0;i<len;i++){
                                     if(arr[i]===text)
                                         return true;
                                 }
                             return false;
+                        },                    
+                  lookUpInItem:function(text,items){
+                            var len = items.length
+                            for(var i=0;i<len;i++){
+                                    if(arr[i].name===text)
+                                        return [true,arr[i]];
+                                }
+                            return [false,null];
                         },
                     reloadDroplist: function(){
                                   this.droplist.removeAll();
@@ -680,21 +755,28 @@ this,
                 
             });
       
+      //~  added in 2016.2.5
       sp.prototype.extend(sp.prototype,{
-                                    doMagic : function(xml,folderName,isPrecompose,isOnlyEffect,isCleanProperty,isKeyframeOffset){
+                                    newProperties : function(xml,folderName,isPrecompose,isCleanProperty,isKeyframeOffset,
+                                                                        layerTypePropertyArr,layerTypePropertyValueArr,
+                                                                        expPropertyArr,
+                                                                        layerArr,layerParentNameArr){
+                                                                              
+                                                                              
+                                                                              
+                                         },         
+                                    newLayers : function(xml,folderName,isPrecompose,
+                                                                        layerTypePropertyArr,layerTypePropertyValueArr,
+                                                                        expPropertyArr,
+                                                                        layerArr,layerParentNameArr){
                                           
                                                   app.beginUndoGroup("Undo once");
                                                   app.beginSuppressDialogs();
                                                   
-                                                if( isOnlyEffect=== false ){
-                                                      /*生成层*/
+
                                                       
-                                                      }else{
-                                                            /*生成效果*/
-                                                            
-                                                            }
-                                                      
-                                                    app.endUndoGroup();
+                                                   app.endSuppressDialogs (false);
+                                                   app.endUndoGroup();
                                                     
                                                     /*translate sp.lastExp*/
                                                     
@@ -703,6 +785,23 @@ this,
                                                    /*precompose layers and cut its length*/
                                                    
             
+                                          },
+                                      selectAllLayer : function(comp){
+                                                for(var i=0;i<comp.numLayers;i++){
+                                                            comp.layer(i+1).selected = true;
+                                                      }
+                                      },
+                                      deselectAllLayer : function(comp){
+                                                for(var i=0;i<comp.numLayers;i++){
+                                                            comp.layer(i+1).selected = false;
+                                                      }
+                                      },
+                                    clearHelperArr : function(){
+                                                this.layerTypePropertyArr.length =
+                                                this.layerTypePropertyValueArr   =
+                                                this.expPropertyArr                    =
+                                                this.layerArr                              =
+                                                this.layerParentNameArr             =  [];
                                           },
                                     saveItemToFile : function(file,xml,position){
                                           var newXml = new XML(file.readd());
@@ -718,14 +817,50 @@ this,
                                            file.writee(newXml);
                                     },
                               
-                                    getXmlFromLayers : function(layers,elementName){
-                                                var newXml = new XML("<Element name=\""+elementName+"\"></Element>")
-                                                layers.forEach(function(item,index){
-                                                            var xml = new $.layer(item).toXML();
-                                                            newXml.appendChild (xml);
+                                    getXmlFromLayers : function(comp,layers,elementName,helperObj){
+                                                helperObj["_"+comp.id] = helperObj["_"+comp.id] || {};
+                                                var elementArr = helperObj.elementArr;
+                                                if(elementArr.length ==0)
+                                                      var elementxml = new XML("<Element name=\""+elementName+"\"></Element>");
+                                                else
+                                                      var elementxml = new XML("<Comptent name=\"" + elementName + "\"></Comptent>");
+                                                
+                                                layers.forEach(function(thisLayer,index){
+                                                                var xml = new $.layer(thisLayer,helperObj).toXML();
+
+                                                                if (thisLayer.source instanceof CompItem) {
+                                                                        if (helperObj.hasOwnProperty ("_"+thisLayer.source.id)) {
+                                                                                elementxmltemp = helperObj["_"+thisLayer.source.id]["ele"];
+                                                                                xml.Properties.appendChild(elementxmltemp);
+                                                                        } else {
+                                                                            elementArr.push(elementxml);
+                                                                            sp.prototype.selectAllLayer(thisLayer.source);
+                                                                            var comptentXml = sp.prototype.getXmlFromLayers(thisLayer.source,
+                                                                                                                                                            thisLayer.source.selectedLayers,
+                                                                                                                                                            encodeURIComponent(thisLayer.source.name),
+                                                                                                                                                            helperObj)
+                                                                            
+                                                                            xml.Properties.appendChild (comptentXml);
+                                                                            sp.prototype.deselectAllLayer(thisLayer.source);
+                                                                            elementxml = elementArr.pop();
+                                                                        }
+                                                                }
+                                                                elementxml.appendChild (xml);
                                                       });
-                                                return newXml;
+                                                
+                                                if(elementArr.length !=0){
+                                                              var cTemp = new XML(elementxml);
+                                                              for (var i = 0; i < cTemp.children().length(); i++) {
+                                                                  cTemp.child(i).setChildren(1);
+                                                              }
+                                                              helperObj["_" + comp.id]["ele"] = cTemp;
+                                                      }
+                                                
+                                                return elementxml;
                                       },
+
+                                    
+                               
             })
 
     sp.prototype.init.prototype = sp.prototype;
@@ -736,6 +871,15 @@ this,
 
 //~ add method to objects
 (function(sp){
+      
+            Function.prototype.bind = function(obj) {
+                  var method = this,
+                  temp = function() {
+                        return method.apply(obj, arguments);
+                  };
+                  return temp;
+            } 
+      
       
             //~   getter/setter for  last  element of array
             Array.prototype.last = function(value){
@@ -937,15 +1081,16 @@ this,
 //~  Layer object to handle with layers of after effects, for saving and generating
 (function(){
     
-    $.layer = function(item){
-        return new $.layer.prototype.init(item);
+    $.layer = function(item,helperObj){
+        return new $.layer.prototype.init(item,helperObj);
     }
 
     $.layer.prototype = {
-            init: function(layer){
+            init: function(item,helperObj){
                    this.item = item;
+                   this.helperObj = helperObj;
                 
-                    return this;
+                   return this;
                 },
     }
 
@@ -953,48 +1098,497 @@ this,
     //~  convert Layer object to XML or JSON
     sp.extend($.layer.prototype,{
         
-        isSaveMaterial: true,
+        isSaveMaterial: sp.saveMaterialValue,
         
         //~         return the attributes of layer
         getLayerAttr: function(){
-                var layer = this.getLayer();
+                var thisLayer = this.item;
+                var helperObj = this.helperObj;
+                var layerInf = {};
+                
+                layerInf.type = "null";
+                if (thisLayer instanceof TextLayer) {
+                    layerInf.type = "Text";
+                } else
+                if (thisLayer instanceof LightLayer) {
+                    layerInf.type = "Light";
+                    layerInf.lightType = thisLayer.lightType;
+                } else
+                if (thisLayer instanceof ShapeLayer) {
+                    layerInf.type = "Shape";
+                } else
+                if (thisLayer instanceof AVLayer) {
+                    if (thisLayer.source.mainSource instanceof SolidSource && thisLayer.nullLayer != true && !(thisLayer.source instanceof CompItem)) {
+                        layerInf.type = "Solid";
+                        layerInf.solidColor = thisLayer.source.mainSource.color;
+                    } else if (thisLayer.source.mainSource instanceof FileSource && thisLayer.nullLayer != null && !(thisLayer.source instanceof CompItem)) {
+                        layerInf.sound = thisLayer.hasAudio;
+                        if (layerInf.sound) {
+                            layerInf.type = "VideoWithSound";
+                        } else {
+                            layerInf.type = "VideoWithoutSound";
+                        }
+                    } else if (thisLayer.source instanceof CompItem) {
+                        layerInf.type = "Comp";
+                    }
+                } else
+                if (thisLayer instanceof AVLayer) {
+                    if (thisLayer.nullLayer) {
+                        layerInf.type = "Null";
+                    }
+                } else
+                if (thisLayer instanceof CameraLayer) {
+                    layerInf.type = "Camera";
+                }
+                layerInf.geoType = "null";
+                layerInf.name = thisLayer.name;
+
+                var text = "<Layer type=\"" + layerInf.type + "\" name=\"" + encodeURIComponent(layerInf.name) + "\"></Layer>"
+                var layerInfo = new XML(text);
+                if (layerInf.type == "Light") {
+                    layerInfo.light = layerInf.lightType;
+                }
+                if (layerInf.type == "Solid") {
+                    layerInfo.solidColor = layerInf.solidColor;
+                }
+                if (layerInf.type == "VideoWithSound" || layerInf.type == "VideoWithoutSound") {
+                        layerInfo = this.getMaterial(layerInf,layerInfo,helperObj,thisLayer);
+                      }
+                if (layerInf.type == "Comp") {
+                        layerInfo = this.getCompLayerAttr(layerInfo,thisLayer,helperObj,thisLayer);
+                }
+                if (layerInf.type == "Text") {
+                    var isPointText = thisLayer.property("ADBE Text Properties")("ADBE Text Document").valueAtTime(0, false).pointText;
+                    var isBoxText = thisLayer.property("ADBE Text Properties")("ADBE Text Document").valueAtTime(0, false).boxText;
+                    layerInfo.textType = (isPointText == true) ? "point" : "box";
+                    if (isBoxText == true) {
+                        layerInfo.boxSize = thisLayer.property("ADBE Text Properties")("ADBE Text Document").valueAtTime(0, false).boxTextSize.toString();
+                    }
+                }
+          
+                    layerInfo.type = layerInf.type;
+                    layerInfo.searchName = thisLayer.name;
+                    layerInfo.label = thisLayer.label;
+                    layerInfo.width = thisLayer.source ? thisLayer.width : "None";
+                    layerInfo.height = thisLayer.source ? thisLayer.height : "None";
+                    layerInfo.index = thisLayer.index;
+
+                    layerInfo.parent = (thisLayer.parent == null) ? false : thisLayer.parent.name;
+                    layerInfo.inPoint = thisLayer.inPoint;
+                    layerInfo.outPoint = thisLayer.outPoint;
+                    layerInfo.enabled = thisLayer.enabled;
+                    layerInfo.three = (typeof thisLayer.threeDLayer == "undefined") ? "undefined" : thisLayer.threeDLayer;
+                    layerInfo.trackMatteType = (typeof thisLayer.trackMatteType == "undefined") ? "undefined" : thisLayer.trackMatteType;
+                    layerInfo.solo = thisLayer.solo;
+                    layerInfo.shy = thisLayer.shy;
+                    layerInfo.collapseTransformation = thisLayer.collapseTransformation;
+                    if (layerInf.type == "VideoWithSound" || layerInf.type == "Comp") {
+                              layerInfo.audioEnabled = thisLayer.audioEnabled;
+                      }
+                    layerInfo.motionBlur = thisLayer.motionBlur;
+                    layerInfo.guideLayer = (typeof thisLayer.guideLayer == "undefined") ? "undefined" : thisLayer.guideLayer;
+                    layerInfo.environmentLayer = (typeof thisLayer.environmentLayer == "undefined") ? "undefined" : thisLayer.environmentLayer;
+                    layerInfo.adjustmentLayer = (typeof thisLayer.adjustmentLayer == "undefined") ? "undefined" : thisLayer.adjustmentLayer;
+                    layerInfo.blendingMode = (typeof thisLayer.trackMatteType == "undefined") ? "undefined" : thisLayer.blendingMode;
+                    layerInfo.autoOrient = (typeof thisLayer.autoOrient == "undefined") ? "undefined" : thisLayer.autoOrient;
+                    layerInfo.preserveTransparency = (typeof thisLayer.preserveTransparency == "undefined") ? "undefined" : thisLayer.preserveTransparency;
+                    try{
+                        layerInfo.separated = thisLayer("ADBE Transform Group")("ADBE Position").dimensionsSeparated;
+                    }catch(err){}
+                    layerInfo.timeRemap = thisLayer.timeRemapEnabled;
+                    layerInfo.stretch = thisLayer.stretch;
+                    layerInfo.startTime = thisLayer.startTime;
+                    layerInfo.ray = thisLayer.containingComp.renderer === "ADBE Picasso";
+                    layerInfo.geoType = "null";
+                      if (layerInfo.type != "null" && layerInfo.three == true && layerInfo.ray == true) {
+                          if (layerInfo.type == "Shape" || layerInfo.type == "Text") {
+                              layerInfo.geoType = "small";
+                          } else {
+                              layerInfo.geoType = "large";
+                          }
+                      }
+                return layerInfo;
+                
+                
             },
       
-        getCompLayerAttr: function(){
-              
+        getCompLayerAttr: function(layerInfo,thisLayer){
+                        layerInfo.frameDuration = thisLayer.source.frameDuration;
+                        layerInfo.dropFrame = thisLayer.source.dropFrame;
+                        layerInfo.workAreaStart = thisLayer.source.workAreaStart;
+                        layerInfo.workAreaDuration = thisLayer.source.workAreaDuration;
+                        layerInfo.hideShyLayers = thisLayer.source.hideShyLayers;
+                        layerInfo.motionBlur = thisLayer.source.motionBlur;
+                        layerInfo.draft3d = thisLayer.source.draft3d;
+                        layerInfo.frameBlending = thisLayer.source.frameBlending;
+                        layerInfo.preserveNestedFrameRate = thisLayer.source.preserveNestedFrameRate;
+                        layerInfo.preserveNestedResolution = thisLayer.source.preserveNestedResolution;
+                        layerInfo.bgColor = thisLayer.source.bgColor;
+                        layerInfo.resolutionFactor = thisLayer.source.resolutionFactor;
+                        layerInfo.shutterAngle = thisLayer.source.shutterAngle;
+                        layerInfo.shutterPhase = thisLayer.source.shutterPhase;
+                        layerInfo.motionBlurSamplesPerFrame = thisLayer.source.motionBlurSamplesPerFrame;
+                        layerInfo.motionBlurAdaptiveSampleLimit = thisLayer.source.motionBlurAdaptiveSampleLimit;
+                        layerInfo.renderer = thisLayer.source.renderer;
+                        layerInfo.compframeDuration = thisLayer.source.frameDuration;
+                        layerInfo.comppixelAspect = thisLayer.source.pixelAspect;
+                        layerInfo.compframeRate = thisLayer.source.frameRate;
+                        layerInfo.compduration = thisLayer.source.duration;
+                        layerInfo.compwidth = thisLayer.source.width;
+                        layerInfo.compheight = thisLayer.source.height;
+                        layerInfo.compname = encodeURIComponent(thisLayer.source.name);
+                        layerInfo.comptime = thisLayer.source.time;
+                        return layerInfo;
               },
         
-        getMaterial: function(){
-              
+        getMaterial: function(layerInf,layerInfo,helperObj,thisLayer){
+                    layerInfo.file = thisLayer.source.mainSource.file;
+                    if (this.isSaveMaterial == true) {
+                          var tempArr = ["ai","bmp","jpg","png","psd"];
+                        if (sp.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
+                            if (thisLayer.source.mainSource.file.length <= 10485760) {
+                                    if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) { 
+                                        } else {
+                                        try {
+                                            helperObj["_"+thisLayer.source.id]={};
+                                       try {
+                                            var thisFileW = File(thisLayer.source.mainSource.file);
+                                            thisFileW.open("r");
+                                            thisFileW.encoding = "BINARY";
+                                            var fileCon = thisFileW.read();
+                                            thisFileW.close();
+                                            layerInfo.fileBin = encodeURIComponent(fileCon);
+                                        } catch (err) {}
+                                      } catch (err) {}
+                                    }
+
+                            }
+                        }
+                        var tempArr = ["ape","flac","mp3","wav"];
+                        if (sp.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
+                            if (thisLayer.source.mainSource.file.length <= 52428800) {
+                                    if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) { 
+                                        } else {
+                                        try {
+                                            helperObj["_"+thisLayer.source.id]={};
+                                       try {
+                                            var thisFileW = File(thisLayer.source.mainSource.file);
+                                            thisFileW.open("r");
+                                            thisFileW.encoding = "BINARY";
+                                            var fileCon = thisFileW.read();
+                                            thisFileW.close();
+                                            layerInfo.fileBin = encodeURIComponent(fileCon);
+                                        } catch (err) {}
+                                      } catch (err) {}
+                                    }
+                            }
+                        }
+                    }
+                  return layerInfo
               },
         
         
         //~         return every property under the layer  
-        getProperties: function(){
-            
+        getProperties: function(ref,layerxml,layerInfo){
+                if (ref != null) {
+                    var point = 0;
+                    var groupxml = [];
+                    var prop;
+                    var va;
+                    for (var i = 1; i <= ref.numProperties; i++) {
+                        prop = ref.property(i);
+                        if ((prop.propertyType == PropertyType.PROPERTY)) {
+                            try {
+                                va = prop.value.toString();
+                                va = true;
+                            } catch (err) {
+                                va = false;
+                            }
+                            var bool = true;
+                            try {
+                                if (prop.matchName != "ADBE Marker") {
+                                    prop.setValue(prop.valueAtTime(0, true));
+                                }
+                            } catch (r) {
+                                bool = false;
+                            }
+                            if (bool || (prop.canSetExpression || prop.matchName == "ADBE Marker") && va) {
+                                if (prop.matchName == "ADBE Marker" && prop.numKeys == 0) {} else {
+                                                try{
+                                                    if(prop.matchName=="ADBE Glo2-0007"){
+                                                            prop.setValue(glowtype);
+                                                        }
+                                                }catch(err){}
+                                                try {
+                                                        $.layer.prototype.addToLastChild(layerxml, new XML($.layer.prototype.getProperty(prop)), prop.propertyDepth,[]);
+                                                } catch (err) {}
+                                }
+                            }
+                        } else if ((prop.propertyType == PropertyType.INDEXED_GROUP) || (prop.propertyType == PropertyType.NAMED_GROUP)) {
+                            layerStyle = (prop.matchName == "ADBE Layer Styles" && prop.canSetEnabled == false);
+                            layerChild = (prop.propertyGroup(1).matchName == "ADBE Layer Styles" && prop.canSetEnabled == false && prop.propertyIndex > 1);
+                            material = (prop.matchName == "ADBE Material Options Group" && prop.propertyGroup(prop.propertyDepth).threeDLayer == false);
+                            audio = (prop.matchName == "ADBE Audio Group");
+                            geosmall = (prop.matchName == "ADBE Extrsn Options Group" && layerInfo.geoType != "small");
+                            geolarge = (prop.matchName == "ADBE Plane Options Group" && layerInfo.geoType != "large");
+                            vector = (prop.matchName == "ADBE Vector Materials Group");
+                            motion = (prop.matchName == "ADBE MTrackers" && prop.numProperties == 0);
+                            if (layerStyle || material || audio || geosmall || geolarge || vector || motion || layerChild) {} else {
+                                if (prop.matchName == "ADBE Mask Atom") {
+                                   try{
+                                          text = "<Group name=\"" + prop.name.toString() + "\" matchName=\"" + prop.matchName.toString() + "\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\" maskFeatherFalloff=\"" + prop.maskFeatherFalloff.toString() + "\" enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    }catch(err){                                    
+                                          text = "<Group name=\"" + prop.name.toString() + "\" matchName=\"" + prop.matchName.toString() + "\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\"  enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    }
+                                } else {
+                                    text = "<Group name=\"" + prop.name.toString() + "\" matchName=\"" + prop.matchName.toString() + "\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                }
+                                        try {
+                                                 if(prop.matchName=="ADBE Glo2"){
+                                                       try{
+                                                           glowtype=prop.property("ADBE Glo2-0007").value;
+                                                        }catch(err){}
+                                                  }    
+                                               $.layer.prototype.addToLastChild(layerxml, new XML(text), prop.propertyDepth,[]);
+                                        } catch (err) {}
+                                        arguments.callee(prop,layerxml,layerInfo);
+                            }
+                        }
+                    }
+                }
+                return layerxml;
              },
         
-        addToLastChild: function(){
-              
+        addToLastChild: function(xml, str, propertyDepth,arrLen){
+                var length = xml.children().length();
+                arrLen.push(length);
+                if (length > 0) {
+                    arguments.callee(xml.child(length - 1), str, propertyDepth,arrLen);
+                } else {
+                    for (var LastCh = 0; LastCh < arrLen.length - propertyDepth; LastCh++) {
+                        xml = xml.parent();
+                    }
+                    xml.appendChild(new XML(str));
+                    arrLen.length = 0;
+                }
               },
       
-        getProperty: function(){
-              
-              },
+        getProperty: function(thisProperty){
+            if (thisProperty.numKeys != 0) {
+                    var keyTime = [];
+                    var keyValue = [];
+                    var keyInSpeed = [];
+                    var keyInIn = [];
+                    var keyOutSpeed = [];
+                    var keyOutIn = [];
+                    if ((thisProperty.valueAtTime(0, true) instanceof Shape == false) && (thisProperty.matchName != "ADBE Marker") && (thisProperty.matchName != "ADBE Text Document")) {
+                        text = "<prop matchName=\"" + thisProperty.matchName.toString() + "\" propertyIndex=\"" + thisProperty.propertyIndex.toString() + "\" key=\"" + thisProperty.numKeys.toString() + "\"></prop>";
+                        var propxml = new XML(text);
+                        for (var propi = 1; propi <= thisProperty.numKeys; propi++) {
+                            keyTime.push(thisProperty.keyTime(propi));
+                            keyValue.push(thisProperty.keyValue(propi));
+                        }
+                        propxml.keyValue = keyValue;
+                        propxml.keyTime = keyTime;
+                        propxml.inType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                        propxml.outType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                    } else if (thisProperty.valueAtTime(0, true) instanceof Shape == true) {
+                        text = "<prop matchName=\"" + thisProperty.matchName.toString() + "\" propertyIndex=\"" + thisProperty.propertyIndex.toString() + "\" key=\"" + thisProperty.numKeys.toString() + "\"></prop>";
+                        propxml = new XML(text);
+                        propxml.keyValue = 0;
+                        propxml.keyValue.setChildren(new XML("<zhanwei>wa</zhanwei>"));
+                        for (var propi = 1; propi <= thisProperty.numKeys; propi++) {
+                            text = "<shapeValue></shapeValue>";
+                            shapexml = new XML(text);
+                            keyTime.push(thisProperty.keyTime(propi));
+                            closed = XML("<closed>" + thisProperty.keyValue(propi).closed + "</closed>");
+                            vertices = XML("<vertices>" + thisProperty.keyValue(propi).vertices.toString() + "</vertices>");
+                            inTan = XML("<inTan>" + thisProperty.keyValue(propi).inTangents.toString() + "</inTan>");
+                            outTan = XML("<outTan>" + thisProperty.keyValue(propi).outTangents.toString() + "</outTan>");
+                            shapexml.appendChild(closed);
+                            shapexml.appendChild(vertices);
+                            shapexml.appendChild(inTan);
+                            shapexml.appendChild(outTan);
+                            propxml.keyValue.appendChild(shapexml);
+                        }
+                        delete propxml.keyValue.zhanwei;
+                        propxml.keyTime = keyTime;
+                        propxml.inType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                        propxml.outType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                    } else if (thisProperty.matchName == "ADBE Marker") {
+                        text = "<prop matchName=\"" + thisProperty.matchName.toString() + "\" propertyIndex=\"" + thisProperty.propertyIndex.toString() + "\" key=\"" + thisProperty.numKeys.toString() + "\"></prop>";
+                        var propxml = new XML(text);
+                        propxml.keyValue = 0;
+                        propxml.keyValue.setChildren(new XML("<zhanwei>wa</zhanwei>"));
+                        for (var propi = 1; propi <= thisProperty.numKeys; propi++) {
+                            text = "<markerValue></markerValue>";
+                            markxml = new XML(text);
+                            keyTime.push(thisProperty.keyTime(propi));
+                            comment = XML("<comment>" + thisProperty.keyValue(propi).comment + "</comment>");
+                            duration = XML("<duration>" + thisProperty.keyValue(propi).duration.toString() + "</duration>");
+                            chapter = XML("<chapter>" + thisProperty.keyValue(propi).chapter.toString() + "</chapter>");
+                            cuePointName = XML("<cuePointName>" + thisProperty.keyValue(propi).cuePointName.toString() + "</cuePointName>");
+                            eventCuePoint = XML("<eventCuePoint>" + thisProperty.keyValue(propi).eventCuePoint.toString() + "</eventCuePoint>");
+                            url = XML("<url>" + thisProperty.keyValue(propi).url.toString() + "</url>");
+                            frameTarget = XML("<frameTarget>" + thisProperty.keyValue(propi).frameTarget.toString() + "</frameTarget>");
+                            markxml.appendChild(comment);
+                            markxml.appendChild(duration);
+                            markxml.appendChild(chapter);
+                            markxml.appendChild(cuePointName);
+                            markxml.appendChild(eventCuePoint);
+                            markxml.appendChild(url);
+                            markxml.appendChild(frameTarget);
+                            propxml.keyValue.appendChild(markxml);
+                        }
+                        delete propxml.keyValue.zhanwei;
+                        propxml.keyTime = keyTime;
+                        propxml.inType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                        propxml.outType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                    } else if (thisProperty.matchName == "ADBE Text Document") {
+                        text = "<prop matchName=\"" + thisProperty.matchName.toString() + "\" propertyIndex=\"" + thisProperty.propertyIndex.toString() + "\" key=\"" + thisProperty.numKeys.toString() + "\"></prop>";
+                        var propxml = new XML(text);
+                        propxml.keyValue = 0;
+                        propxml.keyValue.setChildren(new XML("<zhanwei>wa</zhanwei>"));
+                        for (var propi = 1; propi <= thisProperty.numKeys; propi++) {
+                            text = "<textValue></textValue>";
+                            textxml = new XML(text);
+                            keyTime.push(thisProperty.keyTime(propi));
+                            text = XML("<text>" + thisProperty.keyValue(propi).text + "</text>");
+                            font = XML("<font>" + thisProperty.keyValue(propi).font.toString() + "</font>");
+                            fontSize = XML("<fontSize>" + thisProperty.keyValue(propi).fontSize.toString() + "</fontSize>");
+                            applyFill = XML("<applyFill>" + thisProperty.keyValue(propi).applyFill.toString() + "</applyFill>");
+                            applyStroke = XML("<applyStroke>" + thisProperty.keyValue(propi).applyStroke.toString() + "</applyStroke>");
+                            fillColor = XML("<fillColor>" + ((thisProperty.keyValue(propi).applyFill == true) ? thisProperty.keyValue(propi).fillColor.toString() : "None").toString() + "</fillColor>");
+                            strokeColor = XML("<strokeColor>" + ((thisProperty.keyValue(propi).applyStroke == true) ? thisProperty.keyValue(propi).strokeColor.toString() : "None").toString() + "</strokeColor>");
+                            strokeOverFill = XML("<strokeOverFill>" + thisProperty.keyValue(propi).strokeOverFill.toString() + "</strokeOverFill>");
+                            strokeWidth = XML("<strokeWidth>" + thisProperty.keyValue(propi).strokeWidth.toString() + "</strokeWidth>");
+                            justification = XML("<justification>" + thisProperty.keyValue(propi).justification.toString() + "</justification>");
+                            tracking = XML("<tracking>" + thisProperty.keyValue(propi).tracking.toString() + "</tracking>");
+                            pointText = XML("<pointText>" + thisProperty.keyValue(propi).pointText.toString() + "</pointText>");
+                            boxText = XML("<boxText>" + thisProperty.keyValue(propi).boxText.toString() + "</boxText>");
+                            if (thisProperty.keyValue(propi).boxText == true) {
+                                boxTextSize = XML("<boxTextSize>" + thisProperty.keyValue(propi).boxTextSize.toString() + "</boxTextSize>");
+                            } else {
+                                boxTextSize = XML("<boxTextSize>None</boxTextSize>");
+                            }
+                            textxml.appendChild(text);
+                            textxml.appendChild(font);
+                            textxml.appendChild(fontSize);
+                            textxml.appendChild(applyFill);
+                            textxml.appendChild(applyStroke);
+                            textxml.appendChild(fillColor);
+                            textxml.appendChild(strokeColor);
+                            textxml.appendChild(strokeOverFill);
+                            textxml.appendChild(strokeWidth);
+                            textxml.appendChild(justification);
+                            textxml.appendChild(tracking);
+                            textxml.appendChild(pointText);
+                            textxml.appendChild(boxText);
+                            textxml.appendChild(boxTextSize);
+                            propxml.keyValue.appendChild(textxml);
+                        }
+                        delete propxml.keyValue.zhanwei;
+                        propxml.keyTime = keyTime;
+                        propxml.inType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                        propxml.outType = [thisProperty.propertyValueType, thisProperty.propertyValueType].toString();
+                    }
+                    if (thisProperty.matchName != "ADBE Marker" && thisProperty.matchName != "ADBE Text Document") {
+                        for (var propi = 1; propi <= thisProperty.numKeys; propi++) {
+                            ease = "<Ease></Ease>";
+                            var easexml = new XML(ease);
+                            if (thisProperty.keyInTemporalEase(1).length == 1) {
+                                easexml.InSpeed = thisProperty.keyInTemporalEase(propi)[0].speed;
+                                easexml.InIn = thisProperty.keyInTemporalEase(propi)[0].influence;
+                                easexml.OutSpeed = thisProperty.keyOutTemporalEase(propi)[0].speed;
+                                easexml.OutIn = thisProperty.keyOutTemporalEase(propi)[0].influence;
+                            } else if (thisProperty.keyInTemporalEase(1).length == 2) {
+                                easexml.InSpeed = [thisProperty.keyInTemporalEase(propi)[0].speed, thisProperty.keyInTemporalEase(propi)[1].speed];
+                                easexml.InIn = [thisProperty.keyInTemporalEase(propi)[0].influence, thisProperty.keyInTemporalEase(propi)[1].influence];
+                                easexml.OutSpeed = [thisProperty.keyOutTemporalEase(propi)[0].speed, thisProperty.keyOutTemporalEase(propi)[1].speed];
+                                easexml.OutIn = [thisProperty.keyOutTemporalEase(propi)[0].influence, thisProperty.keyOutTemporalEase(propi)[1].influence];
+                            } else if (thisProperty.keyInTemporalEase(1).length == 3) {
+                                easexml.InSpeed = [thisProperty.keyInTemporalEase(propi)[0].speed, thisProperty.keyInTemporalEase(propi)[1].speed, thisProperty.keyInTemporalEase(propi)[2].speed];
+                                easexml.InIn = [thisProperty.keyInTemporalEase(propi)[0].influence, thisProperty.keyInTemporalEase(propi)[1].influence, thisProperty.keyInTemporalEase(propi)[2].influence];
+                                easexml.OutSpeed = [thisProperty.keyOutTemporalEase(propi)[0].speed, thisProperty.keyOutTemporalEase(propi)[1].speed, thisProperty.keyOutTemporalEase(propi)[2].speed];
+                                easexml.OutIn = [thisProperty.keyOutTemporalEase(propi)[0].influence, thisProperty.keyOutTemporalEase(propi)[1].influence, thisProperty.keyOutTemporalEase(propi)[2].influence];
+                            }
+                            try{
+                            easexml.inInterType = thisProperty.keyInInterpolationType (propi);
+                            easexml.outInterType = thisProperty.keyOutInterpolationType (propi);
+                            }catch(err){}
+                            try{
+                            easexml.isRoving = thisProperty.keyRoving(propi);
+                            }catch(err){}
+                            propxml.appendChild(easexml);
+                        }
+                    }
+                    if (thisProperty.expression != "") {
+                        propxml.exp = encodeURIComponent(thisProperty.expression).toString();
+                        propxml.expEn = encodeURIComponent(thisProperty.expressionEnabled).toString();
+                    }
+                } else {
+                    if ((thisProperty.valueAtTime(0, true) instanceof Shape == false) && thisProperty.matchName != "ADBE Text Document") {
+                        text = "<prop matchName=\"" + thisProperty.matchName.toString() + "\" propertyIndex=\"" + thisProperty.propertyIndex.toString() + "\" key=\"0\">" + thisProperty.valueAtTime(0, true).toString() + "</prop>";
+                        var propxml = new XML(text);
+                        if (thisProperty.expression != "") {
+                            propxml.exp = encodeURIComponent(thisProperty.expression).toString();
+                            propxml.expEn = encodeURIComponent(thisProperty.expressionEnabled).toString();
+                        }
+                    } else if (thisProperty.valueAtTime(0, true) instanceof Shape == true) {
+                        text = "<prop matchName=\"" + thisProperty.matchName.toString() + "\" propertyIndex=\"" + thisProperty.propertyIndex.toString() + "\" key=\"" + thisProperty.numKeys.toString() + "\"></prop>";
+                        shapexml = new XML(text);
+                        shapexml.closed = thisProperty.valueAtTime(0, true).closed;
+                        shapexml.vertices = thisProperty.valueAtTime(0, true).vertices.toString();
+                        shapexml.inTan = thisProperty.valueAtTime(0, true).inTangents.toString();
+                        shapexml.outTan = thisProperty.valueAtTime(0, true).outTangents.toString();
+                        if (thisProperty.expression != "") {
+                            shapexml.exp = encodeURIComponent(thisProperty.expression).toString();
+                            shapexml.expEn = encodeURIComponent(thisProperty.expressionEnabled).toString();
+                        }
+                        propxml = shapexml;
+                    } else if (thisProperty.matchName == "ADBE Text Document") {
+                        text = "<prop matchName=\"" + thisProperty.matchName.toString() + "\" propertyIndex=\"" + thisProperty.propertyIndex.toString() + "\" key=\"" + thisProperty.numKeys.toString() + "\"></prop>";
+                        textxml = new XML(text);
+                        textxml.text = ((thisProperty.valueAtTime(0, true).text == undefined) ? "None" : thisProperty.valueAtTime(0, true).text).toString();
+                        textxml.font = thisProperty.valueAtTime(0, true).font.toString();
+                        textxml.fontSize = thisProperty.valueAtTime(0, true).fontSize.toString();
+                        textxml.applyFill = thisProperty.valueAtTime(0, true).applyFill.toString();
+                        textxml.applyStroke = thisProperty.valueAtTime(0, true).applyStroke.toString();
+                        textxml.fillColor = ((thisProperty.valueAtTime(0, true).applyFill == true) ? thisProperty.valueAtTime(0, true).fillColor.toString() : "None").toString();
+                        textxml.strokeColor = ((thisProperty.valueAtTime(0, true).applyStroke == true) ? thisProperty.valueAtTime(0, true).strokeColor.toString() : "None").toString();
+                        textxml.strokeOverFill = thisProperty.valueAtTime(0, true).strokeOverFill.toString();
+                        textxml.strokeWidth = thisProperty.valueAtTime(0, true).strokeWidth.toString();
+                        textxml.justification = thisProperty.valueAtTime(0, true).justification.toString();
+                        textxml.tracking = thisProperty.valueAtTime(0, true).tracking.toString();
+                        textxml.pointText = thisProperty.valueAtTime(0, true).pointText.toString();
+                        textxml.boxText = thisProperty.valueAtTime(0, true).boxText.toString();
+                        textxml.boxTextSize = ((thisProperty.valueAtTime(0, true).boxText == true) ? thisProperty.valueAtTime(0, true).boxTextSize.toString() : "None").toString();
+                        if (thisProperty.expression != "") {
+                            textxml.exp = encodeURIComponent(thisProperty.expression).toString();
+                            textxml.expEn = encodeURIComponent(thisProperty.expressionEnabled).toString();
+                        }
+                        propxml = textxml;
+                    }
+                }
+                return propxml;
+              }, 
         
         
         //~         get the xml-based data of layer
-        toXML: function(name){
-            
+        toXML: function(){
+                      this.isSaveMaterial= sp.saveMaterialValue;
+                      var thisLayer = this.item;
+                      var helperObj = this.helperObj;
+              
+                      var layerInfo = this.getLayerAttr();
+                      
+                      var layerxml = this.getProperties(thisLayer, new XML("<Properties></Properties>"),layerInfo);
+                      
+                      layerInfo.appendChild (layerxml);
+                      
+                      return layerInfo;
             },
         
-        //~         get the json-based data of layer
-        toJSON: function(name){
-            
-            },
-      
-        
-
         })
   
     //~ convert XML object to Layer object
