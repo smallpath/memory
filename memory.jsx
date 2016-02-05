@@ -130,7 +130,7 @@
                         var thisComp = app.project.activeItem;
                         if(!sp.gv.lastSelectedItem) return;
                         var itemName = sp.gv.lastSelectedItem.text;
-                        var helperObj = {elementArr:[]};
+                        var helperObj = {};
                         
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
@@ -160,7 +160,7 @@
                         
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
-                              var helperObj = {elementArr:[]};
+                              var helperObj = {};
                               
                               var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
                               var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
@@ -786,16 +786,6 @@ this,
                                                    
             
                                           },
-                                      selectAllLayer : function(comp){
-                                                for(var i=0;i<comp.numLayers;i++){
-                                                            comp.layer(i+1).selected = true;
-                                                      }
-                                      },
-                                      deselectAllLayer : function(comp){
-                                                for(var i=0;i<comp.numLayers;i++){
-                                                            comp.layer(i+1).selected = false;
-                                                      }
-                                      },
                                     clearHelperArr : function(){
                                                 this.layerTypePropertyArr.length =
                                                 this.layerTypePropertyValueArr   =
@@ -819,13 +809,15 @@ this,
                               
                                     getXmlFromLayers : function(comp,layers,elementName,helperObj){
                                                 helperObj["_"+comp.id] = helperObj["_"+comp.id] || {};
+                                                helperObj["elementArr"] = helperObj["elementArr"] || [];
                                                 var elementArr = helperObj.elementArr;
                                                 if(elementArr.length ==0)
                                                       var elementxml = new XML("<Element name=\""+elementName+"\"></Element>");
                                                 else
                                                       var elementxml = new XML("<Comptent name=\"" + elementName + "\"></Comptent>");
-                                                
-                                                layers.forEach(function(thisLayer,index){
+                                                      
+                                                      
+                                                var loopFunc = function(thisLayer,index){
                                                                 var xml = new $.layer(thisLayer,helperObj).toXML();
 
                                                                 if (thisLayer.source instanceof CompItem) {
@@ -834,19 +826,21 @@ this,
                                                                                 xml.Properties.appendChild(elementxmltemp);
                                                                         } else {
                                                                             elementArr.push(elementxml);
-                                                                            sp.prototype.selectAllLayer(thisLayer.source);
                                                                             var comptentXml = sp.prototype.getXmlFromLayers(thisLayer.source,
-                                                                                                                                                            thisLayer.source.selectedLayers,
+                                                                                                                                                            thisLayer.source.layers,
                                                                                                                                                             encodeURIComponent(thisLayer.source.name),
                                                                                                                                                             helperObj)
                                                                             
                                                                             xml.Properties.appendChild (comptentXml);
-                                                                            sp.prototype.deselectAllLayer(thisLayer.source);
                                                                             elementxml = elementArr.pop();
                                                                         }
                                                                 }
                                                                 elementxml.appendChild (xml);
-                                                      });
+                                                      };
+                                                if(elementArr.length ==0)
+                                                     layers.forEach(loopFunc);
+                                               else
+                                                     Array.prototype.forEachLayer.call(layers,loopFunc);
                                                 
                                                 if(elementArr.length !=0){
                                                               var cTemp = new XML(elementxml);
@@ -902,8 +896,21 @@ this,
                         }
                     }
                 }
-             }
-         
+             }             
+             Array.prototype.forEachLayer = function(callback, context) {
+                      if (Object.prototype.toString.call(this) === "[object LayerCollection]") {
+                          var i,
+                              len;
+                          for (i = 1, len = this.length; i <= len; i++) {
+                              if (typeof callback === "function"  && Object.prototype.hasOwnProperty.call(this, i)) {
+                                  if (callback.call(context, this[i], i, this) === false) {
+                                      break; // or return;
+                                  }
+                              }
+                          }
+                      }
+                   }
+               
        sp.extend(sp,{
            forEach:function(xml,callback,context){
             if(!(xml instanceof XML)) return;
