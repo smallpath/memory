@@ -60,17 +60,23 @@
                         
                         sp.clearHelperArr();
                         
+                        
+                        app.beginUndoGroup("Undo new");
+                        app.beginSuppressDialogs();
+
+
+                        
                         if(sp.onlyEffectValue == false){
                                     /*
                                               *Create new layers using given xml
                                               */
                                     var folderName = sp.getSetting("folderName");
-                                    var text = sp.droplist.selection.text;
+                                    var text = sp.gv.lastSelectedItem.text;
                                     var compFolder = app.project.items.addFolder(text+".sp");
                                     var sourceFolder = app.project.items.addFolder("Sources");
                                     
                                     var resultArr = sp.lookUpInItem(folderName,app.project.items);
-                                    if(resultArr[0]){
+                                    if(resultArr[0]==true){
                                             var parentFolder = resultArr[1];
                                             compFolder.parentFolder = parentFolder;
                                           }else{
@@ -78,15 +84,13 @@
                                               compFolder.parentFolder = parentFolder;
                                                 }
                                     sourceFolder.parentFolder = compFolder;
+                                    sp.compFolder = compFolder;
+                                    sp.sourceFolder = sourceFolder;
                                     
                                     var currentTime = app.project.activeItem.time;
-                                    
-                                    var activeCompLayersArr = sp.newLayers(xml
-                                                                                                      ,app.project.activeItem
-                                                                                                      ,compFolder,sourceFolder
-                                                                                                      ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
-                                                                                                      ,sp.expPropertyArr
-                                                                                                      ,sp.layerArr,sp.layerParentNameArr);
+
+                                    var activeCompLayersArr = sp.newLayers(xml,app.project.activeItem);
+
                
                                     app.project.activeItem.time = currentTime;      
                                     
@@ -97,18 +101,15 @@
                                               *Create new properties using given xml's first child and layers
                                               */     
                                     var activeCompLayersArr = app.project.activeItem.selectedLayers;
-                                    sp.newProperties(xml.child(0)
-                                                                               ,app.project.activeItem.selectedLayers
-                                                                               ,sp.cleanGroupValue
-                                                                               ,sp.offsetKeyframeValue
-                                                                               ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
-                                                                               ,sp.expPropertyArr); 
+                                    sp.newProperties(xml,app.project.activeItem.selectedLayers); 
                               
                               }
-                                    
+                                                                         
                                //~  Correct the value of property which's type is layerIndex or maskIndex     
                                sp.layerTypePropertyArr.forEach(function(item,index){
-                                           item.setValue(sp.layerTypePropertyValueArr[index]);
+                                          try{
+                                                item.setValue(sp.layerTypePropertyValueArr[index]);
+                                          }catch(err){}
                                     });
                                    
                                    
@@ -131,10 +132,18 @@
                                  //~ Set the parent of layer using Layer.setParentWithJump()
                                  if (sp.onlyEffectValue == false){
                                           sp.layerArr.forEach(function(item,index){
+                                                      try{
                                                             item.setParentWithJump(item.containingComp.layer(sp.layerParentNameArr[index]));
+                                                      }catch(err){
+                                                            $.writeln("index : "+item.index +"  name" + item.name+" comp name:" + item.containingComp.name+" parentName "+sp.layerParentNameArr[index] )
+                                                            }
                                                 })
                                        }
                                  
+                                 
+                                app.endSuppressDialogs (false);
+                                app.endUndoGroup(); 
+                                
                                  //~ Precompose layers and cut their length,no matter whether they are created by newLayers() or selected by user.
                                  if(sp.preComposeValue == true){
                                         var indexArr = [];
@@ -147,15 +156,17 @@
                                                   outPointArr.push(item.outPoint);
                                               })
 
-                                        inPointArrs.sort(function(a,b){return a-b;})
-                                        outPointArrs.sort(function(a,b){return b-a;})
+                                        inPointArr.sort(function(a,b){return a-b;})
+                                        outPointArr.sort(function(a,b){return b-a;})
                                         
                                         app.beginUndoGroup("Undo precomp");
                                               var precomp = app.project.activeItem.layers.precompose(indexArr,precomposeName, true);
-                                              app.project.activeItem.selectedLayers[0].inPoint=inPointArrs[0];
-                                              app.project.activeItem.selectedLayers[0].outPoint=outPointArrs[0];
+                                              app.project.activeItem.selectedLayers[0].inPoint=inPointArr[0];
+                                              app.project.activeItem.selectedLayers[0].outPoint=outPointArr[0];
                                         app.endUndoGroup();
                                   }
+                            
+                            
 
                   },
             
@@ -448,7 +459,7 @@
                     var thisStr = win.location[0].toString()+","+win.location[1].toString();
                     sp.saveSetting ("winLocation",thisStr);
                 },
-             this.rightClick=function(event) {
+            this.rightClick=function(event) {
                                 var alt = event.altKey;
                                 var key = ScriptUI.environment.keyboardState;
                                 if(alt == false && key.ctrlKey == false){
@@ -609,7 +620,7 @@ this,
                     return file;
             },
         
-            getDistance: function (a, b) {
+            getDistancetance: function (a, b) {
                 return parseInt((a.toString().substring(0, 2) - b.toString().substring(0, 2))) * 100 + parseInt(b);
             },
         
@@ -694,9 +705,9 @@ this,
                         },                    
                   lookUpInItem:function(text,items){
                             var len = items.length
-                            for(var i=0;i<len;i++){
-                                    if(arr[i].name===text)
-                                        return [true,arr[i]];
+                            for(var i=1;i<=len;i++){
+                                    if(items[i].name===text)
+                                        return [true,items[i]];
                                 }
                             return [false,null];
                         },
@@ -792,48 +803,28 @@ this,
       
       //~  added in 2016.2.5
       sp.prototype.extend(sp.prototype,{
-                                    newProperties : function(layerXml
-                                                                               ,app.project.activeItem.selectedLayers
-                                                                               ,sp.cleanGroupValue
-                                                                               ,sp.offsetKeyframeValue
-                                                                               ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
-                                                                               ,sp.expPropertyArr){
-                                                                              
-                                                  app.beginUndoGroup("Undo new layers");
-                                                  app.beginSuppressDialogs();
+                                    newProperties : function(xml,selectedLayers){
+                                                                                           
+                                                  var layerXml = new XML(xml);           
                                                   
-
-                                                      
-                                                   app.endSuppressDialogs (false);
-                                                   app.endUndoGroup();          
-                                                                              
+                                                  //~ Ignore xml according to presets.Empty groups according to presets
+                                                  var temp = $.layer(xml);
+                                                  var returnXml= temp.ignoreAndCleanProperties(layerXml.child(0),selectedLayers);
+                              
                                                                               
                                          },         
-                                    newLayers : function(elementXml
-                                                                                      ,app.project.activeItem
-                                                                                      ,compFolder,sourceFolder
-                                                                                      ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
-                                                                                      ,sp.expPropertyArr
-                                                                                      ,sp.layerArr,sp.layerParentNameArr){
-                                          
-                                                  app.beginUndoGroup("Undo new properties");
-                                                  app.beginSuppressDialogs();
-                                                  
+                                    newLayers : function(elementXml,comp){
 
-                                                      
-                                                   app.endSuppressDialogs (false);
-                                                   app.endUndoGroup();
-                                                    
-                                                   
-                                                   
-            
+                                                  var layerArr = $.layer(elementXml).toLayer(comp);
+  
+                                                  return layerArr;
                                           },
                                     clearHelperArr : function(){
-                                                this.layerTypePropertyArr.length =
-                                                this.layerTypePropertyValueArr   =
-                                                this.expPropertyArr                    =
-                                                this.layerArr                              =
-                                                this.layerParentNameArr             =  [];
+                                                this.layerTypePropertyArr.length =[];
+                                                this.layerTypePropertyValueArr   =[];
+                                                this.expPropertyArr                    =[];
+                                                this.layerArr                              =[];
+                                                this.layerParentNameArr             =[];
                                           },
                                     saveItemToFile : function(file,xml,position){
                                           var newXml = new XML(file.readd());
@@ -861,7 +852,7 @@ this,
                                                       
                                                       
                                                 var loopFunc = function(thisLayer,index){
-                                                                var xml = new $.layer(thisLayer,helperObj).toXML();
+                                                                var xml = new $.layer(thisLayer,helperObj).toXML(index);
 
                                                                 if (thisLayer.source instanceof CompItem) {
                                                                         if (helperObj.hasOwnProperty ("_"+thisLayer.source.id)) {
@@ -943,6 +934,15 @@ this,
                               }
                           }
                       }
+                   }             
+             Array.prototype.forEachPropertyGroup = function(callback, context) {
+                          var i,
+                              len;
+                          for (i = 1, len = this.numProperties; i <= len; i++) {
+                                  if (callback.call(context, this.property(i), i, this) === false) {
+                                      break; // or return;
+                                  }
+                          }
                    }
                
        sp.extend(sp,{
@@ -1142,7 +1142,7 @@ this,
         isSaveMaterial: sp.saveMaterialValue,
         
         //~   Return the attributes of layer
-        getLayerAttr: function(){
+        getLayerAttr: function(index){
                 var thisLayer = this.item;
                 var helperObj = this.helperObj;
                 var layerInf = {};
@@ -1212,7 +1212,7 @@ this,
                     layerInfo.label = thisLayer.label;
                     layerInfo.width = thisLayer.source ? thisLayer.width : "None";
                     layerInfo.height = thisLayer.source ? thisLayer.height : "None";
-                    layerInfo.index = thisLayer.index;
+                    layerInfo.index = index;
 
                     layerInfo.parent = (thisLayer.parent == null) ? false : thisLayer.parent.name;
                     layerInfo.inPoint = thisLayer.inPoint;
@@ -1285,7 +1285,7 @@ this,
         getMaterial: function(layerInf,layerInfo,helperObj,thisLayer){
                     layerInfo.file = thisLayer.source.mainSource.file;
                     if (this.isSaveMaterial == true) {
-                          var tempArr = ["ai","bmp","jpg","png","psd"];
+                        var tempArr = ["ai","bmp","jpg","png","psd"];
                         if (sp.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
                             if (thisLayer.source.mainSource.file.length <= 10485760) {
                                     if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) { 
@@ -1616,12 +1616,12 @@ this,
         
         
         //~    Get the xml-based data of layer
-        toXML: function(){
+        toXML: function(index){
                       this.isSaveMaterial= sp.saveMaterialValue;
                       var thisLayer = this.item;
                       var helperObj = this.helperObj;
               
-                      var layerInfo = this.getLayerAttr();
+                      var layerInfo = this.getLayerAttr(index);
                       
                       var layerxml = this.getProperties(thisLayer, new XML("<Properties></Properties>"),layerInfo);
                       
@@ -1635,56 +1635,1131 @@ this,
     //~ Convert XML object to Layer object
     sp.extend($.layer.prototype,{
           materialFolder:     sp.materialFolder,
+          compFolder:         sp.compFolder,
+          sourceFolder:       sp.sourceFolder,
           isPrecompose :     true,
           isOnlyEffect:         false,
           isCleanGroup:       false,
           isKeyframeOffset:  false,
           
-          newLayer: function(){
-                
+          newLayer: function(xml,thisComp){
+                            var layer;
+                            try {
+                                if (xml.@type == "Solid" || xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" || xml.@type == "Comp") {
+                                    solidcolor = [xml.solidColor.toString().split(",")[0], xml.solidColor.toString().split(",")[1], xml.solidColor.toString().split(",")[2]];
+                                    if (xml.solidColor.toString() != "") {
+                                        var layer = thisComp.layers.addSolid(solidcolor, decodeURIComponent(xml.@name), parseInt(xml.width), parseInt(xml.height), 1);
+                                        layer.name = decodeURIComponent(xml.@name);
+                                        try {
+                                            layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                        } catch (err) {};
+                                    } else if (xml.@type == "Comp") {
+                                        layer = $.layer.prototype.newComp(xml, thisComp);
+                                    } else if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
+                                        try{
+                                              layer = $.layer.prototype.newMaterial(xml, thisComp);
+                                              layer.source.parentFolder = sp.compFolder;
+                                        }catch(err){layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", parseInt(xml.width), parseInt(xml.height), 1);}
+                                       try{
+                                           if(layer.name!=decodeURIComponent(xml.@name)){
+                                                layer.name = decodeURIComponent(xml.@name);
+                                            }
+                                            }catch(err){}
+                                    }
+                                } else if (xml.@type == "Text") {
+                                    try{
+                                          var layer = (xml.textType.toString() == "point") ? thisComp.layers.addText() : thisComp.layers.addBoxText([xml.boxSize.toString().split(",")[0], xml.boxSize.toString().split(",")[1]]);
+                                    }catch(err){var layer = thisComp.layers.addText();}
+                                    layer.name = decodeURIComponent(xml.@name);
+                                    try {
+                                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                    } catch (err) {};
+                                } else if (xml.@type == "Shape") {
+                                    var layer = thisComp.layers.addShape();
+                                    layer.name = decodeURIComponent(xml.@name);
+                                    try {
+                                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                    } catch (err) {};
+                                } else if (xml.@type == "null") {
+                                    var layer = thisComp.layers.addNull();
+                                    layer.name = decodeURIComponent(xml.@name);
+                                    try {
+                                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                    } catch (err) {};
+                                } else if (xml.@type == "Light") {
+                                    var layer = thisComp.layers.addLight(decodeURIComponent(xml.@name), [0, 0]);
+                                    layer.lightType = sp.getDistance(layer.lightType, parseInt(xml.light));
+                                    layer.name = decodeURIComponent(xml.@name);
+                                    try {
+                                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                    } catch (err) {};
+                                } else if (xml.@type == "Camera") {
+                                    var layer = thisComp.layers.addCamera(decodeURIComponent(xml.@name), [0, 0]);
+                                    layer.name = decodeURIComponent(xml.@name);
+                                    try {
+                                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                    } catch (err) {};
+                                }
+                            } catch (err) {}
+                            if (xml.@type != "Comp") {
+                                try {
+                                    layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                } catch (err) {};
+                                try {
+                                    layer.label = parseInt(xml.label.toString())
+                                } catch (err) {}
+                                try{
+                                    if(xml.geoType == "small" ||xml.geoType == "large"){
+                                            layer.containingComp.renderer = "ADBE Picasso";
+                                        }
+                                } catch (err) {}
+                                try {
+                                    if (xml.inPoint != "undefined") {
+                                        layer.inPoint = parseFloat(xml.inPoint);
+                                    }
+                                } catch (err) {}
+                                try {
+                                    if (xml.outPoint != "undefined")
+                                        layer.outPoint = parseFloat(xml.outPoint);
+                                } catch (err) {}
+                                try {
+                                    if (xml.solo != "undefined")
+                                        layer.solo = (xml.solo.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.enabled != "undefined")
+                                        layer.enabled = (xml.enabled.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.three != "undefined")
+                                        layer.threeDLayer = (xml.three.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.timeRemap.toString() != "undefined") {
+                                        if (xml.timeRemap.toString() == "true") {
+                                            layer.timeRemapEnabled = true;
+                                        }
+                                    }
+                                } catch (err) {}
+                                try {
+                                    layer.collapseTransformation = (xml.collapseTransformation.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.audioEnabled.toString() != "") {
+                                        layer.audioEnabled = (xml.audioEnabled.toString() == "true") ? true : false;
+                                    }
+                                } catch (err) {}
+                                try {
+                                    if (xml.trackMatteType != "undefined")
+                                        layer.trackMatteType = sp.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
+                                } catch (err) {}
+                                try {
+                                    if (xml.shy != "undefined")
+                                        layer.shy = (xml.shy.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.motionBlur == true)
+                                        layer.motionBlur = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.guideLayer == true)
+                                        layer.guideLayer = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.environmentLayer == true)
+                                        layer.environmentLayer = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.adjustmentLayer == true)
+                                        layer.adjustmentLayer = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.blendingMode.toString() != "undefined")
+                                        layer.blendingMode = sp.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
+                                } catch (err) {}
+                                try {
+                                    if (xml.autoOrient.toString() != "undefined")
+                                        layer.autoOrient = sp.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
+                                } catch (err) {}
+                                try {
+                                    if (xml.preserveTransparency.toString() != "undefined")
+                                        layer.preserveTransparency = (xml.preserveTransparency.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.separated.toString() != "undefined") {
+                                        layer.property("ADBE Transform Group")("ADBE Position").dimensionsSeparated = (xml.separated.toString() == "true") ? true : false;
+                                    }
+                                } catch (err) {}
+                            }
+                            try {
+                                if (xml.@type != "VideoWithSound" && xml.@type != "Comp") {
+                                    try {
+                                        $.layer.prototype.newPropertyGroup(xml.Properties,layer,layer.inPoint);
+                                    } catch (err) {}
+                                }
+                            } catch (err) {};
+                            return layer;
+                            
                 },
           
-          newComp: function(){
-                
+          newComp: function(xml,thisComp){
+                            var layer = null;
+                            if (xml.@type == "Comp") {
+                                try {
+                                    var isComp = false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.@type == "Comp") {
+                                        for (isA = 0; isA < app.project.numItems; isA++) {
+                                            if (app.project.item(isA + 1) instanceof CompItem && app.project.item(isA + 1).name == decodeURIComponent(xml.compname.toString())) {
+                                                if (app.project.item(isA + 1).numLayers == xml.Properties.Comptent.children().length()) {
+                                                    var thisItem = app.project.item(isA + 1);
+                                                    isComp = true;
+                                                    zhuan = false;
+                                                    for (isB = 0; isB < app.project.item(isA + 1).numLayers; isB++) {
+                                                        zhuan = true;
+                                                        if (app.project.item(isA + 1).layer(isB + 1).name != decodeURIComponent(xml.Properties.Comptent.child(isB).@name)) {
+                                                            isComp = false;
+                                                        }
+                                                    }
+                                                    if (isComp == true && zhuan == true) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (err) {}
+                                if (isComp == true) {
+                                    try {
+                                        layer = thisComp.layers.add(thisItem);
+                                    } catch (err) {}
+                                } else {
+                                    try {
+                                        try {
+                                            var comp = app.project.items.addComp(decodeURIComponent(xml.compname.toString()), 
+                                                                                                                  parseInt(xml.compwidth), parseInt(xml.compheight), 
+                                                                                                                  parseFloat(xml.comppixelAspect), parseFloat(xml.compduration), 
+                                                                                                                  parseFloat(xml.compframeRate));
+                                                   if (sp.onlyEffectValue == false &&comp.id != app.project.activeItem.id){
+                                                            comp.parentFolder = sp.compFolder;
+                                                        }
+                                        } catch (err) {}
+                                        try {
+                                            comp.frameDuration = parseFloat(xml.frameDuration);
+                                        } catch (err) {}
+                                        try {
+                                            comp.dropFrame = parseInt(xml.dropFrame);
+                                        } catch (err) {}
+                                        try {
+                                            comp.workAreaStart = parseFloat(xml.workAreaStart);
+                                        } catch (err) {}
+                                        try {
+                                            comp.workAreaDuration = parseFloat(xml.workAreaDuration);
+                                        } catch (err) {}
+                                        try {
+                                            comp.hideShyLayers = parseInt(xml.hideShyLayers);
+                                        } catch (err) {}
+                                        try {
+                                            comp.motionBlur = parseInt(xml.motionBlur);
+                                        } catch (err) {}
+                                        try {
+                                            comp.draft3d = parseInt(xml.draft3d);
+                                        } catch (err) {}
+                                        try {
+                                            comp.frameBlending = parseInt(xml.frameBlending);
+                                        } catch (err) {}
+                                        try {
+                                            comp.preserveNestedFrameRate = parseInt(comp.preserveNestedFrameRate);
+                                        } catch (err) {}
+                                        try {
+                                            comp.preserveNestedResolution = parseInt(comp.preserveNestedResolution);
+                                        } catch (err) {}
+                                        try {
+                                            comp.bgColor = [parseFloat(xml.bgColor.toString().split(",")[0]), parseFloat(xml.bgColor.toString().split(",")[1]), parseFloat(xml.bgColor.toString().split(",")[2])];
+                                        } catch (err) {}
+                                        try {
+                                            comp.resolutionFactor = [parseFloat(xml.resolutionFactor.toString().split(",")[0]), parseFloat(xml.resolutionFactor.toString().split(",")[1])];
+                                        } catch (err) {}
+                                        try {
+                                            comp.shutterAngle = parseFloat(xml.shutterAngle);
+                                        } catch (err) {}
+                                        try {
+                                            comp.shutterPhase = parseFloat(xml.shutterPhase);
+                                        } catch (err) {}
+                                        try {
+                                            comp.motionBlurSamplesPerFrame = parseInt(xml.motionBlurSamplesPerFrame);
+                                        } catch (err) {}
+                                        try {
+                                            comp.motionBlurAdaptiveSampleLimit = parseInt(xml.motionBlurAdaptiveSampleLimit);
+                                        } catch (err) {}
+                                        try {
+                                            comp.renderer = xml.renderer.toString();
+                                        } catch (err) {}
+                                        try {
+                                            layer = thisComp.layers.add(comp);
+                                        } catch (err) {}
+                                    } catch (err) {}
+                                }
+                                layer.name = decodeURIComponent(xml.@name);
+                                try {
+                                    layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                } catch (err) {};
+                                try {
+                                    layer.label = parseInt(xml.label.toString())
+                                } catch (err) {}
+                                try {
+                                    layer.stretch = parseFloat(xml.stretch);
+                                } catch (err) {}
+                                try {
+                                    if (xml.startTime != "undefined") {
+                                        layer.startTime = parseFloat(xml.startTime);
+                                    }
+                                } catch (err) {}
+                                try {
+                                    if (xml.inPoint != "undefined") {
+                                        layer.inPoint = parseFloat(xml.inPoint);
+                                    }
+                                } catch (err) {}
+                                try {
+                                    if (xml.outPoint != "undefined")
+                                        layer.outPoint = parseFloat(xml.outPoint);
+                                } catch (err) {}
+                                try {
+                                    if (xml.solo != "undefined")
+                                        layer.solo = (xml.solo.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.enabled != "undefined")
+                                        layer.enabled = (xml.enabled.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.three != "undefined")
+                                        layer.threeDLayer = (xml.three.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.timeRemap.toString() != "undefined") {
+                                        if (xml.timeRemap.toString() == "true") {
+                                            layer.timeRemapEnabled = true;
+                                            try {
+                                                layer.property("ADBE Time Remapping").removeKey(2);
+                                            } catch (err) {}
+                                        }
+                                    }
+                                } catch (err) {}
+                                try {
+                                    layer.collapseTransformation = (xml.collapseTransformation.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.audioEnabled.toString() != "") {
+                                        layer.audioEnabled = (xml.audioEnabled.toString() == "true") ? true : false;
+                                    }
+                                } catch (err) {}
+                                try {
+                                    if (xml.trackMatteType != "undefined")
+                                        layer.trackMatteType = sp.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
+                                } catch (err) {}
+                                try {
+                                    if (xml.shy != "undefined")
+                                        layer.shy = (xml.shy.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.motionBlur == true)
+                                        layer.motionBlur = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.guideLayer == true)
+                                        layer.guideLayer = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.environmentLayer == true)
+                                        layer.environmentLayer = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.adjustmentLayer == true)
+                                        layer.adjustmentLayer = true;
+                                } catch (err) {}
+                                try {
+                                    if (xml.blendingMode.toString() != "undefined")
+                                        layer.blendingMode = sp.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
+                                } catch (err) {}
+                                try {
+                                    if (xml.autoOrient.toString() != "undefined")
+                                        layer.autoOrient = sp.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
+                                } catch (err) {}
+                                try {
+                                    if (xml.preserveTransparency.toString() != "undefined")
+                                        layer.preserveTransparency = (xml.preserveTransparency.toString() == "true") ? true : false;
+                                } catch (err) {}
+                                try {
+                                    if (xml.separated.toString() != "undefined") {
+                                        layer.property("ADBE Transform Group")("ADBE Position").dimensionsSeparated = (xml.separated.toString() == "true") ? true : false;
+                                    }
+                                } catch (err) {}
+                                try {
+                                   $.layer.prototype.newPropertyGroup(xml.Properties,layer,layer.inPoint);
+                                } catch (err) {}
+                                if (isComp == false) {
+                                    try {
+                                        $.layer.prototype.toLayer(comp,xml.Properties.Comptent);
+                                    } catch (err) {};
+                                }
+                            }
+                            return layer;
                 },
           
-          newMaterial: function(){
-                
+          newMaterial: function(xml, thisComp){
+                            var isCunzai = false;
+                            try {
+                                if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
+                                    for (isA = 0; isA < app.project.numItems; isA++) {
+                                        if (typeof app.project.item(isA + 1).file != "undefiend" && app.project.item(isA + 1).file != null) {
+                                            if (File(app.project.item(isA + 1).file).toString() == File(xml.file.toString()).toString() ||File(app.project.item(isA+1).file.toString()).toString() == File(sp.scriptFolder.toString()+"/tempFile"+decodeURIComponent(File(xml.file.toString()).toString())).toString()) {
+                                                isCunzai = true;
+                                                thisItem = app.project.item(isA + 1);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (err) {}
+                            try {
+                                if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && isCunzai) {
+                                    layer = thisComp.layers.add(thisItem);
+                                    layer.name = decodeURIComponent(xml.@name);
+                                    try {
+                                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                    } catch (err) {};
+                                    try {
+                                        layer.strectch = parseFloat(xml.stretch);
+                                    } catch (err) {}
+                                    try {
+                                        if (xml.startTime != "undefined") {
+                                            layer.startTime = parseFloat(xml.startTime);
+                                        }
+                                    } catch (err) {}
+                                }
+                            } catch (err) {}
+                          try{  if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && !(isCunzai)) {
+                                try {
+                                    try {
+                                        if (File(xml.file.toString()).exists) {
+                                            var waitIm = File(xml.file.toString());
+                                            }else if(File(sp.scriptFolder.toString()+sp.slash+"tempFile"+sp.slash+decodeURIComponent(File(xml.file.toString()).toString())).exists){
+                                                if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
+                                                    genFilePath = File(genFileFolder.toString()+sp.slash +"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    }else{
+                                                        genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
+                                                        }
+                                                    var waitIm=genFilePath;
+                                        } else if (xml.fileBin.toString() != "") {
+                                            try {
+                                                if (xml.file.toString().indexOf(".ai") != -1 ||
+                                                      xml.file.toString().indexOf(".psd") != -1 ||
+                                                      xml.file.toString().indexOf(".bmp") != -1 ||
+                                                      xml.file.toString().indexOf(".jpg") != -1 || 
+                                                      xml.file.toString().indexOf(".png") != -1) {
+                                                    genFileFolder = Folder(sp.scriptFolder.toString() +sp.slash+ "tempFile");
+                                                    if (!genFileFolder.exists) {
+                                                        genFileFolder.create();
+                                                    }
+                                                if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
+                                                    genFilePath = File(genFileFolder.toString() +sp.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    }else{
+                                                        genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
+                                                        }
+                                                    waitToWrite = decodeURIComponent(xml.fileBin.toString());
+                                                    if (!genFilePath.exists || genFilePath.exists && genFilePath.length != waitToWrite.length) {
+                                                        genThisFolder(genFilePath,new Array);
+                                                        function genThisFolder(theFile,arr){
+                                                            if (theFile.parent.exists){
+                                                                }else{
+                                                                    arr.push(theFile);
+                                                                    genThisFolder(theFile.parent,arr);
+                                                                    theFile = arr[arr.length-1];
+                                                                    arr.pop();
+                                                                    theFile.parent.create();
+                                                                    }
+                                                            }
+                                                        if(!genFilePath.parent.exists)
+                                                            genFilePath=File(sp.scriptFolder.toString()+sp.slash+"tempFile"+sp.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
+                                                        genFilePath.open("w");
+                                                        genFilePath.encoding = "BINARY";
+                                                        isWrite=genFilePath.write(waitToWrite);
+                                                        genFilePath.close();
+                                                    }
+                                                } else if (xml.file.toString().indexOf(".ape") != -1 ||
+                                                               xml.file.toString().indexOf(".flac") != -1 ||
+                                                               xml.file.toString().indexOf(".mp3") != -1 || 
+                                                               xml.file.toString().indexOf(".wav") != -1) {
+                                                    genFileFolder = Folder(sp.scriptFolder.toString() +sp.slash+ "tempFile");
+                                                    if (!genFileFolder.exists) {
+                                                        genFileFolder.create();
+                                                    }
+                                                if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
+                                                    genFilePath = File(genFileFolder.toString() +sp.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    }else{
+                                                        genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
+                                                        }
+                                                    waitToWrite = decodeURIComponent(xml.fileBin.toString());
+                                                    if (!genFilePath.exists || genFilePath.exists && genFilePath.length != waitToWrite.length) {
+                                                        genThisFolder(genFilePath,new Array);
+                                                        function genThisFolder(theFile,arr){
+                                                            if (theFile.parent.exists){
+                                                                }else{
+                                                                    arr.push(theFile);
+                                                                    genThisFolder(theFile.parent,arr);
+                                                                    theFile = arr[arr.length-1];
+                                                                    arr.pop();
+                                                                    theFile.parent.create();
+                                                                    }
+                                                            }
+                                                        if(!genFilePath.parent.exists)
+                                                            genFilePath=File(sp.scriptFolder.toString()+"/tempFile/"+decodeURIComponent(File(xml.file.toString()).name.toString()));
+                                                        genFilePath.open("w");
+                                                        genFilePath.encoding = "BINARY";
+                                                        genFilePath.write(waitToWrite);
+                                                        genFilePath.close();
+                                                    }
+                                                }
+                                                var waitIm = genFilePath;
+                                            } catch (err) {}
+                                        }
+                                    } catch (err) {}
+                                    try{
+                                    var im = new ImportOptions();
+                                    //alert(waitIm);
+                                    im.file = waitIm;
+                                    try {
+                                        im.sequence = false;
+                                        im.forceAlphabetical = false;
+                                    } catch (err) {}
+                                    }catch(err){layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);return layer;}
+                                    if (im.canImportAs(ImportAsType.FOOTAGE)) {
+                                        im.importAs = ImportAsType.FOOTAGE;
+                                        f = app.project.importFile(im);
+                                        layer = thisComp.layers.add(f);
+                                        layer.name = decodeURIComponent(xml.@name);
+                                        try {
+                                            layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                        } catch (err) {};
+                                        try {
+                                            layer.strectch = parseFloat(xml.stretch);
+                                        } catch (err) {}
+                                        try {
+                                            if (xml.startTime != "undefined") {
+                                                layer.startTime = parseFloat(xml.startTime);
+                                            }
+                                        } catch (err) {}
+                                    } else if (im.canImportAs(ImportAsType.FOOTAGE)) {
+                                        im.importAs = ImportAsType.FOOTAGE;
+                                        f = app.project.importFile(im);
+                                        layer = thisComp.layers.add(f);
+                                        layer.name = decodeURIComponent(xml.@name);
+                                        try {
+                                            layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                                        } catch (err) {};
+                                        try {
+                                            layer.strectch = parseFloat(xml.stretch);
+                                        } catch (err) {}
+                                        try {
+                                            if (xml.startTime != "undefined") {
+                                                layer.startTime = parseFloat(xml.startTime);
+                                            }
+                                        } catch (err) {}
+                                    } else {
+                                       // alert("Wrong file type can not be imported !");
+                                        layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
+                                    }
+                                } catch (err) {}
+                            }
+                        }catch(err){}
+                        try{
+                            if(layer instanceof AVLayer){
+                              return layer;
+                            }else{
+                                layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
+                                return layer;
+                                }
+                            }catch(err){layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);return layer;}
                 },
           
-          findCompOrMaterial: function(){
-                
+          
+          newPropertyGroup: function(xml,layers,inTime){
+                                for (var addi = 0; addi < xml.children().length(); addi++) {
+                                  if (xml.child(addi).name() == "Group") {
+                                      prop = 0;
+                                      try{
+                                      if (layers.canAddProperty(xml.child(addi).@matchName)) {
+                                                                                    
+                                          var prop = layers.addProperty(xml.child(addi).@matchName);
+                                                                                  
+                                          try {
+                                              if (layers.property(parseInt(xml.child(addi).@propertyIndex)).matchName == "ADBE Mask Atom") {
+                                                  try {
+                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode = sp.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode, parseInt(xml.child(addi).@maskmode));
+                                                  } catch (err) {}
+                                                  layers.property(parseInt(xml.child(addi).@propertyIndex)).inverted = (xml.child(addi).@inverted.toString() == "false") ? false : true;
+                                                  layers.property(parseInt(xml.child(addi).@propertyIndex)).rotoBezier = (xml.child(addi).@rotoBezier.toString() == "false") ? false : true;
+                                                  layers.property(parseInt(xml.child(addi).@propertyIndex)).color = [xml.child(addi).@color.toString().split(",")[0], xml.child(addi).@color.toString().split(",")[1], xml.child(addi).@color.toString().split(",")[2]];
+                                                  try {
+                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur = sp.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur, parseInt(xml.child(addi).@maskMotionBlur));
+                                                  } catch (err) {}
+                                                  try {
+                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff = sp.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff, parseInt(xml.child(addi).@maskFeatherFalloff));
+                                                  } catch (err) {}
+                                              }
+                                          } catch (err) {}
+                                      } else if (xml.child(addi).@matchName.toString() == "ADBE Layer Styles") {
+                                          var group = xml.child(addi).children();
+                                          var layerStyleArr = [];
+                                          var cunName = [];
+                                          for (var shenqi = 0; shenqi < group.length(); shenqi++) {
+                                              layerStyleArr.push(xml.child(addi).child(shenqi).@matchName);
+                                              cunName.push(xml.child(addi).child(shenqi).@name);
+                                          }
+                                          for (var shenqi = 0; shenqi < layerStyleArr.length; shenqi++) {
+                                              if (layerStyleArr[shenqi].indexOf("/") != -1) {
+                                                  try {
+                                                      if (layer.propertyGroup(layer.propertyIndex).containingComp.id == app.project.activeItem.id) {
+                                                          app.executeCommand(app.findMenuCommandId(cunName[shenqi]));
+                                                      }
+                                                  } catch (err) {}
+                                              }
+                                          }
+                                      }
+                                      }catch(err){}
+                                      try {
+                                          if (xml.child(addi).@enabled != "None") {
+                                              if (layers.property(parseInt(xml.child(addi).@propertyIndex)).canSetEnabled == true) {
+                                                  if (prop == 0) {
+                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).enabled = (xml.child(addi).@enabled == "true") ? true : false;
+                                                  } else {
+                                                      layers.property(parseInt(prop.propertyIndex)).enabled = (xml.child(addi).@enabled == "true") ? true : false;
+                                                  }
+                                              }
+                                          }
+                                      } catch (err) {}
+                                      try {
+                                          if (prop == 0) {
+                                              if (layers.propertyType == PropertyType.INDEXED_GROUP) {
+                                                  layers.property(parseInt(xml.child(addi).@propertyIndex)).name = xml.child(addi).@name.toString();
+                                              }
+                                          } else {
+                                              if (layers.propertyType == PropertyType.INDEXED_GROUP)
+                                                  layers.property(prop.propertyIndex).name = xml.child(addi).@name.toString();
+                                          }
+                                      } catch (err) {}
+                                      if (xml.child(addi).children().length() > 0) {
+                                          if (prop == 0 && xml.child(addi).@matchName != "ADBE Mask Parade" && xml.child(addi).@matchName != "ADBE Effect Parade" && xml.child(addi).@matchName != "ADBE Layer Styles") {
+                                              try {
+                                                  $.layer.prototype.newPropertyGroup(xml.child(addi),layers.property(parseInt(xml.child(addi).@propertyIndex)) ,inTime);
+                                              } catch (err) {}
+                                          } else {
+                                              if (xml.child(addi).@matchName != "ADBE Mask Parade" && xml.child(addi).@matchName != "ADBE Effect Parade" && xml.child(addi).@matchName != "ADBE Layer Styles") {
+                                                  try {
+                                                      $.layer.prototype.newPropertyGroup(xml.child(addi),layers.property(prop.propertyIndex), inTime);
+                                                  } catch (err) {}
+                                              } else {
+                                                  try {
+                                                      $.layer.prototype.newPropertyGroup(xml.child(addi),layers.property(xml.child(addi).@matchName), inTime);
+                                                  } catch (err) {}
+                                              }
+                                          }
+                                      }
+                                  } else if (xml.child(addi).name() == "prop") {
+                                        $.layer.prototype.newProperty(xml.child(addi),layers,inTime)
+                                  }
+
+                                  if (xml.child(addi).name() == "prop") {
+                                      if (xml.child(addi).exp.toString() != "") {
+                                          try {
+
+                                              sp.expPropertyArr.push(layers.property(xml.child(addi).@matchName));
+                                              layers.property(xml.child(addi).@matchName).expression = decodeURIComponent(xml.child(addi).exp.toString());
+                                              layers.property(xml.child(addi).@matchName).expressionEnabled = xml.child(addi).expEn;
+
+                                          } catch (err) {};
+                                      }
+                                  }
+                              }
                 },
           
-          setLayerAttr: function(){
-                
+          newProperty: function(xml,layers,inTime){
+                                      var bool1 = layers.property(xml.@matchName).matchName != "ADBE Text Document";
+                                      var bool2 = layers.property(xml.@matchName).matchName != "ADBE Marker";
+                                      var bool3 = layers.property(xml.@matchName).matchName != "ADBE Mask Shape";
+                                      var bool4 = layers.property(xml.@matchName).matchName != "ADBE Vector Shape";
+                                      var bool5 = layers.matchName != "ADBE Text Animator Properties";
+                                      var bool6 = layers.matchName != "ADBE Vector Stroke Dashes";
+                                      if (bool1 && bool2 && bool3 && bool4) {
+                                          if (!bool5 || !bool6) {
+                                              if (layers.canAddProperty(xml.@matchName)) {
+                                                  layers.addProperty(xml.@matchName);
+                                              }
+                                          }
+                                          if (xml.@key == 0) {
+                                              var value = [];
+                                              if (xml.child(0).toString().split(",").length > 1) {
+                                                  for (var ia = 0; ia < xml.child(0).toString().split(",").length; ia++) {
+                                                      value.push(xml.child(0).toString().split(",")[ia]);
+                                                  }
+                                              } else {
+                                                  value = parseFloat(xml.child(0).toString());
+                                              }
+                                              try {
+                                                  layers.property(xml.@matchName).setValue(value);
+                                              } catch (err) {}
+                                              try{
+                                              var a=layers.property(xml.@matchName).propertyValueType.toString();
+                                              if (a.indexOf ("17")!=-1||a.indexOf("21")!=-1 ||a.indexOf("22")!=-1){
+                                                      sp.layerTypePropertyArr.push(layers.property(xml.@matchName));
+                                                      sp.layerTypePropertyValueArr.push(value);
+                                                  } 
+                                              }catch(err){}
+                                          } else {
+                                              var values = [];
+                                              var valueTemp = [];
+                                              var times = [];
+                                              var div = xml.keyTime.toString().split(",");
+                                              var vas = xml.keyValue.toString().split(",");
+                                              for (ia = 0; ia < div.length; ia++) {
+                                                  if(typeof inTime =="undefined"){
+                                                  times.push(div[ia]);
+                                                  }else{
+                                                      times.push(parseFloat(div[ia])+parseFloat(inTime));
+                                                      }
+                                              }
+                                              for (ia = 0; ia < div.length; ia++) {
+                                                  for (ib = 0; ib < vas.length / div.length; ib++) {
+                                                      valueTemp.push(xml.keyValue.toString().split(",")[ia * vas.length / div.length + ib]);
+                                                  }
+                                                  values.push(valueTemp);
+                                                  valueTemp = [];
+                                              }
+                                              try {
+                                                  layers.property(xml.@matchName).setValuesAtTimes(times, values);
+                                              } catch (err) {}
+                                              var inSpeedArr = [];
+                                              var inInArr = [];
+                                              var outSpeedArr = [];
+                                              var outIn = [];
+                                              if(app.version[1]=="."||app.version[1]=="0"){
+                                                      var ease;
+                                                      for(var iaa=0;iaa<xml.keyTime.toString().split(",").length;iaa++){
+                                                          ease+=xml.child(iaa+4);
+                                                          }
+                                                      len=xml.keyTime.toString().split(",").length;
+                                                  }else{
+                                              var ease = xml..Ease;
+                                              len = ease.length();
+                                              }
+                                              for (ia = 0; ia < len; ia++) {
+                                                  var clamp = parseFloat(xml.child(ia + 4).InIn);
+                                                  if (clamp < 0.1) {
+                                                      clamp = 0.1;
+                                                  }
+                                                  var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed), clamp);
+                                                  var clampb = parseFloat(xml.child(ia + 4).OutIn);
+                                                  if (clampb < 0.1) {
+                                                      clampb = 0.1;
+                                                  }
+                                                  var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
+                                                  var myScaleProperty = layers.property(xml.@matchName);
+                                                  try {
+                                                      if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD && sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
+                                                          var clamp = parseFloat(xml.child(ia + 4).InIn);
+                                                          if (clamp < 0.1) {
+                                                              clamp = 0.1;
+                                                          }
+                                                          var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed), clamp);
+                                                          var clampb = parseFloat(xml.child(ia + 4).OutIn);
+                                                          if (clampb < 0.1) {
+                                                              clampb = 0.1;
+                                                          }
+                                                          var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
+                                                          try {
+                                                              myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
+                                                          } catch (err) {}
+                                                      } else if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
+
+                                                          var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
+                                                          if (clamp < 0.1) {
+                                                              clamp = 0.1;
+                                                          }
+                                                          var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[0]), clamp);
+                                                          var clampb = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[0]);
+                                                          if (clampb < 0.1) {
+                                                              clampb = 0.1;
+                                                          }
+                                                          var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[0]), clampb);
+                                                          var clamp1 = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[1]);
+                                                          if (clamp1 < 0.1) {
+                                                              clamp1 = 0.1;
+                                                          }
+                                                          var easeIn1 = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[1]), clamp1);
+                                                          var clampb1 = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[1]);
+                                                          if (clampb1 < 0.1) {
+                                                              clampb1 = 0.1;
+                                                          }
+                                                          var easeOut1 = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[1]), clampb1);
+                                                          try {
+                                                              myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn1], [easeOut, easeOut1]);
+                                                          } catch (err) {}
+                                                      } else if (sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
+                                                          var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
+                                                          if (clamp < 0.1) {
+                                                              clamp = 0.1;
+                                                          }
+                                                          var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[0]), clamp);
+                                                          var clampb = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[0]);
+                                                          if (clampb < 0.1) {
+                                                              clampb = 0.1;
+                                                          }
+                                                          var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[0]), clampb);
+                                                          var clamp1 = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[1]);
+                                                          if (clamp1 < 0.1) {
+                                                              clamp1 = 0.1;
+                                                          }
+                                                          var easeIn1 = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[1]), clamp1);
+                                                          var clampb1 = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[1]);
+                                                          if (clampb1 < 0.1) {
+                                                              clampb1 = 0.1;
+                                                          }
+                                                          var easeOut1 = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[1]), clampb1);
+                                                          var clamp2 = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[2]);
+                                                          if (clamp2 < 0.1) {
+                                                              clamp2 = 0.1;
+                                                          }
+                                                          var easeIn2 = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[2]), clamp2);
+                                                          var clampb2 = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[2]);
+                                                          if (clampb2 < 0.1) {
+                                                              clampb2 = 0.1;
+                                                          }
+                                                          var easeOut2 = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[2]), clampb2);
+                                                          try {
+                                                              myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn1, easeIn2], [easeOut, easeOut1, easeOut2]);
+                                                          } catch (err) {}
+                                                      }
+                                                          try {
+                                                               var inIn = sp.getDistance(myScaleProperty.keyInInterpolationType (ia+1),parseInt(xml.child(ia+4).inInterType));
+                                                               var outIn = sp.getDistance(myScaleProperty.keyOutInterpolationType (ia+1),parseInt(xml.child(ia+4).outInterType));
+                                                               myScaleProperty.setInterpolationTypeAtKey (ia + 1, inIn,outIn);
+                                                           } catch (err) {}   
+                                                          try {
+                                                               var isRoving = ((xml.child(ia+4).isRoving).toString() == "true")? true:false;
+                                                               myScaleProperty.setRovingAtKey (ia+1, isRoving);
+                                                           } catch (err) {} 
+                                                  } catch (err) {}
+                                              }
+                                          }
+                                      } else if (layers.property(xml.@matchName).matchName == "ADBE Text Document") {
+                                          if (xml.@key == 0) {
+                                              try {
+                                                  var value = [];
+                                                  var myText = layers.property(xml.@matchName).value;
+                                                  myText.text = xml.text.toString();
+                                                  myText.font = xml.font.toString();
+                                                  myText.fontSize = parseInt(xml.fontSize);
+                                                  myText.applyFill = (xml.applyFill.toString() == "true") ? true : false;
+                                                  myText.applyStroke = (xml.applyStroke.toString() == "true") ? true : false;
+                                                  if (xml.applyFill.toString() == "true") {
+                                                      myText.fillColor = [xml.fillColor.toString().split(",")[0], xml.fillColor.toString().split(",")[1], xml.fillColor.toString().split(",")[2]];
+                                                  }
+                                                  if (xml.applyStroke.toString() == "true") {
+                                                      myText.strokeColor = [xml.strokeColor.toString().split(",")[0], xml.strokeColor.toString().split(",")[1], xml.strokeColor.toString().split(",")[2]];
+                                                      myText.strokeOverFill = xml.strokeOverFill.toString();
+                                                      myText.strokeWidth = xml.strokeWidth.toString();
+                                                  }
+                                                  try {
+                                                      myText.justification = sp.getDistance(myText.justification, parseInt(xml.justification));
+                                                  } catch (err) {}
+                                                  var nextText = myText;
+                                              } catch (err) {}
+                                              try {
+                                                  layers.property(xml.@matchName).setValue(myText);
+                                              } catch (err) {}
+                                              try {
+                                                  layers.property(xml.@matchName).setValue(nextText);
+                                              } catch (err) {}
+                                          } else {
+                                              var values = [];
+                                              var valueTemp = [];
+                                              var times = [];
+                                              var div = xml.keyTime.toString().split(",");
+                                              var vas = xml.keyValue.toString().split(",");
+                                              for (ia = 0; ia < div.length; ia++) {
+                                                  //times.push(div[ia]);
+                                                  if(typeof inTime =="undefined"){
+                                                  times.push(div[ia]);
+                                                  }else{
+                                                      times.push(parseFloat(div[ia])+parseFloat(inTime));
+                                                      }
+                                              }
+                                              for (ib = 0; ib < div.length; ib++) {
+                                                  var myText = null;
+                                                  myText = layers.property(xml.child(0).@matchName).valueAtTime(times[ib], true);
+                                                  myText.text = xml.child(0).keyValue.child(ib).text.toString();
+                                                  myText.font = xml.child(0).keyValue.child(ib).font.toString();
+                                                  myText.fontSize = parseInt(xml.child(0).keyValue.child(ib).fontSize);
+                                                  myText.applyFill = (xml.child(0).keyValue.child(ib).applyFill.toString() == "true") ? true : false;
+                                                  myText.applyStroke = (xml.child(0).keyValue.child(ib).applyStroke.toString() == "true") ? true : false;
+                                                  if (xml.child(0).keyValue.child(ib).applyFill.toString() == "true")
+                                                      myText.fillColor = [xml.child(0).keyValue.child(ib).fillColor.toString().split(",")[0], xml.child(0).keyValue.child(ib).fillColor.toString().split(",")[1], xml.child(0).keyValue.child(ib).fillColor.toString().split(",")[2]];
+                                                  if (xml.child(0).keyValue.child(ib).applyStroke.toString() == "true") {
+                                                      myText.strokeColor = [xml.child(0).keyValue.child(ib).strokeColor.toString().split(",")[0], xml.child(0).keyValue.child(ib).strokeColor.toString().split(",")[1], xml.child(0).keyValue.child(ib).strokeColor.toString().split(",")[2]];
+                                                      myText.strokeOverFill = xml.child(0).keyValue.child(ib).strokeOverFill.toString();
+                                                      myText.strokeWidth = xml.child(0).keyValue.child(ib).strokeWidth.toString();
+                                                  }
+                                                  try {
+                                                      myText.justification = sp.getDistance(myText.justification, parseInt(xml.child(0).keyValue.child(ib).justification));
+                                                  } catch (err) {}
+                                                  nextText = myText;
+                                                  try {
+                                                      layers.property(xml.child(0).@matchName).setValueAtTime(times[ib], myText);
+                                                  } catch (err) {}
+                                                  try {
+                                                      layers.property(xml.child(0).@matchName).setValueAtTime(times[ib], nextText);
+                                                  } catch (err) {}
+                                              }
+                                          }
+                                      } else if (!bool2) {
+                                          if (xml.@key == 0) {} else {
+                                              var values = [];
+                                              var valueTemp = [];
+                                              var times = [];
+                                              var div = xml.keyTime.toString().split(",");
+                                              for (ia = 0; ia < div.length; ia++) {
+                                                 // times.push(div[ia]);
+                                                  if(typeof inTime =="undefined"){
+                                                  times.push(div[ia]);
+                                                  }else{
+                                                      times.push(parseFloat(div[ia])+parseFloat(inTime));
+                                                      }
+                                              }
+                                              for (ib = 0; ib < div.length; ib++) {
+                                                  var myMarker = new MarkerValue("zhanwei");
+                                                  myMarker.comment = xml.child(0).keyValue.child(ib).comment.toString();
+                                                  myMarker.duration = xml.child(0).keyValue.child(ib).duration.toString();
+                                                  myMarker.chapter = xml.child(0).keyValue.child(ib).chapter.toString();
+                                                  myMarker.cuePointName = xml.child(0).keyValue.child(ib).cuePointName.toString();
+                                                  myMarker.eventCuePoint = xml.child(0).keyValue.child(ib).eventCuePoint.toString();
+                                                  myMarker.url = xml.child(0).keyValue.child(ib).url.toString();
+                                                  myMarker.frameTarget = xml.child(0).keyValue.child(ib).frameTarget.toString();
+                                                  try {
+                                                      layers.property(xml.child(0).@matchName).setValueAtTime(times[ib], myMarker);
+                                                  } catch (err) {}
+                                              }
+                                          }
+                                      } else if (!bool3 || !bool4) {
+                                          if (xml.@key == "0") {
+                                              var myShape = new Shape();
+                                              var vertsArr = [];
+                                              var inTanArr = [];
+                                              var outTanArr = [];
+                                              var verts = xml.vertices.toString().split(",");
+                                              var inTan = xml.inTan.toString().split(",");
+                                              var outTan = xml.outTan.toString().split(",");
+                                              for (ic = 0; ic < verts.length / 2; ic++) {
+                                                  vertsArr.push([verts[ic * 2], verts[ic * 2 + 1]]);
+                                                  inTanArr.push([inTan[ic * 2], inTan[ic * 2 + 1]]);
+                                                  outTanArr.push([outTan[ic * 2], outTan[ic * 2 + 1]]);
+                                              }
+                                              myShape.vertices = vertsArr;
+                                              myShape.inTangents = inTanArr;
+                                              myShape.outTangents = outTanArr;
+                                              myShape.closed = (xml.closed == true) ? true : false;
+                                              try {
+                                                  layers.property(xml.@matchName).setValue(myShape);
+                                              } catch (err) {}
+                                          } else {
+                                              var myShape = new Shape();
+                                              var vertsArr = [];
+                                              var inTanArr = [];
+                                              var outTanArr = [];
+                                              var times = [];
+                                              var shapes = [];
+                                              var div = xml.keyTime.toString().split(",");
+                                              for (ia = 0; ia < div.length; ia++) {
+                                                  //times.push(div[ia]);
+                                                  if(typeof inTime =="undefined"){
+                                                  times.push(div[ia]);
+                                                  }else{
+                                                      times.push(parseFloat(div[ia])+parseFloat(inTime));
+                                                      }
+                                              }
+                                              for (ic = 0; ic < xml.keyValue.children().length(); ic++) {
+                                                  var verts = xml.keyValue.child(ic).vertices.toString().split(",");
+                                                  var inTan = xml.keyValue.child(ic).inTan.toString().split(",");
+                                                  var outTan = xml.keyValue.child(ic).outTan.toString().split(",");
+                                                  for (ib = 0; ib < verts.length / 2; ib++) {
+                                                      vertsArr.push([verts[ib * 2], verts[ib * 2 + 1]]);
+                                                      inTanArr.push([inTan[ib * 2], inTan[ib * 2 + 1]]);
+                                                      outTanArr.push([outTan[ib * 2], outTan[ib * 2 + 1]]);
+                                                  }
+                                                  var myShape = new Shape();
+                                                  myShape.vertices = vertsArr;
+                                                  myShape.inTangents = inTanArr;
+                                                  myShape.outTangents = outTanArr;
+                                                  myShape.closed = (xml.keyValue.child(ic).closed == true) ? true : false;
+                                                  shapes.push(myShape);
+                                                  vertsArr = [];
+                                                  inTanArr = [];
+                                                  outTanArr = [];
+                                              }
+                                              try {
+                                                  layers.property(xml.@matchName).setValuesAtTimes(times, shapes);
+                                              } catch (err) {}
+                                              var inSpeedArr = [];
+                                              var inInArr = [];
+                                              var outSpeedArr = [];
+                                              var outIn = [];
+                                              if(app.version[1]=="."||app.version[1]=="0"){
+                                                      var ease;
+                                                      for(var iaa=0;iaa<xml.keyTime.toString().split(",").length;iaa++){
+                                                          ease+=xml.child(iaa+4);
+                                                          }
+                                                      len=xml.keyTime.toString().split(",").length;
+                                                  }else{
+                                              var ease = xml..Ease;
+                                              len = ease.length();
+                                              }
+                                              for (ia = 0; ia < len; ia++) {
+                                                  var clamp = parseFloat(xml.child(ia + 4).InIn);
+                                                  if (clamp < 0.1) {
+                                                      clamp = 0.1;
+                                                  }
+                                                  var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed), clamp);
+                                                  var clampb = parseFloat(xml.child(ia + 4).OutIn);
+                                                  if (clampb < 0.1) {
+                                                      clampb = 0.1;
+                                                  }
+                                                  var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
+                                                  var myScaleProperty = layers.property(xml.@matchName);
+                                                  try {
+                                                      if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD && sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
+                                                          try {
+                                                              myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
+                                                          } catch (err) {}
+                                                      } else if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
+                                                          myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn], [easeOut, easeOut]);
+                                                      } else if (sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
+                                                          myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn, easeIn], [easeOut, easeOut, easeOut]);
+                                                      }
+                                                           try {
+                                                               var inIn = sp.getDistance(myScaleProperty.keyInInterpolationType (ia+1),parseInt(xml.inInterType));
+                                                               var outIn = sp.getDistance(myScaleProperty.keyOutInterpolationType (ia+1),parseInt(xml.outInterType));
+                                                               myScaleProperty.setInterpolationTypeAtKey (ia + 1, inIn,outIn);
+                                                           } catch (err) {}    
+                                                          try {
+                                                               var isRoving = ((xml.isRoving).toString() == "true")? true:false;
+                                                               myScaleProperty.setRovingAtKey (ia+1, isRoving);
+                                                           } catch (err) {} 
+                                                  } catch (err) {}
+                                              }
+                                          }
+                                      }
                 },
           
-          setCompLayerAttr: function(){
-                
+          
+          
+          ignoreAndCleanProperties: function(effectxml,selectedLayers){
+                        var idArr=[
+                                          "ADBE Mask Parade","ADBE Effect Parade","ADBE Transform Group",
+                                          "ADBE Material Options Group","ADBE Layer Styles","ADBE Root Vectors Group",
+                                          "ADBE Text Animators","ADBE Light Options Group","ADBE Camera Options Group"
+                                         ];
+                        var idGen=[];
+                        var idDel=[];
+                        
+                       for(var i=1;i<=9;i++){
+                              if(sp.getSetting("Sp_memory","_1_"+i)=="1"){
+                                  idGen.push(idArr[i-1]);
+                                  }   
+                              if(spgetSetting("Sp_memory","_2_"+i)=="1"){
+                                  idDel.push(idArr[i-1]);
+                                  }   
+                        }
+                  
+                  
+                        //~Set xml ignored
+                        for(var i=effectxml.children().length();i>=0;i--){
+                                    var xml = effectxml.child(i);
+                                    if(xml.name() == "Group"){
+                                          xml.child(0).setLocalName("textignore");
+                                          if(effectxml.children().length()>=4)
+                                                      sp.lookUpInArray(xml.child(3).@matchName,idGen)==false && xml.child(3).setLocalName ("ignore");           
+                                    
+                                          if(sp.lookUpInArray(xml.@matchName,idGen)==false)
+                                                      xml.@matchName != "ADBE Text Properties" && xml.setLocalName("ignore");
+                                          
+                              }else{
+                                         xml.name() == "Comptent" &&xml.setLocalName("compignore")
+                                }
+                         }
+                   
+                        //~ Delete propertyGroup in layers
+                        if(this.isCleanGroup==true){
+                              selectedLayers.forEach(function(layer,index){
+                                          Array.prototype.forEachPropertyGroup.call (layer,function(thisGroup,index){
+                                                      if(sp.lookUpInArray(thisGroup.matchName,idDel)==true){
+                                                                  if(thisGroup.matchName != "ADBE Layer Styles"){
+                                                                              for(var i=thisGroup.numProperties;i>0;i--){
+                                                                                          try{thisGroup.property(i).remove();}catch(err){}
+                                                                                       }
+                                                                        }else{
+                                                                              for(var i=thisGroup.numProperties;i>0;i--){
+                                                                                          try{thisGroup.property(i).enabled = false;}catch(err){}
+                                                                                       }
+                                                                              }
+                                                            }
+                                                      if(thisGroupHere.matchName=="ADBE Text Properties"){
+                                                                  if(sp.lookUpInArray(thisGroup.property(4).matchName,idDel)==true){
+                                                                              for(var i=thisGroup.property(4).numProperties;i>0;i--){
+                                                                                          try{thisGroup.property(4).property(i).remove();}catch(err){}
+                                                                                       }
+                                                                        }
+                                                            }
+                                                })//~ ForEachPropertyGroup end
+                                          
+                                          
+                                            if(this.isKeyframeOffset==true)
+                                                      $.layer.prototype.newPropertyGroup(effectxml,layer,layer.inPoint)
+                                            else
+                                                      $.layer.prototype.newPropertyGroup(effectxml,layer)
+                                    })
+
+                              
+                              
+                              } //~Clean group and ignore end
+                  
+                  
+                  
+                  
                 },
           
-          setProperties: function(){
-                
-                },
-          
-          setProperty: function(){
-                
-                },
-          
-          cleanProperty: function(){
-                
-                },
-          
-          toLayer: function(){
+          toLayer: function(thisComp,xml){
                       this.materialFolder = sp.materialFolder;
-                      this.isPrecompose = sp.preComposeValue;
                       this.isOnlyEffect =sp.onlyEffectValue;
                       this.isCleanGroup= sp.cleanGroupValue;
                       this.isKeyframeOffset=sp.offsetKeyframeValue;
+                      this.compFolder=sp.compFolder;
+                      this.sourceFolder= sp.sourceFolder;
                       
-                      var xml = this.item;
+                      
+                      xml = xml || this.item;
                       var helperObj = this.helperObj;
+                      
+                      var layerArr = [];
+
+                      sp.forEach(xml,function(item,index){
+
+                              sp.layerArr[sp.layerArr.length]=layerArr[layerArr.length]=$.layer.prototype.newLayer(item,thisComp);  
+                              sp.layerParentNameArr.push(item.parent.toString());
+                            })
+                      
+                      
+                      return layerArr;
                       
                 }
           
