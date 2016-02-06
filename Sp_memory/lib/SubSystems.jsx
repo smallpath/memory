@@ -228,7 +228,7 @@ _('#wlist')[0].addEventListener("keydown", function(k) {
             handleKey(k, this);
         });
   
-win.location = [200,300];
+win.center();
 win.show();
                         
     }
