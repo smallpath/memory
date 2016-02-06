@@ -8,6 +8,8 @@
     #include 'Sp_memory/lib/RightClickMenu.jsx'
     var fns = sp.fns = new fns();
  
+ 
+    //~ Create UI
     var win = global instanceof Panel ? global : new Window("window",sp.scriptName, undefined, {resizeable: true});
     var group1 = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}");
     var group11 = group1.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}");
@@ -15,12 +17,12 @@
     var gv = sp.gv = new GridView(group1);
     
 
-
+    //~ Set GridView's attributes
     gv.limitText = sp.getSettingAsBool ("limitText");
     gv.showText = sp.showThumbValue ;
     gv.version =  parseInt(app.version.split(".")[0])==12?"CC":"CC2014";
     
-
+    //~ Binding eventHandlers to mouse click and Window
     gv.rightClick = fns.rightClick;
     gv.leftDoubleClick = fns.newLayer;
     droplist.onChange = fns.droplistChange;
@@ -28,9 +30,9 @@
     droplist.selection = parseInt(sp.getSetting("thisSelection"));
     win.onResize =win.onResizing =fns.winResize;
     
-    if(win instanceof Panel){    // show Panel
+    if(win instanceof Panel){    //~ Show Panel
             win.layout.layout(1);         
-        }else{                            // show Palette
+        }else{                            //~ Show Palette and set its size && location
 
             win.location= sp.getSetting("winLocation").split(",");
             win.show();      
@@ -48,8 +50,13 @@
             this.newLayer  = function(){
                         if(!sp.gv.lastSelectedItem) return;
                         if(!(app.project.activeItem instanceof CompItem)) return;
+                        if(sp.onlyEffectValue==true && app.project.activeItem.selectedLayers.length == 0) return;
+                        if(!sp.gv.lastSelectedItem) return;
                         
                         var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
+                              xml = xml.child(sp.gv.lastSelectedItem.index);
+                              
+                        var precomposeName = decodeURIComponent(xml.@name);
                         
                         sp.clearHelperArr();
                         
@@ -74,12 +81,12 @@
                                     
                                     var currentTime = app.project.activeItem.time;
                                     
-                                    sp.newLayers(xml
-                                                              ,folderName
-                                                              ,sp.preComposeValue
-                                                              ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
-                                                              ,sp.expPropertyArr
-                                                              ,sp.layerArr,sp.layerParentNameArr);
+                                    var activeCompLayersArr = sp.newLayers(xml
+                                                                                                      ,app.project.activeItem
+                                                                                                      ,compFolder,sourceFolder
+                                                                                                      ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
+                                                                                                      ,sp.expPropertyArr
+                                                                                                      ,sp.layerArr,sp.layerParentNameArr);
                
                                     app.project.activeItem.time = currentTime;      
                                     
@@ -87,23 +94,25 @@
                                     compFolder.numItems == 0 && compFolder.remove();
                         }else{
                                     /*
-                                              *Create new properties using given xml and layer
+                                              *Create new properties using given xml's first child and layers
                                               */     
-                                    sp.newProperties(xml
-                                                                   ,folderName
-                                                                   ,sp.preComposeValue
-                                                                   ,sp.cleanGroupValue
-                                                                   ,sp.offsetKeyframeValue
-                                                                   ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
-                                                                   ,sp.expPropertyArr
-                                                                   ,sp.layerArr,sp.layerParentNameArr); 
+                                    var activeCompLayersArr = app.project.activeItem.selectedLayers;
+                                    sp.newProperties(xml.child(0)
+                                                                               ,app.project.activeItem.selectedLayers
+                                                                               ,sp.cleanGroupValue
+                                                                               ,sp.offsetKeyframeValue
+                                                                               ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
+                                                                               ,sp.expPropertyArr); 
                               
                               }
                                     
+                               //~  Correct the value of property which's type is layerIndex or maskIndex     
                                sp.layerTypePropertyArr.forEach(function(item,index){
                                            item.setValue(sp.layerTypePropertyValueArr[index]);
                                     });
                                    
+                                   
+                               //~   Translate the error expressions to avoid script freezing caused by different language version of AfterEffects 
                                var translatedExpPropertyArr = [];
                                sp.expPropertyArr.forEach(function(item,index){
                                          try{
@@ -116,12 +125,38 @@
                                                    app.endSuppressDialogs(false);
                                              }catch(err){}
                                      });
-                                 translatedExpPropertyArr.length !=0 &&translate(this,sp.lastExp);
+                                 translatedExpPropertyArr.length !=0 &&translate(this,translatedExpPropertyArr);
+                                 
+                                 
+                                 //~ Set the parent of layer using Layer.setParentWithJump()
+                                 if (sp.onlyEffectValue == false){
+                                          sp.layerArr.forEach(function(item,index){
+                                                            item.setParentWithJump(item.containingComp.layer(sp.layerParentNameArr[index]));
+                                                })
+                                       }
+                                 
+                                 //~ Precompose layers and cut their length,no matter whether they are created by newLayers() or selected by user.
+                                 if(sp.preComposeValue == true){
+                                        var indexArr = [];
+                                        var inPointArr=[];
+                                        var outPointArr=[];
+                                        
+                                        activeCompLayersArr.forEach(function(item,index){
+                                                  indexArr.push(item.index);
+                                                  inPointArr.push(item.inPoint);
+                                                  outPointArr.push(item.outPoint);
+                                              })
 
-                                    
+                                        inPointArrs.sort(function(a,b){return a-b;})
+                                        outPointArrs.sort(function(a,b){return b-a;})
+                                        
+                                        app.beginUndoGroup("Undo precomp");
+                                              var precomp = app.project.activeItem.layers.precompose(indexArr,precomposeName, true);
+                                              app.project.activeItem.selectedLayers[0].inPoint=inPointArrs[0];
+                                              app.project.activeItem.selectedLayers[0].outPoint=outPointArrs[0];
+                                        app.endUndoGroup();
+                                  }
 
-                        
-                        
                   },
             
 
@@ -292,7 +327,7 @@
                   },
           
           
-            //~ function to import XML files
+            //~ Function to import XML files
             this.importFiles = function(){
                   var files = File.openDialog("Please select xmls", "*.xml", true);
                   if(!files) return;
@@ -320,7 +355,7 @@
                     sp.droplist.selection = sp.droplist.items.length -1 ;
                     sp.gv.refresh();
                   },
-            //~   the function which change element name
+            //~   Function which change element name
             this.changeName=function (){
                     if (!sp.gv.children) return;
                     var newEleName = prompt(loc(sp.setName), sp.gv.lastSelectedItem.text);
@@ -348,7 +383,7 @@
                     sp.gv.lastSelectedItem.image = targetImage;
                     sp.gv.refresh();
                 },
-            //~   the function called when dropdownlist's selection changes
+            //~   Function called when dropdownlist's selection changes
             this.droplistChange = function(){
                     if(!this.selection) return;
                     var text = this.selection.text;
@@ -395,7 +430,7 @@
                     sp.saveSetting("onlyEffect",sp.onlyEffectValue.toString());
                     sp.droplist.itemSize.height = 20;
                 }
-            //~   the function called when window has been resized
+            //~   Function called when window has been resized
             this.winResize = function(){
                     group1.location = [2,0];
                     group1.size = [win.size[0],win.size[1]];
@@ -406,7 +441,7 @@
                     droplist.itemSize.width = droplist.size.width - 27;
                     sp.gv.refresh();
                 },
-            //~   the function called by window closing
+            //~   Function called by window closing
             this.winClose = function(){
                     var thisStr = win.size[0].toString()+","+win.size[1].toString();
                     sp.saveSetting ("winSize",thisStr);
@@ -426,7 +461,7 @@
 
                                              }
                 },
-            //~ the function called by right clicking
+            //~ Function called by right clicking
             this.shortMenu = function(event){
                     if (!event) return;
                     if (event.button == 2 && event.detail == 1 && event.altKey == false) {
@@ -757,20 +792,31 @@ this,
       
       //~  added in 2016.2.5
       sp.prototype.extend(sp.prototype,{
-                                    newProperties : function(xml,folderName,isPrecompose,isCleanProperty,isKeyframeOffset,
-                                                                        layerTypePropertyArr,layerTypePropertyValueArr,
-                                                                        expPropertyArr,
-                                                                        layerArr,layerParentNameArr){
+                                    newProperties : function(layerXml
+                                                                               ,app.project.activeItem.selectedLayers
+                                                                               ,sp.cleanGroupValue
+                                                                               ,sp.offsetKeyframeValue
+                                                                               ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
+                                                                               ,sp.expPropertyArr){
                                                                               
+                                                  app.beginUndoGroup("Undo new layers");
+                                                  app.beginSuppressDialogs();
+                                                  
+
+                                                      
+                                                   app.endSuppressDialogs (false);
+                                                   app.endUndoGroup();          
                                                                               
                                                                               
                                          },         
-                                    newLayers : function(xml,folderName,isPrecompose,
-                                                                        layerTypePropertyArr,layerTypePropertyValueArr,
-                                                                        expPropertyArr,
-                                                                        layerArr,layerParentNameArr){
+                                    newLayers : function(elementXml
+                                                                                      ,app.project.activeItem
+                                                                                      ,compFolder,sourceFolder
+                                                                                      ,sp.layerTypePropertyArr,sp.layerTypePropertyValueArr
+                                                                                      ,sp.expPropertyArr
+                                                                                      ,sp.layerArr,sp.layerParentNameArr){
                                           
-                                                  app.beginUndoGroup("Undo once");
+                                                  app.beginUndoGroup("Undo new properties");
                                                   app.beginSuppressDialogs();
                                                   
 
@@ -778,11 +824,7 @@ this,
                                                    app.endSuppressDialogs (false);
                                                    app.endUndoGroup();
                                                     
-                                                    /*translate sp.lastExp*/
-                                                    
-                                                   /*set parent with jump*/      
                                                    
-                                                   /*precompose layers and cut its length*/
                                                    
             
                                           },
@@ -864,17 +906,8 @@ this,
 })(),
 
 
-//~ add method to objects
+//~ Add methods to objects
 (function(sp){
-      
-            Function.prototype.bind = function(obj) {
-                  var method = this,
-                  temp = function() {
-                        return method.apply(obj, arguments);
-                  };
-                  return temp;
-            } 
-      
       
             //~   getter/setter for  last  element of array
             Array.prototype.last = function(value){
@@ -957,7 +990,7 @@ this,
     
 })(sp),
 
-//~ save presets and load presets file and parse them
+//~ Save presets and load presets file and parse them
 (function(sp){
 
     var keyNameArr = [];
@@ -1103,12 +1136,12 @@ this,
     }
 
 
-    //~  convert Layer object to XML or JSON
+    //~  Convert Layer object to XML or JSON
     sp.extend($.layer.prototype,{
         
         isSaveMaterial: sp.saveMaterialValue,
         
-        //~         return the attributes of layer
+        //~   Return the attributes of layer
         getLayerAttr: function(){
                 var thisLayer = this.item;
                 var helperObj = this.helperObj;
@@ -1296,7 +1329,7 @@ this,
               },
         
         
-        //~         return every property under the layer  
+        //~   Return every property under the layer  
         getProperties: function(ref,layerxml,layerInfo){
                 if (ref != null) {
                     var point = 0;
@@ -1582,7 +1615,7 @@ this,
               }, 
         
         
-        //~         get the xml-based data of layer
+        //~    Get the xml-based data of layer
         toXML: function(){
                       this.isSaveMaterial= sp.saveMaterialValue;
                       var thisLayer = this.item;
@@ -1599,7 +1632,7 @@ this,
         
         })
   
-    //~ convert XML object to Layer object
+    //~ Convert XML object to Layer object
     sp.extend($.layer.prototype,{
           materialFolder:     sp.materialFolder,
           isPrecompose :     true,
