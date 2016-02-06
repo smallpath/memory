@@ -795,14 +795,15 @@ this,
                                           },
                                     saveItemToFile : function(file,xml,position){
                                           var newXml = new XML(file.readd());
-                                          if(!position){
+                                          if(typeof position ==="undefined"){
                                                 newXml.appendChild(xml);
                                            }else{
-                                                var newInsertxml = new XML(newXml.child(newXml.children().length() - 1));
-                                                newXml.insertChildAfter(newXml.child(position), newInsertxml);
-                                                newXml.child(position).setLocalName("waitToDelete");
-                                                newXml.child(newXml.children().length() - 1).setLocalName("waitToDelete");
-                                                delete newXml.waitToDelete;
+                                                      newXml.appendChild(xml);
+                                                      var newInsertxml = new XML(newXml.child(newXml.children().length() - 1));
+                                                      newXml.insertChildAfter(newXml.child(position), newInsertxml);
+                                                      newXml.child(position).setLocalName("waitToDelete");
+                                                      newXml.child(newXml.children().length() - 1).setLocalName("waitToDelete");
+                                                      delete newXml.waitToDelete;
                                                  }
                                            file.writee(newXml);
                                     },
@@ -1643,7 +1644,15 @@ this,
                 },
           
           toLayer: function(){
-
+                      this.materialFolder = sp.materialFolder;
+                      this.isPrecompose = sp.preComposeValue;
+                      this.isOnlyEffect =sp.onlyEffectValue;
+                      this.isCleanGroup= sp.cleanGroupValue;
+                      this.isKeyframeOffset=sp.offsetKeyframeValue;
+                      
+                      var xml = this.item;
+                      var helperObj = this.helperObj;
+                      
                 }
           
           
