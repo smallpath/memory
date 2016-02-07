@@ -7,7 +7,6 @@
 
 This is a script for Adobe After Effects.**It can be used to save any layers in AE,so you can create these layers in another project,another version of ae and even another computer**
 
----
 
 ##脚本界面
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/screenShot.PNG)
@@ -54,11 +53,13 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 - 添加一种新类型的缩略图,支持CS6-CC2014
 - 生成加速5%
 - 修正一些BUG
+
 ###2.1
 - 非Panel模式打开脚本时添加快捷键
 - 添加裁剪新界面上文字的长度的选项
 - 存储过程加速10%
 - 添加组级别的出错处理
+
 ###2.0
 - 添加新界面(支持CC,CC2014,CC2015),支持图片自动排列,支持多选
 - 添加一些设置选项
@@ -68,17 +69,20 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 - 添加检查更新的功能
 - 添加记忆脚本窗口位置与大小的功能
 - 修正一些BUG
+
 ###1.3
 - 添加AE CC2015的支持
 - 添加快速存储辅助脚本
 - 添加批量导出功能
 - 修正一些BUG
+
 ###1.2
 - 添加AE CS3,CS4,CS5,CS5.5的支持
 - 新增第五检测框,关键帧偏移检测框,并在设置中新增属性组选择选项
 - 新增第六检测框,清空层内容检测框,仅生成效果时,覆盖层内容检测框
 - 新增最新的预设功能
 - 修正一些BUG
+
 ###1.1
 - 启用第四检测框,存储素材
 - 在设置菜单中添加清空临时文件夹的快捷按钮
@@ -86,6 +90,7 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 - 在右键菜单中增加重命名选中元素的按钮
 - 在设置菜单中增加中英文界面切换的按钮
 - 修正一些BUG
+
 ###1.0
 - 新增合成层支持
 - 添加AE CS6,CC,CC2014的支持
