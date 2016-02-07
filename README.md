@@ -10,6 +10,7 @@ This is a script for Adobe After Effects.**It can be used to save any layers in 
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/screenShot.PNG)
 
 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间
+
 Script layouts automatically according to window size.Moreover,it has right-click menu to reduce space for you
 
 ##脚本功能
@@ -49,10 +50,10 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 - 修正一些BUG
 
 ###2.1
+- 添加组级别的出错处理
 - 非Panel模式打开脚本时添加快捷键
 - 添加裁剪新界面上文字的长度的选项
 - 存储过程加速10%
-- 添加组级别的出错处理
 
 ###2.0
 - 添加新界面(支持CC,CC2014,CC2015),支持图片自动排列,支持多选
@@ -72,9 +73,9 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 
 ###1.2
 - 添加AE CS3,CS4,CS5,CS5.5的支持
-- 新增第五检测框,关键帧偏移检测框,并在设置中新增属性组选择选项
-- 新增第六检测框,清空层内容检测框,仅生成效果时,覆盖层内容检测框
-- 新增最新的预设功能
+- 新增第五检测框,关键帧偏移检测框,并在右键菜单中新增其选项
+- 新增第六检测框,清空层内容检测框
+- 新增预设功能
 - 修正一些BUG
 
 ###1.1
