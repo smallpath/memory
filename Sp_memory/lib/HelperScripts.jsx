@@ -217,6 +217,7 @@ var tsp={
 
         if (checkb.value == true) {
           if ((prop.propertyType == PropertyType.PROPERTY) && (prop.expression != "") && prop.canSetExpression && (prop.expressionEnabled == true)) { //.expressionError        
+            propArr.push(prop)
             prop.selected = true;
             exps.push(prop.name);
             comps.add(compindex);
@@ -229,6 +230,7 @@ var tsp={
           }
         } else if (checka.value == true) {
           if ((prop.propertyType == PropertyType.PROPERTY) && (prop.expression != "") && prop.canSetExpression && (prop.expressionEnabled == false)) {
+            propArr.push(prop)
             prop.selected = true;
             exps.push(prop.name);
             comps.add(compindex);
@@ -241,6 +243,7 @@ var tsp={
           }
         } else if (checkc.value == true) {
           if ((prop.propertyType == PropertyType.PROPERTY) && (prop.expression != "") && prop.canSetExpression) {
+            propArr.push(prop)
             prop.selected = true;
             exps.push(prop.name);
             comps.add(compindex);
@@ -269,6 +272,7 @@ var tsp={
   }
 
   function ScanProjectForExpr(blackList) {
+    propArr = [];
     exps = new Array();
     layerExps = new Array();
     comps = new Array();
@@ -294,12 +298,9 @@ var tsp={
           layers.push(layerTemp);
         }
         layerTemp = new Array();
-        var selProps = item.selectedProperties;
+        var selProps = propArr;
         app.beginUndoGroup("Undo translate");
         for (var ic = 0; ic < selProps.length; ic++) {
-          if (selProps[ic].isEffect == true) {
-            ic++;
-          }
           if (lista.selection.index == 0) {
             switch (app.language) {
               case Language.ENGLISH:
