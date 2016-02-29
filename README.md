@@ -6,15 +6,14 @@
 This is a script for Adobe After Effects.**It can be used to save any layers in AE,so you can create these layers in another project,another version of ae and even another computer**
 
 
-##脚本界面
+##脚本界面/User Interface
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/screenShot.PNG)
 
 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间
 
 Script layouts automatically according to window size.Moreover,it has right-click menu to reduce space for you
 
-##脚本功能
-
+##脚本功能/Script Feature
 1. 支持存储一切层,包括形状层,文字层,图片音频层,甚至**合成层**
 2. 支持存储几乎一切层的属性,包括层本身属性以及层内部属性组,例如插件,遮罩,文字动画器,形状效果器,图层样式等等
 3. 支持存储图片层与音频层中的图片和音频,即使原素材不存在,脚本也可以正确生成
@@ -22,16 +21,14 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 5. 支持生成属性组,脚本提供插件,遮罩,动画器等9种属性组的自由搭配选项
 
 
-##脚本安装
-将`memory.jsx`,`Sp_memory.jsxbin`,`Sp_memory文件夹`
-放置在AE脚本文件夹中
+##脚本安装/Usage
+将`memory.jsx`,`Sp_memory.jsxbin`,`Sp_memory文件夹`放置在AE脚本文件夹中,在AE中打开`memory.jsx`或`Sp_memory.jsxbin`
 
-在AE中打开`memory.jsx`或`Sp_memory.jsxbin`即可
 
-##脚本使用教程
+##脚本使用教程/Tutorial
 >[Vimeo](https://vimeo.com/154461198)
 
-##使用提示
+##使用提示/Tips
 
 1. 右键->`设置`,在设置中选择`English`或`中文`按钮,可以切换脚本语言
 2. 右键->`新建元素`(快捷键:窗口上Alt+右键),即可存储选中的层
@@ -41,7 +38,7 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 6. 双击界面内任意元素,即可根据元素对应的数据生成新层
 
 
-##版本更新记录
+##版本更新记录/Logs
 ###2.2
 - 重构代码
 - 生成时将默认翻译表达式
@@ -90,7 +87,7 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 - 新增合成层支持
 - 添加AE CS6,CC,CC2014的支持
 
-##感谢
+##感谢/Thanks To
 - 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
 - 水果硬糖([UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
 
