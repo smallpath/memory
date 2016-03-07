@@ -7,6 +7,7 @@
     #include 'Sp_memory/lib/SubSystems.jsx'
     #include 'Sp_memory/lib/RightClickMenu.jsx'
     #include 'Sp_memory/lib/LayerObject.jsx'
+    #include 'Sp_memory/lib/OperatorOverload.jsx'
     
     var fns = sp.fns = new fns();
  
