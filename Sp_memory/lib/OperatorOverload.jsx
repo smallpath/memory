@@ -1,14 +1,17 @@
-﻿function OperatorOverload(call){
+﻿function OperatorOverload(call,operator){
             this.call = call;
-            return this;
-      }
-
-OperatorOverload.prototype ['>>']  = function (operand){
-            this.call(operand);
+            this [operator] = function(operand){
+                        this.call(operand);
+                        return this;
+                  }
             return this;
       }
 
 var cout = $.global.cout = new OperatorOverload(function (str){
             $.writeln(str);
-      });
+      },'>>');
+
+
+
+
 
