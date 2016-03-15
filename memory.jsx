@@ -1,14 +1,17 @@
 ﻿try{
+     
+      
 (function(global){
+      
     #include 'Sp_memory/lib/StringResource.jsx'
-    #include 'Sp_memory/lib/GridView.jsx'
-    #include 'Sp_memory/lib/UIParser.jsx'
     #include 'Sp_memory/lib/HelperScripts.jsx'
     #include 'Sp_memory/lib/SubSystems.jsx'
     #include 'Sp_memory/lib/RightClickMenu.jsx'
     #include 'Sp_memory/lib/LayerObject.jsx'
-    #include 'Sp_memory/lib/OperatorOverload.jsx'
-    
+    #include 'Sp_memory/lib/GridView.jsx'
+    #include 'Sp_memory/lib/UIParser.jsx'
+      
+      
     var fns = sp.fns = new fns();
  
  
@@ -905,6 +908,8 @@ this,
 
 //~ Add methods to objects
 (function(sp){
+            #include 'Sp_memory/lib/OperatorOverload.jsx'
+      
       
             //~   getter/setter for  last  element of array
             Array.prototype.last = function(value){
@@ -969,13 +974,13 @@ this,
             }
 
         Error.prototype.printc = Error.prototype.printc||function(){
-                $.writeln("\n---------");
-                $.writeln(this.print());
-                $.writeln("---------\n");
+                cout<<"\n---------";
+                cout<<this.print();
+                cout<<"---------\n";
             }
 
         Error.prototype.printa = Error.prototype.printa ||function(){
-                alert(this.print());
+                this.print()<<cout;
             }
 
         File.prototype.writee = function (str) {    //method to write file
@@ -1134,7 +1139,7 @@ this,
 
 
 
-}catch(err){err.printa();err.printc()}
+}catch(err){alert("Line #"+err.line.toString()+"\r\n"+err.toString())}
 
 
 
