@@ -572,7 +572,7 @@ this,
                    
             scriptFile: new File($.fileName),
             scriptFolder: new Folder(File($.fileName).parent.fsName +sp.prototype.slash +  "Sp_memory"),
-            materialFolder: new Folder(File($.fileName).parent.fsName +sp.prototype.slash +  "tempFile"),
+            materialFolder: new Folder(File($.fileName).parent.fsName +sp.prototype.slash +  "Sp_memory"+sp.prototype.slash +  "tempFile"),
             settingsFile: new File(File($.fileName).parent.fsName + sp.prototype.slash +  "Sp_memory"+ sp.prototype.slash + "settings.xml"),
             imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash +  "Sp_memory"+ sp.prototype.slash + "image"),
             roamingFolder:new  Folder(Folder.userData.fullName + "/Aescripts/Sp_memory"),
