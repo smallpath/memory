@@ -360,7 +360,7 @@ var sp_toolbar = {
               parse:{en:'Parse',ch:'转移'},
               parseButton:{en:'Parse Ft_toolbar config to Sp_toolbar',ch:'从Ft_toolbar文件读取配置'},
               language:{en:'Language',ch:'语言'},
-              nameText:{en:'Name:',ch:'名称'},
+              nameText:{en:'Name:',ch:'名称:'},
               subName:{en:'Sub name:',ch:'右键菜单中子元素的名称:'},
               command:{en:'Command:',ch:'命令:'},
               activeModifiers:{en:'Active modifiers',ch:'允许右键菜单与键盘监听'},
