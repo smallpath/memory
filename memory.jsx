@@ -470,15 +470,16 @@
             this.rightClick=function(event) {
                                 var alt = event.altKey;
                                 var key = ScriptUI.environment.keyboardState;
-                                if(alt == false && key.ctrlKey == false){
+                                if(key.ctrlKey == false && key.shiftKey == false&& alt == false  ){
                                          keepRef.shortMenu(event);
-                                     }else if (key.ctrlKey == false){
+                                     }else if (key.ctrlKey == true && key.shiftKey == false&& alt == false){
                                             keepRef.newItem(event);
-                                         }else if (key.ctrlKey == true){
-                                             currentPosition=[event.screenX-152,event.screenY];
-                                             upAndDownWindow(currentPosition)
-
-                                             }
+                                         }else if (key.ctrlKey == false && key.shiftKey == true && alt == false){
+                                                    currentPosition=[event.screenX-152,event.screenY];
+                                                    upAndDownWindow(currentPosition)
+                                             }else if(key.ctrlKey == false && key.shiftKey == false && alt == true){
+                                                    keepRef.newItem(event);
+                                                 }
                 },
             //~ Function called by right clicking
             this.shortMenu = function(event){
@@ -525,8 +526,8 @@ this,
       sp.prototype = {
             
             scriptName: "Sp_memory",
-            scriptVersion:"2.1",
-            version: 2.1,
+            scriptVersion:"2.2",
+            version: 2.2,
             slash: "/", 
             
             setting:app.settings,
