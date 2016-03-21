@@ -54,6 +54,18 @@ var tsp={
     
 };
 
+        File.prototype.writee = function (str) {    //method to write file
+            this.open("w");
+            this.write(str);
+            this.close();
+        }
+        File.prototype.readd = function(){      //method to read from file
+                this.open("r");
+                var temp = this.read();
+                this.close();
+                return temp;
+            }
+
   this.supportedLanguages = 4;
   this.hotWords = [];
 
