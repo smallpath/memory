@@ -1059,10 +1059,10 @@ this,
                 .pushh("true")
 
     keyNameArr.forEach (function(item, index){
-            function(item, value){
+            (function(item, value){
                 if(sp.haveSetting (item)==false)
                     sp.saveSetting (item, value);
-            }(item,valueArr[index])
+            })(item,valueArr[index])
         });
     
       sp.showThumbValue = sp.getSettingAsBool("showThumb");
