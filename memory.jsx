@@ -189,7 +189,10 @@
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
                               
-                              var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
+                              if(app.version.indexOf("13.5") != -1 ||app.version.indexOf("13.6") != -1||app.version.indexOf("13.7") != -1||app.version.indexOf("13.8") != -1)
+                                var itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text,itemName));
+                              else
+                                var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
                               var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml,sp.gv.lastSelectedItem.index);
                               
@@ -216,7 +219,10 @@
                               app.beginUndoGroup("Undo save");
                               var helperObj = {};
                               
-                              var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
+                              if(app.version.indexOf("13.5") != -1 ||app.version.indexOf("13.6") != -1||app.version.indexOf("13.7") != -1||app.version.indexOf("13.8") != -1)
+                                var itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text,itemName));
+                              else
+                                var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
                               var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
@@ -760,7 +766,54 @@ this,
                               } catch (err) { }
                               tempComp3.remove();
                         },
-    
+                savePng2: function (pngPath) {
+                    app.beginSuppressDialogs();
+                    var comps = app.project.activeItem;
+                    var layers = comps.selectedLayers;
+                    var jishushuzu = [];
+                    var waitToPre = [];
+                    var tempComp2 = app.project.items.addComp("tempComp2", comps.width, comps.height, comps.pixelAspect, comps.duration, comps.frameRate);
+                    var BGtemp = tempComp2.layers.addSolid([0, 0, 0], "BG", 100, 60, 1, 10800);
+                    var cunLengthA = layers.length;
+                    for (iq = 0; iq < layers.length; iq++) {
+                        jishushuzu.push(layers[iq].index);
+                    }
+                    for (iq = 0; iq < layers.length; iq++) {
+                        wocaoName = layers[iq].name;
+                        waitToPre[waitToPre.length] = layers[iq].duplicate();
+                        waitToPre[iq].name = wocaoName;
+                    }
+                    var wwwww = [];
+                    for (iq = 0; iq < cunLengthA; iq++) {
+                        wwwww.push(waitToPre[iq].index);
+                    }
+                    precomposeComp = comps.layers.precompose(wwwww, "tempA", true);
+                    comps.layer("tempA").copyToComp(tempComp2);
+                    comps.layer("tempA").remove();
+                    for (iq = 0; iq < cunLengthA; iq++) {
+                        comps.layer(jishushuzu[iq]).selected = true;
+                    }
+                    try{tempComp2.layer(1).solo = false;}catch(err){}
+                    var preVVVV = tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Scale").value;
+                    tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Scale").setValue([100 / tempComp2.width * preVVVV[0], 60 / tempComp2.height * preVVVV[1]]);
+                    tempComp2.width = 100;
+                    tempComp2.height = 60;
+                    BGtemp.property("ADBE Transform Group").property("ADBE Position").setValue([50, 30]);
+                    tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Position").setValue([50, 30]);
+                    var nameStr = "";
+                    pngPath = File(pngPath);
+                    while (pngPath.exists) {
+                        pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
+                        pngPath = File(pngPath);
+                    }
+                    try{tempComp2.saveFrameToPng(comps.time, pngPath);}catch(err){}
+                    BGtemp.source.remove();
+                    tempComp2.remove();
+                    precomposeComp.remove();
+                    try{nameStr = decodeURIComponent(File(pngPath).displayName.split(".")[0].toString());}catch(err){}
+                    app.endSuppressDialogs(false);
+                    return encodeURIComponent(nameStr);
+                },
                   savePng:function (pngPath) {
                               try{
                                       app.beginSuppressDialogs();
