@@ -38,7 +38,7 @@
     var selection = parseInt(sp.getSetting("parentSelection"));
     parentDroplist.selection = (selection<=parentDroplist.items.length-1 &&selection>=0)?selection:0;
     var selection = parseInt(sp.getSetting("thisSelection"));
-    droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+    droplist.selection = (selection<=droplist.items.length-1 &&selection>=0)?selection:0;
     win.onResize =win.onResizing =fns.winResize;
     
     if(win instanceof Panel){    //~ Show Panel
@@ -59,6 +59,71 @@
 
     function fns(){
             var keepRef = this;
+            this.addModule = function(){
+                    var newEleName = prompt(loc(sp.setName), "Default");
+                    if (!newEleName){ return;}
+                    if(sp.lookUpTextInChildren(newEleName,sp.parentDroplist.items)){alert(loc(sp.existName));return;}
+                    
+                    var content = new XML(sp.settingsFile.readd());
+                    content.ParentGroup.appendChild(new XML("<item groupName = '"+newEleName+"'></item>"));
+                    sp.settingsFile.writee(content);
+                    sp.reloadParentDroplist();
+                    sp.parentDroplist.selection = sp.parentDroplist.items.length -1;
+                    var selection = parseInt(sp.getSetting("thisSelection"));
+                    sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+                    sp.gv.refresh();
+                    
+                },
+            this.deleteModule = function(){
+                        if(!sp.parentDroplist.selection) return;
+                        var isSureDelete = confirm(loc(sp.deleteModuleAlert));
+                        if (isSureDelete == true) isSureDelete = confirm(loc(sp.addAlert)+loc(sp.deleteModuleAlert));
+                        if (isSureDelete == false) return;
+                        
+                        var groupName = sp.parentDroplist.selection.text;
+                        
+
+                        sp.xmlCurrentFileNames.forEach (function(item,index){
+                                var xml = new XML(sp.settingsFile.readd());
+                                var selectionText = item;
+                                
+                                var preIndex =sp.getGlobalIndexFromFileName(item);  
+                                xml.ListItems.child(preIndex).setLocalName("waitToDelete");
+                                delete xml.ListItems.waitToDelete;
+                                sp.settingsFile.writee(xml);
+                                sp.deleteIndexAndReload(preIndex);
+                                
+                                var imageFolder = sp.getImageFolderByName(selectionText);
+                                var images = imageFolder.getFiles();
+                                images.forEach(function(item){
+                                            item.remove();
+                                      });
+                                imageFolder.remove();
+                                
+                                var file = sp.getFileByName(selectionText);
+                                file.remove();
+
+                            })
+                        
+                            
+                            var xml = new XML(sp.settingsFile.readd());
+                            sp.forEach(xml.ParentGroup,function(item,index){
+                                    if(item.@groupName == groupName){
+                                            item.setLocalName("waitToDelete");
+                                        }
+                                })
+                            delete xml.ParentGroup.waitToDelete;
+                            sp.settingsFile.writee(xml);
+                            
+                            sp.reloadParentDroplist();
+                            var selection = parseInt(sp.getSetting("parentSelection"));
+                            sp.parentDroplist.selection =  (selection-1<=sp.parentDroplist.items.length-1 &&selection-1>=0)?selection-1:0;
+                            var selection = parseInt(sp.getSetting("thisSelection"));
+                            sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+                            sp.gv.refresh();
+                            
+
+                }
             
             this.newLayer  = function(){
                         if(!sp.gv.lastSelectedItem) return;
@@ -282,58 +347,54 @@
                   },
           
             this.deleteGroup  = function(){
+                        if(!sp.parentDroplist.selection) return;
+                        if(!sp.droplist.selection) return;
                         var isSureDelete = confirm(loc(sp.isSureGroup));
                         if (isSureDelete == true) isSureDelete = confirm(loc(sp.isSureGroup2));
                         if (isSureDelete == false) return;
-                        if(!sp.parentDroplist.selection) return;
-                        
+
+ 
+                        var xml = new XML(sp.settingsFile.readd());
                         var selectionText = sp.droplist.selection.text;
-                        var imageFolder = sp.getImageFolderByName(sp.droplist.selection.text);
+                        var groupName = sp.parentDroplist.selection.text;
+
+                        var preIndex = sp.getGlobalIndexFromFileName(selectionText); 
+                        
+                        
+                        var indexInParent = preIndex;
+                        
+                        //~delete the child
+                        xml.ListItems.child(preIndex).setLocalName("waitToDelete");
+                        delete xml.ListItems.waitToDelete;
+                        sp.settingsFile.writee(xml);
+                        sp.deleteIndexAndReload(preIndex);
+                        
+                        //~ delete the imagesFolder
+
+                        var imageFolder = sp.getImageFolderByName(selectionText);
                         var images = imageFolder.getFiles();
                         images.forEach(function(item){
                                     item.remove();
                               });
                         imageFolder.remove();
                         
-                        var file = sp.getFileByName(sp.droplist.selection.text);
+                        //~delete the files
+                        var file = sp.getFileByName(selectionText);
                         file.remove();
-                        
-                        var xml = new XML(sp.settingsFile.readd());
-
-                        var groupName = sp.parentDroplist.selection.text;
-                        var preIndex = sp.droplist.selection.globalIndex;
-                        var indexInParent = sp.droplist.selection.index;
-                        
-                        xml.ListItems.child(preIndex).setLocalName("waitToDelete");
-                        delete xml.ListItems.waitToDelete;
-                        
-                        sp.forEach(xml.ParentGroup,function(item,index){
-                                if(item.@groupName == groupName){
-                                        for(var j=0;j<item.children().length();j++){
-                                                if(indexInParent ==parseInt(item.child(j).toString())){
-                                                        item.child(j).setLocalName("waitToDelete");
-                                                    }
-                                            }
-                                        delete item.waitToDelete;
-                                    }
-                            })
-
-                        sp.settingsFile.writee(xml);
                         
                         sp.reloadParentDroplist();
                         sp.parentDroplist.selection = parseInt(sp.getSetting("parentSelection"));
                         
                         var selection = parseInt(sp.getSetting("thisSelection"));
                         sp.droplist.selection = selection -1;
-                        
                         sp.gv.refresh();
                   },
           
             this.addGroup  = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
-                    if (!newEleName){ alert(loc(sp.blankName));return;}
+                    if (!newEleName){ return;}
                     if(!sp.parentDroplist.selection) return;
-                    if(sp.lookUpTextInChildren(newEleName,sp.droplist.items)){alert(loc(sp.existName));return;}
+                    if(sp.xmlFileNames.has(newEleName)){alert(loc(sp.existName));return;}
                     
                     var file = sp.getFileByName(newEleName);
                     sp.getImageFolderByName(newEleName);
@@ -397,7 +458,9 @@
             this.importFiles = function(){
                   var files = File.openDialog("Please select xmls", "*.xml", true);
                   if(!files) return;
-                  var selectionIndex = sp.droplist.selection.index;
+                  if(!sp.parentDroplist.selection) return;
+
+                  var selectionIndex = sp.parentDroplist.selection.index;
                   files.forEach(function(item,index){
                               var file = sp.getFileByName(item.name.replace(".xml",""));
                               if(file.exists) return;
@@ -415,11 +478,15 @@
                                file.writee(xml);
                                xml = new XML(sp.settingsFile.readd());
                                xml.ListItems.appendChild(new XML("<Name>" + decodeURIComponent(item.name.replace(".xml","")) + "</Name>"));
+                               xml.ParentGroup.child(selectionIndex).appendChild(new XML("<Index>"+(xml.ListItems.children().length()-1).toString()+"</Index>"))
+
                                sp.settingsFile.writee(xml.toString());
                         });
-                    sp.reloadDroplist();
-                    sp.droplist.selection = sp.droplist.items.length -1 ;
-                    sp.gv.refresh();
+                            sp.reloadParentDroplist();
+                            sp.parentDroplist.selection = parseInt(sp.getSetting("parentSelection"));
+                            var selection = parseInt(sp.getSetting("thisSelection"));
+                            sp.droplist.selection = sp.droplist.items.length-1;
+                            sp.gv.refresh();
                   },
             this.changeName=function (){
                     if (!sp.gv.children) return;
@@ -451,8 +518,11 @@
             this.parentDroplistChange = function(){
                     if(!this.selection) return;
                     
+                    sp.saveSetting("parentSelection",this.selection.index.toString()); 
                     sp.reloadDroplist();
-                    sp.saveSetting("parentSelection",this.selection.index.toString());
+                    var selection = parseInt(sp.getSetting("thisSelection"));
+                    sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+
 
                 },
             this.droplistChange = function(){
@@ -597,6 +667,7 @@ this,
             
             xmlFileNames : [],
             xmlGroupNames:[],
+            xmlCurrentFileNames:[],
             
             layerTypePropertyArr : [],
             layerTypePropertyValueArr : [],
@@ -686,6 +757,16 @@ this,
                 return parseInt((a.toString().substring(0, 2) - b.toString().substring(0, 2))) * 100 + parseInt(b);
             },
         
+            getGlobalIndexFromFileName:function(name){
+                var content = new XML(this.settingsFile.readd());
+                var thisIndex = -1;
+                this.forEach(content.ListItems,function(item,index){
+                        if(item.toString() == name)
+                            thisIndex =  index;
+                    });
+                return thisIndex;
+            },
+        
             openLink: function(url) {
                     var cmd = "";
                     if ($.os.indexOf("Win") != -1) {
@@ -773,6 +854,31 @@ this,
                                 }
                             return [false,null];
                         },
+                    deleteIndexAndReload:function(deleteIndex){
+                            var settingxml = new XML(this.settingsFile.readd());
+                            this.forEach(settingxml.ParentGroup,function(item,index){
+                                    for(var j=0,len = item.children().length();j<len;j++){
+                                            var thisItem = item.child(j);
+                                            if(parseInt(thisItem.toString())==deleteIndex){
+                                                     thisItem.setLocalName ("waitToDelete");
+                                                     delete item.waitToDelete;
+                                                }
+                                        }
+                                })             
+                            this.forEach(settingxml.ParentGroup,function(item,index){
+                                    for(var j=0,len = item.children().length();j<len;j++){
+                                            var thisItem = item.child(j);
+                                            if(parseInt(thisItem.toString())>deleteIndex){
+                                                     item.insertChildBefore (thisItem,new XML("<Index>"+(parseInt(thisItem.toString())-1).toString()+"</Index>"));
+                                                     thisItem.setLocalName ("waitToDelete");
+                                                     delete item.waitToDelete;
+                                                }
+                                        }
+                                })
+
+
+                            this.settingsFile.writee(settingxml);
+                        },
                     reloadParentDroplist:function(){
                             this.parentDroplist.removeAll();
                             var settingxml = new XML(this.settingsFile.readd());
@@ -787,11 +893,13 @@ this,
                         },
                     reloadDroplist: function(){
                                   this.droplist.removeAll();
+                                  this.gv.removeAll();
                                   var parentSelection = parseInt(this.getSetting("parentSelection"));
                                   var groupName = this.xmlGroupNames[parentSelection];
                                   
                                   var settingxml = new XML(this.settingsFile.readd());
                                   this.xmlFileNames.length = 0;
+                                  this.xmlCurrentFileNames.length = 0;
                                   
                                   var indexArr = [];
                                   
@@ -803,17 +911,20 @@ this,
                                                }
                                       });
                                   
+                                  
                                   var listArr = [];
                                   this.forEach(settingxml.ListItems,function(item,index){
                                             if(indexArr.has(index)){
                                                     listArr.push(item.toString())
                                                 }
-                                      })
+                                            this.push(item.toString());
+                                      }, this.xmlFileNames)
 
                                   listArr.forEach(function(item,index){
-                                          var thisItem = this.add("item",item);
-                                          thisItem.globalIndex = index; 
+                                          this.add("item",item);
                                       },this.droplist);
+                                  
+                                  this.xmlCurrentFileNames = listArr;
                                   
                               },
                     cropImage :function (fi, inImageFileA) {

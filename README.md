@@ -45,13 +45,13 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 - [x] 初始化配置文件时增加默认模块
 - [x] 升级时初始化默认模块
 - [x] droplist触发onChange方法时增加模块的操作
-- [ ] 新建模块,删除模块
+- [x] 新建模块,删除模块
 - [x] 新建组,删除组时指定模块
 - [ ] 模块增删改移动
 - [ ] 模块中组的增删改移动
 - [ ] 修复批量导出组时取消按钮无效
-- [ ] 导出时导出session信息
-- [ ] 导入时导入session信息
+- [x] 导出时导出模块信息
+- [x] 导入时导入模块信息
 - [ ] 升级时初始化元素预览(初稿约定20帧)
 - [ ] 保存时进行预览图片序列生成
 - [ ] 导出时导出图片序列
