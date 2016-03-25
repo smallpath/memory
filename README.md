@@ -39,6 +39,22 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 
 
 ##版本更新记录/Logs
+
+## 2.3 TODO
+
+- [x] 初始化配置文件时增加默认session
+- [] 升级时初始化session
+- [] droplist触发onChange方法时增加session的操作
+- [] session增删改移动
+- [] session中group的增删改移动
+- [] 导出时导出session信息
+- [] 导入时导入session信息
+- [] 升级时初始化元素预览(初稿约定20帧)
+- [] 保存时进行预览图片序列生成
+- [] 导出时导出图片序列
+- [] 导入时生成图片序列
+- [] 删除元素时删除图片序列
+
 ##2.2 (Date:2016-03-20)
 ###### 功能添加
 - 重构代码

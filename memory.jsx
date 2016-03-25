@@ -19,7 +19,8 @@
     var win = global instanceof Panel ? global : new Window("window",sp.scriptName, undefined, {resizeable: true});
     var group1 = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}");
     var group11 = group1.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}");
-    var droplist  = sp.droplist = group1.add("Dropdownlist{}");
+    var parentDroplist = sp.parentDroplist = group11.add("Dropdownlist{}");
+    var droplist  = sp.droplist = group11.add("Dropdownlist{}");
     var gv = sp.gv = new GridView(group1);
     
 
@@ -462,7 +463,10 @@
                     gv.size([group1.size[0],group1.size[1]-20]);
                     group11.location = [1,1];
                     group11.size.width = win.size[0]+12;
-                    droplist.size = [win.size[0]-4,group11.size[1]-3];
+                    droplist.size = [win.size[0]-64,group11.size[1]-3];
+                    droplist.location.x = 60;
+                    sp.parentDroplist.size.width = 60;
+                    sp.parentDroplist.itemSize.width = 33;
                     droplist.itemSize.width = droplist.size.width - 27;
                     sp.gv.refresh();
                 },
@@ -1151,7 +1155,9 @@ this,
 //~             alert(loc(sp.versionUpdateInfo));
             sp.saveSetting("version", sp.version);
         }
-    
+    })(sp),
+
+(function(){
     
     if (!(sp.settingsFile.exists)||sp.settingsFile.length==0) {
         if(sp.settingsFile.exists) sp.settingsFile.remove();
@@ -1166,22 +1172,23 @@ this,
     <Selection>0</Selection>\
     <SubItems>0</SubItems>\
     <ListItems/>\
+    <ParentGroup/>\
 </settings>";
         var newsettingsxml = new XML(settingsText);
         var allFiles = sp.scriptFolder.getFiles();
         var xmlFinalArr = [];
+        newsettingsxml.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
         allFiles.forEach(function(item,index){
                 if(item.toString().indexOf(".xml")!=-1){
                         sp.xmlFileNames.push(item.displayName.replace(".xml",""));
-                        newsettingsxml.ListItems.appendChild(XML("<Name>" + item.displayName.replace(".xml","") + "</Name>"))
+                        newsettingsxml.ListItems.appendChild(new XML("<Name>" + item.displayName.replace(".xml","") + "</Name>"));
+                        newsettingsxml.ParentGroup.child(0).appendChild(new XML("<Index>"+index.toString()+"</Index>"))
                     }
             })
         sp.settingsFile.writee(newsettingsxml);
-    }
+    }    
 
 
-
-    
     })(sp),
 
 
