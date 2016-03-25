@@ -34,11 +34,13 @@
     gv.leftDoubleClick = fns.newLayer;
     parentDroplist.onChange = fns.parentDroplistChange;
     droplist.onChange = fns.droplistChange;
+    
     sp.reloadParentDroplist();
     var selection = parseInt(sp.getSetting("parentSelection"));
     parentDroplist.selection = (selection<=parentDroplist.items.length-1 &&selection>=0)?selection:0;
     var selection = parseInt(sp.getSetting("thisSelection"));
     droplist.selection = (selection<=droplist.items.length-1 &&selection>=0)?selection:0;
+    
     win.onResize =win.onResizing =fns.winResize;
     
     if(win instanceof Panel){    //~ Show Panel
@@ -914,11 +916,10 @@ this,
                                   
                                   var listArr = [];
                                   this.forEach(settingxml.ListItems,function(item,index){
-                                            if(indexArr.has(index)){
-                                                    listArr.push(item.toString())
-                                                }
                                             this.push(item.toString());
                                       }, this.xmlFileNames)
+                                  for(var i =0,len = indexArr.length;i<len;i++)
+                                     listArr.push(settingxml.ListItems.child(indexArr[i]).toString());
 
                                   listArr.forEach(function(item,index){
                                           this.add("item",item);

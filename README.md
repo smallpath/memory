@@ -47,9 +47,9 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 - [x] droplist触发onChange方法时增加模块的操作
 - [x] 新建模块,删除模块
 - [x] 新建组,删除组时指定模块
-- [ ] 模块增删改移动
-- [ ] 模块中组的增删改移动
-- [ ] 修复批量导出组时取消按钮无效
+- [x] 模块增删改移动
+- [x] 模块中组的增删改移动
+- [x] 修复批量导出组时取消按钮无效
 - [x] 导出时导出模块信息
 - [x] 导入时导入模块信息
 - [ ] 升级时初始化元素预览(初稿约定20帧)

@@ -36,7 +36,7 @@ sp.extend(sp,{
         inputName: { en: "Please input your name!", ch: "请输入名字!" },
         alertSpe: { en: "There are special symbols in selectedLayers,please rename them first!", ch: "选中层名字有特殊符号,请首先重命名选中层!" },
         deleteFolder: { en: "Empty temp folder", ch: "清空素材文件夹" },
-        changeGroupName: { en: "Change group name", ch: "重命名选中组" },
+        changeGroupName: { en: "Change name of group", ch: "重命名选中组" },
         deleteOk: { en: "Clean folder successfully!", ch: "清空文件夹完毕!" },
         yushe: { en: "New & Empty Property Setting", ch: "仅生成效果与清空属性组选项" },
         jinOne: { en: "Please select groups that will be created on selectedLayers", ch: "请选择在仅生成效果时要在选中层上生成的属性组" },
@@ -102,5 +102,9 @@ New ui has no shortcut except right click with ctrl-key to call the up and down 
             en:"Dangerous!\r\nYou are deleting a module!\r\nAll groups in this module will be removed!\r\nDo you really want to remove this module?",
             ch:"警告!\r\n你正在删除一个模块!\r\n所有包含在此模块中的组都将被删除!\r\n你想要继续删除吗?"},
         addAlert:{en:"Repeart:\r\n",ch:"重复:\r\n"},
-        
+        move:{en:"Move selected group to other module",ch:"剪切选中组到其他模块"},
+        editModule:{en:"Move module or rename module",ch:"改变模块顺序或重命名模块"},
+        changeModuleName:{en:"Change module name",ch:"重命名选中模块"},
+        moduleHelpTip:{en:"press key 'Up' and 'Down can move the selected module' ",ch:"方向上下键可移动选中模块"},
+        quit:{en:"Quit",ch:"退出"},
         })

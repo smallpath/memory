@@ -14,13 +14,13 @@
     <Name>Transition circle pack 1</Name>
   </ListItems>
   <ParentGroup>
-    <item groupName="Default">
-      <Index>0</Index>
-      <Index>1</Index>
-    </item>
     <item groupName="ww">
       <Index>2</Index>
       <Index>3</Index>
+    </item>
+    <item groupName="Default">
+      <Index>0</Index>
+      <Index>1</Index>
     </item>
   </ParentGroup>
 </settings>

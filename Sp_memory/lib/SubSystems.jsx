@@ -8,7 +8,10 @@ var UIJson =
                         
                         group1:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                           helpText:{type:'edittext',properties:{multiline:true,scrolling:false},preferredSize:[150,300],text:'',enabled:1},
-                                          wlist:{type:'listbox',preferredSize:[150,300]}
+                                          gr:{type:'group',orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                            drop:{type:'dropdownlist',preferredSize:[150,20]},
+                                            wlist:{type:'listbox',preferredSize:[150,300]}
+                                          }},
                                     }},
                         group2:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                           deleteFolder:{type:'Button',preferredSize:[165,27],text:loc(sp.deleteFolder),enabled:1},
@@ -16,7 +19,11 @@ var UIJson =
                                     }},
                         group3:{type:'group',alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],children:{
                                           output:{type:'Button',text:loc(sp.output),enabled:1},
-                                    }},                    
+                                          move:{type:'Button',text:loc(sp.move),enabled:1}
+                                    }},    
+                        group35:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                          editModule:{type:'Button',preferredSize:[330,27],text:loc(sp.editModule),enabled:1},
+                                    }},
                         group4:{type:'group',orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                     g0:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                         gr1:{type:'group',children:{
@@ -65,12 +72,33 @@ var win = _.newWindow(UIJson)[0];
 
 _('*').each(function(e){
             switch(e.id){
+                  case 'move':    e.onClick = function(){
+                                        if(!_('#wlist')[0].selection || !_('#drop')[0]) return;
+                                                moveWindow(_('#wlist')[0].selection,_('#drop')[0].selection,win);
+                                    };  break;
+                  case 'editModule':e.onClick = function(){
+                                        if(!_('#drop')[0]) return;
+                                                moduleWindow(_('#drop')[0].selection,win);
+                                    };  break;
+                  case 'drop':  sp.xmlGroupNames.forEach(function(item,index){
+                                        this.add("item",item);
+                                      },e);
+                                      var wlist = _('#wlist')[0];
+                                      e.onChange = function(){
+                                            if(!this.selection) return;
+                                            wlist.removeAll();
+                                            sp.parentDroplist.selection = this.selection.index;
+                                            sp.xmlCurrentFileNames.forEach(function(item,index){
+                                                                        this.add("item",item)
+                                                                    },wlist);
+                                            sp.gv.refresh();
+                                          };
+                                      e.selection = sp.parentDroplist.selection?sp.parentDroplist.selection.index:0;
+                                      break;
                   case 'helpText': e.text = loc(sp.about);
                                           e.onChange = e.onChanging = function(){this.text = loc(sp.about)};
                                           break;
-                  case 'wlist': sp.xmlFileNames.forEach(function(item,index){
-                                                            this.add("item",item)
-                                                            },e)
+                  case 'wlist': break;
                   case 'deleteFolder': e.onClick = function(){
                                                       var folder = sp.materialFolder;
                                                       function deleteThisFolder(folder) {
@@ -93,13 +121,15 @@ _('*').each(function(e){
                                                                         if(!wlist.selection) return;
                                                                         var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
                                                                         if(!newGroupName) return;
-                                                                        if(sp.lookUpTextInChildren(newGroupName,wlist.items)){alert(loc(sp.existName));return;}
+                                                                        if(sp.xmlFileNames.has(newGroupName)){alert(loc(sp.existName));return;}
+                                                                        
                                                                         var file = sp.getFileByName(wlist.selection.text);
                                                                         file.rename(newGroupName+".xml");
                                                                         var xml = new XML(sp.settingsFile.readd());
-                                                                        xml.ListItems.insertChildAfter(xml.ListItems.child(wlist.selection.index),
+                                                                        var index = sp.getGlobalIndexFromFileName(wlist.selection.text);
+                                                                        xml.ListItems.insertChildAfter(xml.ListItems.child(index),
                                                                                                                     new XML("<Name>" + newGroupName.toString() + "</Name>"));
-                                                                        xml.ListItems.child(wlist.selection.index).setLocalName("waitToDelete");
+                                                                        xml.ListItems.child(index).setLocalName("waitToDelete");
                                                                         delete xml.ListItems.waitToDelete;
                                                                         sp.settingsFile.writee(xml);
                                                                         var folder = sp.getImageFolderByName(wlist.selection.text);
@@ -107,7 +137,7 @@ _('*').each(function(e){
                                                                               folder.rename(newGroupName);
                                                                         wlist.items[wlist.selection.index].text = newGroupName;
                                                                         sp.droplist.items[wlist.selection.index].text = newGroupName;
-                                                                        sp.xmlFileNames[wlist.selection.index] = newGroupName;
+                                                                        sp.xmlFileNames[index] = newGroupName;
                                                                         sp.droplist.notify("onChange"); 
                                                                         };break;
                   case 'output':e.onClick =  function(){outputWindow()};
@@ -171,40 +201,47 @@ _('*').each(function(e){
             var tempD = a.text;
             a.text = b.text;
             b.text = tempD;
-            var tempXML = sp.xmlFileNames[index1];
-            sp.xmlFileNames[index1] = sp.xmlFileNames[index2];
-            sp.xmlFileNames[index2] = tempXML;
+            var tempXML = sp.xmlCurrentFileNames[index1];
+            sp.xmlCurrentFileNames[index1] = sp.xmlCurrentFileNames[index2];
+            sp.xmlCurrentFileNames[index2] = tempXML;
         }
 
 
         var exchange= function(isUp,wXML) {
+                var xmlIndex = _('#wlist')[0].selection.index;
+                var groupIndex = _('#drop')[0].selection.index;
+                var name = sp.droplist.selection.text;
+
             if (isUp == true) {
-                var aic = _('#wlist')[0].selection.index;
-                var name = sp.droplist.selection.text;
-                var wupxml = new XML(wXML.ListItems.child(aic));
-                wXML.ListItems.insertChildBefore(wXML.ListItems.child(aic - 1), wupxml);
-                wXML.ListItems.child(aic + 1).setLocalName("waitToDelete");
-                delete wXML.ListItems.waitToDelete;
+
+                var wupxml = new XML(wXML.ParentGroup.child(groupIndex).child(xmlIndex));
+                wXML.ParentGroup.child(groupIndex).insertChildBefore(wXML.ParentGroup.child(groupIndex).child(xmlIndex - 1), wupxml);
+
+                wXML.ParentGroup.child(groupIndex).child(xmlIndex + 1).setLocalName("waitToDelete");
+
+                delete wXML.ParentGroup.child(groupIndex).waitToDelete;
+
                 sp.settingsFile.writee(wXML);
-                sp.swap(_('#wlist')[0].items[aic - 1], _('#wlist')[0].items[aic]);
-                warpDrop(sp.droplist.items[aic - 1], sp.droplist.items[aic], aic - 1, aic);
-                sp.droplist.selection = sp.droplist.find(name);
-                sp.droplist.notify("onChange");
-                sp.gv.refresh();
+                sp.swap(_('#wlist')[0].items[xmlIndex - 1], _('#wlist')[0].items[xmlIndex]);
+                warpDrop(sp.droplist.items[xmlIndex - 1], sp.droplist.items[xmlIndex], xmlIndex - 1, xmlIndex);
+
             } else {
-                var aic = _('#wlist')[0].selection.index;
-                var name = sp.droplist.selection.text;
-                var wdownxml = new XML(wXML.ListItems.child(aic));
-                wXML.ListItems.insertChildAfter(wXML.ListItems.child(aic + 1), wdownxml);
-                wXML.ListItems.child(aic).setLocalName("waitToDelete");
-                delete wXML.ListItems.waitToDelete;
-                wxmlFile.writee(wXML);
-                sp.swap(_('#wlist')[0].items[aic + 1], _('#wlist')[0].items[aic]);
-                warpDrop(sp.droplist.items[aic + 1], sp.droplist.items[aic], aic + 1, aic);
+
+                var wdownxml = new XML(wXML.ParentGroup.child(groupIndex).child(xmlIndex));
+
+                wXML.ParentGroup.child(groupIndex).insertChildAfter(wXML.ParentGroup.child(groupIndex).child(xmlIndex + 1), wdownxml);
+                wXML.ParentGroup.child(groupIndex).child(xmlIndex).setLocalName("waitToDelete");
+                delete wXML.ParentGroup.child(groupIndex).waitToDelete;
+
+                
+                sp.settingsFile.writee(wXML);
+                sp.swap(_('#wlist')[0].items[xmlIndex + 1], _('#wlist')[0].items[xmlIndex]);
+                warpDrop(sp.droplist.items[xmlIndex + 1], sp.droplist.items[xmlIndex], xmlIndex + 1, xmlIndex);
+
+            }
                 sp.droplist.selection = sp.droplist.find(name);
                 sp.droplist.notify("onChange");
                 sp.gv.refresh();
-            }
         }
 
 
@@ -212,12 +249,12 @@ _('*').each(function(e){
             var wXML = new XML(sp.settingsFile.readd());
             switch (key.keyName) {
                 case "Up":
-                    if (_('#wlist')[0].selection != null && _('#wlist')[0].selection.index > 0) {
+                    if (_('#wlist')[0].selection != null && _('#wlist')[0].selection.index > 0 &&_('#drop')[0].selection) {
                         exchange(true,wXML);
                     };
                     break;
                 case "Down":
-                    if (_('#wlist')[0].selection != null && _('#wlist')[0].selection.index < _('#wlist')[0].items.length - 1) {
+                    if (_('#wlist')[0].selection != null && _('#wlist')[0].selection.index < _('#wlist')[0].items.length - 1 &&_('#drop')[0].selection) {
                         exchange(false,wXML);
                     };
                     break;
@@ -235,6 +272,113 @@ win.show();
 
 
 
+function moduleWindow(groupItem,win){
+            var moveWin = new Window("dialog", "Module", undefined, { resizeable: 0, maximizeButton: 0 });
+            outRes = """Group{
+                            orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
+                            helpTip:StaticText{text:'"""+loc(sp.moduleHelpTip)+"""'},
+                            wlist:ListBox{properties:{multiselect:0}},
+                            oc:Group{
+                                alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],
+                                ok:Button{text:'"""+loc(sp.changeModuleName)+"""'},
+                                cancel:Button{text:'"""+loc(sp.quit)+"""'}
+                            }}""";
+                try{outRes=moveWin.add(outRes);}catch(err){alert(err)}     
+                sp.xmlGroupNames.forEach(function(item,index){this.add("item",item)}, outRes.wlist);
+
+                outRes.wlist.addEventListener ("keydown",function(k){
+                        switch (k.keyName) {
+                            case "Up":
+
+                                if (this.selection != null && this.selection.index > 0) {
+                                    var xml = new XML(sp.settingsFile.readd());
+                                    var groupIndex = this.selection.index;
+                                    var targetXml = xml.ParentGroup.child(groupIndex);
+                                    
+                                    xml.ParentGroup.insertChildBefore(xml.ParentGroup.child(groupIndex-1),new XML(targetXml));
+                                    xml.ParentGroup.child(groupIndex+1).setLocalName("waitToDelete");
+                                    delete xml.ParentGroup.waitToDelete;
+                                    
+                                    sp.settingsFile.writee(xml);
+                                    
+                                    sp.reloadParentDroplist();
+                                    var selection = parseInt(sp.getSetting("parentSelection"));
+                                    sp.parentDroplist.selection = (selection<=sp.parentDroplist.items.length-1 &&selection>=0)?selection:0;
+                                    var selection = parseInt(sp.getSetting("thisSelection"));
+                                    sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+                                    
+                                    sp.swap(outRes.wlist.items[this.selection.index-1],outRes.wlist.items[this.selection.index]);
+                                    
+                                };
+                                break;
+                            case "Down":
+                                if (this.selection != null && this.selection.index < this.items.length - 1 ) {
+                                    var xml = new XML(sp.settingsFile.readd());
+                                    var groupIndex = this.selection.index;
+                                    var targetXml = xml.ParentGroup.child(groupIndex);
+                                    
+                                    xml.ParentGroup.insertChildAfter(xml.ParentGroup.child(groupIndex+1),new XML(targetXml));
+                                    xml.ParentGroup.child(groupIndex).setLocalName("waitToDelete");
+                                    delete xml.ParentGroup.waitToDelete;
+                                    
+                                    sp.settingsFile.writee(xml);
+                                    
+                                    sp.reloadParentDroplist();
+                                    var selection = parseInt(sp.getSetting("parentSelection"));
+                                    sp.parentDroplist.selection = (selection<=sp.parentDroplist.items.length-1 &&selection>=0)?selection:0;
+                                    var selection = parseInt(sp.getSetting("thisSelection"));
+                                    sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+                                    
+                                    sp.swap(outRes.wlist.items[this.selection.index],outRes.wlist.items[this.selection.index+1]);
+                                };
+                                break;
+                        }
+                    });
+                
+                outRes.oc.cancel.onClick=function(){
+                        moveWin.close();
+                        win.close();
+                    }
+                
+                moveWin.onClose = function(){
+                        moveWin.close();
+                        win.close();
+                    }
+                
+
+                
+                outRes.oc.ok.onClick=function(){
+                        var wlist = outRes.wlist;
+                        if(!wlist.selection) return;
+                        var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
+                        if(!newGroupName) return;
+                        if(sp.xmlGroupNames.has(newGroupName)){alert(loc(sp.existName));return;}
+                        
+                        var xml = new XML(sp.settingsFile.readd());
+                        var parentGroup = xml.ParentGroup;
+                        var groupIndex = wlist.selection.index;
+
+                        var editXml = parentGroup.child(groupIndex);
+                        editXml.@groupName = newGroupName;
+
+                        sp.settingsFile.writee(xml);
+     
+                        sp.reloadParentDroplist();
+                        var selection = parseInt(sp.getSetting("parentSelection"));
+                        sp.parentDroplist.selection = (selection<=sp.parentDroplist.items.length-1 &&selection>=0)?selection:0;
+                        var selection = parseInt(sp.getSetting("thisSelection"));
+                        sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+
+                        moveWin.close();
+                        win.close();
+                    }   //last 
+                
+                outRes.wlist.size = [200,300];
+                moveWin.show();
+
+  
+                
+    }
 
 
 
@@ -243,7 +387,57 @@ win.show();
 
 
 
+function moveWindow(xmlItem,groupItem,win){
+            var moveWin = new Window("dialog", "Move", undefined, { resizeable: 0, maximizeButton: 0 });
+            outRes = """Group{
+                            orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
+                            wlist:ListBox{properties:{multiselect:0}},
+                            oc:Group{
+                                alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],
+                                ok:Button{text:'"""+loc(sp.ok)+"""'},
+                                cancel:Button{text:'"""+loc(sp.cancel)+"""'}
+                            }}""";
+                try{outRes=moveWin.add(outRes);}catch(err){alert(err)}     
+                sp.xmlGroupNames.forEach(function(item,index){this.add("item",item)}, outRes.wlist);
 
+
+                
+                outRes.oc.cancel.onClick=function(){
+                        moveWin.close();
+                    }
+                
+                outRes.oc.ok.onClick=function(){
+                        if(!outRes.wlist.selection) return;
+                        if(outRes.wlist.selection.text == groupItem.text) return;
+                        var xml = new XML(sp.settingsFile.readd());
+                        var parentGroup = xml.ParentGroup;
+                        var xmlIndex = xmlItem.index;
+                        var groupIndex = groupItem.index;
+
+                        var editXml = parentGroup.child(groupIndex).child(xmlIndex);
+                        var targetXml = parentGroup.child(outRes.wlist.selection.index);
+                        targetXml.appendChild (new XML(editXml));
+                        
+                        parentGroup.child(groupIndex).child(xmlIndex).setLocalName ("waitToDelete");
+                        delete parentGroup.child(groupIndex).waitToDelete;
+                        sp.settingsFile.writee(xml);
+                        
+                        sp.reloadParentDroplist();
+                        var selection = parseInt(sp.getSetting("parentSelection"));
+                        sp.parentDroplist.selection = (selection<=sp.parentDroplist.items.length-1 &&selection>=0)?selection:0;
+                        var selection = parseInt(sp.getSetting("thisSelection"));
+                        sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
+                        
+                        moveWin.close();
+                        win.close();
+                    }   //last 
+                
+                outRes.wlist.size = [200,300];
+                moveWin.show();
+
+  
+                
+    }
 
 
 
@@ -253,7 +447,7 @@ win.show();
 function outputWindow () {
             var outWin = new Window("window", "Export", undefined, { resizeable: 0, maximizeButton: 0 });
             outRes = """Group{
-            orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
+                            orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
                             wlist:ListBox{properties:{multiselect:1}},
                             oc:Group{
                                 alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],
@@ -266,10 +460,10 @@ function outputWindow () {
                     wxmlFile = sp.settingsFile;
                     wcontent = wxmlFile.readd();
                     wXML = new XML(wcontent);
-                    for (var bPoint = 0; bPoint < wXML.ListItems.children().length(); bPoint++) {
-                        outRes.wlist.add("item", wXML.ListItems.child(bPoint).toString());
+                    for (var i = 0; i < sp.xmlFileNames.length; i++) {
+                        outRes.wlist.add("item",  sp.xmlFileNames[i]);
                     }
-                outRes.wlist.size = [200,500];
+                outRes.wlist.size = [200,400];
                 outWin.show();
                 
                 outRes.oc.cancel.onClick=function(){
