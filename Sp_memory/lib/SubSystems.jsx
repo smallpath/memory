@@ -256,6 +256,7 @@ function outputWindow () {
             orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
                             wlist:ListBox{properties:{multiselect:1}},
                             oc:Group{
+                                alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],
                                 ok:Button{text:'"""+loc(sp.ok)+"""'},
                                 cancel:Button{text:'"""+loc(sp.cancel)+"""'}
                             }}""";
@@ -270,6 +271,10 @@ function outputWindow () {
                     }
                 outRes.wlist.size = [200,500];
                 outWin.show();
+                
+                outRes.oc.cancel.onClick=function(){
+                        outWin.close();
+                    }
                 
                 outRes.oc.ok.onClick=function(){
                         if(outRes.wlist.selection!=null){
@@ -311,9 +316,8 @@ function outputWindow () {
                                     writeLn("Complete!");
                             } // not null
                     }   //last 
-                outRes.oc.cancel.onClick=function(){
-                        outWin.close();
-                    }
+                
+
 
            }
 }
