@@ -338,11 +338,7 @@ function moduleWindow(groupItem,win){
                 outRes.oc.cancel.onClick=function(){
                         moveWin.close();
                         win.close();
-                    }
-                
-                moveWin.onClose = function(){
-                        moveWin.close();
-                        win.close();
+                        settingsButtonFunc();
                     }
                 
 
@@ -404,6 +400,8 @@ function moveWindow(xmlItem,groupItem,win){
                 
                 outRes.oc.cancel.onClick=function(){
                         moveWin.close();
+                        win.close();
+                        settingsButtonFunc();
                     }
                 
                 outRes.oc.ok.onClick=function(){
@@ -430,6 +428,7 @@ function moveWindow(xmlItem,groupItem,win){
                         
                         moveWin.close();
                         win.close();
+                        settingsButtonFunc();
                     }   //last 
                 
                 outRes.wlist.size = [200,300];
