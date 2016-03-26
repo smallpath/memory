@@ -40,9 +40,11 @@ Open Memory from Window->'Sp_memory.jsxbin'
 The default language is not English.To change it into English, follow this:
 
 Right click at script panel,click the first button:
+
 ![screenshot5](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/5.PNG)
 
 In the big setting window,click the 'English' button which is near the bottom:
+
 ![screenshot6](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/6.PNG)
 
 Final,restart the script
