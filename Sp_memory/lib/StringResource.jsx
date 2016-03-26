@@ -127,7 +127,7 @@ F键:覆盖选中元素.
         settingPre: { en: "Preference", ch: "预设" },
         thumbType:{ en:"Enable new type of thumb",ch:"启用另一种缩略图"},
         addModule:{en:"New module",ch:"新建模块"},
-        deleteModule:{en:"Delete module",ch:"删除模块"},
+        deleteModule:{en:"Remove module",ch:"删除模块"},
         deleteModuleAlert:{
             en:"Dangerous!\r\nYou are deleting a module!\r\nAll groups in this module will be removed!\r\nDo you really want to remove this module?",
             ch:"警告!\r\n你正在删除一个模块!\r\n所有包含在此模块中的组都将被删除!\r\n你想要继续删除吗?"},
