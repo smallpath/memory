@@ -29,21 +29,31 @@ Go to [release page](https://github.com/Smallpath/Memory/releases).Download the 
 
 If your AE version is CC-CC2015,extract the `Sp_memory.jsxbin` and `Sp_memory` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`
 
-If your AE version is CS3-CS6,extract `Sp_memory v2.2(CS3-CS6).jsxbin` and `Sp_memory` instead
+If your AE version is CS3-CS6,extract `Sp_memory(CS3-CS6).jsxbin` and `Sp_memory` instead
 
 If your windows is win8 or win10, make sure AE is running under the administrator access
 
 In AE, go to Edit->Preferences->General,make sure 'Allow scripts to write File and access Network' is checked
 
-In the end,open Memory from Window->'Sp_memory.jsxbin'
+Open Memory from Window->'Sp_memory.jsxbin'
+
+The default language is not English.To change it into English, follow this:
+
+Right click at script panel,click the first button:
+![screenshot5](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/5.PNG)
+
+In the big setting window,click the 'English' button which is near the bottom:
+![screenshot6](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/6.PNG)
+
+Final,restart the script
 
 
 ##Tutorial
->[Tutorial](https://raw.githubusercontent.com/Smallpath/Memory/master/wiki/TUTORIAL-EN.md)
+>[Tutorial](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL-EN.md)
 
 
 ##Logs
-[Version Log](https://raw.githubusercontent.com/Smallpath/Memory/master/LOG.md)
+[Version Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS.md)
 
 ##Thanks To
 - 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))

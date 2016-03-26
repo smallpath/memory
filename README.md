@@ -35,9 +35,9 @@
 
 AE版本为CC-CC2015的,请将压缩包中的`Sp_memory.jsxbin`,`Sp_memory文件夹`放置在你的AE脚本文件夹中,例如`Support Files\Scripts\ScriptUI Panels`
 
-AE版本为CS3-CS6的,请解压`Sp_memory v2.2(CS3-CS6).jsxbin`与`Sp_memory文件夹`
+AE版本为CS3-CS6的,请解压`Sp_memory(CS3-CS6).jsxbin`与`Sp_memory文件夹`
 
-win7,win8,win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`以管理员身份运行此程序`
+win8与win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`以管理员身份运行此程序`
 
 在AE中打开编辑->预选项->一般,勾选`允许脚本访问文件与网络`
 
@@ -46,7 +46,7 @@ win7,win8,win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`�
 
 ##脚本使用教程
 
->[文字教程](https://raw.githubusercontent.com/Smallpath/Memory/master/wiki/TUTORIAL.md)
+>[文字教程](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL.md)
 
 ## v2.3 TODO LIST
 
