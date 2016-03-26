@@ -1,8 +1,8 @@
 # Memory
 
-[English version](https://raw.githubusercontent.com/Smallpath/Memory/master/wiki/README.md)
+[English Version](https://github.com/Smallpath/Memory/blob/master/wiki/README-EN.md)
 
-这是后期合成软件*Adobe After Effects*的层存储脚本,你可以将AE中任何层保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
+这是后期合成软件[Adobe After Effects](https://en.wikipedia.org/wiki/Adobe_After_Effects)的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
 
 
@@ -24,22 +24,19 @@
 
 ##脚本安装
 
-下载最新版本
-
+进入[版本发布页面](https://github.com/Smallpath/Memory/releases),下载最新版的`Source code (zip)` 
 AE版本为CC-CC2015的,请将压缩包中的`Sp_memory.jsxbin`,`Sp_memory文件夹`放置在你的AE脚本文件夹中,例如`Support Files\Scripts\ScriptUI Panels`
-
 AE版本为CS3-CS6的,请解压`Sp_memory v2.2(CS3-CS6).jsxbin`与`Sp_memory文件夹`
-
 win7,win8,win10用户请用管理员权限运行AE,右键AE->兼容性->勾选*以管理员身份运行此程序*
-
 在AE中打开编辑->预选项->一般,勾选*允许脚本访问文件与网络*
-
 在AE中打开窗口菜单中的`Sp_memory.jsxbin`,即可
 
 
 ##脚本使用教程
+
+>[中文文字教程](https://raw.githubusercontent.com/Smallpath/Memory/master/wiki/TUTORIAL.md)
+
 >[中文视频:Vimeo](https://vimeo.com/154461198)
->[中文文字教程](https://raw.githubusercontent.com/Smallpath/Memory/master/wiki/README.md)
 
 
 ## v2.3 TODO LIST
@@ -61,7 +58,7 @@ win7,win8,win10用户请用管理员权限运行AE,右键AE->兼容性->勾选*�
 - [ ] 删除元素时删除图片序列
 
 ##版本更新记录
-[更新历史](https://raw.githubusercontent.com/Smallpath/Memory/master/LOG.md)
+[更新历史](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS.md)
 
 ##感谢
 - 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
