@@ -58,10 +58,40 @@ sp.extend(sp,{
         newVersionNotFind:{en:"No new version!",ch:"已是最新版!"},
         link: {en:"Weibo",ch:"作者微博"},
         about: {
-            en: "Made by:Smallpath.\rE-mail:\rsmallpath2013@gmail.com.\r\rShortCutKey:\rDoubleClick:generate new layers or properties on selected layers from selected element.\r\rRightClick:call the shortcut menu.\r\rAlt+RightClick:save selected layers as a new element.\r\r\
-New ui has no shortcut except right click with ctrl-key to call the up and down window\rOld ui shortcutkey:\rKey 'D' or 'Delete':delete selected element.\rKey 'F': overlap selected element.\rKey 'Up':drop up selected element.\rKey 'Down':drop down selected element.",
-            ch: "作者:Smallpath.\r百度与微博id:秋风_小径.\r邮箱:\rpxlh3456@gmail.com,\rsmallpath2013@gmail.com.\r\r快捷键:\r双击:从选中元素创建层或创建效果.\r右键点击:呼出右键菜单.\rAlt+右键点击:从选中的层读取层信息创建新元素.\r\
-新UI无快捷键,ctrl+右键换出移动元素的窗口\r旧UI快捷键:\rD键:删除选中元素.\rF键:覆盖选中元素.\r上键:上移选中元素.\r下键:下移选中元素.",
+            en: 
+"""Made by:Smallpath
+E-mail:smallpath2013@gmail.com
+Source Code:
+github.com/Smallpath/Memory
+
+DoubleClick:generate new layers or properties on selected layers from selected element.
+RightClick:call the shortcut menu.
+Ctrl/Alt+RightClick:save selected layers as a new element.
+Shift+Rightclick:call the up and down window
+
+Shortcutkey when script runs as Window:
+Key 'D' or 'Delete':delete selected element.
+Key 'F': overlap selected element.
+Key 'Up':drop up selected element.
+Key 'Down':drop down selected element.""",
+            ch: 
+"""作者:
+    Smallpath
+邮箱:
+    smallpath2013@gmail.com
+源码托管地址:
+github.com/Smallpath/Memory
+
+右键点击:呼出右键菜单.
+双击:从选中元素创建层或创建效果.
+Ctrl/Alt+右键点击:从选中的层读取层信息以创建新元素.
+Shift+右键:唤出移动元素的窗口
+
+窗口模式运行脚本时:
+D键:删除选中元素.
+F键:覆盖选中元素.
+上键:上移选中元素.
+下键:下移选中元素."""
         },
         refresh: {
             en: "Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp's time first.",

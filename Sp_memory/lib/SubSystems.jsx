@@ -7,10 +7,10 @@ var UIJson =
             newWin:{type:'palette',text:sp.scriptName+' v'+sp.scriptVersion,margins:10,children:{
                         
                         group1:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
-                                          helpText:{type:'edittext',properties:{multiline:true,scrolling:false},preferredSize:[150,300],text:'',enabled:1},
-                                          gr:{type:'group',orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                          helpText:{type:'edittext',properties:{multiline:true,scrolling:false},preferredSize:[150,280],text:'',enabled:1},
+                                          gr:{type:'group',orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],margins: 0 , spacing:0,children:{
                                             drop:{type:'dropdownlist',preferredSize:[150,20]},
-                                            wlist:{type:'listbox',preferredSize:[150,300]}
+                                            wlist:{type:'listbox',preferredSize:[150,260]}
                                           }},
                                     }},
                         group2:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
@@ -54,10 +54,10 @@ var UIJson =
                                           ch:{type:'Button',text:'中文',enabled:0},
                                           en:{type:'Button',text:'English',enabled:0}
                                     }},
-                        group6:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
-                                          ui1:{type:'Button',text:loc(sp.ui1),enabled:0},
-                                          ui2:{type:'Button',text:loc(sp.ui2),enabled:0}
-                                    }},
+//~                         group6:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+//~                                           ui1:{type:'Button',text:loc(sp.ui1),enabled:0},
+//~                                           ui2:{type:'Button',text:loc(sp.ui2),enabled:0}
+//~                                     }},
                         group7:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                           checkVersion:{type:'Button',text:loc(sp.checkVersion),enabled:1},
                                           openLink:{type:'Button',text:loc(sp.link),enabled:1}
@@ -86,6 +86,7 @@ _('*').each(function(e){
                                       var wlist = _('#wlist')[0];
                                       e.onChange = function(){
                                             if(!this.selection) return;
+                                            if(!sp.parentDroplist.selection) return;
                                             wlist.removeAll();
                                             sp.parentDroplist.selection = this.selection.index;
                                             sp.xmlCurrentFileNames.forEach(function(item,index){
