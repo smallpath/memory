@@ -242,6 +242,7 @@ this.extend(this, {
                     e.event.leftButtonPressedLocation = [event.clientX, event.clientY];
                     e.event.leftButtonPressedScrollBarValue = e.scrollBarValue;
                     /***************************************/
+                    e.mouseMove(event,e.event.targetItem,e.event.mouseMoving);
 
                     /***************************************/
                 } else if (event.detail == 2) {//左键双击
@@ -272,7 +273,7 @@ this.extend(this, {
 
                 /***************************************/
             }
-            e.mouseMove(event,e.getItemFromLocation(event.clientX, event.clientY));
+            e.mouseMove(event,e.getItemFromLocation(event.clientX, event.clientY),e.event.mouseMoving);
 
         });
         eventRect.addEventListener('mouseup', function (event) {

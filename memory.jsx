@@ -60,20 +60,25 @@
     win.onResize();
     
     
-sp.gv.mouseMove = function(event,item){
+sp.gv.mouseMove = function(event,item,isMouseMoving){
+
         if(!item){
                 sp.moveInIter = 0;
                 return;
             };
-        if(sp.moveInIter!=0) return;
+        if(isMouseMoving == true){
+            if(sp.moveInIter!=0) return;
+        }
         
         var img = item.image ; 
         var index = item.index;
-        var oneFrame = 66;
+        var oneFrame = 200;
 
 
         var folder = new Folder(img.parent);
         var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
+        
+
         
         if(!targetFolder.exists){
                 if(targetFolder.toString().indexOf("_seq")==-1){
@@ -82,15 +87,14 @@ sp.gv.mouseMove = function(event,item){
                     }
             }
         
-        if(!targetFolder.exists){return; cout<<'seq folder not found';}
-        if(!img.exists){ return; cout<<'image not found'}
-
+        if(!targetFolder.exists){return ;cout<<targetFolder.toString()+'\r\nseq folder not found';}
+        if(!img.exists){ return ;cout<<'image not found'}
         
-        
-        sp["tempItem"+index] = item;
-        sp["tempImg"+index] = img;
 
-        sp["tempFiles"+index] = (function(f){
+        sp.previewHelper["item"+index] = {};
+        sp.previewHelper["item"+index]["tempItem"] = item;
+        sp.previewHelper["item"+index]["tempImg"] = img;
+        sp.previewHelper["item"+index]["tempFiles"] = (function(f){
                 var len = f.getFiles().length;
                 var arr =[];
                 for(var i=0;i<len;i++){
@@ -101,14 +105,59 @@ sp.gv.mouseMove = function(event,item){
                 return arr;
             })(targetFolder);
         
+        if(sp.previewHelper["item"+index]["tempFiles"].length==0) return;
         
-        for(var i =0,len = sp["tempFiles"+index].length;i<len;i++){
-                    app.scheduleTask ("sp.tempItem"+index+".image=sp.tempFiles"+index+"["+i+"];sp.gv.refresh();", oneFrame, false);
+        
+        for(var i =0,len = sp.previewHelper["item"+index]["tempFiles"].length;i<len;i++){
+                    var stringToCall = 
+                                                """
+                                                        var len = sp.gv.children.length; 
+                                                        for(var itemIndex=0;itemIndex<len;itemIndex++){
+                                                            var currentItem = sp.previewHelper["item"+itemIndex];
+                                                            if(currentItem){
+                                                                //$.writeln("""+i+""")
+                                                                var currentIndex = """+i+""";
+                                                                var currentFile = currentItem["tempFiles"][currentIndex];
+                                                                if(currentFile){
+                                                                        currentItem["tempItem"].image=currentFile;
+                                                                    }
+                                                                }
+                                                        }
+                                                    sp.gv.refresh();
+                                                """;
+                    app.scheduleTask (stringToCall, oneFrame, false);
             }
-        app.scheduleTask ("sp.tempItem"+index+".image=sp.tempImg"+index+";sp.gv.refresh();", oneFrame, false);
+        
+        var stringToCall = """
+                                            var len = sp.gv.children.length; 
+                                            for(var itemIndex=0;itemIndex<len;itemIndex++){
+                                                    var currentItem = sp.previewHelper["item"+itemIndex];
+                                                    if(currentItem){
+                                                        var currentImg = currentItem["tempImg"];
+                                                        if(currentImg){
+                                                                currentItem["tempItem"].image=currentImg;
+                                                            }
+                                                        }
+                                            }
+                                        sp.gv.refresh();
+                                        sp.previewHelper = {};
+                                    """
+        app.scheduleTask (stringToCall, oneFrame, false);
         sp.moveInIter++;
         
      }
+
+
+//~ 全局:元素的个数,元素,每个元素对应的图片序列数组,对应的原始图片,
+
+//~ sp.previewHelper.len = sp.gv.children.length; 原始个数
+//~ for(var i=0;i<sp.previewHelper.len;i++){
+//~     sp.previewHelper["item"+i]={};
+//~     sp.previewHelper["item"+i]["tempItem"]=元素本身
+//~     sp.previewHelper["item"+i]["tempImg"] = 原始图片
+//~     sp.previewHelper["item"+i]["tempFiles"] = 图片序列数组
+//~     sp.previewHelper["item"+i]["currentIndex"] = 目前该放到的index 
+//~ }
 
 
     
@@ -758,7 +807,7 @@ this,
             roamingFolder:new  Folder(Folder.userData.fullName + "/Aescripts/Sp_memory"),
             
             moveInIter:0,
-            
+            previewHelper: {},
         
             haveSetting: function(keyName){
                     return this.setting.haveSetting (this.scriptName, keyName);
