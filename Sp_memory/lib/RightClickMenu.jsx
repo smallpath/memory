@@ -43,7 +43,7 @@
                    }
                 }
             }
-            ShortMenu._preview=ShortMenu.add("button",[0,20,h/2,42],loc(sp.previewAll));
+            ShortMenu._preview=ShortMenu.add("button",[0,20,h/2,42],(sp.gv.selection.length==0)?loc(sp.previewAll):loc(sp.previewSelected));
             ShortMenu._yushe = ShortMenu.add("button",[h/2,20,h,42],loc(sp.yushe));
             ShortMenu._c = ShortMenu.add("button", [0, 42, h/2, 62], loc(sp.changeName));
             ShortMenu._1 = ShortMenu.add("dropdownlist", [h/2, 0,h, 22]);

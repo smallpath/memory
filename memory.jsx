@@ -50,6 +50,7 @@
               app.cancelTask (item);
      });
      sp.renderTaskArray.length = 0;
+     sp.previewHelper = {};
     
     win.onResize =win.onResizing =fns.winResize;
     
@@ -75,6 +76,9 @@
     function fns(){
             var keepRef = this;
             this.previewAll = function(){
+                
+                    keepRef.moveOut();
+                    
                     var lenArr = [];
                     var oneFrame = sp.frameSecond;
                     sp.previewHelper = {};
@@ -262,7 +266,7 @@
                                                         sp.gv.refresh();
                                                         sp.previewHelper = {};
                                                     """
-                        sp.backTaskArray.push(app.scheduleTask (stringToCall, oneFrame*i, false));
+                        sp.renderTaskArray.push(app.scheduleTask (stringToCall, oneFrame*i, false));
                         sp.moveInIter++;
                     },
 
@@ -274,6 +278,7 @@
                     sp.preImageArr.forEach(function(item,index){
                             sp.gv.children[index].image = item;
                         });
+                    sp.previewHelper = {};
                 },
             this.addModule = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
@@ -833,6 +838,14 @@
                     sp.saveSetting ("winLocation",thisStr);
                 },
             this.rightClick=function(event) {
+                                sp.renderTaskArray.forEach (function(item,index){
+                                        app.cancelTask (item);
+                                    });
+                                sp.renderTaskArray.length = 0;
+                                sp.preImageArr.forEach(function(item,index){
+                                        sp.gv.children[index].image = item;
+                                    });
+                                sp.previewHelper = {};
                                 var alt = event.altKey;
                                 var key = ScriptUI.environment.keyboardState;
                                 if(key.ctrlKey == false && key.shiftKey == false&& alt == false  ){
@@ -850,14 +863,6 @@
                                                      }
                 },
             this.shortMenu = function(event){
-                    sp.renderTaskArray.forEach (function(item,index){
-                            app.cancelTask (item);
-                        });
-                    sp.renderTaskArray.length = 0;
-                    sp.preImageArr.forEach(function(item,index){
-                            sp.gv.children[index].image = item;
-                        });
-
                     if (!event) return;
                     if (event.button == 2 && event.detail == 1 && event.altKey == false) {
                     var currentPosition = [event.screenX, event.screenY];
@@ -901,8 +906,8 @@ this,
       sp.prototype = {
             
             scriptName: "Sp_memory",
-            scriptVersion:"2.2",
-            version: 2.2,
+            scriptVersion:"3.0",
+            version: 3.0,
             slash: "/", 
             
             setting:app.settings,
@@ -1675,13 +1680,35 @@ this,
         sp.extend(sp,{
                 beyondCS6: true,
                 versionUpdateInfo:{
-                        ch: "测试",
-                        en: "test"
+                        ch: 
+                        """层存储脚本Sp_Memory 3.0 @秋风_小径
+
+功能添加:
+1.默认开启预览动画功能
+2.存储层时默认存储预览动画,可设定预览的帧率和帧数
+3.导入导出功能支持预览动画
+3.添加组的分类-模块
+
+右键菜单新增:
+1.预览全部/预览选中
+2.新建模块
+3.删除模块
+
+
+小提示:
+1.在3.x版本前保存的组,可以用"右键->辅助脚本->生成组内预览动画"来为组所有元素进行批量生成预览动画
+2.可使用ctrl与shift对元素进行自由选择,之后右键->预览选中,即可同时预览所有被选中元素的动画
+3.在未选中任何元素时,右键->预览全部,即可预览组内的全部元素的动画
+4.在设置窗口中,选中一个组,之后点击"剪切选中组到其他模块",可将组移动到其他模块中
+
+
+""",
+                        en: """test"""
                     },
             });
     
        if (sp.haveSetting("version") == false || sp.getSetting("version")<sp.version) {
-//~             alert(loc(sp.versionUpdateInfo));
+            alert(loc(sp.versionUpdateInfo));
             sp.saveSetting("version", sp.version);
         }
     })(sp),

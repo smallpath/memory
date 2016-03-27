@@ -155,5 +155,6 @@ F键:覆盖选中元素.
                                      ch:"请输入最大帧数,这将被用来使预览动画的时间范围更加准确\r\n不输入则将不进行校准"},
         needComp:{en:"Please select a comp first",ch:"脚本需要一个合成"},
         previewAll:{en:"Preview all",ch:"预览全部"},
+        previewSelected:{en:"Preview selected",ch:"预览选中"},
         
         })
