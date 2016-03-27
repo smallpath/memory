@@ -34,6 +34,8 @@
     //~ Binding eventHandlers to mouse click and Window
     gv.rightClick = fns.rightClick;
     gv.leftDoubleClick = fns.newLayer;
+    gv.mouseOut = sp.fns.moveOut;
+    gv.mouseMove = sp.fns.moveOver;
     parentDroplist.onChange = fns.parentDroplistChange;
     droplist.onChange = fns.droplistChange;
     
@@ -43,6 +45,11 @@
     parentDroplist.selection = (selection<=parentDroplist.items.length-1 &&selection>=0)?selection:0;
     var selection = parseInt(sp.getSetting("thisSelection"));
     droplist.selection = (selection<=droplist.items.length-1 &&selection>=0)?selection:0;
+    
+     sp.renderTaskArray.forEach (function(item,index){
+              app.cancelTask (item);
+     });
+     sp.renderTaskArray.length = 0;
     
     win.onResize =win.onResizing =fns.winResize;
     
@@ -60,8 +67,8 @@
 
     win.onResize();
     
-    sp.gv.mouseOut = function(){sp.moveOut = true;}
-//~     sp.gv.mouseMove = sp.fns.moveOver;
+    
+
 
     
 
@@ -70,8 +77,13 @@
             this.previewAll = function(){
                     var lenArr = [];
                     var oneFrame = sp.frameSecond;
-                    for(var iter=0,thisLen=sp.gv.children.length;iter<thisLen;iter++){
-                        var item = sp.gv.children[iter];
+                    sp.previewHelper = {};
+                    var items = (sp.gv.selection.length==0)?sp.gv.children:sp.gv.selection;
+                    
+
+                    
+                    for(var iter=0,thisLen=items.length;iter<thisLen;iter++){
+                        var item = items[iter];
                         var img = item.image ; 
                         var index = item.index;
                         
@@ -81,15 +93,25 @@
                         var folder = new Folder(img.parent);
                         var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
                         
+                        try{
                         if(!targetFolder.exists){
-                                if(targetFolder.parent.indexOf("_seq")==-1){
+                                if(targetFolder.parent.toString().indexOf("_seq")==-1){
                                         targetFolder = new Folder(folder.parent.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
                                         img = new File(folder.parent.toString()+sp.slash+item.text+".png");
                                     }
                             }
+                        }catch(err){
+//~                                 cout<<"----"+decodeURIComponent ( targetFolder.toString())+'\r\nseq folder not found\r'+iter ;
+                            }
                         
-                        if(!targetFolder.exists){cout<<targetFolder.toString()+'\r\nseq folder not found\r'+iter;continue ;}
-                        if(!img.exists){ cout<<'image not found\r'+iter;continue ;}
+                        if(!targetFolder.exists){
+//~                                 cout<<decodeURIComponent ( targetFolder.toString())+'\r\nseq folder not found\r'+iter;
+                                continue;
+                            }
+                        if(!img.exists){ 
+//~                                 cout<<'image not found\r'+iter ;
+                                continue;
+                            }
                         
 
 
@@ -129,10 +151,17 @@
                                                                         }
                                                                     sp.gv.refresh();
                                                                 """;
-                                    app.scheduleTask (stringToCall, oneFrame, false);
+                                                                         
+                                    sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, false));
+
                             }
                         
-                        var stringToCall = """var len = sp.gv.children.length; 
+                        var stringToCall = """                    
+                                                        sp.renderTaskArray.forEach (function(item,index){
+                                                                app.cancelTask (item);
+                                                            });
+                                                        sp.renderTaskArray.length = 0;
+                                                        var len = sp.gv.children.length; 
                                                             for(var itemIndex=0;itemIndex<len;itemIndex++){
                                                                     var currentItem = sp.previewHelper["item"+itemIndex];
                                                                     if(currentItem){
@@ -145,10 +174,11 @@
                                                         sp.gv.refresh();
                                                         sp.previewHelper = {};
                                                     """
-                        app.scheduleTask (stringToCall, oneFrame, false);
-
+                        app.scheduleTask (stringToCall, oneFrame*i, false);
+                        
+                        
                     },
-                this.moveOver = function(event,item,isMouseMoving){
+            this.moveOver = function(event,item,isMouseMoving){
                         if(!item){
                                 sp.moveInIter = 0;
                                 return;
@@ -161,6 +191,7 @@
                         var index = item.index;
                         var oneFrame = sp.frameSecond;
                         
+                        
                         sp.moveOut =false;
 
 
@@ -170,7 +201,7 @@
 
                         
                         if(!targetFolder.exists){
-                                if(targetFolder.toString().indexOf("_seq")==-1){
+                                if(targetFolder.parent.toString().indexOf("_seq")==-1){
                                         targetFolder = new Folder(folder.parent.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
                                         img = new File(folder.parent.toString()+sp.slash+item.text+".png");
                                     }
@@ -214,10 +245,10 @@
                                                                     sp.gv.refresh();
                                                                     }
                                                                 """;
-                                    app.scheduleTask (stringToCall, oneFrame, false);
+                                    sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, false));
                             }
                         
-                        var stringToCall = """if(sp.moveOut==false){
+                        var stringToCall = """
                                                             var len = sp.gv.children.length; 
                                                             for(var itemIndex=0;itemIndex<len;itemIndex++){
                                                                     var currentItem = sp.previewHelper["item"+itemIndex];
@@ -229,13 +260,21 @@
                                                                         }
                                                             }
                                                         sp.gv.refresh();
-                                                        }
                                                         sp.previewHelper = {};
                                                     """
-                        app.scheduleTask (stringToCall, oneFrame, false);
+                        sp.backTaskArray.push(app.scheduleTask (stringToCall, oneFrame*i, false));
                         sp.moveInIter++;
                     },
 
+            this.moveOut = function(){
+                    sp.renderTaskArray.forEach (function(item,index){
+                            app.cancelTask (item);
+                        });
+                    sp.renderTaskArray.length = 0;
+                    sp.preImageArr.forEach(function(item,index){
+                            sp.gv.children[index].image = item;
+                        });
+                },
             this.addModule = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
                     if (!newEleName){ return;}
@@ -495,7 +534,8 @@
                               var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
-                              sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
+                              var item = sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
+                              sp.preImageArr.push(item.image);
                               sp.gv.refresh();
                               
 
@@ -750,8 +790,10 @@
                                 j=content.indexOf(thisStr,j+thisStr.length);
                             }
                         sp.gv.removeAll();
+                        sp.preImageArr = [];
                         for(var i=0;i<indexArr.length;i++){
-                                   sp.gv.add(decodeURIComponent(indexArr[i]),sp.getImage(this.selection.text,indexArr[i]));
+                                   var item = sp.gv.add(decodeURIComponent(indexArr[i]),sp.getImage(this.selection.text,indexArr[i]));
+                                   sp.preImageArr.push(item.image);
                         }
                      
                     
@@ -802,9 +844,20 @@
                                                     upAndDownWindow(currentPosition)
                                              }else if(key.ctrlKey == false && key.shiftKey == false && alt == true){
                                                     keepRef.newItem(event);
-                                                 }
+                                                 }else if(key.ctrlKey == true && key.shiftKey == true && alt == true){
+                                                        alert(sp.gv.selection.length);
+                                                        alert(sp.gv.lastSelectedItem.index);
+                                                     }
                 },
             this.shortMenu = function(event){
+                    sp.renderTaskArray.forEach (function(item,index){
+                            app.cancelTask (item);
+                        });
+                    sp.renderTaskArray.length = 0;
+                    sp.preImageArr.forEach(function(item,index){
+                            sp.gv.children[index].image = item;
+                        });
+
                     if (!event) return;
                     if (event.button == 2 && event.detail == 1 && event.altKey == false) {
                     var currentPosition = [event.screenX, event.screenY];
@@ -903,6 +956,9 @@ this,
             
             moveInIter:0,
             previewHelper: {},
+            renderTaskArray:[],
+            backTaskArray:[],
+            preImageArr:[],
         
             haveSetting: function(keyName){
                     return this.setting.haveSetting (this.scriptName, keyName);
@@ -1579,7 +1635,7 @@ this,
                 .pushh("ch")
                 .pushh("true")
                 .pushh("0")
-                .pushh("66")
+                .pushh("33")
                 .pushh("30")
 
     keyNameArr.forEach (function(item, index){

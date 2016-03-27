@@ -243,7 +243,8 @@ this.extend(this, {
                     e.event.leftButtonPressedLocation = [event.clientX, event.clientY];
                     e.event.leftButtonPressedScrollBarValue = e.scrollBarValue;
                     /***************************************/
-                    e.mouseMove(event,e.event.targetItem,e.event.mouseMoving);
+                    if(event.ctrlKey==false)
+                        e.mouseMove(event,e.event.targetItem,e.event.mouseMoving);
 
                     /***************************************/
                 } else if (event.detail == 2) {//左键双击
@@ -581,8 +582,14 @@ this.extend(this, {
         var s = e.selection;
         var c = e.children;
         var currentItem = e.event.targetItem;
+        if (!currentItem){
+                for (var i = 0;i < s.length; i++) s[i].selected = 0; 
+                e.lastSelectedItem = null;
+                e.getSelection();
+            }
 
         if (currentItem) {
+            var preSelected = currentItem.selected
             if (event.ctrlKey == false) {
                 for (var i = 0; i < c.length; i++) c[i].selected = 0;
             }
@@ -595,8 +602,17 @@ this.extend(this, {
                     }
                 }
             }
+        
             currentItem.selected = true;
-            e.lastSelectedItem = currentItem;
+            if(e.lastSelectedItem && event.ctrlKey == true){
+                    if(preSelected == true){
+                        currentItem.selected = false;
+                    }
+                }else{
+                e.lastSelectedItem = currentItem;
+            }
+
+
             e.getSelection();
         } else if (e.event.targetScrollBar == 1) {
             e.scrollBarValue = e.scrollBarMaxValue * event.clientY / e.list.size[1];

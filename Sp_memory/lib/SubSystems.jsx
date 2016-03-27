@@ -85,7 +85,7 @@ _('*').each(function(e){
                                                         if(isNaN(this.text)){this.text = sp.frameSecond;return;}
                                                         
                                                         var value = parseInt(this.text);
-                                                        if(value>=1000) value = 1000;
+                                                        if(value>=200) value = 200;
                                                         if(value<=33) value =33;
                                                         sp.frameSecond = value;
                                                         sp.saveSetting("frameSecond",value);
