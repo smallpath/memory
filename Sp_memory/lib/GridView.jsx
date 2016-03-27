@@ -272,7 +272,7 @@ this.extend(this, {
 
                 /***************************************/
             }
-            e.mouseMove(event);
+            e.mouseMove(event,e.getItemFromLocation(event.clientX, event.clientY));
 
         });
         eventRect.addEventListener('mouseup', function (event) {
@@ -519,7 +519,7 @@ this.extend(this, {
         for (var i = 0; i < items.length; i++) {
             items[i].rect[2] = e.itemSize[0] * e.scale;
             items[i].rect[3] = e.itemSize[1] * e.scale;
-            items[i].imageRect = e.resizeImage(ScriptUI.newImage(items[i].image));
+//~             items[i].imageRect = e.resizeImage(ScriptUI.newImage(items[i].image));
             items[i].fontRect[0] = 0;
             items[i].fontRect[1] = (e.itemSize[1] - e.itemFontHeight) * e.scale+5;
             items[i].fontRect[2] = e.itemSize[0] * e.scale;

@@ -24,6 +24,8 @@
     var gv = sp.gv = new GridView(group1);
     
 
+
+
     //~ Set GridView's attributes
     gv.limitText = sp.getSettingAsBool ("limitText");
     gv.showText = sp.showThumbValue ;
@@ -56,6 +58,58 @@
     }
 
     win.onResize();
+    
+    
+sp.gv.mouseMove = function(event,item){
+        if(!item){
+                sp.moveInIter = 0;
+                return;
+            };
+        if(sp.moveInIter!=0) return;
+        
+        var img = item.image ; 
+        var index = item.index;
+        var oneFrame = 66;
+
+
+        var folder = new Folder(img.parent);
+        var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
+        
+        if(!targetFolder.exists){
+                if(targetFolder.toString().indexOf("_seq")==-1){
+                        targetFolder = new Folder(folder.parent.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
+                        img = new File(folder.parent.toString()+sp.slash+item.text+".png");
+                    }
+            }
+        
+        if(!targetFolder.exists){return; cout<<'seq folder not found';}
+        if(!img.exists){ return; cout<<'image not found'}
+
+        
+        
+        sp["tempItem"+index] = item;
+        sp["tempImg"+index] = img;
+
+        sp["tempFiles"+index] = (function(f){
+                var len = f.getFiles().length;
+                var arr =[];
+                for(var i=0;i<len;i++){
+                    var newFile = new File(f.toString()+sp.slash+i.toString()+".png");
+                    if(newFile.exists)
+                        arr.push(newFile);
+                    }
+                return arr;
+            })(targetFolder);
+        
+        
+        for(var i =0,len = sp["tempFiles"+index].length;i<len;i++){
+                    app.scheduleTask ("sp.tempItem"+index+".image=sp.tempFiles"+index+"["+i+"];sp.gv.refresh();", oneFrame, false);
+            }
+        app.scheduleTask ("sp.tempItem"+index+".image=sp.tempImg"+index+";sp.gv.refresh();", oneFrame, false);
+        sp.moveInIter++;
+        
+     }
+
 
     
 
@@ -702,6 +756,8 @@ this,
             settingsFile: new File(File($.fileName).parent.fsName + sp.prototype.slash +  "Sp_memory"+ sp.prototype.slash + "settings.xml"),
             imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash +  "Sp_memory"+ sp.prototype.slash + "image"),
             roamingFolder:new  Folder(Folder.userData.fullName + "/Aescripts/Sp_memory"),
+            
+            moveInIter:0,
             
         
             haveSetting: function(keyName){

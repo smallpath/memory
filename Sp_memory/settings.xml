@@ -12,11 +12,13 @@
     <Name>Text</Name>
     <Name>Effects</Name>
     <Name>Transition circle pack 1</Name>
+    <Name>test</Name>
   </ListItems>
   <ParentGroup>
     <item groupName="Default">
       <Index>0</Index>
       <Index>1</Index>
+      <Index>4</Index>
     </item>
     <item groupName="ww">
       <Index>3</Index>
