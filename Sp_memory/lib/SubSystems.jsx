@@ -38,6 +38,14 @@ var UIJson =
                                                     thumbType:{type:'checkbox',text:loc(sp.thumbType)}
                                                     }}
                                     }},
+                                    gr4:{type:'group',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                                      frameSecond:{type:'statictext',text:loc(sp.frameSecondText)},
+                                                      frameSecondText:{type:'edittext',text:"",characters:18}
+                                    }},                                    
+                                    gr5:{type:'group',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
+                                                      frameNum:{type:'statictext',text:loc(sp.frameNumText)},
+                                                      frameNumText:{type:'edittext',text:"",characters:18}
+                                    }},
                                     gr0:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                                 gr2:{type:'group',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                                             folderName:{type:'statictext',text:loc(sp.folderName)},
@@ -47,7 +55,7 @@ var UIJson =
                                     gr3:{type:'group',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                                       effectName:{type:'statictext',text:loc(sp.effectName)},
                                                       effectNameText:{type:'edittext',text:"",characters:18}
-                                    }},
+                                    }},                  
                         
                         }},//end of group4
                         group5:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
@@ -72,12 +80,34 @@ var win = _.newWindow(UIJson)[0];
 
 _('*').each(function(e){
             switch(e.id){
+                  case 'frameSecondText': e.text = sp.frameSecond.toString();
+                                                e.onChange = function(){
+                                                        if(isNaN(this.text)){this.text = sp.frameSecond;return;}
+                                                        
+                                                        var value = parseInt(this.text);
+                                                        if(value>=1000) value = 1000;
+                                                        if(value<=33) value =33;
+                                                        sp.frameSecond = value;
+                                                        sp.saveSetting("frameSecond",value);
+                                                        this.text = value.toString();
+                                                    };break;                  
+                   case 'frameNumText':   e.text = sp.frameNum.toString();
+                                                e.onChange = function(){
+                                                        if(isNaN(this.text)){this.text = sp.frameNum;return;}
+                                                        
+                                                        var value = parseInt(this.text);
+                                                        if(value>=50) value = 50;
+                                                        if(value<=0) value =0;
+                                                        sp.frameNum = value;
+                                                        sp.saveSetting("frameNum",value);
+                                                        this.text = value.toString();
+                                                    };break;
                   case 'move':    e.onClick = function(){
-                                        if(!_('#wlist')[0].selection || !_('#drop')[0]) return;
+                                        if(!_('#wlist')[0].selection || !_('#drop')[0]) return alert(loc(sp.selectGroupFirst));
                                                 moveWindow(_('#wlist')[0].selection,_('#drop')[0].selection,win);
                                     };  break;
                   case 'editModule':e.onClick = function(){
-                                        if(!_('#drop')[0]) return;
+                                        if(!_('#drop')[0]) return alert(loc(sp.selectModuleFirst));
                                                 moduleWindow(_('#drop')[0].selection,win);
                                     };  break;
                   case 'drop':  sp.xmlGroupNames.forEach(function(item,index){
@@ -102,24 +132,13 @@ _('*').each(function(e){
                   case 'wlist': break;
                   case 'deleteFolder': e.onClick = function(){
                                                       var folder = sp.materialFolder;
-                                                      function deleteThisFolder(folder) {
-                                                          var waitClFile = folder.getFiles();
-                                                          for (var waitA = 0; waitA < waitClFile.length; waitA++) {
-                                                              if (waitClFile[waitA] instanceof Folder) {
-                                                                  deleteThisFolder(waitClFile[waitA]);
-                                                                  waitClFile[waitA].remove();
-                                                              } else {
-                                                                  waitClFile[waitA].remove();
-                                                              }
-                                                          }
-                                                      }
                                                       deleteThisFolder(folder);
                                                       alert(loc(sp.deleteOk));
                               
                                                 };break;
                   case 'changeGroupName': e.onClick = function(){
                                                                         var wlist = _('#wlist')[0];
-                                                                        if(!wlist.selection) return;
+                                                                        if(!wlist.selection) return alert(loc(sp.selectGroupFirst));
                                                                         var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
                                                                         if(!newGroupName) return;
                                                                         if(sp.xmlFileNames.has(newGroupName)){alert(loc(sp.existName));return;}
@@ -150,7 +169,7 @@ _('*').each(function(e){
                                                 e.onClick = function(){sp.saveSetting("coverChange",this.value.toString())}
                                                 break;
                   case 'thumbType':   e.value = sp.getSettingAsBool("thumbType");
-                                                e.onClick = function(){sp.saveSetting("thumbType",this.value.toString())}
+                                                e.onClick = function(){sp.saveSetting("thumbType",this.value.toString());sp.thumbTypeValue = this.value}
                                                 break;
                   case 'folderNameText':   e.text = sp.getSetting("folderName");
                                                       e.onChange = function(){sp.saveSetting("folderName",this.text)}
@@ -270,7 +289,6 @@ win.center();
 win.show();
                         
     }
-
 
 
 function moduleWindow(groupItem,win){
@@ -584,6 +602,19 @@ var upAndDownWindow=function (cu){
         }
 
 
+function deleteThisFolder(folder) {
+             var waitClFile = folder.getFiles();
+               for (var waitA = 0; waitA < waitClFile.length; waitA++) {
+                   if (waitClFile[waitA] instanceof Folder) {
+                    deleteThisFolder(waitClFile[waitA]);
+                                      waitClFile[waitA].remove();
+                            } else {
+                           waitClFile[waitA].remove();
+                         }
+                }
+            }
+
+
 
 var presetWindow = function () {
                     var jinWin = new Window("dialog", loc(sp.settingPre));
@@ -662,4 +693,6 @@ var presetWindow = function () {
                 }
     
     
+
+
     

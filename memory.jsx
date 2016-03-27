@@ -37,6 +37,7 @@
     parentDroplist.onChange = fns.parentDroplistChange;
     droplist.onChange = fns.droplistChange;
     
+
     sp.reloadParentDroplist();
     var selection = parseInt(sp.getSetting("parentSelection"));
     parentDroplist.selection = (selection<=parentDroplist.items.length-1 &&selection>=0)?selection:0;
@@ -59,111 +60,182 @@
 
     win.onResize();
     
-    
-sp.gv.mouseMove = function(event,item,isMouseMoving){
-
-        if(!item){
-                sp.moveInIter = 0;
-                return;
-            };
-        if(isMouseMoving == true){
-            if(sp.moveInIter!=0) return;
-        }
-        
-        var img = item.image ; 
-        var index = item.index;
-        var oneFrame = 200;
-
-
-        var folder = new Folder(img.parent);
-        var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
-        
-
-        
-        if(!targetFolder.exists){
-                if(targetFolder.toString().indexOf("_seq")==-1){
-                        targetFolder = new Folder(folder.parent.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
-                        img = new File(folder.parent.toString()+sp.slash+item.text+".png");
-                    }
-            }
-        
-        if(!targetFolder.exists){return ;cout<<targetFolder.toString()+'\r\nseq folder not found';}
-        if(!img.exists){ return ;cout<<'image not found'}
-        
-
-        sp.previewHelper["item"+index] = {};
-        sp.previewHelper["item"+index]["tempItem"] = item;
-        sp.previewHelper["item"+index]["tempImg"] = img;
-        sp.previewHelper["item"+index]["tempFiles"] = (function(f){
-                var len = f.getFiles().length;
-                var arr =[];
-                for(var i=0;i<len;i++){
-                    var newFile = new File(f.toString()+sp.slash+i.toString()+".png");
-                    if(newFile.exists)
-                        arr.push(newFile);
-                    }
-                return arr;
-            })(targetFolder);
-        
-        if(sp.previewHelper["item"+index]["tempFiles"].length==0) return;
-        
-        
-        for(var i =0,len = sp.previewHelper["item"+index]["tempFiles"].length;i<len;i++){
-                    var stringToCall = 
-                                                """
-                                                        var len = sp.gv.children.length; 
-                                                        for(var itemIndex=0;itemIndex<len;itemIndex++){
-                                                            var currentItem = sp.previewHelper["item"+itemIndex];
-                                                            if(currentItem){
-                                                                //$.writeln("""+i+""")
-                                                                var currentIndex = """+i+""";
-                                                                var currentFile = currentItem["tempFiles"][currentIndex];
-                                                                if(currentFile){
-                                                                        currentItem["tempItem"].image=currentFile;
-                                                                    }
-                                                                }
-                                                        }
-                                                    sp.gv.refresh();
-                                                """;
-                    app.scheduleTask (stringToCall, oneFrame, false);
-            }
-        
-        var stringToCall = """
-                                            var len = sp.gv.children.length; 
-                                            for(var itemIndex=0;itemIndex<len;itemIndex++){
-                                                    var currentItem = sp.previewHelper["item"+itemIndex];
-                                                    if(currentItem){
-                                                        var currentImg = currentItem["tempImg"];
-                                                        if(currentImg){
-                                                                currentItem["tempItem"].image=currentImg;
-                                                            }
-                                                        }
-                                            }
-                                        sp.gv.refresh();
-                                        sp.previewHelper = {};
-                                    """
-        app.scheduleTask (stringToCall, oneFrame, false);
-        sp.moveInIter++;
-        
-     }
-
-
-//~ 全局:元素的个数,元素,每个元素对应的图片序列数组,对应的原始图片,
-
-//~ sp.previewHelper.len = sp.gv.children.length; 原始个数
-//~ for(var i=0;i<sp.previewHelper.len;i++){
-//~     sp.previewHelper["item"+i]={};
-//~     sp.previewHelper["item"+i]["tempItem"]=元素本身
-//~     sp.previewHelper["item"+i]["tempImg"] = 原始图片
-//~     sp.previewHelper["item"+i]["tempFiles"] = 图片序列数组
-//~     sp.previewHelper["item"+i]["currentIndex"] = 目前该放到的index 
-//~ }
-
+    sp.gv.mouseOut = function(){sp.moveOut = true;}
+//~     sp.gv.mouseMove = sp.fns.moveOver;
 
     
 
     function fns(){
             var keepRef = this;
+            this.previewAll = function(){
+                    var lenArr = [];
+                    var oneFrame = sp.frameSecond;
+                    for(var iter=0,thisLen=sp.gv.children.length;iter<thisLen;iter++){
+                        var item = sp.gv.children[iter];
+                        var img = item.image ; 
+                        var index = item.index;
+                        
+                        sp.moveOut =false;
+
+
+                        var folder = new Folder(img.parent);
+                        var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
+                        
+                        if(!targetFolder.exists){
+                                if(targetFolder.parent.indexOf("_seq")==-1){
+                                        targetFolder = new Folder(folder.parent.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
+                                        img = new File(folder.parent.toString()+sp.slash+item.text+".png");
+                                    }
+                            }
+                        
+                        if(!targetFolder.exists){cout<<targetFolder.toString()+'\r\nseq folder not found\r'+iter;continue ;}
+                        if(!img.exists){ cout<<'image not found\r'+iter;continue ;}
+                        
+
+
+
+                        sp.previewHelper["item"+index] = {};
+                        sp.previewHelper["item"+index]["tempItem"] = item;
+                        sp.previewHelper["item"+index]["tempImg"] = img;
+                        sp.previewHelper["item"+index]["tempFiles"] = (function(f){
+                                var len = f.getFiles().length;
+                                var arr =[];
+                                for(var i=0;i<len;i++){
+                                    var newFile = new File(f.toString()+sp.slash+i.toString()+".png");
+                                    if(newFile.exists)
+                                        arr.push(newFile);
+                                    }
+                                return arr;
+                            })(targetFolder);
+                        
+                        lenArr.push(sp.previewHelper["item"+index]["tempFiles"])
+                    }
+                    
+                        lenArr.sort(function(a,b){return a.length-b.length});
+                        var maxLen = lenArr[lenArr.length-1].length;
+                        
+                        for(var i =0,len = maxLen;i<len;i++){
+                                    var stringToCall = 
+                                                                """ var len = sp.gv.children.length; 
+                                                                        for(var itemIndex=0;itemIndex<len;itemIndex++){
+                                                                            var currentItem = sp.previewHelper["item"+itemIndex];
+                                                                            if(currentItem){
+                                                                                var currentIndex = """+i+""";
+                                                                                var currentFile = currentItem["tempFiles"][currentIndex];
+                                                                                if(currentFile){
+                                                                                        currentItem["tempItem"].image=currentFile;
+                                                                                    }
+                                                                                }
+                                                                        }
+                                                                    sp.gv.refresh();
+                                                                """;
+                                    app.scheduleTask (stringToCall, oneFrame, false);
+                            }
+                        
+                        var stringToCall = """var len = sp.gv.children.length; 
+                                                            for(var itemIndex=0;itemIndex<len;itemIndex++){
+                                                                    var currentItem = sp.previewHelper["item"+itemIndex];
+                                                                    if(currentItem){
+                                                                        var currentImg = currentItem["tempImg"];
+                                                                        if(currentImg){
+                                                                                currentItem["tempItem"].image=currentImg;
+                                                                            }
+                                                                        }
+                                                            }
+                                                        sp.gv.refresh();
+                                                        sp.previewHelper = {};
+                                                    """
+                        app.scheduleTask (stringToCall, oneFrame, false);
+
+                    },
+                this.moveOver = function(event,item,isMouseMoving){
+                        if(!item){
+                                sp.moveInIter = 0;
+                                return;
+                            };
+                        if(isMouseMoving == true){
+                            if(sp.moveInIter!=0) return;
+                        }
+                        
+                        var img = item.image ; 
+                        var index = item.index;
+                        var oneFrame = sp.frameSecond;
+                        
+                        sp.moveOut =false;
+
+
+                        var folder = new Folder(img.parent);
+                        var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
+                        
+
+                        
+                        if(!targetFolder.exists){
+                                if(targetFolder.toString().indexOf("_seq")==-1){
+                                        targetFolder = new Folder(folder.parent.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
+                                        img = new File(folder.parent.toString()+sp.slash+item.text+".png");
+                                    }
+                            }
+                        
+                        if(!targetFolder.exists){return ;cout<<targetFolder.toString()+'\r\nseq folder not found';}
+                        if(!img.exists){ return ;cout<<'image not found'}
+                        
+
+                        sp.previewHelper["item"+index] = {};
+                        sp.previewHelper["item"+index]["tempItem"] = item;
+                        sp.previewHelper["item"+index]["tempImg"] = img;
+                        sp.previewHelper["item"+index]["tempFiles"] = (function(f){
+                                var len = f.getFiles().length;
+                                var arr =[];
+                                for(var i=0;i<len;i++){
+                                    var newFile = new File(f.toString()+sp.slash+i.toString()+".png");
+                                    if(newFile.exists)
+                                        arr.push(newFile);
+                                    }
+                                return arr;
+                            })(targetFolder);
+                        
+                        if(sp.previewHelper["item"+index]["tempFiles"].length==0) return;
+                        
+                        
+                        for(var i =0,len = sp.previewHelper["item"+index]["tempFiles"].length;i<len;i++){
+                                    var stringToCall = 
+                                                                """if(sp.moveOut==false){
+                                                                        var len = sp.gv.children.length; 
+                                                                        for(var itemIndex=0;itemIndex<len;itemIndex++){
+                                                                            var currentItem = sp.previewHelper["item"+itemIndex];
+                                                                            if(currentItem){
+                                                                                var currentIndex = """+i+""";
+                                                                                var currentFile = currentItem["tempFiles"][currentIndex];
+                                                                                if(currentFile){
+                                                                                        currentItem["tempItem"].image=currentFile;
+                                                                                    }
+                                                                                }
+                                                                        }
+                                                                    sp.gv.refresh();
+                                                                    }
+                                                                """;
+                                    app.scheduleTask (stringToCall, oneFrame, false);
+                            }
+                        
+                        var stringToCall = """if(sp.moveOut==false){
+                                                            var len = sp.gv.children.length; 
+                                                            for(var itemIndex=0;itemIndex<len;itemIndex++){
+                                                                    var currentItem = sp.previewHelper["item"+itemIndex];
+                                                                    if(currentItem){
+                                                                        var currentImg = currentItem["tempImg"];
+                                                                        if(currentImg){
+                                                                                currentItem["tempItem"].image=currentImg;
+                                                                            }
+                                                                        }
+                                                            }
+                                                        sp.gv.refresh();
+                                                        }
+                                                        sp.previewHelper = {};
+                                                    """
+                        app.scheduleTask (stringToCall, oneFrame, false);
+                        sp.moveInIter++;
+                    },
+
             this.addModule = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
                     if (!newEleName){ return;}
@@ -228,7 +300,7 @@ sp.gv.mouseMove = function(event,item,isMouseMoving){
                             sp.gv.refresh();
                             
 
-                }
+                },
             
             this.newLayer  = function(){
                         if(!sp.gv.lastSelectedItem) return;
@@ -350,7 +422,14 @@ sp.gv.mouseMove = function(event,item,isMouseMoving){
                                               app.project.activeItem.selectedLayers[0].outPoint=outPointArr[0];
                                         app.endUndoGroup();
                                   }
-                            
+                              
+                              
+                                  //~ Return the layer array
+                                  if(sp.onlyEffectValue == false){
+                                        return activeCompLayersArr;
+                                  }else{
+                                        return null;
+                                   }
                             
 
                   },
@@ -366,10 +445,23 @@ sp.gv.mouseMove = function(event,item,isMouseMoving){
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
                               
-                              if(app.version.indexOf("13.5") != -1 ||app.version.indexOf("13.6") != -1||app.version.indexOf("13.7") != -1||app.version.indexOf("13.8") != -1)
-                                var itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text,itemName));
+                              var imageFile = sp.getImageFile(sp.droplist.selection.text,itemName);
+                              if(imageFile.exists)
+                                  imageFile.remove();    
+                              var seqFolder = new Folder(imageFile.toString().replace(/.png/i,"")+"_seq");
+                              if(seqFolder.exists){
+                                   deleteThisFolder(seqFolder);
+                                   seqFolder.remove();
+                              }
+                              
+                              
+                              if(app.version.indexOf("13.5") != -1||
+                                  app.version.indexOf("13.6") != -1||
+                                  app.version.indexOf("13.7") != -1||
+                                  app.version.indexOf("13.8") != -1)
+                                var itemName = sp.savePng2(imageFile);
                               else
-                                var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
+                                var itemName = sp.savePng(imageFile);
                               var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml,sp.gv.lastSelectedItem.index);
                               
@@ -427,6 +519,12 @@ sp.gv.mouseMove = function(event,item,isMouseMoving){
                                       var image = sp.getImageFile(sp.droplist.selection.text,preText);
                                       if(image.exists)
                                           image.remove();    
+                                      var seqFolder = new Folder(image.toString().replace(/.png/i,"")+"_seq");
+                                      if(seqFolder.exists){
+                                            deleteThisFolder(seqFolder);
+                                            seqFolder.remove();
+                                        }
+                                       
                                 });
                           delete xml.waitToDelete;
                           if(xml.children().length() !=0){
@@ -477,10 +575,7 @@ sp.gv.mouseMove = function(event,item,isMouseMoving){
                         //~ delete the imagesFolder
 
                         var imageFolder = sp.getImageFolderByName(selectionText);
-                        var images = imageFolder.getFiles();
-                        images.forEach(function(item){
-                                    item.remove();
-                              });
+                        deleteThisFolder(imageFolder);
                         imageFolder.remove();
                         
                         //~delete the files
@@ -931,6 +1026,38 @@ this,
     
       //~  added in 2016.1.21
       sp.prototype.extend(sp.prototype,{
+                 getTimeInfoArr:function(comp){
+                            var layers = [];
+                            if(comp.selectedLayers.length==0){
+                                    for(var i=0;i<comp.numLayers;i++){
+                                        if(comp.layer(i+1).enabled == true)
+                                            layers.push(comp.layer(i+1));
+                                        }
+                                }else{
+                                        for(var i=0;i<comp.selectedLayers.length;i++){
+                                            if(comp.selectedLayers[i].enabled ==true)
+                                                layers.push(comp.selectedLayers[i]);
+                                            }
+                                    }
+                                
+                            var inPointArr = [];
+                            var outPointArr =[];
+                            
+                                
+                            for(var i=0;i<layers.length;i++){
+                                    var layer = layers[i];
+                                    inPointArr.push(layer.inPoint);
+                                    outPointArr.push(layer.outPoint);
+                                }
+                            
+                            if(layers.length==0) return null;
+                            inPointArr.sort(function(a,b){return a-b});
+                            outPointArr.sort(function(a,b){return a-b});
+                            
+                            return [inPointArr[0],outPointArr[outPointArr.length-1]]
+                            
+                            
+                    },
                     swap: function(a, b) {
                         tempA = a.text;
                         a.text = b.text;
@@ -1062,54 +1189,71 @@ this,
                               } catch (err) { }
                               tempComp3.remove();
                         },
+                    
                     savePng2: function (pngPath) {
-                    app.beginSuppressDialogs();
-                    var comps = app.project.activeItem;
-                    var layers = comps.selectedLayers;
-                    var jishushuzu = [];
-                    var waitToPre = [];
-                    var tempComp2 = app.project.items.addComp("tempComp2", comps.width, comps.height, comps.pixelAspect, comps.duration, comps.frameRate);
-                    var BGtemp = tempComp2.layers.addSolid([0, 0, 0], "BG", 100, 60, 1, 10800);
-                    var cunLengthA = layers.length;
-                    for (iq = 0; iq < layers.length; iq++) {
-                        jishushuzu.push(layers[iq].index);
-                    }
-                    for (iq = 0; iq < layers.length; iq++) {
-                        wocaoName = layers[iq].name;
-                        waitToPre[waitToPre.length] = layers[iq].duplicate();
-                        waitToPre[iq].name = wocaoName;
-                    }
-                    var wwwww = [];
-                    for (iq = 0; iq < cunLengthA; iq++) {
-                        wwwww.push(waitToPre[iq].index);
-                    }
-                    precomposeComp = comps.layers.precompose(wwwww, "tempA", true);
-                    comps.layer("tempA").copyToComp(tempComp2);
-                    comps.layer("tempA").remove();
-                    for (iq = 0; iq < cunLengthA; iq++) {
-                        comps.layer(jishushuzu[iq]).selected = true;
-                    }
-                    try{tempComp2.layer(1).solo = false;}catch(err){}
-                    var preVVVV = tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Scale").value;
-                    tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Scale").setValue([100 / tempComp2.width * preVVVV[0], 60 / tempComp2.height * preVVVV[1]]);
-                    tempComp2.width = 100;
-                    tempComp2.height = 60;
-                    BGtemp.property("ADBE Transform Group").property("ADBE Position").setValue([50, 30]);
-                    tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Position").setValue([50, 30]);
-                    var nameStr = "";
-                    pngPath = File(pngPath);
-                    while (pngPath.exists) {
-                        pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
+                        app.beginSuppressDialogs();
+                        var comps = app.project.activeItem;
+                        var timeArr = this.getTimeInfoArr(comps);
+                        var layers = comps.selectedLayers;
+                        var jishushuzu = [];
+                        var waitToPre = [];
+                        var tempComp2 = app.project.items.addComp("tempComp2", comps.width, comps.height, comps.pixelAspect, comps.duration, comps.frameRate);
+                        var BGtemp = tempComp2.layers.addSolid([0, 0, 0], "BG", 100, 60, 1, 10800);
+                        var cunLengthA = layers.length;
+                        for (iq = 0; iq < layers.length; iq++) {
+                            jishushuzu.push(layers[iq].index);
+                        }
+                        for (iq = 0; iq < layers.length; iq++) {
+                            wocaoName = layers[iq].name;
+                            waitToPre[waitToPre.length] = layers[iq].duplicate();
+                            waitToPre[iq].name = wocaoName;
+                        }
+                        var wwwww = [];
+                        for (iq = 0; iq < cunLengthA; iq++) {
+                            wwwww.push(waitToPre[iq].index);
+                        }
+                        precomposeComp = comps.layers.precompose(wwwww, "tempA", true);
+                        comps.layer("tempA").copyToComp(tempComp2);
+                        comps.layer("tempA").remove();
+                        for (iq = 0; iq < cunLengthA; iq++) {
+                            comps.layer(jishushuzu[iq]).selected = true;
+                        }
+                        try{tempComp2.layer(1).solo = false;}catch(err){}
+                        var preVVVV = tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Scale").value;
+                        tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Scale").setValue([100 / tempComp2.width * preVVVV[0], 60 / tempComp2.height * preVVVV[1]]);
+                        tempComp2.width = 100;
+                        tempComp2.height = 60;
+                        BGtemp.property("ADBE Transform Group").property("ADBE Position").setValue([50, 30]);
+                        tempComp2.layer(1).property("ADBE Transform Group").property("ADBE Position").setValue([50, 30]);
+                        var nameStr = "";
                         pngPath = File(pngPath);
-                    }
-                    try{tempComp2.saveFrameToPng(comps.time, pngPath);}catch(err){}
-                    BGtemp.source.remove();
-                    tempComp2.remove();
-                    precomposeComp.remove();
-                    try{nameStr = decodeURIComponent(File(pngPath).displayName.split(".")[0].toString());}catch(err){}
-                    app.endSuppressDialogs(false);
-                    return encodeURIComponent(nameStr);
-                },
+                        while (pngPath.exists) {
+                            pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
+                            pngPath = File(pngPath);
+                        }
+                        try{tempComp2.saveFrameToPng(comps.time, pngPath);}catch(err){}
+                        if(this.frameNum!=0){
+                                tempComp2.layer(1).inPoint = timeArr[0];
+                                tempComp2.layer(1).outPoint = timeArr[1];
+                                var timeArr = this.getTimeInfoArr(tempComp2)
+                                var targetFolder = new Folder(pngPath.toString().replace(/.png/i,"")+"_seq");
+                                !targetFolder.exists && targetFolder.create();
+                                var num = this.frameNum;
+                                for(var i=0;i<num;i++){                                                  
+                                      var time = timeArr[0] +i*(timeArr[1]-timeArr[0])/num;
+                                      var seqPath = new File(targetFolder.toString()+this.slash+i.toString()+".png");
+                                      comps.saveFrameToPng (time, seqPath);
+                                      this.cropImage (seqPath, seqPath);
+                                      app.purge (PurgeTarget.IMAGE_CACHES);
+                                   }
+                         }
+                        BGtemp.source.remove();
+                        tempComp2.remove();
+                        precomposeComp.remove();
+                        try{nameStr = decodeURIComponent(File(pngPath).displayName.split(".")[0].toString());}catch(err){}
+                        app.endSuppressDialogs(false);
+                        return encodeURIComponent(nameStr);
+                    },
                     savePng:function (pngPath) {
                               try{
                                       app.beginSuppressDialogs();
@@ -1138,10 +1282,28 @@ this,
                                           pngPath = File(pngPath);
                                       }
                                       try{
-                                          if(app.settings.getSetting("Sp_memory", "thumbType")=="true"){
+                                          if(this.getSetting("thumbType")=="true"){
                                               app.activeViewer.views[0].saveBlittedImageToPng(comps.time,pngPath,1000,"what's this? I don't know");
                                           }else{
                                               comps.saveFrameToPng (comps.time, pngPath);
+                                              }
+                                          this.cropImage (pngPath, pngPath);
+                                          if(this.frameNum!=0){
+                                                    var targetFolder = new Folder(pngPath.toString().replace(/.png/i,"")+"_seq");
+                                                    !targetFolder.exists && targetFolder.create();
+                                                    var num = this.frameNum;
+                                                    var timeArr = this.getTimeInfoArr(comps);
+                                                    for(var i=0;i<num;i++){                                                  
+                                                          var time = timeArr[0] +i*(timeArr[1]-timeArr[0])/num;
+                                                          var seqPath = new File(targetFolder.toString()+this.slash+i.toString()+".png");
+                                                          if(this.thumbTypeValue){
+                                                              app.activeViewer.views[0].saveBlittedImageToPng(time,seqPath,1000,"what's this? I don't know");
+                                                          }else{
+                                                              comps.saveFrameToPng (time, seqPath);
+                                                              }
+                                                        this.cropImage (seqPath, seqPath);
+                                                        app.purge (PurgeTarget.IMAGE_CACHES);
+                                                        }
                                               }
                                           }catch(err){alert(err.line.toString()+ err.toString())}
                                           for(var i=0;i<otherIndexArr.length;i++){
@@ -1150,7 +1312,6 @@ this,
                                                  thisLayer.enabled = otherEnabledArr[i];
                                                  }catch(err){}
                                           }
-                                          this.cropImage (pngPath, pngPath);
                                           app.endSuppressDialogs(false);    
                                                   nameStr = decodeURIComponent(File(pngPath).displayName.split(".")[0].toString());
                                                   return encodeURIComponent(nameStr);
@@ -1396,7 +1557,9 @@ this,
                  .pushh("offsetKeyframe")   
                  .pushh("language")
                  .pushh("showThumb")
-                 .pushh("parentSelection");
+                 .pushh("parentSelection")
+                 .pushh("frameSecond")
+                 .pushh("frameNum")
                  
     valueArr.pushh("1")
                 .pushh("true")
@@ -1416,6 +1579,8 @@ this,
                 .pushh("ch")
                 .pushh("true")
                 .pushh("0")
+                .pushh("66")
+                .pushh("30")
 
     keyNameArr.forEach (function(item, index){
             (function(item, value){
@@ -1432,6 +1597,12 @@ this,
       sp.onlyEffectValue = sp.getSettingAsBool ("onlyEffect");
       sp.cleanGroupValue = sp.getSettingAsBool("cleanGroup");
       sp.offsetKeyframeValue = sp.getSettingAsBool ("offsetKeyframe");
+      
+      sp.thumbTypeValue = sp.getSettingAsBool("thumbType");
+      
+      sp.frameSecond  = parseInt(sp.getSetting("frameSecond"));
+      sp.frameNum = parseInt(sp.getSetting("frameNum"));
+      
       
     
       !sp.roamingFolder.exists && sp.roamingFolder.create();
@@ -1489,6 +1660,15 @@ this,
             })
         sp.settingsFile.writee(newsettingsxml);
     }    
+
+    //~ If the file do not have a group,give it
+    var content = new XML( sp.settingsFile.readd());
+    if(!content.hasOwnProperty ("ListItems"))
+        content.appendChild(new XML("<ListItems/>"));
+    if(content.ListItems.children().length()==0){
+            content.ListItems.appendChild(new XML("<Name>Default</Name>"));
+        }
+    sp.settingsFile.writee(content);
 
     //~ If the file do not have the ParentGroup,add parentGroup to it
     var content = new XML( sp.settingsFile.readd());

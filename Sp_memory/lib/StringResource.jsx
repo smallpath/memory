@@ -27,7 +27,7 @@ sp.extend(sp,{
         save: { en: "Help scripts", ch: "辅助脚本" },
         exp: { en: "Fix expression errors", ch: "表达式翻译" },
         script: { en: "Sp_palette v1.0", ch: "形状层画板" },
-        aep: { en: "Reload Thumbnails of group", ch: "重载组内图片" },
+        aep: { en: "Reload previews of group", ch: "生成组内预览动画" },
         preset: { en: "Save every layer in active comp", ch: "自动存储每一层" },
         curve: { en: "Cut layer length", ch: "裁剪层长度" },
         blankName: { en: "Name should not be empty!", ch: "名字不应为空!" },
@@ -38,7 +38,7 @@ sp.extend(sp,{
         deleteFolder: { en: "Empty temp folder", ch: "清空素材文件夹" },
         changeGroupName: { en: "Change name of group", ch: "重命名选中组" },
         deleteOk: { en: "Clean folder successfully!", ch: "清空文件夹完毕!" },
-        yushe: { en: "New & Empty Property Setting", ch: "仅生成效果与清空属性组选项" },
+        yushe: { en: "Preset Setting", ch: "预设设置" },
         jinOne: { en: "Please select groups that will be created on selectedLayers", ch: "请选择在仅生成效果时要在选中层上生成的属性组" },
         jinTwo: { en: "Please select groups that will be empty on selectedLayers before creating Properties", ch: "请选择在仅生成效果之前要清空的选中层的属性组" },
         isSureGroup: { en: "What you are deleting is a Group.\rAre you sure?", ch: "你正在删除的是一个组.\r确定删除吗?" },
@@ -94,16 +94,26 @@ F键:覆盖选中元素.
 下键:下移选中元素."""
         },
         refresh: {
-            en: "Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp's time first.",
-            ch: "请仅在组内元素的缩略图未正确生成时使用本脚本\r本脚本将耗费大量时间重载缩略图\r新缩略图会在当前合成的时间处生成,请在运行本脚本之前选择好合成时间"
+            en: """Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp's time first.""",
+            ch: """生成组内所有元素的预览动画:
+##请用本功能对非3.x版本保存的组进行生成预览动画的操作:
+
+此功能将生成组内所有元素的主缩略图和预览动画,其中主缩略图为当前合成的当前时间点的画面
+
+注意:本脚本将耗费大量时间
+"""
         },
         auto: {
-            en: "This script helps you simplify you saving proccess\rIt will save every layer in active comp as a new element.",
-            ch: "此脚本可以帮助你快速存储新元素\r这会将活动合成中每一层都分别存储为一个新元素."
-        },
+            en: """This script helps you simplify you saving proccess\rIt will save every layer in active comp as a new element.""",
+            ch: """批量存储功能:
+
+这会将当前合成中每一层都分别存储为一个新元素.
+
+此功能可以帮助你快速存储新元素,十分适合存储大量的MG合成层
+"""},
         cutLength: {
             en: "This script will cut every layer in current comp, related to opacity for common layer and content length for comp layer.",
-            ch: "此脚本将会裁剪当前合成中每一层,根据普通层的透明度与合成层内容的长度."
+            ch: "此功能将会裁剪当前合成中每一层的长度,根据普通层的透明度与合成层内容的长度."
         },
         output: { en: "Export groups", ch: "批量导出组" },
         ok: { en: "Ok", ch: "确定", },
@@ -137,4 +147,13 @@ F键:覆盖选中元素.
         changeModuleName:{en:"Change module name",ch:"重命名选中模块"},
         moduleHelpTip:{en:"press key 'Up' and 'Down can move the selected module' ",ch:"方向上下键可移动选中模块"},
         quit:{en:"Quit",ch:"退出"},
+        selectGroupFirst:{en:"Please select a group first!",ch:"请先选中一个组!"},
+        selectModuleFirst:{en:"Please select a module first!",ch:"请先选中一个模块!"},
+        frameSecondText:{en:"The milliseconds length of frame continues when preview:",ch:"预览时一张图片持续的毫秒数:"},
+        frameNumText:{en:"The number of picture sequence generated for preview",ch:"生成供预览的图片序列时图片的数量:"},
+        reloadNeedFrames:{en:"Please input the max frames which will be used to correct the duration of Preview.Keep blank if you don't what this feature",
+                                     ch:"请输入最大帧数,这将被用来使预览动画的时间范围更加准确\r\n不输入则将不进行校准"},
+        needComp:{en:"Please select a comp first",ch:"脚本需要一个合成"},
+        previewAll:{en:"Preview all",ch:"预览全部"},
+        
         })

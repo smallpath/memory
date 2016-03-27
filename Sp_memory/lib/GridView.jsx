@@ -168,6 +168,7 @@ this.extend(this, {
         rightClick: function (event) { },//右键单击事件
         rightDoubleClick: function (event) { },//右键双击事件
         mouseMove: function (event) { },//鼠标移动事件
+        mouseOut:function(event) { },
     });
 
 /*********************网格视图的原型*************************************************************************/
@@ -309,6 +310,7 @@ this.extend(this, {
             e.event.rightButtonPressed = false;
             e.event.mouseMoving = false;
             e.event.targetScrollBar = false;
+            e.mouseOut();
             e.refresh();
         });
 
