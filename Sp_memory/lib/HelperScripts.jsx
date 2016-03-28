@@ -861,7 +861,14 @@ function cut(layer){
 /*************************************批量自动保存每一层为新Item**************************************/
 function autoSave(){
                         if(confirm(loc(sp.auto))==false) return;
-                        if(!(app.project.activeItem instanceof CompItem)) return;
+                        if(!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
+                        if(!sp.droplist.selection) return;
+                        
+                        if(app.project.activeItem.numLayers!=0){
+                                    var special_folder = sp.getImageFolderByName(sp.droplist.selection.text);
+                                    special_folder.execute();
+                            }
+
                         try{
                             var preRenameValue=sp.autoNameValue;
                             sp.autoNameValue=true;
@@ -883,6 +890,7 @@ function autoSave(){
 function reloadPic(){
                     var thisComp = app.project.activeItem;
                     if(!(thisComp instanceof CompItem)) return alert(loc(sp.needComp));
+                    if(!sp.droplist.selection) return;
                     
                     if(confirm (loc(sp.refresh))==false)  return;
                     
@@ -901,6 +909,11 @@ function reloadPic(){
                             sp.autoNameValue=true;
                             var preCompValue=sp.preComposeValue;
                             sp.preComposeValue=false;
+                            if(sp.gv.children.length!=0){
+                                    var special_folder = sp.getImageFolderByName(sp.droplist.selection.text);
+                                    special_folder.execute();
+                                }
+                            
                         for(var i=0;i<sp.gv.children.length;i++){
                           try{
                                 sp.gv.children[i].selected = true;

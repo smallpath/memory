@@ -36,6 +36,9 @@ var UIJson =
                                     gr1:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
                                         gr1:{type:'group',children:{
                                                     thumbType:{type:'checkbox',text:loc(sp.thumbType)}
+                                                    }},
+                                        gr2:{type:'group',children:{
+                                                    deleteAlert:{type:'checkbox',text:loc(sp.isAlert)}
                                                     }}
                                     }},
                                     gr4:{type:'group',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
@@ -80,6 +83,11 @@ var win = _.newWindow(UIJson)[0];
 
 _('*').each(function(e){
             switch(e.id){
+                  case 'deleteAlert': e.value =sp.getSettingAsBool ("deleteAlert");
+                                            e.onClick = function(){
+                                                    sp.deleteAlertValue = this.value;
+                                                    sp.saveSetting("deleteAlert",this.value.toString());
+                                                };break;
                   case 'frameSecondText': e.text = sp.frameSecond.toString();
                                                 e.onChange = function(){
                                                         if(isNaN(this.text)){this.text = sp.frameSecond;return;}
@@ -166,7 +174,7 @@ _('*').each(function(e){
                                           e.onClick = function(){sp.saveSetting("limitText",this.value.toString())}
                                           break;
                   case 'coverChange': e.value = sp.getSettingAsBool("coverChange");
-                                                e.onClick = function(){sp.saveSetting("coverChange",this.value.toString())}
+                                                e.onClick = function(){sp.saveSetting("coverChange",this.value.toString());sp.coverChangeValue = this.value;}
                                                 break;
                   case 'thumbType':   e.value = sp.getSettingAsBool("thumbType");
                                                 e.onClick = function(){sp.saveSetting("thumbType",this.value.toString());sp.thumbTypeValue = this.value}

@@ -32,10 +32,11 @@
     gv.version =  parseInt(app.version.split(".")[0])==12?"CC":"CC2014";
     
     //~ Binding eventHandlers to mouse click and Window
+    gv.leftClick = fns.leftClick;
     gv.rightClick = fns.rightClick;
     gv.leftDoubleClick = fns.newLayer;
-    gv.mouseOut = sp.fns.moveOut;
-    gv.mouseMove = sp.fns.moveOver;
+//~     gv.mouseOut = sp.fns.moveOut;
+    gv.mouseMove = fns.moveOver;
     parentDroplist.onChange = fns.parentDroplistChange;
     droplist.onChange = fns.droplistChange;
     
@@ -50,10 +51,6 @@
               app.cancelTask (item);
      });
      sp.renderTaskArray.length = 0;
-     sp.backTaskArray.forEach(function(item){
-                 app.cancelTask (item);
-           })
-     sp.backTaskArray.length=0;
      sp.previewHelper = {};
     
     win.onResize =win.onResizing =fns.winResize;
@@ -81,14 +78,7 @@
             var keepRef = this;
             this.previewAll = function(){
                 
-                    if(sp.gv.children.length ==0) return;
-                    
-                    if(sp.backTaskArray.length!=0){
-                            sp.backTaskArray.forEach(function(item){
-                                    app.cancelTask (item);
-                                })
-                        }
-                    sp.backTaskArray.length=0;
+                    if(sp.gv.children.length ==0) return; 
                 
                     keepRef.moveOut();
                     
@@ -103,9 +93,6 @@
                         var item = items[iter];
                         var img = item.image ; 
                         var index = item.index;
-                        
-                        sp.moveOut =false;
-
 
                         var folder = new Folder(img.parent);
                         var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
@@ -136,6 +123,7 @@
                         sp.previewHelper["item"+index] = {};
                         sp.previewHelper["item"+index]["tempItem"] = item;
                         sp.previewHelper["item"+index]["tempImg"] = img;
+                        sp.previewHelper["item"+index]["currentIndex"] = 0;
                         sp.previewHelper["item"+index]["tempFiles"] = (function(f){
                                 var len = f.getFiles().length;
                                 var arr =[];
@@ -151,72 +139,74 @@
                     }
                     
                         lenArr.sort(function(a,b){return a.length-b.length});
+                        
                         var maxLen = lenArr[lenArr.length-1].length;
                         
-                        for(var i =0,len = maxLen;i<len;i++){
+                        
+                        for(var i =0,len = maxLen;i<=len;i++){
                                     var stringToCall = 
                                                                 """ var len = sp.gv.children.length; 
                                                                         for(var itemIndex=0;itemIndex<len;itemIndex++){
                                                                             var currentItem = sp.previewHelper["item"+itemIndex];
                                                                             if(currentItem){
-                                                                                var currentIndex = """+i+""";
+
+                                                                                var currentIndex = currentItem["currentIndex"];
+                                                                                currentItem["currentIndex"]++;
                                                                                 var currentIndexTemp = currentItem["tempFiles"];
-                                                                                if(currentIndexTemp)
+                                                                                if(currentIndexTemp){
                                                                                     var currentFile = currentIndexTemp[currentIndex];
                                                                                     if(currentFile){
+
                                                                                         if(currentItem["tempItem"])
                                                                                             currentItem["tempItem"].image=currentFile;
+                                                                                        
+                                                                                    }else{
+
+                                                                                            var currentImg = currentItem["tempImg"];
+                                                                                            if(currentImg){
+                                                                                                currentItem["tempItem"].image=currentImg;
+                                                                                            }
+                                                                                            currentItem["currentIndex"] = 0;
+//~                                                                                             sp.previewHelper["item"+itemIndex] = {}; 
                                                                                         }
                                                                                     }
                                                                                 }
                                                                         }
                                                                     sp.gv.refresh();
-                                                                """;
-                                                                         
-                                    sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, false));
+                                                                """;                          
+                                    sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, true));
 
                             }
                         
-                        var stringToCall = """                    
-                                                        sp.renderTaskArray.forEach (function(item,index){
-                                                                app.cancelTask (item);
-                                                            });
-                                                        sp.renderTaskArray.length = 0;
-                                                        var len = sp.gv.children.length; 
-                                                            for(var itemIndex=0;itemIndex<len;itemIndex++){
-                                                                    var currentItem = sp.previewHelper["item"+itemIndex];
-                                                                    if(currentItem){
-                                                                        var currentImg = currentItem["tempImg"];
-                                                                        if(currentImg){
-                                                                                if(currentItem["tempItem"])
-                                                                                    currentItem["tempItem"].image=currentImg;
-                                                                            }
-                                                                        }
-                                                            }
-                                                        sp.gv.refresh();
-                                                        sp.previewHelper = {};
-                                                    """
-                        app.scheduleTask (stringToCall, oneFrame*i, false);
-                        
-                        
+                        sp.isLoopPreview = true;
+
                     },
-            this.moveOver = function(event,item,isMouseMoving){
+            this.moveOver = function(event,item,isClick){
+
+                        if(sp.isLoopPreview == true) return;
+                        
                         if(!item){
-                                sp.moveInIter = 0;
+                                sp.isOutside = true;
                                 return;
-                            };
-                        if(isMouseMoving == true){
-                            if(sp.moveInIter!=0) return;
-                        }
+                            }
                         
 
+
+                        if(typeof isClick != 'undefined'){
+                            if(sp.isOutside == true){
+                                    return;
+                                }
+                            }else{
+                                if(sp.isOutside == false){
+                                        return;
+                                    }
+                                }
+                        
+                        
                         var img = item.image ; 
                         var index = item.index;
                         var oneFrame = sp.frameSecond;
                         
-                        
-                        sp.moveOut =false;
-
 
                         var folder = new Folder(img.parent);
                         var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
@@ -237,6 +227,7 @@
                         sp.previewHelper["item"+index] = {};
                         sp.previewHelper["item"+index]["tempItem"] = item;
                         sp.previewHelper["item"+index]["tempImg"] = img;
+                        sp.previewHelper["item"+index]["currentIndex"] = 0;
                         sp.previewHelper["item"+index]["tempFiles"] = (function(f){
                                 var len = f.getFiles().length;
                                 var arr =[];
@@ -251,60 +242,48 @@
                         if(sp.previewHelper["item"+index]["tempFiles"].length==0) return;
                         
 
-                        for(var i =0,len = sp.previewHelper["item"+index]["tempFiles"].length;i<len;i++){
-                                    var stringToCall = 
-                                                                """if(sp.moveOut==false){
-                                                                        var len = sp.gv.children.length; 
+                        for(var i =0,len = sp.previewHelper["item"+index]["tempFiles"].length;i<=len;i++){
+                                    var stringToCall = """     
+                                                                        var len = sp.gv.children.length;
                                                                         for(var itemIndex=0;itemIndex<len;itemIndex++){
                                                                             var currentItem = sp.previewHelper["item"+itemIndex];
                                                                             if(currentItem){
-                                                                                var currentIndex = """+i+""";
+                                                                                var currentIndex = currentItem["currentIndex"];
+                                                                                currentItem["currentIndex"]++;
+                  
                                                                                 var currentIndexTemp = currentItem["tempFiles"];
-                                                                                if(currentIndexTemp)
+                                                                                if(currentIndexTemp){
                                                                                     var currentFile = currentIndexTemp[currentIndex];
                                                                                     if(currentFile){
                                                                                             if(currentItem["tempItem"])
                                                                                                 currentItem["tempItem"].image=currentFile;
+                                                                                        }else{
+                                                                                            var currentImg = currentItem["tempImg"];
+                                                                                            if(currentImg){
+                                                                                                currentItem["tempItem"].image=currentImg;
+                                                                                            }
+                                                                                            sp.previewHelper["item"+itemIndex] = {}; 
                                                                                         }
+                                                                                      }
                                                                                     }
                                                                         }
                                                                     sp.gv.refresh();
-                                                                    }
                                                                 """;
                                     sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, false));
                             }
                         
-//~                         if(sp.backTaskArray.length!=0){
-//~                                 sp.backTaskArray.forEach(function(item){
-//~                                         app.cancelTask (item);
-//~                                     })
-//~                             }
-//~                         sp.backTaskArray.length=0;
-                        
+                        sp.isOutside = false;
+                        sp.isLoopPreview = false;
 
-                        
-                        var stringToCall = """
-                                                            var len = sp.gv.children.length; 
-                                                            for(var itemIndex=0;itemIndex<len;itemIndex++){
-                                                                    var currentItem = sp.previewHelper["item"+itemIndex];
-                                                                    if(currentItem){
-                                                                        var currentImg = currentItem["tempImg"];
-                                                                        if(currentImg){
-                                                                                currentItem["tempItem"].image=currentImg;
-                                                                                //sp.previewHelper["item"+itemIndex] = {}; 
-                                                                            }
-                                                                        }
-                                                            }
-                                                        sp.previewHelper = {}; 
-                                                        sp.gv.refresh();
-                                                    """
-                        sp.backTaskArray.push(app.scheduleTask (stringToCall, oneFrame*i, false));
-                        sp.moveInIter++;
-                        
-
-                        
                     },
 
+            this.leftClick = function(){
+                    if(sp.isLoopPreview == false) return;
+                    
+                    keepRef.moveOut();
+                    
+                    sp.isLoopPreview = false;
+                },
             this.moveOut = function(){
                 
                     sp.renderTaskArray.forEach (function(item,index){
@@ -320,15 +299,8 @@
                                     
                         }
                     
-                    if(sp.backTaskArray.length!=0){
-                        
-                            sp.backTaskArray.forEach(function(item){
-                                    app.cancelTask (item);
-                                })
-                            
-                        }
-                    sp.backTaskArray.length=0;
-                     
+                    sp.previewHelper = {};
+
                 },
             this.addModule = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
@@ -399,6 +371,7 @@
                         if(!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
                         if(!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
                         if(sp.onlyEffectValue==true && app.project.activeItem.selectedLayers.length == 0) return alert(loc(sp.needLayers));
+                        
                         
                         var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
                               xml = xml.child(sp.gv.lastSelectedItem.index);
@@ -929,22 +902,16 @@
                     sp.saveSetting ("winSize",thisStr);
                     var thisStr = win.location[0].toString()+","+win.location[1].toString();
                     sp.saveSetting ("winLocation",thisStr);
+                    
+                    sp.renderTaskArray.forEach (function(item,index){
+                              app.cancelTask (item);
+                    });
+                    sp.renderTaskArray.length = 0;
+                    sp.previewHelper = {};
                 },
             this.rightClick=function(event) {
-                                sp.renderTaskArray.forEach (function(item,index){
-                                        app.cancelTask (item);
-                                    });
-                                sp.renderTaskArray.length = 0;
+                                keepRef.leftClick();
                                 
-                                if(sp.gv.children.length!=0){
-                                
-                                    sp.preImageArr.forEach(function(item,index){
-                                            sp.gv.children[index].image = item;
-                                        });
-                                    
-                                    }
-
-                                sp.previewHelper = {};
                                 var alt = event.altKey;
                                 var key = ScriptUI.environment.keyboardState;
                                 if(key.ctrlKey == false && key.shiftKey == false&& alt == false  ){
@@ -957,7 +924,6 @@
                                              }else if(key.ctrlKey == false && key.shiftKey == false && alt == true){
                                                     keepRef.newItem(event);
                                                  }else if(key.ctrlKey == true && key.shiftKey == true && alt == true){
-//~                                                         alert(sp.gv.selection.length);
 //~                                                         alert(sp.gv.lastSelectedItem.index);
                                                      }
                 },
@@ -1058,10 +1024,10 @@ this,
             imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash +  "Sp_memory"+ sp.prototype.slash + "image"),
             roamingFolder:new  Folder(Folder.userData.fullName + "/Aescripts/Sp_memory"),
             
-            moveInIter:0,
+            isOutside: true,
+            isLoopPreview: false,
             previewHelper: {},
             renderTaskArray:[],
-            backTaskArray:[],
             preImageArr:[],
         
             haveSetting: function(keyName){
@@ -1391,8 +1357,10 @@ this,
                             pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
                             pngPath = File(pngPath);
                         }
-                        try{tempComp2.saveFrameToPng(comps.time, pngPath);}catch(err){}
-                        if(this.frameNum!=0){
+                        if(sp.coverChangeValue == true || pngPath.exists == false){
+                            try{tempComp2.saveFrameToPng(comps.time, pngPath);}catch(err){}
+                        }
+                        if(this.savePreviewValue==true){
                                 tempComp2.layer(1).inPoint = timeArr[0];
                                 tempComp2.layer(1).outPoint = timeArr[1];
                                 var timeArr = this.getTimeInfoArr(tempComp2)
@@ -1402,7 +1370,7 @@ this,
                                 for(var i=0;i<num;i++){                                                  
                                       var time = timeArr[0] +i*(timeArr[1]-timeArr[0])/num;
                                       var seqPath = new File(targetFolder.toString()+this.slash+i.toString()+".png");
-                                      comps.saveFrameToPng (time, seqPath);
+                                      tempComp2.saveFrameToPng (time, seqPath);
                                       this.cropImage (seqPath, seqPath);
                                       app.purge (PurgeTarget.IMAGE_CACHES);
                                    }
@@ -1442,13 +1410,15 @@ this,
                                           pngPath = File(pngPath);
                                       }
                                       try{
-                                          if(this.getSetting("thumbType")=="true"){
-                                              app.activeViewer.views[0].saveBlittedImageToPng(comps.time,pngPath,1000,"what's this? I don't know");
-                                          }else{
-                                              comps.saveFrameToPng (comps.time, pngPath);
-                                              }
-                                          this.cropImage (pngPath, pngPath);
-                                          if(this.frameNum!=0){
+                                          if(sp.coverChangeValue == true || pngPath.exists == false){
+                                              if(this.getSetting("thumbType")=="true"){
+                                                  app.activeViewer.views[0].saveBlittedImageToPng(comps.time,pngPath,1000,"what's this? I don't know");
+                                              }else{
+                                                  comps.saveFrameToPng (comps.time, pngPath);
+                                                  }
+                                              this.cropImage (pngPath, pngPath);
+                                          }
+                                          if(this.savePreviewValue==true){
                                                     var targetFolder = new Folder(pngPath.toString().replace(/.png/i,"")+"_seq");
                                                     !targetFolder.exists && targetFolder.create();
                                                     var num = this.frameNum;
@@ -1720,6 +1690,7 @@ this,
                  .pushh("parentSelection")
                  .pushh("frameSecond")
                  .pushh("frameNum")
+                 .pushh("savePreview")
                  
     valueArr.pushh("1")
                 .pushh("true")
@@ -1741,6 +1712,7 @@ this,
                 .pushh("0")
                 .pushh("33")
                 .pushh("30")
+                .pushh("true")
 
     keyNameArr.forEach (function(item, index){
             (function(item, value){
@@ -1757,8 +1729,10 @@ this,
       sp.onlyEffectValue = sp.getSettingAsBool ("onlyEffect");
       sp.cleanGroupValue = sp.getSettingAsBool("cleanGroup");
       sp.offsetKeyframeValue = sp.getSettingAsBool ("offsetKeyframe");
+      sp.savePreviewValue = sp.getSettingAsBool ("savePreview");
       
       sp.thumbTypeValue = sp.getSettingAsBool("thumbType");
+      sp.coverChangeValue = sp.getSettingAsBool("coverChange");
       
       sp.frameSecond  = parseInt(sp.getSetting("frameSecond"));
       sp.frameNum = parseInt(sp.getSetting("frameNum"));

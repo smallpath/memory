@@ -244,7 +244,7 @@ this.extend(this, {
                     e.event.leftButtonPressedScrollBarValue = e.scrollBarValue;
                     /***************************************/
                     if(event.ctrlKey==false)
-                        e.mouseMove(event,e.event.targetItem,e.event.mouseMoving);
+                        e.mouseMove(event,e.event.targetItem,true);
 
                     /***************************************/
                 } else if (event.detail == 2) {//左键双击
@@ -275,7 +275,8 @@ this.extend(this, {
 
                 /***************************************/
             }
-            e.mouseMove(event,e.getItemFromLocation(event.clientX, event.clientY),e.event.mouseMoving);
+            if (event.ctrlKey==false)
+                e.mouseMove(event,e.getItemFromLocation(event.clientX, event.clientY));
 
         });
         eventRect.addEventListener('mouseup', function (event) {
@@ -283,7 +284,7 @@ this.extend(this, {
                 if (e.event.mouseMoving) {
                     /***************************************/
 //~                     e.defaultLeftClick(event);
-//~                     e.leftClick(event);
+                    e.leftClick(event);
                     /***************************************/
                 } else {
                     e.defaultLeftClick(event);

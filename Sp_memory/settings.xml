@@ -13,6 +13,7 @@
     <Name>Text</Name>
     <Name>Transition circle pack 1</Name>
     <Name>Project test</Name>
+    <Name>Lightning pack 1</Name>
   </ListItems>
   <ParentGroup>
     <item groupName="Default">
@@ -23,6 +24,7 @@
     <item groupName="MG">
       <Index>3</Index>
       <Index>4</Index>
+      <Index>5</Index>
     </item>
   </ParentGroup>
 </settings>

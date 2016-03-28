@@ -17,7 +17,7 @@ sp.extend(sp,{
         cover: { en: "Cover item", ch: "覆盖元素" },
         isShow: { en: "Limit text", ch: "显示文字" },
         isAlert: { en: "Deleting Alert", ch: "删除时警告" },
-        isPrecomp: { en: "Pre-compose", ch: "预合成元素" },
+        isPrecomp: { en: "Pre-compose", ch: "预合成" },
         isOffset: { en: "Save material", ch: "存储素材" },
         isName: { en: "Auto rename", ch: "自动取名" },
         isEffect: { en: "Only property", ch: "仅生成效果" },
@@ -100,7 +100,7 @@ F键:覆盖选中元素.
 
 此功能将生成组内所有元素的主缩略图和预览动画,其中主缩略图为当前合成的当前时间点的画面
 
-注意:本脚本将耗费大量时间
+注意:此功能将耗费大量时间,脚本会弹出图片文件夹,你可以根据其中的图片判断预览动画的生成进度
 """
         },
         auto: {
@@ -110,6 +110,7 @@ F键:覆盖选中元素.
 这会将当前合成中每一层都分别存储为一个新元素.
 
 此功能可以帮助你快速存储新元素,十分适合存储大量的MG合成层
+脚本会弹出图片文件夹,你可以根据其中的图片来判断预览动画的生成进度
 """},
         cutLength: {
             en: "This script will cut every layer in current comp, related to opacity for common layer and content length for comp layer.",
@@ -160,5 +161,6 @@ F键:覆盖选中元素.
         needElements:{en:"Please select at least one element in the group",ch:"组内元素未被选中,请至少选中一个元素"},
         needLayers:{en:"Please select at least one layer in the current comp",ch:"请选中至少一个层"},
         needModule:{en:"Please create a module first",ch:"请先新建一个模块"},
+        isSavePreview:{ en: "Save preview", ch: "存储预览" },
         
         })

@@ -8,10 +8,14 @@
                                        loc(sp.addGroup),loc(sp.deleteGroup), 
                                        loc(sp.addElement), loc(sp.deleteElement), 
                                        loc(sp.create), loc(sp.cover), 
-                                       loc(sp.isShow), loc(sp.isAlert),
-                                       loc(sp.isPrecomp), loc(sp.isOffset), 
-                                       loc(sp.isName), loc(sp.isEffect),
-                                       loc(sp.cleanProperty),loc(sp.offsetKey)
+                                       
+                                       loc(sp.isShow),          loc(sp.isName),
+                                       
+                                       loc(sp.isSavePreview),      loc(sp.isOffset), 
+                                       
+                                       loc(sp.isPrecomp),          loc(sp.isEffect),
+                                       
+                                       loc(sp.cleanProperty), loc(sp.offsetKey)
                               ];
         var length = StringList.length;
         var Space = 102 / 5;
@@ -55,10 +59,10 @@
             ShortMenu._1.selection = 0;
             ShortMenu._1.enabled = true;
             ShortMenu._13.value = sp.showThumbValue ;
-            ShortMenu._14.value = sp.deleteAlertValue ;
-            ShortMenu._15.value = sp.preComposeValue;
+            ShortMenu._14.value = sp.autoNameValue;
+            ShortMenu._15.value = sp.savePreviewValue ;
             ShortMenu._16.value = sp.saveMaterialValue;
-            ShortMenu._17.value = sp.autoNameValue;
+            ShortMenu._17.value = sp.preComposeValue;
             ShortMenu._18.value = sp.onlyEffectValue;
             ShortMenu._19.value = sp.cleanGroupValue;
             ShortMenu._20.value = sp.offsetKeyframeValue;
@@ -181,31 +185,31 @@
                 sp.fns.cover();
             }
       
-            ShortMenu._13.onClick = function(){
+            ShortMenu._13.onClick = function(){         
                      sp.showThumbValue = this.value;
                      gv.showText = this.value;
                      sp.saveSetting("showThumb",this.value.toString());
                      isCheckBoxClicked = true;
                      sp.gv.refresh();
                 }            
-            ShortMenu._14.onClick = function(){
-                     sp.deleteAlertValue = this.value;
-                     sp.saveSetting("deleteAlert",this.value.toString());
+            ShortMenu._14.onClick = function(){     //-14对deleteAlert
+                     sp.autoNameValue = this.value;
+                     sp.saveSetting("autoName",this.value.toString());
                      isCheckBoxClicked = true;
                 }      
-            ShortMenu._15.onClick = function(){
-                     sp.preComposeValue = this.value;
-                     sp.saveSetting("preCompose",this.value.toString());
+            ShortMenu._15.onClick = function(){     //-15对preCompose
+                     sp.savePreviewValue = this.value;
+                     sp.saveSetting("savePreview",this.value.toString());
                      isCheckBoxClicked = true;
                 }      
-            ShortMenu._16.onClick = function(){
+            ShortMenu._16.onClick = function(){ 
                      sp.saveMaterialValue = this.value;
                      sp.saveSetting("saveMaterial",this.value.toString());
                      isCheckBoxClicked = true;
                 }      
-            ShortMenu._17.onClick = function(){
-                     sp.autoNameValue = this.value;
-                     sp.saveSetting("autoName",this.value.toString());
+            ShortMenu._17.onClick = function(){  //-17 对autoName
+                     sp.preComposeValue = this.value;
+                     sp.saveSetting("preCompose",this.value.toString());
                      isCheckBoxClicked = true;
                 }      
             ShortMenu._18.onClick = function(){
