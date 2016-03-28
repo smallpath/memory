@@ -50,6 +50,10 @@
               app.cancelTask (item);
      });
      sp.renderTaskArray.length = 0;
+     sp.backTaskArray.forEach(function(item){
+                 app.cancelTask (item);
+           })
+     sp.backTaskArray.length=0;
      sp.previewHelper = {};
     
     win.onResize =win.onResizing =fns.winResize;
@@ -78,6 +82,13 @@
             this.previewAll = function(){
                 
                     if(sp.gv.children.length ==0) return;
+                    
+                    if(sp.backTaskArray.length!=0){
+                            sp.backTaskArray.forEach(function(item){
+                                    app.cancelTask (item);
+                                })
+                        }
+                    sp.backTaskArray.length=0;
                 
                     keepRef.moveOut();
                     
@@ -149,9 +160,13 @@
                                                                             var currentItem = sp.previewHelper["item"+itemIndex];
                                                                             if(currentItem){
                                                                                 var currentIndex = """+i+""";
-                                                                                var currentFile = currentItem["tempFiles"][currentIndex];
-                                                                                if(currentFile){
-                                                                                        currentItem["tempItem"].image=currentFile;
+                                                                                var currentIndexTemp = currentItem["tempFiles"];
+                                                                                if(currentIndexTemp)
+                                                                                    var currentFile = currentIndexTemp[currentIndex];
+                                                                                    if(currentFile){
+                                                                                        if(currentItem["tempItem"])
+                                                                                            currentItem["tempItem"].image=currentFile;
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                         }
@@ -173,7 +188,8 @@
                                                                     if(currentItem){
                                                                         var currentImg = currentItem["tempImg"];
                                                                         if(currentImg){
-                                                                                currentItem["tempItem"].image=currentImg;
+                                                                                if(currentItem["tempItem"])
+                                                                                    currentItem["tempItem"].image=currentImg;
                                                                             }
                                                                         }
                                                             }
@@ -193,6 +209,7 @@
                             if(sp.moveInIter!=0) return;
                         }
                         
+
                         var img = item.image ; 
                         var index = item.index;
                         var oneFrame = sp.frameSecond;
@@ -233,7 +250,7 @@
                         
                         if(sp.previewHelper["item"+index]["tempFiles"].length==0) return;
                         
-                        
+
                         for(var i =0,len = sp.previewHelper["item"+index]["tempFiles"].length;i<len;i++){
                                     var stringToCall = 
                                                                 """if(sp.moveOut==false){
@@ -242,17 +259,29 @@
                                                                             var currentItem = sp.previewHelper["item"+itemIndex];
                                                                             if(currentItem){
                                                                                 var currentIndex = """+i+""";
-                                                                                var currentFile = currentItem["tempFiles"][currentIndex];
-                                                                                if(currentFile){
-                                                                                        currentItem["tempItem"].image=currentFile;
+                                                                                var currentIndexTemp = currentItem["tempFiles"];
+                                                                                if(currentIndexTemp)
+                                                                                    var currentFile = currentIndexTemp[currentIndex];
+                                                                                    if(currentFile){
+                                                                                            if(currentItem["tempItem"])
+                                                                                                currentItem["tempItem"].image=currentFile;
+                                                                                        }
                                                                                     }
-                                                                                }
                                                                         }
                                                                     sp.gv.refresh();
                                                                     }
                                                                 """;
                                     sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, false));
                             }
+                        
+//~                         if(sp.backTaskArray.length!=0){
+//~                                 sp.backTaskArray.forEach(function(item){
+//~                                         app.cancelTask (item);
+//~                                     })
+//~                             }
+//~                         sp.backTaskArray.length=0;
+                        
+
                         
                         var stringToCall = """
                                                             var len = sp.gv.children.length; 
@@ -262,21 +291,27 @@
                                                                         var currentImg = currentItem["tempImg"];
                                                                         if(currentImg){
                                                                                 currentItem["tempItem"].image=currentImg;
+                                                                                //sp.previewHelper["item"+itemIndex] = {}; 
                                                                             }
                                                                         }
                                                             }
+                                                        sp.previewHelper = {}; 
                                                         sp.gv.refresh();
-                                                        sp.previewHelper = {};
                                                     """
-                        sp.renderTaskArray.push(app.scheduleTask (stringToCall, oneFrame*i, false));
+                        sp.backTaskArray.push(app.scheduleTask (stringToCall, oneFrame*i, false));
                         sp.moveInIter++;
+                        
+
+                        
                     },
 
             this.moveOut = function(){
+                
                     sp.renderTaskArray.forEach (function(item,index){
                             app.cancelTask (item);
                         });
                     sp.renderTaskArray.length = 0;
+                    
                     if(sp.gv.children.length!=0){
                                 
                         sp.preImageArr.forEach(function(item,index){
@@ -284,6 +319,16 @@
                             });
                                     
                         }
+                    
+                    if(sp.backTaskArray.length!=0){
+                        
+                            sp.backTaskArray.forEach(function(item){
+                                    app.cancelTask (item);
+                                })
+                            
+                        }
+                    sp.backTaskArray.length=0;
+                     
                 },
             this.addModule = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
@@ -351,10 +396,9 @@
                 },
             
             this.newLayer  = function(){
-                        if(!sp.gv.lastSelectedItem) return;
-                        if(!(app.project.activeItem instanceof CompItem)) return;
-                        if(sp.onlyEffectValue==true && app.project.activeItem.selectedLayers.length == 0) return;
-                        if(!sp.gv.lastSelectedItem) return;
+                        if(!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
+                        if(!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
+                        if(sp.onlyEffectValue==true && app.project.activeItem.selectedLayers.length == 0) return alert(loc(sp.needLayers));
                         
                         var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
                               xml = xml.child(sp.gv.lastSelectedItem.index);
@@ -484,9 +528,9 @@
             
 
             this.cover  = function(){
-                        if(!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length ==0) return;
+                        if(!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length ==0) return alert(loc(sp.needLayers));
                         var thisComp = app.project.activeItem;
-                        if(!sp.gv.lastSelectedItem) return;
+                        if(!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
                         var itemName = sp.gv.lastSelectedItem.text;
                         var helperObj = {};
                         
@@ -524,7 +568,7 @@
 
             this.newItem  = function(){
                   try{
-                        if(!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length ==0) return;
+                        if(!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length ==0) return alert(loc(sp.needLayers));
                         var thisComp = app.project.activeItem;
                         if(sp.autoNameValue == false) 
                               var itemName = prompt(loc(sp.setName), "Name");
@@ -555,7 +599,7 @@
            
 
             this.deleteItem  = function(){
-                          if(sp.gv.selection.length == 0) return;
+                          if(sp.gv.selection.length == 0) return alert(loc(sp.needElements));
                           if(sp.deleteAlertValue == true)
                               var sure = confirm(loc(sp.sureDelete));
                           if(sp.deleteAlertValue == true && sure== false)  return;
@@ -588,7 +632,7 @@
                   },
 
             this.importImage  = function(){
-                        if(!sp.gv.lastSelectedItem) return;
+                        if(!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
                         var file = File.openDialog("Please select pictures", false);
                         if(!file) return;
                         if(file.name.split(".").last() != "jpg" && file.name.split(".").last() != "png") return;
@@ -643,7 +687,7 @@
             this.addGroup  = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
                     if (!newEleName){ return;}
-                    if(!sp.parentDroplist.selection) return;
+                    if(!sp.parentDroplist.selection) return alert(loc(sp.needModule));
                     if(sp.xmlFileNames.has(newEleName)){alert(loc(sp.existName));return;}
                     
                     var file = sp.getFileByName(newEleName);
@@ -675,6 +719,7 @@
                         var sourceFile = sp.getFileByName(sp.droplist.selection.text);
                         var targetFile = File(exportFolder.toString() + sp.slash + sp.droplist.selection.text + ".xml");
                         if(targetFile.exists) {alert(loc(sp.overWritten)); return; }
+                        if(!sp.droplist.selection) return;
                         
                         var images= sp.getImageFolderByName(sp.droplist.selection.text).getFiles();
                         var picXml = new XML("<pic></pic>");
@@ -731,7 +776,7 @@
             this.importFiles = function(){
                   var files = File.openDialog("Please select xmls", "*.xml", true);
                   if(!files) return;
-                  if(!sp.parentDroplist.selection) return;
+                  if(!sp.parentDroplist.selection) return alert(loc(sp.needModule));
 
                   var selectionIndex = sp.parentDroplist.selection.index;
                   files.forEach(function(item,index){
@@ -780,7 +825,8 @@
                             sp.gv.refresh();
                   },
             this.changeName=function (){
-                    if (!sp.gv.children) return;
+                    if (!sp.gv.children) return alert(loc(sp.needElement));
+                    if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
                     var newEleName = prompt(loc(sp.setName), sp.gv.lastSelectedItem.text);
                     if (!newEleName){ alert(loc(sp.blankName));return;}
                     if(sp.lookUpTextInChildren(newEleName,sp.gv.children)){alert(loc(sp.existName));return;}
@@ -911,8 +957,8 @@
                                              }else if(key.ctrlKey == false && key.shiftKey == false && alt == true){
                                                     keepRef.newItem(event);
                                                  }else if(key.ctrlKey == true && key.shiftKey == true && alt == true){
-                                                        alert(sp.gv.selection.length);
-                                                        alert(sp.gv.lastSelectedItem.index);
+//~                                                         alert(sp.gv.selection.length);
+//~                                                         alert(sp.gv.lastSelectedItem.index);
                                                      }
                 },
             this.shortMenu = function(event){
@@ -1749,14 +1795,28 @@ this,
 
 
 小提示:
-1.在3.x版本前保存的组,可以用"右键->辅助脚本->生成组内预览动画"来为组所有元素进行批量生成预览动画
+1.在3.x版本前保存的组,可以用"右键->辅助脚本->重载组内预览动画"来为组所有元素进行批量生成预览动画
 2.可使用ctrl与shift对元素进行自由选择,之后右键->预览选中,即可同时预览所有被选中元素的动画
 3.在未选中任何元素时,右键->预览全部,即可预览组内的全部元素的动画
 4.在设置窗口中,选中一个组,之后点击"剪切选中组到其他模块",可将组移动到其他模块中
 
 
 """,
-                        en: """test"""
+                        en: """Sp_memory 3.0 @smallpath
+                        
+New Feature:
+1.Enable preview element
+2.Create preview animation while saving layers,you can set the frame rate and frame number
+3.Export/Import group support preview animation
+4.Add module - the group of group
+
+Tips:
+1.When your group is saved  before v3.0,you can use "RightClick->Helper scripts->Reload previews of group" to create all the preview animation
+2.Use ctrl key and shift key to select element,then use "RightClick->Preview selected" to preview the animations of selected element at the same time.
+3.When there isn't any element being selected, us "RightClick->Preview all" to preview all the animations of group.
+4.To cut the group from its module into another module,use "Cut selected group to other module" in the settings window
+                        
+"""
                     },
             });
     
