@@ -93,8 +93,11 @@
                         var item = items[iter];
                         var img = item.image ; 
                         var index = item.index;
-
+                        
+                        if(!img.parent) return;
                         var folder = new Folder(img.parent);
+                        
+                        if(!(folder instanceof Folder)) return;
                         var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
                         
                         try{
@@ -208,7 +211,10 @@
                         var oneFrame = sp.frameSecond;
                         
 
+                        if(!img.parent) return;
                         var folder = new Folder(img.parent);
+
+                        if(!(folder instanceof Folder)) return;
                         var targetFolder = new Folder(folder.toString()+sp.slash+img.displayName.replace(/.png/i,"")+"_seq");
                         
 
