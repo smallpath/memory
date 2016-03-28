@@ -9,11 +9,11 @@ This is a script for Adobe After Effects.It can save any layer even `composition
 
 Memory support preview animation,what have you watched is what it will be after generating layers
 
-![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)
+![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)
 
-![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)
+![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)
 
-![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/3.gif)
+![screenshot9](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/3.gif)
 
 ![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/4.gif)
 
