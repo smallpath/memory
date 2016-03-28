@@ -501,8 +501,10 @@ function outputWindow () {
                                     
                                     var images= sp.getImageFolderByName(outRes.wlist.selection[i].text).getFiles();
                                     var picXml = new XML("<pic></pic>");
+                                    var seqXml = new XML("<seq></seq>");
                                     images.forEach(function(item,index){
-                                                  if(item.name.indexOf(".png") !=1){
+                                                  if(item.name.indexOf(".png") !=-1){
+                                                      
                                                               item.open("r");
                                                               item.encoding = "binary";
                                                               var str = encodeURIComponent (item.read());
@@ -513,11 +515,34 @@ function outputWindow () {
                                                               guluTempA.appendChild(tempXmlBigHere);
                                                               guluTempA.appendChild(tempXmlHeres);
                                                               picXml.appendChild (guluTempA);
-                                                        }
+                                                              
+                                                  }else if(item instanceof Folder && item.name.indexOf("_seq")!=-1){
+                                                      
+                                                      var thisFolder = item;
+                                                      var folderXml = new XML("<folder name='"+encodeURIComponent(item.name)+"'></folder>")
+                                                      var seqFiles = thisFolder.getFiles();
+                                                      seqFiles.forEach(function(imageFile,imageIndex){
+                                                              imageFile.open("r");
+                                                              imageFile.encoding = "binary";
+                                                              var str = encodeURIComponent (imageFile.read());
+                                                              imageFile.close();
+                                                              var tempXmlBigHere=new XML("<imgName>"+encodeURIComponent(imageFile.name)+"</imgName>");
+                                                              var tempXmlHeres=new XML("<img>"+str+"</img>");
+                                                              var guluTempA=new XML("<imgInfo></imgInfo>");
+                                                              guluTempA.appendChild(tempXmlBigHere);
+                                                              guluTempA.appendChild(tempXmlHeres);
+                                                              folderXml.appendChild (guluTempA);
+                                                          });
+                                                      seqXml.appendChild (folderXml);
+                                                
+                                                }
                                           });
                                     var xml = new XML(sourceFile.readd());
                                     if(picXml.children().length()>0){
                                                 xml.appendChild (picXml);
+                                          }
+                                    if(seqXml.children().length()>0){
+                                                xml.appendChild (seqXml);
                                           }
                                     if(xml.children().length()==0){
                                                 xml = "<tree></tree>"

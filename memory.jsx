@@ -77,6 +77,8 @@
             var keepRef = this;
             this.previewAll = function(){
                 
+                    if(sp.gv.children.length ==0) return;
+                
                     keepRef.moveOut();
                     
                     var lenArr = [];
@@ -275,10 +277,13 @@
                             app.cancelTask (item);
                         });
                     sp.renderTaskArray.length = 0;
-                    sp.preImageArr.forEach(function(item,index){
-                            sp.gv.children[index].image = item;
-                        });
-                    sp.previewHelper = {};
+                    if(sp.gv.children.length!=0){
+                                
+                        sp.preImageArr.forEach(function(item,index){
+                                sp.gv.children[index].image = item;
+                            });
+                                    
+                        }
                 },
             this.addModule = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
@@ -290,6 +295,7 @@
                     sp.settingsFile.writee(content);
                     sp.reloadParentDroplist();
                     sp.parentDroplist.selection = sp.parentDroplist.items.length -1;
+                    sp.preImageArr = [];
                     var selection = parseInt(sp.getSetting("thisSelection"));
                     sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
                     sp.gv.refresh();
@@ -315,10 +321,7 @@
                                 sp.deleteIndexAndReload(preIndex);
                                 
                                 var imageFolder = sp.getImageFolderByName(selectionText);
-                                var images = imageFolder.getFiles();
-                                images.forEach(function(item){
-                                            item.remove();
-                                      });
+                                deleteThisFolder(imageFolder);
                                 imageFolder.remove();
                                 
                                 var file = sp.getFileByName(selectionText);
@@ -337,6 +340,7 @@
                             sp.settingsFile.writee(xml);
                             
                             sp.reloadParentDroplist();
+                            sp.preImageArr = [];
                             var selection = parseInt(sp.getSetting("parentSelection"));
                             sp.parentDroplist.selection =  (selection-1<=sp.parentDroplist.items.length-1 &&selection-1>=0)?selection-1:0;
                             var selection = parseInt(sp.getSetting("thisSelection"));
@@ -630,6 +634,7 @@
                         sp.reloadParentDroplist();
                         sp.parentDroplist.selection = parseInt(sp.getSetting("parentSelection"));
                         
+                        sp.preImageArr = [];
                         var selection = parseInt(sp.getSetting("thisSelection"));
                         sp.droplist.selection = selection -1;
                         sp.gv.refresh();
@@ -657,6 +662,7 @@
                     
                     sp.settingsFile.writee(xml);
                     sp.reloadParentDroplist();
+                    sp.preImageArr = [];
                     sp.parentDroplist.selection = parseInt(sp.getSetting("parentSelection"));
                     sp.droplist.selection = sp.droplist.items.length -1;
                     sp.gv.refresh();
@@ -672,8 +678,9 @@
                         
                         var images= sp.getImageFolderByName(sp.droplist.selection.text).getFiles();
                         var picXml = new XML("<pic></pic>");
+                        var seqXml = new XML("<seq></seq>");
                         images.forEach(function(item,index){
-                                      if(item.name.indexOf(".png") !=1){
+                                      if(item.name.indexOf(".png") !=-1){
                                                   item.open("r");
                                                   item.encoding = "binary";
                                                   var str = encodeURIComponent (item.read());
@@ -684,11 +691,32 @@
                                                   guluTempA.appendChild(tempXmlBigHere);
                                                   guluTempA.appendChild(tempXmlHeres);
                                                   picXml.appendChild (guluTempA);
-                                            }
+                                            }else if(item instanceof Folder && item.name.indexOf("_seq")!=-1){
+                                                  var thisFolder = item;
+                                                  var folderXml = new XML("<folder name='"+encodeURIComponent(item.name)+"'></folder>")
+                                                  var seqFiles = thisFolder.getFiles();
+                                                  seqFiles.forEach(function(imageFile,imageIndex){
+                                                          imageFile.open("r");
+                                                          imageFile.encoding = "binary";
+                                                          var str = encodeURIComponent (imageFile.read());
+                                                          imageFile.close();
+                                                          var tempXmlBigHere=new XML("<imgName>"+encodeURIComponent(imageFile.name)+"</imgName>");
+                                                          var tempXmlHeres=new XML("<img>"+str+"</img>");
+                                                          var guluTempA=new XML("<imgInfo></imgInfo>");
+                                                          guluTempA.appendChild(tempXmlBigHere);
+                                                          guluTempA.appendChild(tempXmlHeres);
+                                                          folderXml.appendChild (guluTempA);
+                                                      });
+                                                  seqXml.appendChild (folderXml);
+                                                
+                                                }
                               });
                         var xml = new XML(sourceFile.readd());
                         if(picXml.children().length()>0){
                                     xml.appendChild (picXml);
+                              }
+                        if(seqXml.children().length()>0){
+                                    xml.appendChild (seqXml);
                               }
                         if(xml.children().length()==0){
                                     xml = "<tree></tree>"
@@ -712,14 +740,31 @@
                               var imageFolder= sp.getImageFolderByName(item.name.replace(".xml",""));
                               item.copy(file.toString());
                               var xml = new XML(file.readd());
-                               sp.forEach(xml.pic,function(item,index){
+                              sp.forEach(xml.pic,function(item,index){
                                                  var image = sp.getImageFile(this.name.replace(".xml",""),decodeURIComponent (item.imgName.toString()).replace(".png",""));
                                                  image.open("w");
                                                  image.encoding = "binary";
                                                  image.write(decodeURIComponent (item.img.toString()));
                                                  image.close();
                                          },item);
+                               sp.forEach(xml.seq,function(folder,folderIndex){
+                                        var name = decodeURIComponent (folder.@name);
+                                        var parentFolder = sp.getImageFolderByName(this.name.replace(".xml",""));
+                                        var targetFolder = new Folder(parentFolder.toString() + sp.slash + name);
+                                        if(!targetFolder.exists)
+                                            targetFolder.create();
+                                            
+                                        sp.forEach(folder,function(imageXml,imageIndex){
+                                                    var imageFile = new File(this.toString()+sp.slash+ decodeURIComponent (imageXml.imgName.toString()));
+                                                     imageFile.open("w");
+                                                     imageFile.encoding = "binary";
+                                                     imageFile.write(decodeURIComponent (imageXml.img.toString()));
+                                                     imageFile.close();
+                                            },targetFolder);
+                                   
+                                   },item);
                                delete xml.pic;
+                               delete xml.seq;
                                file.writee(xml);
                                xml = new XML(sp.settingsFile.readd());
                                xml.ListItems.appendChild(new XML("<Name>" + decodeURIComponent(item.name.replace(".xml","")) + "</Name>"));
@@ -730,6 +775,7 @@
                             sp.reloadParentDroplist();
                             sp.parentDroplist.selection = parseInt(sp.getSetting("parentSelection"));
                             var selection = parseInt(sp.getSetting("thisSelection"));
+                            sp.preImageArr = [];
                             sp.droplist.selection = sp.droplist.items.length-1;
                             sp.gv.refresh();
                   },
@@ -765,6 +811,7 @@
                     
                     sp.saveSetting("parentSelection",this.selection.index.toString()); 
                     sp.reloadDroplist();
+                    sp.preImageArr = [];
                     var selection = parseInt(sp.getSetting("thisSelection"));
                     sp.droplist.selection = (selection<=sp.droplist.items.length-1 &&selection>=0)?selection:0;
 
@@ -842,9 +889,15 @@
                                         app.cancelTask (item);
                                     });
                                 sp.renderTaskArray.length = 0;
-                                sp.preImageArr.forEach(function(item,index){
-                                        sp.gv.children[index].image = item;
-                                    });
+                                
+                                if(sp.gv.children.length!=0){
+                                
+                                    sp.preImageArr.forEach(function(item,index){
+                                            sp.gv.children[index].image = item;
+                                        });
+                                    
+                                    }
+
                                 sp.previewHelper = {};
                                 var alt = event.altKey;
                                 var key = ScriptUI.environment.keyboardState;
@@ -1736,7 +1789,7 @@ this,
         var xmlFinalArr = [];
         newsettingsxml.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
         allFiles.forEach(function(item,index){
-                if(item.toString().indexOf(".xml")!=-1){
+                if(item.toString().indexOf(".xml")!=-1 && item.name.indexOf("settings.xml") ==-1){
                         newsettingsxml.ListItems.appendChild(new XML("<Name>" + item.displayName.replace(".xml","") + "</Name>"));
                         newsettingsxml.ParentGroup.child(0).appendChild(new XML("<Index>"+index.toString()+"</Index>"))
                     }
@@ -1744,14 +1797,6 @@ this,
         sp.settingsFile.writee(newsettingsxml);
     }    
 
-    //~ If the file do not have a group,give it
-    var content = new XML( sp.settingsFile.readd());
-    if(!content.hasOwnProperty ("ListItems"))
-        content.appendChild(new XML("<ListItems/>"));
-    if(content.ListItems.children().length()==0){
-            content.ListItems.appendChild(new XML("<Name>Default</Name>"));
-        }
-    sp.settingsFile.writee(content);
 
     //~ If the file do not have the ParentGroup,add parentGroup to it
     var content = new XML( sp.settingsFile.readd());
@@ -1765,7 +1810,25 @@ this,
             sp.settingsFile.writee(content);
         }
     
-
+    //~ If the file do not have a group,give it
+    var content = new XML( sp.settingsFile.readd());
+    if(!content.hasOwnProperty ("ListItems"))
+        content.appendChild(new XML("<ListItems/>"));
+    if(content.ListItems.children().length()==0){
+        var allFiles = sp.scriptFolder.getFiles();
+        var xmlFinalArr = [];
+        allFiles.forEach(function(item,index){
+                if(item.toString().indexOf(".xml")!=-1 && item.name.indexOf("settings.xml") ==-1){
+                        content.ListItems.appendChild(new XML("<Name>" + item.displayName.replace(".xml","") + "</Name>"));
+                        content.ParentGroup.child(0).appendChild(new XML("<Index>"+index.toString()+"</Index>"))
+                    }
+            })
+    }
+    if(content.ListItems.children().length()==0){
+            content.ListItems.appendChild(new XML("<Name>Default</Name>"));
+            content.ParentGroup.child(0).appendChild(new XML("<Index>"+0+"</Index>"))
+        }
+    sp.settingsFile.writee(content);
     
 
     })(sp),

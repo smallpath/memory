@@ -1,3 +1,5 @@
 *.jsxinc
 
-Sp_memory/
+Sp_memory/*
+
+!Sp_memory/lib/*
