@@ -883,6 +883,8 @@
                         sp.onlyEffectValue = false;
                     sp.saveSetting("onlyEffect",sp.onlyEffectValue.toString());
                     sp.droplist.itemSize.height = 20;
+                    sp.gv.scrollBarValue = 0;
+                    sp.gv.refresh();
                 }
             this.winResize = function(){
                     group1.location = [2,0];
