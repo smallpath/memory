@@ -283,7 +283,7 @@ this.extend(this, {
             if (e.event.leftButtonPressed) {//左键
                 if (e.event.mouseMoving) {
                     /***************************************/
-//~                     e.defaultLeftClick(event);
+                    e.defaultLeftClick(event);
                     e.leftClick(event);
                     /***************************************/
                 } else {

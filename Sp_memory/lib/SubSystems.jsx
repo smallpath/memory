@@ -104,7 +104,11 @@ _('*').each(function(e){
                                                         if(isNaN(this.text)){this.text = sp.frameNum;return;}
                                                         
                                                         var value = parseInt(this.text);
-                                                        if(value>=50) value = 50;
+                                                        if(sp.isCC2015){
+                                                            if(value>=300) value = 300;
+                                                        }else{
+                                                            if(value>=50) value = 50;
+                                                            }
                                                         if(value<=0) value =0;
                                                         sp.frameNum = value;
                                                         sp.saveSetting("frameNum",value);
