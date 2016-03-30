@@ -520,14 +520,14 @@
                               app.beginUndoGroup("Undo save");
                               
                               var imageFile = sp.getImageFile(sp.droplist.selection.text,itemName);
-                              if(imageFile.exists && sp.coverChangeValue == true){
-                                    imageFile.remove();
-                                  }
+
                               var seqFolder = new Folder(imageFile.toString().replace(/.png/i,"")+"_seq");
                               if(seqFolder.exists){
                                    deleteThisFolder(seqFolder);
                                    seqFolder.remove();
                               }
+                              
+                              sp.newItemOrCover = 'cover';
                               
                               if(sp.isCC2015 == true)
                                 var itemName = sp.savePng2(imageFile);
@@ -559,6 +559,9 @@
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
                               var helperObj = {};
+                              
+                              sp.newItemOrCover = 'newItem';
+                              
                               
                               if(sp.isCC2015 == true)
                                 var itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text,itemName));
@@ -617,6 +620,7 @@
                         if(!file) return;
                         if(file.name.split(".").last() != "jpg" && file.name.split(".").last() != "png") return;
                         var imageFile = sp.getImageFile(sp.droplist.selection.text,sp.gv.lastSelectedItem.text);
+                        
                         sp.cropImage(file,imageFile);
                         sp.gv.lastSelectedItem.image = imageFile;
                         sp.gv.refresh();
@@ -1045,6 +1049,7 @@ this,
             previewHelper: {},
             renderTaskArray:[],
             preImageArr:[],
+            newItemOrCover:'newItem',
             
         
             haveSetting: function(keyName){
@@ -1371,12 +1376,17 @@ this,
                         var nameStr = "";
                         pngPath = File(pngPath);
 
-                        if(this.coverChangeValue == true || (this.coverChangeValue==false && pngPath.exists == false )){
-                            while (pngPath.exists) {
-                                pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
-                                pngPath = File(pngPath);                            }
+                        if( this.newItemOrCover == 'newItem' ||(this.newItemOrCover =='cover' && this.coverChangeValue == true)){
+                            if( this.newItemOrCover == 'newItem'){
+                                while (pngPath.exists) {
+                                    pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
+                                    pngPath = File(pngPath);                            
+                                }
+                            }
                             try{tempComp2.saveFrameToPng(comps.time, pngPath);}catch(err){}
                         }
+                            
+                            
                         if(this.savePreviewValue==true){
                                 tempComp2.layer(1).inPoint = timeArr[0];
                                 tempComp2.layer(1).outPoint = timeArr[1];                                
@@ -1385,7 +1395,8 @@ this,
                                 var timeArr = this.getTimeInfoArr(tempComp2)
                                 var targetFolder = new Folder(pngPath.toString().replace(/.png/i,"")+"_seq");
                                 !targetFolder.exists && targetFolder.create();
-                                var num = this.frameNum;                                for(var i=0;i<num;i++){    
+                                var num = this.frameNum;                                
+                                for(var i=0;i<num;i++){    
                                     try{
                                           var time = timeArr[0] +i*(timeArr[1]-timeArr[0])/num;
                                           var seqPath = new File(targetFolder.toString()+this.slash+i.toString()+".png");
@@ -1426,18 +1437,23 @@ this,
                                           }
                                       var nameStr = "";
                                       pngPath = File(pngPath);
-                                          if(this.coverChangeValue == true || (this.coverChangeValue==false && pngPath.exists == false )){
-                                              while (pngPath.exists) {
-                                                  pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
-                                                  pngPath = File(pngPath);
-                                              }
-                                              if(this.thumbTypeValue== true){
-                                                  app.activeViewer.views[0].saveBlittedImageToPng(comps.time,pngPath,1000,"what's this? I don't know");
-                                              }else{
-                                                  comps.saveFrameToPng (comps.time, pngPath);
+                                
+                                
+                                    if( this.newItemOrCover == 'newItem' ||(this.newItemOrCover =='cover' && this.coverChangeValue == true)){
+                                        if( this.newItemOrCover == 'newItem'){
+                                                  while (pngPath.exists) {
+                                                      pngPath = pngPath.toString().split(".")[0].toString() + "_" + ".png";
+                                                      pngPath = File(pngPath);
                                                   }
-                                              this.cropImage (pngPath, pngPath);
-                                          }
+                                            }
+                                            if(this.thumbTypeValue== true){
+                                                app.activeViewer.views[0].saveBlittedImageToPng(comps.time,pngPath,1000,"what's this? I don't know");
+                                            }else{
+                                                comps.saveFrameToPng (comps.time, pngPath);
+                                                }
+                                            this.cropImage (pngPath, pngPath);
+                                        }
+
                                           if(this.savePreviewValue==true){
                                                     var targetFolder = new Folder(pngPath.toString().replace(/.png/i,"")+"_seq");
                                                     !targetFolder.exists && targetFolder.create();

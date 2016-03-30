@@ -14,7 +14,6 @@
     <Name>Transition circle pack 1</Name>
     <Name>Project test</Name>
     <Name>Lightning pack 1</Name>
-    <Name>Transition squad and step pack 1</Name>
   </ListItems>
   <ParentGroup>
     <item groupName="Default">
@@ -26,7 +25,6 @@
       <Index>3</Index>
       <Index>4</Index>
       <Index>5</Index>
-      <Index>6</Index>
     </item>
   </ParentGroup>
 </settings>
