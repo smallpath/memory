@@ -13,8 +13,6 @@ Memory support preview animation,what have you watched is what it will be after 
 
 ![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)
 
-![screenshot9](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/3.gif)
-
 ![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/4.gif)
 
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1_en.PNG)

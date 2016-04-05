@@ -15,8 +15,6 @@
 
 ![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)
 
-![screenshot9](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/3.gif)
-
 ![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/4.gif)
 
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.PNG)
@@ -84,7 +82,7 @@ win8与win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`以�
 - [x] 添加预览用的图片序列的帧速率和图片数量选项
 - [x] 生成预览序列时后清理内存
 - [x] 右键菜单检测框的调整
-- [ ] 预览的单元测试,环境windows,aecc cc2014 cc2015
+- [x] 预览的单元测试,环境windows,aecc cc2014 cc2015
 
 ##版本更新记录
 [更新历史](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS.md)
