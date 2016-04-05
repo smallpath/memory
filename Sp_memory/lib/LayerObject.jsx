@@ -164,7 +164,7 @@
         getMaterial: function(layerInf,layerInfo,helperObj,thisLayer){
                     layerInfo.file = thisLayer.source.mainSource.file;
                     if (this.isSaveMaterial == true) {
-                        var tempArr = ["ai","bmp","jpg","png","psd"];
+                        var tempArr = ["ai","bmp","jpg","png","psd","tiff"];
                         if (sp.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
                             if (thisLayer.source.mainSource.file.length <= 10485760) {
                                     if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) { 
@@ -937,6 +937,7 @@
                                                       xml.file.toString().indexOf(".psd") != -1 ||
                                                       xml.file.toString().indexOf(".bmp") != -1 ||
                                                       xml.file.toString().indexOf(".jpg") != -1 || 
+                                                      xml.file.toString().indexOf(".tiff") != -1 || 
                                                       xml.file.toString().indexOf(".png") != -1) {
                                                     genFileFolder = Folder(sp.scriptFolder.toString() +sp.slash+ "tempFile");
                                                     if (!genFileFolder.exists) {
