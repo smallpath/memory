@@ -7,7 +7,7 @@ This is a script for Adobe After Effects.It can save any layer even `composition
 
 ##User Interface
 
-Memory support preview animation,what have you watched is what it will be after generating layers
+Memory support preview animation,what you have watched is what it will be after generating layers
 
 ![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)
 
@@ -22,19 +22,16 @@ Memory support preview animation,what have you watched is what it will be after 
 ![screenshot3](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/3_en.PNG)
 
 
-
-
-
 Script layouts automatically according to window size.Moreover,it has right-click menu to reduce space for you
 
 ##Script Feature
-1. It support preview element, you can set the frame numbers and frame rate of preview animation.
-2. It support any layer, such as Shape layer,Text layer,Image layer,Music layer and even `Composition layer`
-3. It support any property,including Plugin,Mask,Text Animator,Shape Effector,Layer Style and so on.
-4. It support storing image and music.Even if the material has been removed, it can be generated correctly by Memory
-5. It support fixing the expression error caused by using different launguage of AE.Lauguage supported includes English,Chinese,Japanese and ADBE.
-6. It support preset which support 9 types of PropertyGroup such as Plugin,Mask,Text Animator and Transform.
-7. It support cross-version,For example, if you save a composition layer in AE CC2015,Memory can generate that layer perfect in AE CS4
+1. Supporting preview element, you can set the frame numbers and frame rate of preview animation.
+2. Supporting any layer, such as Shape layer,Text layer,Image layer,Music layer and even `Composition layer`
+3. Supporting any property,including Plugin,Mask,Text Animator,Shape Effector,Layer Style and so on.
+4. Supporting storing image and music.Even if the material has been removed, it can be generated correctly by Memory
+5. Supporting fixing the expression error caused by using different launguage of AE.Lauguage supported includes English,Chinese,Japanese and ADBE.
+6. Supporting preset which support 9 types of PropertyGroup such as Plugin,Mask,Text Animator and Transform.
+7. Supporting cross-version,For example, if you save a composition layer in AE CC2015,Memory can generate that layer perfect in AE CS4
 
 
 
