@@ -14,17 +14,23 @@
     <Name>Transition circle pack 1</Name>
     <Name>Project test</Name>
     <Name>Lightning pack 1</Name>
+    <Name>Animate text pack 1</Name>
+    <Name>Icon pack 1</Name>
+    <Name>Transition blind pack 1</Name>
   </ListItems>
   <ParentGroup>
     <item groupName="Default">
       <Index>0</Index>
       <Index>1</Index>
       <Index>2</Index>
+      <Index>4</Index>
     </item>
     <item groupName="MG">
       <Index>3</Index>
-      <Index>4</Index>
       <Index>5</Index>
+      <Index>6</Index>
+      <Index>7</Index>
+      <Index>8</Index>
     </item>
   </ParentGroup>
 </settings>
