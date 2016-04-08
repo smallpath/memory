@@ -826,11 +826,19 @@
                     
                     var targetImage = sp.noImage;
                     if (image.exists) {
+                          var seqFolder = new Folder(image.toString().replace(/.png/i,"")+"_seq");
+                          if(seqFolder.exists){
+                               seqFolder.rename(newEleName.toString()+"_seq");
+                          }
                         image.rename(newEleName.toString() + ".png");
                         targetImage = sp.getImage(sp.droplist.selection.text,newEleName.toString());
-                        if (image.toString() != targetImage.toString()) 
+                        if (image.toString() != targetImage.toString()){ 
                             image.remove();
+                            }
+
                     }
+                
+
                 
                     sp.gv.lastSelectedItem.text = newEleName.toString();
                     sp.gv.lastSelectedItem.image = targetImage;
