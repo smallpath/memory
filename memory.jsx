@@ -1905,6 +1905,10 @@ Tips:
     if(content.ListItems.children().length()==0){
             content.ListItems.appendChild(new XML("<Name>Default</Name>"));
             content.ParentGroup.child(0).appendChild(new XML("<Index>"+0+"</Index>"))
+            var file = sp.getFileByName("Default");
+            sp.getImageFolderByName("Default");
+            var str = "<tree></tree>";
+            file.writee(str);
         }
     sp.settingsFile.writee(content);
     
