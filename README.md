@@ -13,14 +13,7 @@ Memory support preview animation,what you have watched is what it will be after 
 
 ![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)
 
-![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/4.gif)
-
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1_en.PNG)
-
-![screenshot2](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2_en.PNG)
-
-![screenshot3](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/3_en.PNG)
-
 
 Script layouts automatically according to window size.Moreover,it has right-click menu to reduce space for you
 
