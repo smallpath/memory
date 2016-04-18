@@ -15,13 +15,7 @@
 
 ![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)
 
-![screenshot4](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/4.gif)
-
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.PNG)
-
-![screenshot2](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.PNG)
-
-![screenshot3](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/3.PNG)
 
 
 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间
