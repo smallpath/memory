@@ -15,7 +15,7 @@ sp.extend(sp,{
         deleteElement: { en: "Remove item", ch: "删除元素" },
         create: { en: "New layer", ch: "生成层" },
         cover: { en: "Cover item", ch: "覆盖元素" },
-        isShow: { en: "Limit text", ch: "显示文字" },
+        isShow: { en: "Show text", ch: "显示文字" },
         isAlert: { en: "Deleting Alert", ch: "删除时警告" },
         isPrecomp: { en: "Pre-compose", ch: "预合成" },
         isOffset: { en: "Save material", ch: "存储素材" },

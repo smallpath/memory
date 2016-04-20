@@ -7,7 +7,7 @@ This is a script for Adobe After Effects.It can save any layer even `composition
 
 ##User Interface
 
-Memory support preview animation,what you have watched is what it will be after generating layers
+Memory supports preview animation,what you have watched is what it will be after generating layers
 
 ![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)
 
@@ -23,13 +23,13 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 3. Supporting any property,including Plugin,Mask,Text Animator,Shape Effector,Layer Style and so on.
 4. Supporting storing image and music.Even if the material has been removed, it can be generated correctly by Memory
 5. Supporting fixing the expression error caused by using different launguage of AE.Lauguage supported includes English,Chinese,Japanese and ADBE.
-6. Supporting preset which support 9 types of PropertyGroup such as Plugin,Mask,Text Animator and Transform.
-7. Supporting cross-version,For example, if you save a composition layer in AE CC2015,Memory can generate that layer perfect in AE CS4
+6. Supporting preset which has 9 types of PropertyGroup such as Plugin,Mask,Text Animator and Transform.
+7. Supporting cross-version.For example, if you save a composition layer in AE CC2015,Memory can generate that layer perfectly in AE CS4
 
 
 
 ##Usage
-Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking '`Source code (zip)`
+Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Source code (zip)`
 
 If your AE version is CC-CC2015,extract the `Sp_memory.jsxbin` and `Sp_memory` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`
 
