@@ -36,13 +36,14 @@ General:
 Save layer:
     Auto rename:   whether auto name for the item when save layer
     Save preview:   whether save preview for the item when save layer
-    Save material:  whether save images and musics for the item when save layer.If yes,script can create images and musics even the source has been removed.  
+    Save material:  whether save images and musics for the item when save layer.
+                    If yes,script can create images and musics even if the source has been removed.  
     
 Create layer:
     Pre-compose:   Whether pre-compose layers which is created
     Only property:  Whether only create new property groups on selected layer rather than create new layers  
     Empty property:  If Only property is checked,decide whether clean property group before Only property  
-    Shift keyframe:  If Only property is checked,decide whether keyframes that is created should offset related to the inPoint of layer or not  
+    Offset keyframe:  If Only property is checked,decide whether keyframes created should offset related to the inPoint of layer
 ```
 
 ## Reload previews of group
@@ -52,7 +53,7 @@ Option is the max frames.Memory will cut the layers from 0 to the max frames if 
 ## Fix expression errors
 `Right Click->Help scripts->Fix expression errors` to fix expression errors caused by using different language of AE  
 Language supported includes Chinese,English,Japanese and ADBE(Adobe general identifier)  
-If there is wrong expressions when create layer,Memory will call this script to fix them.
+If there are wrong expressions when create layer,Memory will call this script to fix them.
 
 ## Preview all/selected
 If there is items being selected , the preview button in Right-click menu will be `Preview selected`  
@@ -72,7 +73,7 @@ Group is the container of item,so make sure there is a group before saving layer
 
 ## Add module
 `Right Click->New module` to add a new module  
-When add group and import group,the group will be added into current module
+When add group and import group,the group will be added into current module  
 You can edit the module by open the `Move module or rename module` from the Setting window
 
 ## Setting
@@ -125,7 +126,7 @@ Check updates for Memory
 You can edit them by yourself to use  the powerful preset feather of Memory
 
 #### Only property
-If `Right Click->Only property` is checked ,decide the property groups that will be created
+If `Right Click->Only property` is checked ,decide the property groups that will be created  
 Default:
 ```
 Mask

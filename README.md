@@ -59,7 +59,7 @@ Finally,restart the script
 
 
 ##Logs
-[Version Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS.md)
+[Version Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS-EN.md)
 
 ##Thanks To
 - 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
