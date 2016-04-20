@@ -19,8 +19,6 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 6. Supporting preset which has 9 types of PropertyGroup such as Plugin,Mask,Text Animator and Transform.
 7. Supporting cross-version.For example, if you save a composition layer in AE CC2015,Memory can generate that layer perfectly in AE CS4
 
-
-
 ##Usage
 Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Source code (zip)`  
 If your AE version is CC-CC2015,extract the `Sp_memory.jsxbin` and `Sp_memory` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`  
@@ -28,13 +26,6 @@ If your AE version is CS3-CS6,extract `Sp_memory(CS3-CS6).jsxbin` and `Sp_memory
 If your windows is win8 or win10, make sure AE is running under the administrator access  
 In AE, go to Edit->Preferences->General,make sure 'Allow scripts to write File and access Network' is checked  
 Open Memory from Window->'Sp_memory.jsxbin'  
-
-The default language is not English.To change it into English, follow these steps:  
-Right click at script panel,click the first button:  
-![screenshot5](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/5.PNG)  
-In the big setting window,click the 'English' button which is near the bottom:  
-![screenshot6](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/6.PNG)  
-Finally,restart the script
 
 ##Tutorial
 >[Tutorial](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL-EN.md)

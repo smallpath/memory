@@ -190,6 +190,8 @@ _('*').each(function(e){
                                                       e.onChange = function(){sp.saveSetting("effectName",this.text)}
                                                       break;
                   case 'ch':    e.enabled = sp.lang =="en"? true: false;
+                                    if(e.enabled == true)
+                                        e.enabled = sp.isForceEnglish() ? false:true;
                                     e.onClick = function(){
                                                sp.saveSetting("language","ch");
                                                alert("请重新打开脚本,语言会将自动变更为中文.");

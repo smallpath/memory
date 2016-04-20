@@ -1082,6 +1082,12 @@ this,
                 return file;
             },
         
+            isForceEnglish: function(){
+                var string = this.scriptFolder.toString() +this.slash+ "force_en.txt";
+                var file = new File(string);
+                return file.exists;
+            },
+        
             getImageFolderByName: function(name){
                 var string = this.imageFolder.toString() + this.slash + name + "";
                 var folder = new Folder(string);
@@ -1787,8 +1793,15 @@ this,
       !sp.materialFolder.exists && sp.materialFolder.create();
        
      var loc = function(string){
-            if(sp.lang === 0)
-                    sp.lang = sp.getSetting ("language");
+            if(sp.lang === 0){
+                /* sp.lang = sp.getSetting ("language");*/
+                    sp.lang = "en";
+                /* 
+                    if(sp.isForceEnglish()){
+                            sp.lang = "en";
+                    }
+                    */
+            }
             return string[sp.lang];
          }
      
