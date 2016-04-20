@@ -1,12 +1,9 @@
 ##[中文文档](https://github.com/Smallpath/Memory/blob/master/README-CH.md)
 
 # Memory
-
 This is a script for Adobe After Effects.It can save any layer even `composition layer` in AE ,so you can create these layers in another project,another version of ae and even another computer
 
-
 ##User Interface
-
 Memory supports preview animation,what you have watched is what it will be after generating layers  
 ![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)  
 ![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)  
@@ -44,7 +41,7 @@ Finally,restart the script
 
 
 ##Logs
-[Version Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS-EN.md)
+>[Version Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS-EN.md)
 
 ##Thanks To
 - 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
