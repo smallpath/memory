@@ -7,14 +7,10 @@ This is a script for Adobe After Effects.It can save any layer even `composition
 
 ##User Interface
 
-Memory supports preview animation,what you have watched is what it will be after generating layers
-
-![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)
-
-![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)
-
-![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1_en.PNG)
-
+Memory supports preview animation,what you have watched is what it will be after generating layers  
+![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)  
+![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)  
+![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1_en.PNG)  
 Script layouts automatically according to window size.Moreover,it has right-click menu to reduce space for you
 
 ##Script Feature
@@ -29,30 +25,19 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 
 
 ##Usage
-Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Source code (zip)`
+Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Source code (zip)`  
+If your AE version is CC-CC2015,extract the `Sp_memory.jsxbin` and `Sp_memory` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`  
+If your AE version is CS3-CS6,extract `Sp_memory(CS3-CS6).jsxbin` and `Sp_memory` instead  
+If your windows is win8 or win10, make sure AE is running under the administrator access  
+In AE, go to Edit->Preferences->General,make sure 'Allow scripts to write File and access Network' is checked  
+Open Memory from Window->'Sp_memory.jsxbin'  
 
-If your AE version is CC-CC2015,extract the `Sp_memory.jsxbin` and `Sp_memory` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`
-
-If your AE version is CS3-CS6,extract `Sp_memory(CS3-CS6).jsxbin` and `Sp_memory` instead
-
-If your windows is win8 or win10, make sure AE is running under the administrator access
-
-In AE, go to Edit->Preferences->General,make sure 'Allow scripts to write File and access Network' is checked
-
-Open Memory from Window->'Sp_memory.jsxbin'
-
-The default language is not English.To change it into English, follow these steps:
-
-Right click at script panel,click the first button:
-
-![screenshot5](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/5.PNG)
-
-In the big setting window,click the 'English' button which is near the bottom:
-
-![screenshot6](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/6.PNG)
-
+The default language is not English.To change it into English, follow these steps:  
+Right click at script panel,click the first button:  
+![screenshot5](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/5.PNG)  
+In the big setting window,click the 'English' button which is near the bottom:  
+![screenshot6](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/6.PNG)  
 Finally,restart the script
-
 
 ##Tutorial
 >[Tutorial](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL-EN.md)
@@ -83,5 +68,4 @@ limitations under the License.
 ```
 
 ##Feedback
-
 If you encounter any problems or have any feedback, please open an issue.

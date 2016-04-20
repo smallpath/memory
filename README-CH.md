@@ -31,61 +31,27 @@
 7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CS4上正确地生成
 
 
-##脚本安装
+## 脚本安装
 
-进入[版本发布页面](https://github.com/Smallpath/Memory/releases),下载最新版的`Source code (zip)` 
-
-AE版本为CC-CC2015的,请将压缩包中的`Sp_memory.jsxbin`,`Sp_memory文件夹`放置在你的AE脚本文件夹中,例如`Support Files\Scripts\ScriptUI Panels`
-
-AE版本为CS3-CS6的,请解压`Sp_memory(CS3-CS6).jsxbin`与`Sp_memory文件夹`
-
-win8与win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`以管理员身份运行此程序`
-
-在AE中打开编辑->预选项->一般,勾选`允许脚本访问文件与网络`
-
+进入[版本发布页面](https://github.com/Smallpath/Memory/releases),下载最新版的`Source code (zip)`  
+AE版本为CC-CC2015的,请将压缩包中的`Sp_memory.jsxbin`,`Sp_memory文件夹`放置在你的AE脚本文件夹中,例如`Support Files\Scripts\ScriptUI Panels`  
+AE版本为CS3-CS6的,请解压`Sp_memory(CS3-CS6).jsxbin`与`Sp_memory文件夹`  
+win8与win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`以管理员身份运行此程序`  
+在AE中打开编辑->预选项->一般,勾选`允许脚本访问文件与网络`  
 在AE中打开窗口菜单中的`Sp_memory.jsxbin`,即可
 
-
-##脚本使用教程
+## 脚本使用教程
 
 >[文字教程](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL.md)
 
-## v3.0 TODO LIST
-
-- [x] 初始化配置文件时增加默认模块
-- [x] 升级时初始化默认模块
-- [x] droplist触发onChange方法时增加模块的操作
-- [x] 新建模块,删除模块
-- [x] 新建组,删除组时指定模块
-- [x] 模块增删改移动
-- [x] 模块中组的增删改移动
-- [x] 修复批量导出组时取消按钮无效
-- [x] 导出时导出模块信息
-- [x] 导入时导入模块信息
-- [x] 鼠标靠近元素时预览
-- [x] 所有元素同步预览
-- [x] 点击元素时预览
-- [x] 添加预览全部功能
-- [x] 升级时提示模块相关和预览相关的信息,并着重提示用重载组内图片的初始化功能
-- [x] 保存时进行预览图片序列生成
-- [x] 重写重载组内图片的功能,以初始化预览动画
-- [x] 导出时导出图片序列,注意数据的向下兼容
-- [x] 导入时生成图片序列
-- [x] 删除元素时删除图片序列
-- [x] 管理组和模块时添加提示
-- [x] 添加预览用的图片序列的帧速率和图片数量选项
-- [x] 生成预览序列时后清理内存
-- [x] 右键菜单检测框的调整
-- [x] 预览的单元测试,环境windows,aecc cc2014 cc2015
-
-##版本更新记录
+## 版本更新记录
 [更新历史](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS.md)
 
-##感谢
+## 感谢
 - 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
 - 水果硬糖([UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
 
-##License
+## License
 ```
 Copyright (C) 2015 Smallpath
 
@@ -102,5 +68,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
-##反馈
+## 反馈
 脚本使用中遇到任何问题,请新开issue,或联系smallpath2013@gmail.com

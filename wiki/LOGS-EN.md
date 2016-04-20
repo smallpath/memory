@@ -1,4 +1,4 @@
-###3.0 (Date:2016-4-12)
+###3.0 (Date:2016-04-07)
 - Add preview feature
 - Add module
 - New checkbox->Save preview
