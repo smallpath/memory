@@ -3,6 +3,9 @@
 # Memory
 这是后期合成软件[Adobe After Effects](https://en.wikipedia.org/wiki/Adobe_After_Effects)的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
+##环境要求
+Windows系统;AE版本为CC,CC2014与CC2015
+
 ##脚本界面
 支持动态预览元素内容  
 ![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)  
@@ -22,7 +25,7 @@
 
 
 ## 脚本安装
-进入[版本发布页面](https://github.com/Smallpath/Memory/releases),下载最新版的`Source code (zip)`  
+进入[版本发布页面](https://github.com/Smallpath/Memory/releases),下载最新版的`Sp_memory-EN.zip`  
 AE版本为CC-CC2015的,请将压缩包中的`Sp_memory.jsxbin`,`Sp_memory文件夹`放置在你的AE脚本文件夹中,例如`Support Files\Scripts\ScriptUI Panels`  
 AE版本为CS3-CS6的,请解压`Sp_memory(CS3-CS6).jsxbin`与`Sp_memory文件夹`  
 win8与win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`以管理员身份运行此程序`  

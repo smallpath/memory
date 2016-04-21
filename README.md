@@ -3,6 +3,9 @@
 # Memory
 This is a script for Adobe After Effects.It can save any layer even `composition layer` in AE ,so you can create these layers in another project,another version of ae and even another computer
 
+##Support
+Windows system;AE CC,CC2014 and CC2015
+
 ##User Interface
 Memory supports preview animation,what you have watched is what it will be after generating layers  
 ![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)  
@@ -20,7 +23,7 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 7. Supporting cross-version.For example, if you save a composition layer in AE CC2015,Memory can generate that layer perfectly in AE CS4
 
 ##Usage
-Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Source code (zip)`  
+Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Sp_memory-EN.zip`  
 If your AE version is CC-CC2015,extract the `Sp_memory.jsxbin` and `Sp_memory` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`  
 If your AE version is CS3-CS6,extract `Sp_memory(CS3-CS6).jsxbin` and `Sp_memory` instead  
 If your windows is win8 or win10, make sure AE is running under the administrator access  
