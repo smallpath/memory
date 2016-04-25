@@ -8,18 +8,18 @@ Open `Sp_memory.jsxbin` from `AE->Window->Sp_memory.jsxbin`
 In this type, Memory supports shortcut keys.More infomation in the Memory setting window
 
 ## Item
-The elements in Memory panel is called `Item`
+The element in Memory panel is called `Item`
 
 ## Save layer
 `Right Click->New item` to save selected layers into a new item  
 Shortcut:`Ctrl+Right Click` Or `Alt+Right Click`
 
 ## Create layer
-`Right Click->New layer` to generating new layers in current comp  
+`Right Click->New layer` to generating new layers using the selected item    
 Shortcut:Double click at selected item.
 
 ## Cover item
-`Right Click->Cover item` to cover item by selected layers
+`Right Click->Cover item` to cover selected item by selected layers
 
 ## Move item
 `Shift+Right Click` to show item-moving window
@@ -34,21 +34,21 @@ General:
     Show text:   whether the text of item shows
     
 Save layer:
-    Auto rename:   whether auto name for the item when save layer
-    Save preview:   whether save preview for the item when save layer
+    Auto rename:   whether auto name for the item when save layer.
+    Save preview:   whether save preview for the item when save layer.
     Save material:  whether save images and musics for the item when save layer.
-                    If yes,script can create images and musics even if the source has been removed.  
+                    If true,script can create images and musics even if the source has been removed.  
     
 Create layer:
-    Pre-compose:   Whether pre-compose layers which is created
-    Only property:  Whether only create new property groups on selected layer rather than create new layers  
+    Pre-compose:   Whether pre-compose layers which are created.
+    Only property:  Whether only create new property groups on selected layer rather than create new layers.
     Empty property:  If Only property is checked,decide whether clean property group before Only property  
-    Offset keyframe:  If Only property is checked,decide whether keyframes created should offset related to the inPoint of layer
+    Offset keyframe:  If Only property is checked,decide whether keyframes created should offset related to the inPoint of layer.
 ```
 
 ## Reload previews of group
 `Right Click->Help scripts->Reload previews of group` to reload previews of group if there is no previews  
-Option is the max frames.Memory will cut the layers from 0 to the max frames if you input a value
+Option is the max number of frames.Memory will cut the layers from 0 to the max number if you input it.
 
 ## Fix expression errors
 `Right Click->Help scripts->Fix expression errors` to fix expression errors caused by using different language of AE  
