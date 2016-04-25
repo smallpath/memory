@@ -1,4 +1,4 @@
-##[中文文档](https://github.com/Smallpath/Memory/blob/master/README-CH.md)
+##[简体中文文档](https://github.com/Smallpath/Memory/blob/master/README-CH.md)
 
 # Memory
 This is a script for Adobe After Effects.It can save any layer even `composition layer` in AE ,so you can create these layers in another project,another version of ae and even another computer
@@ -24,18 +24,17 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 
 ## Installation
 Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Sp_memory-EN.zip`  
-If your AE version is CC-CC2015,extract the `Sp_memory.jsxbin` and `Sp_memory` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`  
-If your AE version is CS3-CS6,extract `Sp_memory(CS3-CS6).jsxbin` and `Sp_memory` instead  
+Extract the `Sp_memory.jsxbin` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`  
 If your windows is win8 or win10, make sure AE is running under the administrator access  
-In AE, go to Edit->Preferences->General,make sure 'Allow scripts to write File and access Network' is checked  
-Open Memory from Window->'Sp_memory.jsxbin'  
+In AE, go to `Edit->Preferences->General`,make sure `Allow scripts to write File and access Network` is checked  
+Open script from `Window->Sp_memory.jsxbin`
 
 ## Usage
 >[Usage](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL-EN.md)
 
 
 ## ChangeLog
->[Version Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS-EN.md)
+>[Change Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS-EN.md)
 
 ## Thanks To
 - 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
