@@ -6,11 +6,17 @@
     }
 
     $.layer.prototype = {
-        init: function(item, options) {
+        init: function(item, options,helperObj) {
             this.item = item;
+            
+            this.helperObj = helperObj || {};
 
-            if($.layer.parseOption(item,options) == false){
-                return alert("Your options is invalid.Please check them");
+            $.layer.parseFolderItem(item,options)
+        
+            if($.layer.isType(options,"Object")){
+                this.isSaveMaterial = options.isSaveMaterial || false;
+            }else{
+                this.isSaveMaterial = false;
             }
 
             return this;
@@ -22,26 +28,26 @@
         return target;
     },
 
-    $.layer.parseOption = function(item,options){
-            if ($.layer.isType(options, "Object") && (item instanceof XML)) {
-                if (!($.layer.isType(options.sourceFolder,"FolderItem"))){
-                    return false;
-                }                
+    $.layer.parseFolderItem = function(item,options){
+            if ($.layer.isType(options, "Object") && (item instanceof XML)) {               
                 if (!($.layer.isType(options.compFolder,"FolderItem"))){
-                    return false;
+                    $.layer.compFolder = null
+                }else{
+                    $.layer.compFolder = options.compFolder;
+                }
+                if (!($.layer.isType(options.sourceFolder,"FolderItem"))){
+                    if($.layer.compFolder!= null){
+                        $.layer.sourceFolder = $.layer.compFolder;
+                    }else{
+                        $.layer.sourceFolder = null;
+                    }
+                }else{
+                    $.layer.sourceFolder = options.sourceFolder;
                 }
             
-            
-                $.layer.sourceFolder = options.sourceFolder;
-                $.layer.compFolder = options.compFolder;
-               
+
+
             }
-            if($.layer.isType(options,"Object")){
-                this.isSaveMaterial = options.isSaveMaterial || false;
-            }else{
-                this.isSaveMaterial = false;
-            }
-            return true;
     }
 
     $.layer.extend($.layer.prototype, {
@@ -189,9 +195,9 @@
         getMaterial: function(layerInf, layerInfo, helperObj, thisLayer) {
             layerInfo.file = thisLayer.source.mainSource.file;
             if (this.isSaveMaterial == true) {
-                var tempArr = ["ai", "bmp", "jpg", "png", "psd", "tiff"];
-                if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(), tempArr)) {
-                    if (thisLayer.source.mainSource.file.length <= 10485760) {
+                var tempArr = $.layer.pictureType;
+                if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").slice(-1), tempArr)) {
+                    if (thisLayer.source.mainSource.file.length <= $.layer.pictureMaxLength) {
                         if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) {} else {
                             try {
                                 helperObj["_" + thisLayer.source.id] = {};
@@ -208,9 +214,9 @@
 
                     }
                 }
-                var tempArr = ["ape", "flac", "mp3", "wav"];
-                if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(), tempArr)) {
-                    if (thisLayer.source.mainSource.file.length <= 52428800) {
+                var tempArr = $.layer.musicType;
+                if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").slice(-1), tempArr)) {
+                    if (thisLayer.source.mainSource.file.length <= $.layer.musicMaxLength) {
                         if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) {} else {
                             try {
                                 helperObj["_" + thisLayer.source.id] = {};
@@ -537,10 +543,13 @@
             }else{
                 var comp = layers[1].containingComp;
             }
+        
+        
+            elementName = elementName || "Default";
             helperObj = helperObj || {};
-
             helperObj["_" + comp.id] = helperObj["_" + comp.id] || {};
             helperObj["elementArr"] = helperObj["elementArr"] || [];
+            
             var elementArr = helperObj.elementArr;
             if (elementArr.length == 0)
                 var elementxml = new XML("<Element name=\"" + elementName + "\"></Element>");
@@ -562,7 +571,7 @@
                         xml.Properties.appendChild(elementxmltemp);
                     } else {
                         elementArr.push(elementxml);
-                        var comptentXml = $.layer(thisLayer.source.layers,options).toXML(encodeURIComponent(thisLayer.source.name),helperObj)
+                        var comptentXml = $.layer(thisLayer.source.layers,options,helperObj).toXML(encodeURIComponent(thisLayer.source.name),helperObj)
 
                         xml.Properties.appendChild(comptentXml);
                         elementxml = elementArr.pop();
@@ -964,6 +973,7 @@
 
         newMaterial: function(xml, thisComp) {
             var isExist = false;
+            var waitIm;
             try {
                 if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
                     for (isA = 0; isA < app.project.numItems; isA++) {
@@ -1000,54 +1010,46 @@
                     try {
                         try {
                             if (File(xml.file.toString()).exists) {
-                                var waitIm = File(xml.file.toString());
+                                waitIm = File(xml.file.toString());
                             } else if (File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(File(xml.file.toString()).toString())).exists) {
                                 if (decodeURIComponent(File(xml.file.toString()).toString())[0] == "~") {
-                                    genFilePath = File(genFileFolder.toString() + $.layer.slash + "D" + decodeURIComponent(File(xml.file.toString()).toString()));
+                                    var genFilePath = File(genFileFolder.toString() + $.layer.slash + "D" + decodeURIComponent(File(xml.file.toString()).toString()));
                                 } else {
-                                    genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
+                                    var genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
                                 }
-                                var waitIm = genFilePath;
+                                waitIm = genFilePath;
                             } else if (xml.fileBin.toString() != "") {
+
                                 try {
-                                    if (xml.file.toString().indexOf(".ai") != -1 ||
-                                        xml.file.toString().indexOf(".psd") != -1 ||
-                                        xml.file.toString().indexOf(".bmp") != -1 ||
-                                        xml.file.toString().indexOf(".jpg") != -1 ||
-                                        xml.file.toString().indexOf(".tiff") != -1 ||
-                                        xml.file.toString().indexOf(".png") != -1) {
-                                        genFileFolder = Folder($.layer.tempFolder);
+                                    if ($.layer.arrayIndexOf($.layer.pictureType,xml.file.toString().split(".").slice(-1)) != -1) {
+                                        var genFileFolder = Folder($.layer.tempFolder);
                                         if (!genFileFolder.exists) {
                                             genFileFolder.create();
                                         }
                                         if (decodeURIComponent(File(xml.file.toString()).toString())[0] == "~") {
-                                            genFilePath = File(genFileFolder.toString() + $.layer.slash + "D" + decodeURIComponent(File(xml.file.toString()).toString()));
+                                            var genFilePath = File(genFileFolder.toString() + $.layer.slash + "D" + decodeURIComponent(File(xml.file.toString()).toString()));
                                         } else {
-                                            genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
+                                            var genFilePath = File(genFileFolder.toString() + $.layer.slash + decodeURIComponent(File(xml.file.toString()).toString()));
                                         }
-                                        waitToWrite = decodeURIComponent(xml.fileBin.toString());
+                                        if(!genFilePath.parent.exists){
+                                            genFilePath.parent.create();
+                                        }
+
+                                        var waitToWrite = decodeURIComponent(xml.fileBin.toString());
+
                                         if (!genFilePath.exists || genFilePath.exists && genFilePath.length != waitToWrite.length) {
-                                            var genThisFolder= function(theFile, arr) {
-                                                if (theFile.parent.exists) {} else {
-                                                    arr.push(theFile);
-                                                    genThisFolder(theFile.parent, arr);
-                                                    theFile = arr[arr.length - 1];
-                                                    arr.pop();
-                                                    theFile.parent.create();
-                                                }
-                                            }
-                                            genThisFolder(genFilePath, []);
+
+                                            if(!genFilePath.parent.exists)
+                                                genFilePath.create();
                                             if (!genFilePath.parent.exists)
                                                 genFilePath = File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(File(xml.file.toString()).name.toString()));
+
                                             genFilePath.open("w");
                                             genFilePath.encoding = "BINARY";
-                                            isWrite = genFilePath.write(waitToWrite);
+                                            var isWrite = genFilePath.write(waitToWrite);
                                             genFilePath.close();
                                         }
-                                    } else if (xml.file.toString().indexOf(".ape") != -1 ||
-                                        xml.file.toString().indexOf(".flac") != -1 ||
-                                        xml.file.toString().indexOf(".mp3") != -1 ||
-                                        xml.file.toString().indexOf(".wav") != -1) {
+                                    } else if ($.layer.arrayIndexOf($.layer.musicType ,xml.file.toString().split(".").slice(-1)) != -1) {
                                         genFileFolder = Folder($.layer.tempFolder);
                                         if (!genFileFolder.exists) {
                                             genFileFolder.create();
@@ -1055,20 +1057,15 @@
                                         if (decodeURIComponent(File(xml.file.toString()).toString())[0] == "~") {
                                             genFilePath = File(genFileFolder.toString() + $.layer.slash + "D" + decodeURIComponent(File(xml.file.toString()).toString()));
                                         } else {
-                                            genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
+                                            genFilePath = File(genFileFolder.toString() + + $.layer.slash+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                        }
+                                        if(!genFilePath.parent.exists){
+                                            genFilePath.parent.create();
                                         }
                                         waitToWrite = decodeURIComponent(xml.fileBin.toString());
                                         if (!genFilePath.exists || genFilePath.exists && genFilePath.length != waitToWrite.length) {
-                                            var genThisFolder = function(theFile, arr) {
-                                                if (theFile.parent.exists) {} else {
-                                                    arr.push(theFile);
-                                                    genThisFolder(theFile.parent, arr);
-                                                    theFile = arr[arr.length - 1];
-                                                    arr.pop();
-                                                    theFile.parent.create();
-                                                }
-                                            }
-                                            genThisFolder(genFilePath, []);
+                                            if(!genFilePath.parent.exists)
+                                                genFilePath.create();
                                             if (!genFilePath.parent.exists)
                                                 genFilePath = File($.layer.tempFolder + $.layer.slash + decodeURIComponent(File(xml.file.toString()).name.toString()));
                                             genFilePath.open("w");
@@ -1077,11 +1074,12 @@
                                             genFilePath.close();
                                         }
                                     }
-                                    var waitIm = genFilePath;
+                                    waitIm = genFilePath;
                                 } catch (err) {}
                             }
                         } catch (err) {}
                         try {
+                            
                             var im = new ImportOptions();
                             im.file = waitIm;
                             try {
@@ -1129,6 +1127,7 @@
                         } else {
                             // alert("Wrong file type can not be imported !");
                             layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
+                            alert(1);
                         }
                     } catch (err) {}
                 }
@@ -1138,10 +1137,12 @@
                     return layer;
                 } else {
                     layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
+                            alert(2);
                     return layer;
                 }
             } catch (err) {
                 layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
+                            alert(3);
                 return layer;
             }
         },
@@ -1631,6 +1632,12 @@
 
         toLayer: function(thisComp, xml) {
             xml = xml || this.item;
+            
+            if($.layer.layerArr.length == 0){
+              var isFirstStage = true;  
+            }else{
+              var isFirstStage = false;
+            }
 
             var layerArr = [];
 
@@ -1640,12 +1647,15 @@
                 $.layer.layerParentNameArr.push(item.parent.toString());
             },this);
 
-            $.layer.correctProperty();
-            $.layer.fixExpression();
-            $.layer.setParent();
 
-            $.layer.clearHelperArr();
-            
+            if (isFirstStage == true) {
+                $.layer.correctProperty();
+                $.layer.fixExpression();
+                $.layer.setParent();
+
+                $.layer.clearHelperArr();  
+            }
+        
             return layerArr;
 
         }
@@ -1772,8 +1782,8 @@
                 app.endSuppressDialogs(false);
             } catch (err) {}
         });
-        if (typeof translate != "undefined") {
-            translatedExpPropertyArr.length != 0 && translate(this, translatedExpPropertyArr);
+        if (typeof $.layer.translate == "function") {
+            translatedExpPropertyArr.length != 0 && $.layer.translate(this, translatedExpPropertyArr);
         }
     }
 
@@ -1790,6 +1800,14 @@
 
     $.layer.isType = function(obj, type) {
         return Object.prototype.toString.call(obj) == "[object " + type + "]";
+    }
+
+    $.layer.arrayIndexOf = function(arr,item){
+            for(var i=0,len=arr.length;i<len;i++){
+                if(arr[i]==item)
+                    return i;
+            }
+            return -1;
     }
 
     $.layer.forEachXML = function(xml, callback, context) {
@@ -1871,7 +1889,12 @@
         $.layer.layerParentNameArr = [];
     },
 
-
+    $.layer.musicType = ["ape", "flac", "mp3", "wav"];
+    $.layer.musicMaxLength = 52428800;
+    $.layer.pictureType = ["ai", "bmp", "jpg", "png", "psd", "tiff"];
+    $.layer.pictureMaxLength = 10485760;
+    
+    $.layer.translate = function(){};
 
     $.layer.prototype.init.prototype = $.layer.prototype;
     $.global._layer = $.layer;
