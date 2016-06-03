@@ -9,13 +9,15 @@
             init: function(item,options){
                    this.item = item;
                     
-                   this.tempFolder = options.tempFolder;
-                   this.slash = options.slash || "/";
-                   
-                   this.materialFolder = options.materialFolder;
-                   this.compFolder = options.compFolder;
-                   
-                   this.isSaveMaterial = options.isSaveMaterial;
+                   if($.layer.isType(options,"Object")){
+                       this.tempFolder = options.tempFolder || null;
+                       this.slash = options.slash || "/";
+                       
+                       this.sourceFolder = options.sourceFolder || null;
+                       this.compFolder = options.compFolder || null;
+                       
+                       this.isSaveMaterial = options.isSaveMaterial || false;
+                   }
                 
                    return this;
                 },
@@ -27,12 +29,9 @@
     },
 
 
-    //convert Layer object to XML or JSON
+
     $.layer.extend($.layer.prototype,{
         
-        isSaveMaterial: true,
-        
-        //~   Return the attributes of layer
         getLayerAttr: function(index){
                 var thisLayer = this.item;
                 var helperObj = this.helperObj;
@@ -220,7 +219,6 @@
               },
         
         
-        //~   Return every property under the layer  
         getProperties: function(ref,layerxml,layerInfo){
                 if (ref != null) {
                     var point = 0;
@@ -506,7 +504,6 @@
               }, 
         
         
-        //get the xml-based data of single layer
         getXmlFromLayer: function(index){
             
                       var thisLayer = this.item;
@@ -522,7 +519,7 @@
             },
             
             //recuisive get all xmls from selected layers, support comp layer
-            toXML : function(layers,elementName,helperObj){
+            toXML : function(elementName,helperObj){
                                                 var comp = layers[0].containingComp;
                                                 helperObj = helperObj || {};
                                                 helperObj["_"+comp.id] = helperObj["_"+comp.id] || {};
@@ -533,10 +530,20 @@
                                                 else
                                                       var elementxml = new XML("<Comptent name=\"" + elementName + "\"></Comptent>");
                                                       
+                                                var options = {
+                                                   tempFolder : this.tempFolder,
+                                                   slash : this.slash,
+                                                   
+                                                   sourceFolder : this.sourceFolder,
+                                                   compFolder : this.compFolder,
+                                                   
+                                                   isSaveMaterial : this.isSaveMaterial,
+                                                };
+                                                      
                                                       
                                                 var loopFunc = function(thisLayer,index){
                                                                 var thisIndex = elementArr.length ==0? index+1: index;
-                                                                var xml = new $.layer(thisLayer,helperObj).getXmlFromLayer(thisIndex);
+                                                                var xml = new $.layer(thisLayer,options).getXmlFromLayer(thisIndex,helperObj);
 
                                                                 if (thisLayer.source instanceof CompItem) {
                                                                         if (helperObj.hasOwnProperty ("_"+thisLayer.source.id)) {
@@ -572,12 +579,8 @@
         
         })
   
-    //convert XML object to Layer object
-    $.layer.extend($.layer.prototype,{
 
-          isOnlyEffect:         false,
-          isCleanGroup:       false,
-          isKeyframeOffset:  false,
+    $.layer.extend($.layer.prototype,{
           
           newLayer: function(xml,thisComp){
                             var layer;
@@ -595,7 +598,7 @@
                                     } else if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
                                         try{
                                               layer = $.layer.prototype.newMaterial(xml, thisComp);
-                                              layer.source.parentFolder = this.compFolder;
+                                              layer.source.parentFolder = this.sourceFolder;
                                         }catch(err){layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", parseInt(xml.width), parseInt(xml.height), 1);}
                                        try{
                                            if(layer.name!=decodeURIComponent(xml.@name)){
@@ -952,7 +955,7 @@
                                     for (isA = 0; isA < app.project.numItems; isA++) {
                                         if (typeof app.project.item(isA + 1).file != "undefiend" && app.project.item(isA + 1).file != null) {
                                             if (File(app.project.item(isA + 1).file).toString() == File(xml.file.toString()).toString() ||
-                                                    File(app.project.item(isA+1).file.toString()).toString() == File(this.tempFolder.toString()+decodeURIComponent(File(xml.file.toString()).toString())).toString()) {
+                                                    File(app.project.item(isA+1).file.toString()).toString() == File($.layer.tempFolder.toString()+decodeURIComponent(File(xml.file.toString()).toString())).toString()) {
                                                 isExist = true;
                                                 thisItem = app.project.item(isA + 1);
                                                 break;
@@ -983,9 +986,9 @@
                                     try {
                                         if (File(xml.file.toString()).exists) {
                                             var waitIm = File(xml.file.toString());
-                                            }else if(File(this.tempFolder.toString()+this.slash+decodeURIComponent(File(xml.file.toString()).toString())).exists){
+                                            }else if(File($.layer.tempFolder.toString()+$.layer.slash+decodeURIComponent(File(xml.file.toString()).toString())).exists){
                                                 if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
-                                                    genFilePath = File(genFileFolder.toString()+this.slash +"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    genFilePath = File(genFileFolder.toString()+$.layer.slash +"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
                                                     }else{
                                                         genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
                                                         }
@@ -998,12 +1001,12 @@
                                                       xml.file.toString().indexOf(".jpg") != -1 || 
                                                       xml.file.toString().indexOf(".tiff") != -1 || 
                                                       xml.file.toString().indexOf(".png") != -1) {
-                                                    genFileFolder = Folder(this.tempFolder);
+                                                    genFileFolder = Folder($.layer.tempFolder);
                                                     if (!genFileFolder.exists) {
                                                         genFileFolder.create();
                                                     }
                                                 if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
-                                                    genFilePath = File(genFileFolder.toString() +this.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    genFilePath = File(genFileFolder.toString() +$.layer.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
                                                     }else{
                                                         genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
                                                         }
@@ -1021,7 +1024,7 @@
                                                                     }
                                                             }
                                                         if(!genFilePath.parent.exists)
-                                                            genFilePath=File(this.tempFolder.toString()+this.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
+                                                            genFilePath=File($.layer.tempFolder.toString()+$.layer.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
                                                         genFilePath.open("w");
                                                         genFilePath.encoding = "BINARY";
                                                         isWrite=genFilePath.write(waitToWrite);
@@ -1031,19 +1034,18 @@
                                                                xml.file.toString().indexOf(".flac") != -1 ||
                                                                xml.file.toString().indexOf(".mp3") != -1 || 
                                                                xml.file.toString().indexOf(".wav") != -1) {
-                                                    genFileFolder = Folder(this.tempFolder);
+                                                    genFileFolder = Folder($.layer.tempFolder);
                                                     if (!genFileFolder.exists) {
                                                         genFileFolder.create();
                                                     }
                                                 if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
-                                                    genFilePath = File(genFileFolder.toString() +this.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    genFilePath = File(genFileFolder.toString() +$.layer.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
                                                     }else{
                                                         genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
                                                         }
                                                     waitToWrite = decodeURIComponent(xml.fileBin.toString());
                                                     if (!genFilePath.exists || genFilePath.exists && genFilePath.length != waitToWrite.length) {
-                                                        genThisFolder(genFilePath,new Array);
-                                                        function genThisFolder(theFile,arr){
+                                                        var genThisFolder = function (theFile,arr){
                                                             if (theFile.parent.exists){
                                                                 }else{
                                                                     arr.push(theFile);
@@ -1053,8 +1055,9 @@
                                                                     theFile.parent.create();
                                                                     }
                                                             }
+                                                        genThisFolder(genFilePath,[]);
                                                         if(!genFilePath.parent.exists)
-                                                            genFilePath=File(this.tempFolder+this.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
+                                                            genFilePath=File($.layer.tempFolder+$.layer.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
                                                         genFilePath.open("w");
                                                         genFilePath.encoding = "BINARY";
                                                         genFilePath.write(waitToWrite);
@@ -1076,7 +1079,7 @@
                                     }catch(err){layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);return layer;}
                                     if (im.canImportAs(ImportAsType.FOOTAGE)) {
                                         im.importAs = ImportAsType.FOOTAGE;
-                                        f = app.project.importFile(im);
+                                        var f = app.project.importFile(im);
                                         layer = thisComp.layers.add(f);
                                         layer.name = decodeURIComponent(xml.@name);
                                         try {
@@ -1092,7 +1095,7 @@
                                         } catch (err) {}
                                     } else if (im.canImportAs(ImportAsType.FOOTAGE)) {
                                         im.importAs = ImportAsType.FOOTAGE;
-                                        f = app.project.importFile(im);
+                                        var f = app.project.importFile(im);
                                         layer = thisComp.layers.add(f);
                                         layer.name = decodeURIComponent(xml.@name);
                                         try {
@@ -1218,7 +1221,7 @@
                                       if (xml.child(addi).exp.toString() != "") {
                                           try {
 
-                                              sp.expPropertyArr.push(layers.property(xml.child(addi).@matchName));
+                                              $.layer.expPropertyArr.push(layers.property(xml.child(addi).@matchName));
                                               layers.property(xml.child(addi).@matchName).expression = decodeURIComponent(xml.child(addi).exp.toString());
                                               layers.property(xml.child(addi).@matchName).expressionEnabled = xml.child(addi).expEn;
 
@@ -1256,8 +1259,8 @@
                                               try{
                                               var a=layers.property(xml.@matchName).propertyValueType.toString();
                                               if (a.indexOf ("17")!=-1||a.indexOf("21")!=-1 ||a.indexOf("22")!=-1){
-                                                      sp.layerTypePropertyArr.push(layers.property(xml.@matchName));
-                                                      sp.layerTypePropertyValueArr.push(value);
+                                                      $.layer.layerTypePropertyArr.push(layers.property(xml.@matchName));
+                                                      $.layer.layerTypePropertyValueArr.push(value);
                                                   } 
                                               }catch(err){}
                                           } else {
@@ -1610,17 +1613,16 @@
           
           toLayer: function(thisComp,xml){
                       xml = xml || this.item;
-                      var helperObj = this.helperObj;
+                      var helperObj = {};
                       
                       var layerArr = [];
 
-                      $.layer.forEach(xml,function(item,index){
-                              
-                              sp.layerArr[sp.layerArr.length]=layerArr[layerArr.length]=$.layer.prototype.newLayer(item,thisComp);  
-                              sp.layerParentNameArr.push(item.parent.toString());
+                      $.layer.forEachXML(xml,function(item,index){
+                              $.layer.layerArr[$.layer.layerArr.length] = $.layer.prototype.newLayer(item,thisComp);  
+                              $.layer.layerParentNameArr.push(item.parent.toString());
                             })
                       
-                      
+                      $.layer.clearHelperArr();
                       return layerArr;
                       
                 }
@@ -1628,7 +1630,7 @@
           
           });
       
-    //not create new layers but create properties on selected layers 
+ 
     $.layer.newProperties = function(effectxml,selectedLayers,options){
                      
                        var idArr=[
@@ -1712,7 +1714,50 @@
 
                 };//~Clean group and ignore end
             
-     $.layer.forEach = function(xml,callback,context){
+   
+    $.layer.correctProperty = function(){
+                               //~  Correct the value of property which's type is layerIndex or maskIndex     
+                               $.layer.forEach($.layer.layerTypePropertyArr,function(item,index){
+                                          try{
+                                                item.setValue($.layer.layerTypePropertyValueArr[index]);
+                                          }catch(err){}
+                               });
+    }
+
+    $.layer.fixExpression = function(){
+                               //~   Translate the error expressions to avoid script freezing caused by different language version of AfterEffects 
+                               var translatedExpPropertyArr = [];
+                               $.layer.forEach($.layer.expPropertyArr,function(item,index){
+                                         try{
+                                                 app.beginSuppressDialogs();
+                                                  try {
+                                                     item.expressionEnabled = true;
+                                                     var testItsValue = item.valueAtTime(0, false);
+                                                     item.expressionEnabled == false && translatedExpPropertyArr.push(item);
+                                                   } catch (eer) {};
+                                                   app.endSuppressDialogs(false);
+                                             }catch(err){}
+                                     });
+                                 if(typeof translate != "undefined"){
+                                    translatedExpPropertyArr.length !=0 &&translate(this,translatedExpPropertyArr);
+                                 }
+    }
+   
+    $.layer.setParent =   function(){                               //~ Set the parent of layer using Layer.setParentWithJump()
+                                          $.layer.forEach.call($.layer.layerArr,function(item,index){
+                                                      try{
+                                                         if(parseInt($.layer.layerParentNameArr[index]) == $.layer.layerParentNameArr[index])
+                                                            item.setParentWithJump(item.containingComp.layer(parseInt($.layer.layerParentNameArr[index])));
+                                                         else
+                                                            item.setParentWithJump(item.containingComp.layer($.layer.layerParentNameArr[index]));
+                                                      }catch(err){}
+                                                })
+    }
+   
+    $.layer.isType = function(obj,type){
+            return Object.prototype.toString.call(obj) == "[object "+type+"]";
+    }
+    $.layer.forEachXML = function(xml,callback,context){
             if(!(xml instanceof XML)) return;
             var i,
                 len;
@@ -1722,6 +1767,20 @@
                             }
                     }
             }
+    
+    $.layer.forEach = function(callback, context) {
+                if (Object.prototype.toString.call(this) === "[object Array]") {
+                    var i,
+                        len;
+                    for (i = 0, len = this.length; i < len; i++) {
+                        if (typeof callback === "function"  && Object.prototype.hasOwnProperty.call(this, i)) {
+                            if (callback.call(context, this[i], i, this) === false) {
+                                break; // or return;
+                            }
+                        }
+                    }
+                }
+             }  
     
     $.layer.forEachLayer  = function(callback, context) {
                       if (Object.prototype.toString.call(this) === "[object LayerCollection]") {
@@ -1758,7 +1817,26 @@
                 return parseInt((a.toString().substring(0, 2) - b.toString().substring(0, 2))) * 100 + parseInt(b);
     },
     
-    $.layer.tempFolder = 
+    $.layer.tempFolder = new Folder(new File($.fileName).parent.toString());
+    $.layer.slash = "/";
+    
+    $.layer.layerTypePropertyArr.length =[];
+    $.layer.layerTypePropertyValueArr   =[];
+    $.layer.expPropertyArr                    =[];
+    $.layer.layerArr                              =[];
+    $.layer.layerParentNameArr             =[];
+    
+    $.layer.clearHelperArr =  function(){
+        $.layer.layerTypePropertyArr.length =[];
+        $.layer.layerTypePropertyValueArr   =[];
+        $.layer.expPropertyArr                    =[];
+        $.layer.layerArr                              =[];
+        $.layer.layerParentNameArr             =[];
+     },
+ 
+    
+    
+    
     
     $.layer.prototype.init.prototype = $.layer.prototype;
     $.global._layer = $.layer;

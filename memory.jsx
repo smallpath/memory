@@ -1,13 +1,17 @@
 ﻿try{
-     
+
       
 (function(global){
-      
+    #include 'Sp_memory/lib/LayerObject.jsx'
+    $.layer.slash = sp.slash;
+    $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + "tempFile");
+    
+    
+    
     #include 'Sp_memory/lib/StringResource.jsx'
     #include 'Sp_memory/lib/HelperScripts.jsx'
     #include 'Sp_memory/lib/SubSystems.jsx'
     #include 'Sp_memory/lib/RightClickMenu.jsx'
-    #include 'Sp_memory/lib/LayerObject.jsx'
     #include 'Sp_memory/lib/GridView.jsx'
     #include 'Sp_memory/lib/UIParser.jsx'
       
@@ -387,7 +391,7 @@
                               
                         var precomposeName = decodeURIComponent(xml.@name);
                         
-                        sp.clearHelperArr();
+                        $.layer.clearHelperArr();
                         
                         
                         app.beginUndoGroup("Undo new");
@@ -418,7 +422,10 @@
                                     sp.sourceFolder = sourceFolder;
                                     
                                     var currentTime = app.project.activeItem.time;
-
+                                    var options = {
+                                        compFolder:sp.compFolder,
+                                        sourceFolder:sp.sourceFolder,
+                                    };
                                     var activeCompLayersArr = sp.newLayers(xml,app.project.activeItem);
 
                
@@ -435,41 +442,6 @@
                               
                               }
                                                                          
-                               //~  Correct the value of property which's type is layerIndex or maskIndex     
-                               sp.layerTypePropertyArr.forEach(function(item,index){
-                                          try{
-                                                item.setValue(sp.layerTypePropertyValueArr[index]);
-                                          }catch(err){}
-                                    });
-                                   
-                                   
-                               //~   Translate the error expressions to avoid script freezing caused by different language version of AfterEffects 
-                               var translatedExpPropertyArr = [];
-                               sp.expPropertyArr.forEach(function(item,index){
-                                         try{
-                                                 app.beginSuppressDialogs();
-                                                  try {
-                                                     item.expressionEnabled = true;
-                                                     var testItsValue = item.valueAtTime(0, false);
-                                                     item.expressionEnabled == false && translatedExpPropertyArr.push(item);
-                                                   } catch (eer) {};
-                                                   app.endSuppressDialogs(false);
-                                             }catch(err){}
-                                     });
-                                 translatedExpPropertyArr.length !=0 &&translate(this,translatedExpPropertyArr);
-                                 
-                                 
-                                 //~ Set the parent of layer using Layer.setParentWithJump()
-                                 if (sp.onlyEffectValue == false){
-                                          sp.layerArr.forEach(function(item,index){
-                                                      try{
-                                                         if(parseInt(sp.layerParentNameArr[index]) == sp.layerParentNameArr[index])
-                                                            item.setParentWithJump(item.containingComp.layer(parseInt(sp.layerParentNameArr[index])));
-                                                         else
-                                                            item.setParentWithJump(item.containingComp.layer(sp.layerParentNameArr[index]));
-                                                      }catch(err){}
-                                                })
-                                       }
                                  
                                  
                                 app.endSuppressDialogs (false);
@@ -567,7 +539,9 @@
                                 var itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text,itemName));
                               else
                                 var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
+                                
                               var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
                               var item = sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
@@ -1496,7 +1470,6 @@ this,
                 
             });
       
-      //~  added in 2016.2.5
       sp.prototype.extend(sp.prototype,{
                                     newProperties : function(xml,selectedLayers){
                                                                                            
@@ -1528,22 +1501,17 @@ this,
                                                   var returnXml= $.layer.prototype.newPerperties(layerXml.child(0).Properties,selectedLayers,options);                                  
                                          },         
                                     newLayers : function(elementXml,comp){
-                                                  var options = {
-                                                      slash:"/",
-                                                      scriptFolder : Folder(sp.scriptFolder.toString() + sp.prototype.slash+"tempFile")
-                                                  };
-                                              
-                                                  var layerArr = $.layer(elementXml,options).toLayer(comp);
+                                                  var layerArr = $.layer(elementXml).toLayer(comp);
   
                                                   return layerArr;
                                           },
-                                    clearHelperArr : function(){
-                                                this.layerTypePropertyArr.length =[];
-                                                this.layerTypePropertyValueArr   =[];
-                                                this.expPropertyArr                    =[];
-                                                this.layerArr                              =[];
-                                                this.layerParentNameArr             =[];
-                                          },
+                                    getXmlFromLayers: function(layers,itemName){
+                                            var options = {
+                                                isSaveMaterial : sp.saveMaterialValue;
+                                            };
+                                            return $.layer(layers,options).toXML(itemName);
+                                    },
+
                                     saveItemToFile : function(file,xml,position){
                                           var newXml = new XML(file.readd());
                                           if(typeof position ==="undefined"){
