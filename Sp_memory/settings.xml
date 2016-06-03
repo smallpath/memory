@@ -17,6 +17,7 @@
     <Name>Animate text pack 1</Name>
     <Name>Icon pack 1</Name>
     <Name>Transition blind pack 1</Name>
+    <Name>LayerObject≤‚ ‘</Name>
   </ListItems>
   <ParentGroup>
     <item groupName="Default">
@@ -24,6 +25,7 @@
       <Index>1</Index>
       <Index>2</Index>
       <Index>4</Index>
+      <Index>9</Index>
     </item>
     <item groupName="MG">
       <Index>3</Index>

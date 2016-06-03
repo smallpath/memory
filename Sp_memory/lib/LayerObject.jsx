@@ -9,14 +9,8 @@
         init: function(item, options) {
             this.item = item;
 
-            if ($.layer.isType(options, "Object")) {
-                this.tempFolder = options.tempFolder || null;
-                this.slash = options.slash || "/";
-
-                this.sourceFolder = options.sourceFolder || null;
-                this.compFolder = options.compFolder || null;
-
-                this.isSaveMaterial = options.isSaveMaterial || false;
+            if($.layer.parseOption(item,options) == false){
+                return alert("Your options is invalid.Please check them");
             }
 
             return this;
@@ -28,7 +22,27 @@
         return target;
     },
 
-
+    $.layer.parseOption = function(item,options){
+            if ($.layer.isType(options, "Object") && (item instanceof XML)) {
+                if (!($.layer.isType(options.sourceFolder,"FolderItem"))){
+                    return false;
+                }                
+                if (!($.layer.isType(options.compFolder,"FolderItem"))){
+                    return false;
+                }
+            
+            
+                $.layer.sourceFolder = options.sourceFolder;
+                $.layer.compFolder = options.compFolder;
+               
+            }
+            if($.layer.isType(options,"Object")){
+                this.isSaveMaterial = options.isSaveMaterial || false;
+            }else{
+                this.isSaveMaterial = false;
+            }
+            return true;
+    }
 
     $.layer.extend($.layer.prototype, {
 
@@ -503,10 +517,8 @@
 
 
         getXmlFromLayer: function(index) {
-
             var thisLayer = this.item;
-            var helperObj = {};
-
+            
             var layerInfo = this.getLayerAttr(index);
 
             var layerPropertiesXml = this.getProperties(thisLayer, new XML("<Properties></Properties>"), layerInfo);
@@ -518,8 +530,15 @@
 
         //recuisive get all xmls from selected layers, support comp layer
         toXML: function(elementName, helperObj) {
-            var comp = layers[0].containingComp;
+            var layers = this.item;
+
+            if (layers instanceof Array){
+                var comp = layers[0].containingComp;
+            }else{
+                var comp = layers[1].containingComp;
+            }
             helperObj = helperObj || {};
+
             helperObj["_" + comp.id] = helperObj["_" + comp.id] || {};
             helperObj["elementArr"] = helperObj["elementArr"] || [];
             var elementArr = helperObj.elementArr;
@@ -529,29 +548,21 @@
                 var elementxml = new XML("<Comptent name=\"" + elementName + "\"></Comptent>");
 
             var options = {
-                tempFolder: this.tempFolder,
-                slash: this.slash,
-
-                sourceFolder: this.sourceFolder,
-                compFolder: this.compFolder,
-
                 isSaveMaterial: this.isSaveMaterial,
             };
 
 
             var loopFunc = function(thisLayer, index) {
                 var thisIndex = elementArr.length == 0 ? index + 1 : index;
-                var xml = new $.layer(thisLayer, options).getXmlFromLayer(thisIndex, helperObj);
-
+                var xml = $.layer(thisLayer, options).getXmlFromLayer(thisIndex);
+                
                 if (thisLayer.source instanceof CompItem) {
                     if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) {
                         elementxmltemp = helperObj["_" + thisLayer.source.id]["ele"];
                         xml.Properties.appendChild(elementxmltemp);
                     } else {
                         elementArr.push(elementxml);
-                        var comptentXml = $.layer.prototype.toXML(thisLayer.source.layers,
-                            encodeURIComponent(thisLayer.source.name),
-                            helperObj)
+                        var comptentXml = $.layer(thisLayer.source.layers,options).toXML(encodeURIComponent(thisLayer.source.name),helperObj)
 
                         xml.Properties.appendChild(comptentXml);
                         elementxml = elementArr.pop();
@@ -560,7 +571,7 @@
                 elementxml.appendChild(xml);
             };
             if (elementArr.length == 0)
-                layers.forEach(loopFunc);
+                $.layer.forEach.call(layers,loopFunc);
             else
                 $.layer.forEachLayer.call(layers, loopFunc);
 
@@ -592,11 +603,11 @@
                             layer.moveAfter(thisComp.layer(parseInt(xml.index)));
                         } catch (err) {};
                     } else if (xml.@type == "Comp") {
-                        layer = $.layer.prototype.newComp(xml, thisComp);
+                        layer = this.newComp(xml, thisComp);
                     } else if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
                         try {
-                            layer = $.layer.prototype.newMaterial(xml, thisComp);
-                            layer.source.parentFolder = this.sourceFolder;
+                            layer = this.newMaterial(xml, thisComp);
+                            
                         } catch (err) {
                             layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", parseInt(xml.width), parseInt(xml.height), 1);
                         }
@@ -783,8 +794,9 @@
                                 parseInt(xml.compwidth), parseInt(xml.compheight),
                                 parseFloat(xml.comppixelAspect), parseFloat(xml.compduration),
                                 parseFloat(xml.compframeRate));
+                               
                             if (comp.id != app.project.activeItem.id) {
-                                comp.parentFolder = this.compFolder;
+                                comp.parentFolder = $.layer.compFolder;
                             }
                         } catch (err) {}
                         try {
@@ -1015,9 +1027,7 @@
                                         }
                                         waitToWrite = decodeURIComponent(xml.fileBin.toString());
                                         if (!genFilePath.exists || genFilePath.exists && genFilePath.length != waitToWrite.length) {
-                                            genThisFolder(genFilePath, new Array);
-
-                                            function genThisFolder(theFile, arr) {
+                                            var genThisFolder= function(theFile, arr) {
                                                 if (theFile.parent.exists) {} else {
                                                     arr.push(theFile);
                                                     genThisFolder(theFile.parent, arr);
@@ -1026,6 +1036,7 @@
                                                     theFile.parent.create();
                                                 }
                                             }
+                                            genThisFolder(genFilePath, []);
                                             if (!genFilePath.parent.exists)
                                                 genFilePath = File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(File(xml.file.toString()).name.toString()));
                                             genFilePath.open("w");
@@ -1072,7 +1083,6 @@
                         } catch (err) {}
                         try {
                             var im = new ImportOptions();
-                            //alert(waitIm);
                             im.file = waitIm;
                             try {
                                 im.sequence = false;
@@ -1098,6 +1108,7 @@
                                     layer.startTime = parseFloat(xml.startTime);
                                 }
                             } catch (err) {}
+                            layer.source.parentFolder = $.layer.sourceFolder;
                         } else if (im.canImportAs(ImportAsType.FOOTAGE)) {
                             im.importAs = ImportAsType.FOOTAGE;
                             var f = app.project.importFile(im);
@@ -1114,6 +1125,7 @@
                                     layer.startTime = parseFloat(xml.startTime);
                                 }
                             } catch (err) {}
+                            layer.source.parentFolder = $.layer.sourceFolder;
                         } else {
                             // alert("Wrong file type can not be imported !");
                             layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
@@ -1619,20 +1631,21 @@
 
         toLayer: function(thisComp, xml) {
             xml = xml || this.item;
-            var helperObj = {};
 
             var layerArr = [];
 
             $.layer.forEachXML(xml, function(item, index) {
-                $.layer.layerArr[$.layer.layerArr.length] = $.layer.prototype.newLayer(item, thisComp);
+                $.layer.layerArr[$.layer.layerArr.length] = layerArr[layerArr.length] = $.layer.prototype.newLayer(item, thisComp);
+            
                 $.layer.layerParentNameArr.push(item.parent.toString());
-            })
+            },this);
 
             $.layer.correctProperty();
             $.layer.fixExpression();
             $.layer.setParent();
 
             $.layer.clearHelperArr();
+            
             return layerArr;
 
         }
@@ -1687,9 +1700,10 @@
         }
 
         //~ Delete propertyGroup in layers
-
         if (isCleanGroup == true) {
-            selectedLayers.forEach(function(layer, index) {
+
+            $.layer.forEach.call(selectedLayers,function(layer, index) {
+
                 $.layer.forEachPropertyGroup.call(layer, function(thisGroup, index) {
                     if ($.layer.lookUpInArray(thisGroup.matchName, idDel) == true) {
                         if (thisGroup.matchName != "ADBE Layer Styles") {
@@ -1720,7 +1734,8 @@
 
             })
         }
-        selectedLayers.forEach(function(layer, index) {
+    
+        $.layer.forEach.call(selectedLayers,function(layer, index) {
             if (isKeyframeOffset == true)
                 $.layer.prototype.newPropertyGroup(effectxml, layer, layer.inPoint)
             else
@@ -1736,7 +1751,7 @@
 
     $.layer.correctProperty = function() {
         //~  Correct the value of property which's type is layerIndex or maskIndex     
-        $.layer.forEach($.layer.layerTypePropertyArr, function(item, index) {
+        $.layer.forEach.call($.layer.layerTypePropertyArr, function(item, index) {
             try {
                 item.setValue($.layer.layerTypePropertyValueArr[index]);
             } catch (err) {}
@@ -1746,7 +1761,7 @@
     $.layer.fixExpression = function() {
         //~   Translate the error expressions to avoid script freezing caused by different language version of AfterEffects 
         var translatedExpPropertyArr = [];
-        $.layer.forEach($.layer.expPropertyArr, function(item, index) {
+        $.layer.forEach.call($.layer.expPropertyArr, function(item, index) {
             try {
                 app.beginSuppressDialogs();
                 try {
@@ -1776,6 +1791,7 @@
     $.layer.isType = function(obj, type) {
         return Object.prototype.toString.call(obj) == "[object " + type + "]";
     }
+
     $.layer.forEachXML = function(xml, callback, context) {
         if (!(xml instanceof XML)) return;
         var i,
@@ -1814,39 +1830,41 @@
             }
         }
     }
+
     $.layer.forEachPropertyGroup = function(callback, context) {
         var i,
             len;
         for (i = 1, len = this.numProperties; i <= len; i++) {
             if (callback.call(context, this.property(i), i, this) === false) {
-                break; // or return;
+                break; 
             }
         }
     }
-    $.layer.lookUpInArray: function(text, arr) {
+
+    $.layer.lookUpInArray = function(text, arr) {
         var len = arr.length;
         for (var i = 0; i < len; i++) {
             if (arr[i] == text)
                 return true;
         }
         return false;
-    },
+    };
 
-    $.layer.getDistance: function(a, b) {
+    $.layer.getDistance = function(a, b) {
         return parseInt((a.toString().substring(0, 2) - b.toString().substring(0, 2))) * 100 + parseInt(b);
-    },
+    };
 
     $.layer.tempFolder = new Folder(new File($.fileName).parent.toString());
     $.layer.slash = "/";
 
-    $.layer.layerTypePropertyArr.length = [];
+    $.layer.layerTypePropertyArr = [];
     $.layer.layerTypePropertyValueArr = [];
     $.layer.expPropertyArr = [];
     $.layer.layerArr = [];
     $.layer.layerParentNameArr = [];
 
     $.layer.clearHelperArr = function() {
-        $.layer.layerTypePropertyArr.length = [];
+        $.layer.layerTypePropertyArr = [];
         $.layer.layerTypePropertyValueArr = [];
         $.layer.expPropertyArr = [];
         $.layer.layerArr = [];

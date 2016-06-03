@@ -562,23 +562,15 @@ function moduleWindow(groupItem, win) {
     resizeable: 0,
     maximizeButton: 0
   });
-  outRes = ""
-  "Group{
+  outRes = """Group{
                             orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
-                            helpTip:StaticText{text:'"
-  "" + loc(sp.moduleHelpTip) + ""
-  "'},
+                            helpTip:StaticText{text:'""" + loc(sp.moduleHelpTip) + """'},
                             wlist:ListBox{properties:{multiselect:0}},
                             oc:Group{
                                 alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],
-                                ok:Button{text:'"
-  "" + loc(sp.changeModuleName) + ""
-  "'},
-                                cancel:Button{text:'"
-  "" + loc(sp.quit) + ""
-  "'}
-                            }}"
-  "";
+                                ok:Button{text:'""" + loc(sp.changeModuleName) + """'},
+                                cancel:Button{text:'""" + loc(sp.quit) + """'}
+                            }}""";
   try {
     outRes = moveWin.add(outRes);
   } catch (err) {
@@ -688,20 +680,14 @@ function moveWindow(xmlItem, groupItem, win) {
     resizeable: 0,
     maximizeButton: 0
   });
-  outRes = ""
-  "Group{
+  outRes = """Group{
                             orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
                             wlist:ListBox{properties:{multiselect:0}},
                             oc:Group{
                                 alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],
-                                ok:Button{text:'"
-  "" + loc(sp.ok) + ""
-  "'},
-                                cancel:Button{text:'"
-  "" + loc(sp.cancel) + ""
-  "'}
-                            }}"
-  "";
+                                ok:Button{text:'""" + loc(sp.ok) + """'},
+                                cancel:Button{text:'""" + loc(sp.cancel) + """'}
+                            }}""";
   try {
     outRes = moveWin.add(outRes);
   } catch (err) {
@@ -760,20 +746,14 @@ function outputWindow() {
     resizeable: 0,
     maximizeButton: 0
   });
-  outRes = ""
-  "Group{
+  outRes = """Group{
                             orientation: 'column', alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],\
                             wlist:ListBox{properties:{multiselect:1}},
                             oc:Group{
                                 alignment:['fill', 'fill'], alignChildren:['fill', 'fill'],
-                                ok:Button{text:'"
-  "" + loc(sp.ok) + ""
-  "'},
-                                cancel:Button{text:'"
-  "" + loc(sp.cancel) + ""
-  "'}
-                            }}"
-  "";
+                                ok:Button{text:'""" + loc(sp.ok) + """'},
+                                cancel:Button{text:'""" + loc(sp.cancel) + """'}
+                            }}""";
   try {
     outRes = outWin.add(outRes);
   } catch (err) {

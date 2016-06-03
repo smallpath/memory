@@ -2,10 +2,10 @@
 
       
 (function(global){
+
     #include 'Sp_memory/lib/LayerObject.jsx'
     $.layer.slash = sp.slash;
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + "tempFile");
-    
     
     
     #include 'Sp_memory/lib/StringResource.jsx'
@@ -391,18 +391,12 @@
                               
                         var precomposeName = decodeURIComponent(xml.@name);
                         
-                        $.layer.clearHelperArr();
-                        
                         
                         app.beginUndoGroup("Undo new");
                         app.beginSuppressDialogs();
-
-
+                        
                         
                         if(sp.onlyEffectValue == false){
-                                    /*
-                                              *Create new layers using given xml
-                                              */
 
                                     var folderName = sp.getSetting("folderName");
                                     var text = sp.gv.lastSelectedItem.text;
@@ -426,19 +420,20 @@
                                         compFolder:sp.compFolder,
                                         sourceFolder:sp.sourceFolder,
                                     };
-                                    var activeCompLayersArr = sp.newLayers(xml,app.project.activeItem);
+                              
+                                    var activeCompLayersArr = sp.newLayers(xml,app.project.activeItem,options);
 
                
                                     app.project.activeItem.time = currentTime;      
                                     
                                     sourceFolder.numItems == 0 && sourceFolder.remove();
                                     compFolder.numItems == 0 && compFolder.remove();
+                                    
+                                                                  return;
                         }else{
-                                    /*
-                                              *Create new properties using given xml's first child and layers
-                                              */     
+
                                     var activeCompLayersArr = app.project.activeItem.selectedLayers;
-                                    sp.newProperties(xml,app.project.activeItem.selectedLayers); 
+                                    sp.newProperties(xml,app.project.activeItem.selectedLayers,sp.cleanGroupValue,sp.offsetKeyframeValue); 
                               
                               }
                                                                          
@@ -541,7 +536,12 @@
                                 var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
                                 
                               var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              /*
+                              var tempFile = new File("~/Desktop/test.xml");
+                              tempFile.writee(xml);
                               
+                              return;
+                              */
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
                               var item = sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
@@ -1015,7 +1015,6 @@ this,
     },
 
 
-      //~  added in 2016.1.20
       sp.prototype.extend(sp.prototype,{
         
                    
@@ -1156,7 +1155,6 @@ this,
     
       
     
-      //~  added in 2016.1.21
       sp.prototype.extend(sp.prototype,{
                  getTimeInfoArr:function(comp){
                             var layers = [];
@@ -1470,8 +1468,24 @@ this,
                 
             });
       
-      sp.prototype.extend(sp.prototype,{
-                                    newProperties : function(xml,selectedLayers){
+      sp.prototype.extend(sp.prototype,{       
+          
+                                    newLayers : function(elementXml,comp,options){
+                                                  var layerArr = $.layer(elementXml,options).toLayer(comp);
+
+                                                  return layerArr;
+                                          },
+                                      
+                                    getXmlFromLayers: function(layers,itemName){
+                                            var options = {
+                                                isSaveMaterial : sp.saveMaterialValue,
+                                            };
+                                            return $.layer(layers,options).toXML(itemName);
+                                    },
+
+                                    newProperties : function(xml,selectedLayers,isCleanGroup,isKeyframeOffset){
+                                                  isCleanGroup = isCleanGroup || false;
+                                                  isKeyframeOffset = isKeyframeOffset || false;
                                                                                            
                                                   var layerXml = new XML(xml);           
                                                   
@@ -1480,37 +1494,26 @@ this,
                                                   options.newPropertiesSettingArr = [];
                                                   options.cleanPropertiesSettingArr = [];
                                                   
-                                                  var isCleanGroup = options.isCleanGroup;
-                                                  var isKeyframeOffset = options.isKeyframeOffset;
+                                                  options.isCleanGroup = isCleanGroup;
+                                                  options.isKeyframeOffset = isKeyframeOffset;
+                                                  
                                                   
                                                    for(var i=1;i<=9;i++){
-                                                          if (sp.getSetting("_1_"+i)=="1"){
+                                                          if (sp.prototype.getSetting("_1_"+i)=="1"){
                                                               options.newPropertiesSettingArr.push(1);
                                                           }else{
                                                               options.newPropertiesSettingArr.push(0);
                                                           }
                                                       
-                                                          if (sp.getSetting("_2_"+i)=="1"){
+                                                          if (sp.prototype.getSetting("_2_"+i)=="1"){
                                                               options.cleanPropertiesSettingArr.push(1);
                                                           }else{
                                                               options.cleanPropertiesSettingArr.push(0);
                                                           }
                                                     }
-                                                  
-                                                  
-                                                  var returnXml= $.layer.prototype.newPerperties(layerXml.child(0).Properties,selectedLayers,options);                                  
-                                         },         
-                                    newLayers : function(elementXml,comp){
-                                                  var layerArr = $.layer(elementXml).toLayer(comp);
-  
-                                                  return layerArr;
-                                          },
-                                    getXmlFromLayers: function(layers,itemName){
-                                            var options = {
-                                                isSaveMaterial : sp.saveMaterialValue;
-                                            };
-                                            return $.layer(layers,options).toXML(itemName);
-                                    },
+                                                
+                                                  var returnXml= $.layer.newProperties(layerXml.child(0).Properties,selectedLayers,options);                                  
+                                    },  
 
                                     saveItemToFile : function(file,xml,position){
                                           var newXml = new XML(file.readd());
@@ -1533,7 +1536,6 @@ this,
     $.global.sp = sp();
     return $.global.sp;
 })(),
-
 
 //~ Add methods to objects
 (function(sp){
@@ -1603,16 +1605,18 @@ this,
             this.write(str);
             this.close();
         }
+    
         File.prototype.readd = function(){      //method to read from file
                 this.open("r");
                 var temp = this.read();
                 this.close();
                 return temp;
-            }
+        }
+    
         Array.prototype.pushh = function(str){  //chains call for Array.push()
                 this.push(str);
                 return this;
-            }
+        }
     
 })(sp),
 
@@ -1709,7 +1713,7 @@ this,
      var loc = function(string){
             if(sp.lang === 0){
                 /* sp.lang = sp.getSetting ("language");*/
-                    sp.lang = "en";
+                    sp.lang = "ch";
                 /* 
                     if(sp.isForceEnglish()){
                             sp.lang = "en";
@@ -1816,7 +1820,7 @@ Tips:
         }
     
     //~ If the file do not have a group,give it
-    var content = new XML( sp.settingsFile.readd());
+    var content = new XML(sp.settingsFile.readd());
     if(!content.hasOwnProperty ("ListItems"))
         content.appendChild(new XML("<ListItems/>"));
     if(content.ListItems.children().length()==0){
@@ -1837,8 +1841,9 @@ Tips:
             var str = "<tree></tree>";
             file.writee(str);
         }
+
     sp.settingsFile.writee(content);
-    
+
 
     })(sp),
 
