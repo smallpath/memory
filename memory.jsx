@@ -1507,14 +1507,32 @@ this,
                                                   var layerXml = new XML(xml);           
                                                   
                                                   //~ Ignore xml according to presets.Empty groups according to presets
-                                                  var temp = $.layer(xml);
-                                                  var returnXml= temp.ignoreAndCleanProperties(layerXml.child(0).Properties,selectedLayers);
+                                                  var options = {};
+                                                  options.newPropertiesSettingArr = [];
+                                                  options.cleanPropertiesSettingArr = [];
+                                                  
+                                                   for(var i=1;i<=9;i++){
+                                                          if (sp.getSetting("_1_"+i)=="1"){
+                                                              options.newPropertiesSettingArr.push(1);
+                                                          }else{
+                                                              options.newPropertiesSettingArr.push(0);
+                                                          }
+                                                      
+                                                          if (sp.getSetting("_2_"+i)=="1"){
+                                                              options.cleanPropertiesSettingArr.push(1);
+                                                          }else{
+                                                              options.cleanPropertiesSettingArr.push(0);
+                                                          }
+                                                    }
+                                                  
+                                                  
+                                                  var returnXml= $.layer.prototype.newPerperties(layerXml.child(0).Properties,selectedLayers,options);
                               
                                                                               
                                          },         
                                     newLayers : function(elementXml,comp){
-
-                                                  var layerArr = $.layer(elementXml).toLayer(comp);
+                                                  var options = {};
+                                                  var layerArr = $.layer(elementXml,options).toLayer(comp);
   
                                                   return layerArr;
                                           },
@@ -1770,7 +1788,7 @@ this,
                     sp.saveSetting (item, value);
             })(item,valueArr[index])
         });
-    
+
       sp.showThumbValue = sp.getSettingAsBool("showThumb");
       sp.deleteAlertValue = sp.getSettingAsBool ("deleteAlert");
       sp.preComposeValue = sp.getSettingAsBool ("preCompose");
@@ -1787,7 +1805,16 @@ this,
       sp.frameSecond  = parseInt(sp.getSetting("frameSecond"));
       sp.frameNum = parseInt(sp.getSetting("frameNum"));
       
-      
+      var options = {
+          saveMaterialValue : sp.saveMaterialValue,
+          isOnlyEffect : sp.onlyEffectValue ,
+          isCleanGroup : sp.cleanGroupValue,
+          isKeyframeOffset : sp.offsetKeyframeValue,
+          
+          sourceFolder
+          compFolder:
+          materialFolder:
+      };
     
       !sp.roamingFolder.exists && sp.roamingFolder.create();
       !sp.materialFolder.exists && sp.materialFolder.create();

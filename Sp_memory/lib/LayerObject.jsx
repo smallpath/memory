@@ -1,24 +1,36 @@
 ﻿//~  Layer object to handle with layers of after effects, for saving and generating
 (function(){
     
-    $.layer = function(item,helperObj){
-        return new $.layer.prototype.init(item,helperObj);
+    $.layer = function(item,options){
+        return new $.layer.prototype.init(item,options);
     }
 
     $.layer.prototype = {
-            init: function(item,helperObj){
+            init: function(item,options){
                    this.item = item;
-                   this.helperObj = helperObj;
+                   
+                   this.materialFolder = options.materialFolder;
+                   this.compFolder = options.compFolder;
+                   
+                   this.isSaveMaterial = options.isSaveMaterial;
+                   this.isOnlyEffect = options.isOnlyEffect;
+                   this.isCleanGroup = options.isCleanGroup;
+                   this.isKeyframeOffset = options.isKeyframeOffset;
                 
                    return this;
                 },
     }
 
+    $.layer.extend = function (target, source) {
+                for (var i in source) target[i] = source[i];
+                return target;
+            },
+
 
     //~  Convert Layer object to XML or JSON
-    sp.extend($.layer.prototype,{
+    $.layer.extend($.layer.prototype,{
         
-        isSaveMaterial: sp.saveMaterialValue,
+        isSaveMaterial: true,
         
         //~   Return the attributes of layer
         getLayerAttr: function(index){
@@ -512,11 +524,8 @@
         })
   
     //~ Convert XML object to Layer object
-    sp.extend($.layer.prototype,{
-          materialFolder:     sp.materialFolder,
-          compFolder:         sp.compFolder,
-          sourceFolder:       sp.sourceFolder,
-          isPrecompose :     true,
+    $.layer.extend($.layer.prototype,{
+
           isOnlyEffect:         false,
           isCleanGroup:       false,
           isKeyframeOffset:  false,
@@ -888,13 +897,13 @@
                 },
           
           newMaterial: function(xml, thisComp){
-                            var isCunzai = false;
+                            var isExist = false;
                             try {
                                 if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
                                     for (isA = 0; isA < app.project.numItems; isA++) {
                                         if (typeof app.project.item(isA + 1).file != "undefiend" && app.project.item(isA + 1).file != null) {
                                             if (File(app.project.item(isA + 1).file).toString() == File(xml.file.toString()).toString() ||File(app.project.item(isA+1).file.toString()).toString() == File(sp.scriptFolder.toString()+"/tempFile"+decodeURIComponent(File(xml.file.toString()).toString())).toString()) {
-                                                isCunzai = true;
+                                                isExist = true;
                                                 thisItem = app.project.item(isA + 1);
                                                 break;
                                             }
@@ -903,7 +912,7 @@
                                 }
                             } catch (err) {}
                             try {
-                                if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && isCunzai) {
+                                if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && isExist) {
                                     layer = thisComp.layers.add(thisItem);
                                     layer.name = decodeURIComponent(xml.@name);
                                     try {
@@ -919,7 +928,7 @@
                                     } catch (err) {}
                                 }
                             } catch (err) {}
-                          try{  if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && !(isCunzai)) {
+                          try{  if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && !(isExist)) {
                                 try {
                                     try {
                                         if (File(xml.file.toString()).exists) {
@@ -1551,23 +1560,57 @@
           
           
           
-          ignoreAndCleanProperties: function(effectxml,selectedLayers){
+          
+          
+          toLayer: function(thisComp,xml){
+                      this.materialFolder = sp.materialFolder;
+                      this.isOnlyEffect =sp.onlyEffectValue;
+                      this.isCleanGroup= sp.cleanGroupValue;
+                      this.isKeyframeOffset=sp.offsetKeyframeValue;
+                      this.compFolder=sp.compFolder;
+                      this.sourceFolder= sp.sourceFolder;
+                      
+                      
+                      xml = xml || this.item;
+                      var helperObj = this.helperObj;
+                      
+                      var layerArr = [];
+
+                      sp.forEach(xml,function(item,index){
+                              
+                              sp.layerArr[sp.layerArr.length]=layerArr[layerArr.length]=$.layer.prototype.newLayer(item,thisComp);  
+                              sp.layerParentNameArr.push(item.parent.toString());
+                            })
+                      
+                      
+                      return layerArr;
+                      
+                }
+          
+          
+          });
+      
+    $.layer.newProperties = function(effectxml,selectedLayers,options){
                      
-                      var idArr=[
+                       var idArr=[
                                           "ADBE Mask Parade","ADBE Effect Parade","ADBE Transform Group",
                                           "ADBE Material Options Group","ADBE Layer Styles","ADBE Root Vectors Group",
                                           "ADBE Text Animators","ADBE Light Options Group","ADBE Camera Options Group"
                                          ];
+                                         
                         var idGen=[];
                         var idDel=[];
                         
+                        var newPropertiesSettingArr = options.newPropertiesSettingArr;
+                        var cleanPropertiesSettingArr = options.cleanPropertiesSettingArr
+                        
                        for(var i=1;i<=9;i++){
-                              if(sp.getSetting("_1_"+i)=="1"){
+                              if (newPropertiesSettingArr[i-1] == 1){
                                   idGen.push(idArr[i-1]);
-                                  }   
-                              if(sp.getSetting("_2_"+i)=="1"){
+                              }   
+                              if (cleanPropertiesSettingArr[i-1] == 1){
                                   idDel.push(idArr[i-1]);
-                                  }   
+                              }   
                         }
                   
                         //~Set xml ignored
@@ -1625,35 +1668,7 @@
                                           })
 
 
-                },//~Clean group and ignore end
-          
-          toLayer: function(thisComp,xml){
-                      this.materialFolder = sp.materialFolder;
-                      this.isOnlyEffect =sp.onlyEffectValue;
-                      this.isCleanGroup= sp.cleanGroupValue;
-                      this.isKeyframeOffset=sp.offsetKeyframeValue;
-                      this.compFolder=sp.compFolder;
-                      this.sourceFolder= sp.sourceFolder;
-                      
-                      
-                      xml = xml || this.item;
-                      var helperObj = this.helperObj;
-                      
-                      var layerArr = [];
-
-                      sp.forEach(xml,function(item,index){
-                              
-                              sp.layerArr[sp.layerArr.length]=layerArr[layerArr.length]=$.layer.prototype.newLayer(item,thisComp);  
-                              sp.layerParentNameArr.push(item.parent.toString());
-                            })
-                      
-                      
-                      return layerArr;
-                      
-                }
-          
-          
-          })
+                };//~Clean group and ignore end
 
     $.layer.prototype.init.prototype = $.layer.prototype;
     $.global._layer = $.layer;
