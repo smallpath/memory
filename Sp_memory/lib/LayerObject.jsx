@@ -8,14 +8,14 @@
     $.layer.prototype = {
             init: function(item,options){
                    this.item = item;
+                    
+                   this.tempFolder = options.tempFolder;
+                   this.slash = options.slash || "/";
                    
                    this.materialFolder = options.materialFolder;
                    this.compFolder = options.compFolder;
                    
                    this.isSaveMaterial = options.isSaveMaterial;
-                   this.isOnlyEffect = options.isOnlyEffect;
-                   this.isCleanGroup = options.isCleanGroup;
-                   this.isKeyframeOffset = options.isKeyframeOffset;
                 
                    return this;
                 },
@@ -24,10 +24,10 @@
     $.layer.extend = function (target, source) {
                 for (var i in source) target[i] = source[i];
                 return target;
-            },
+    },
 
 
-    //~  Convert Layer object to XML or JSON
+    //convert Layer object to XML or JSON
     $.layer.extend($.layer.prototype,{
         
         isSaveMaterial: true,
@@ -177,7 +177,7 @@
                     layerInfo.file = thisLayer.source.mainSource.file;
                     if (this.isSaveMaterial == true) {
                         var tempArr = ["ai","bmp","jpg","png","psd","tiff"];
-                        if (sp.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
+                        if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
                             if (thisLayer.source.mainSource.file.length <= 10485760) {
                                     if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) { 
                                         } else {
@@ -197,7 +197,7 @@
                             }
                         }
                         var tempArr = ["ape","flac","mp3","wav"];
-                        if (sp.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
+                        if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").last(),tempArr)) {
                             if (thisLayer.source.mainSource.file.length <= 52428800) {
                                     if (helperObj.hasOwnProperty("_" + thisLayer.source.id)) { 
                                         } else {
@@ -506,24 +506,73 @@
               }, 
         
         
-        //~    Get the xml-based data of layer
-        toXML: function(index){
-                      this.isSaveMaterial= sp.saveMaterialValue;
+        //get the xml-based data of single layer
+        getXmlFromLayer: function(index){
+            
                       var thisLayer = this.item;
-                      var helperObj = this.helperObj;
+                      var helperObj = {};
               
                       var layerInfo = this.getLayerAttr(index);
                       
-                      var layerxml = this.getProperties(thisLayer, new XML("<Properties></Properties>"),layerInfo);
+                      var layerPropertiesXml = this.getProperties(thisLayer, new XML("<Properties></Properties>"),layerInfo);
                       
-                      layerInfo.appendChild (layerxml);
+                      layerInfo.appendChild (layerPropertiesXml);
                       
                       return layerInfo;
             },
+            
+            //recuisive get all xmls from selected layers, support comp layer
+            toXML : function(layers,elementName,helperObj){
+                                                var comp = layers[0].containingComp;
+                                                helperObj = helperObj || {};
+                                                helperObj["_"+comp.id] = helperObj["_"+comp.id] || {};
+                                                helperObj["elementArr"] = helperObj["elementArr"] || [];
+                                                var elementArr = helperObj.elementArr;
+                                                if(elementArr.length ==0)
+                                                      var elementxml = new XML("<Element name=\""+elementName+"\"></Element>");
+                                                else
+                                                      var elementxml = new XML("<Comptent name=\"" + elementName + "\"></Comptent>");
+                                                      
+                                                      
+                                                var loopFunc = function(thisLayer,index){
+                                                                var thisIndex = elementArr.length ==0? index+1: index;
+                                                                var xml = new $.layer(thisLayer,helperObj).getXmlFromLayer(thisIndex);
+
+                                                                if (thisLayer.source instanceof CompItem) {
+                                                                        if (helperObj.hasOwnProperty ("_"+thisLayer.source.id)) {
+                                                                                elementxmltemp = helperObj["_"+thisLayer.source.id]["ele"];
+                                                                                xml.Properties.appendChild(elementxmltemp);
+                                                                        } else {
+                                                                            elementArr.push(elementxml);
+                                                                            var comptentXml = $.layer.prototype.toXML(thisLayer.source.layers,
+                                                                                                                                                            encodeURIComponent(thisLayer.source.name),
+                                                                                                                                                            helperObj)
+                                                                            
+                                                                            xml.Properties.appendChild (comptentXml);
+                                                                            elementxml = elementArr.pop();
+                                                                        }
+                                                                }
+                                                                elementxml.appendChild (xml);
+                                                      };
+                                                if(elementArr.length ==0)
+                                                     layers.forEach(loopFunc);
+                                               else
+                                                     $.layer.forEachLayer.call(layers,loopFunc);
+                                                
+                                                if(elementArr.length !=0){
+                                                              var cTemp = new XML(elementxml);
+                                                              for (var i = 0; i < cTemp.children().length(); i++) {
+                                                                  cTemp.child(i).setChildren(1);
+                                                              }
+                                                              helperObj["_" + comp.id]["ele"] = cTemp;
+                                                      }
+                                                
+                                                return elementxml;
+                  },
         
         })
   
-    //~ Convert XML object to Layer object
+    //convert XML object to Layer object
     $.layer.extend($.layer.prototype,{
 
           isOnlyEffect:         false,
@@ -546,7 +595,7 @@
                                     } else if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
                                         try{
                                               layer = $.layer.prototype.newMaterial(xml, thisComp);
-                                              layer.source.parentFolder = sp.compFolder;
+                                              layer.source.parentFolder = this.compFolder;
                                         }catch(err){layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", parseInt(xml.width), parseInt(xml.height), 1);}
                                        try{
                                            if(layer.name!=decodeURIComponent(xml.@name)){
@@ -576,7 +625,7 @@
                                     } catch (err) {};
                                 } else if (xml.@type == "Light") {
                                     var layer = thisComp.layers.addLight(decodeURIComponent(xml.@name), [0, 0]);
-                                    layer.lightType = sp.getDistance(layer.lightType, parseInt(xml.light));
+                                    layer.lightType = $.layer.getDistance(layer.lightType, parseInt(xml.light));
                                     layer.name = decodeURIComponent(xml.@name);
                                     try {
                                         layer.moveAfter(thisComp.layer(parseInt(xml.index)));
@@ -639,7 +688,7 @@
                                 } catch (err) {}
                                 try {
                                     if (xml.trackMatteType != "undefined")
-                                        layer.trackMatteType = sp.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
+                                        layer.trackMatteType = $.layer.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
                                 } catch (err) {}
                                 try {
                                     if (xml.shy != "undefined")
@@ -663,11 +712,11 @@
                                 } catch (err) {}
                                 try {
                                     if (xml.blendingMode.toString() != "undefined")
-                                        layer.blendingMode = sp.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
+                                        layer.blendingMode = $.layer.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
                                 } catch (err) {}
                                 try {
                                     if (xml.autoOrient.toString() != "undefined")
-                                        layer.autoOrient = sp.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
+                                        layer.autoOrient = $.layer.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
                                 } catch (err) {}
                                 try {
                                     if (xml.preserveTransparency.toString() != "undefined")
@@ -682,7 +731,7 @@
                             try {
                                 if (xml.@type != "VideoWithSound" && xml.@type != "Comp") {
                                     try {
-                                        $.layer.prototype.newPropertyGroup(xml.Properties,layer,layer.inPoint);
+                                        $.layer.prototype.newPropertyGroup(xml.Properties,layer);
                                     } catch (err) {}
                                 }
                             } catch (err) {};
@@ -729,8 +778,8 @@
                                                                                                                   parseInt(xml.compwidth), parseInt(xml.compheight), 
                                                                                                                   parseFloat(xml.comppixelAspect), parseFloat(xml.compduration), 
                                                                                                                   parseFloat(xml.compframeRate));
-                                                   if (sp.onlyEffectValue == false &&comp.id != app.project.activeItem.id){
-                                                            comp.parentFolder = sp.compFolder;
+                                                   if (comp.id != app.project.activeItem.id){
+                                                            comp.parentFolder = this.compFolder;
                                                         }
                                         } catch (err) {}
                                         try {
@@ -845,7 +894,7 @@
                                 } catch (err) {}
                                 try {
                                     if (xml.trackMatteType != "undefined")
-                                        layer.trackMatteType = sp.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
+                                        layer.trackMatteType = $.layer.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
                                 } catch (err) {}
                                 try {
                                     if (xml.shy != "undefined")
@@ -869,11 +918,11 @@
                                 } catch (err) {}
                                 try {
                                     if (xml.blendingMode.toString() != "undefined")
-                                        layer.blendingMode = sp.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
+                                        layer.blendingMode = $.layer.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
                                 } catch (err) {}
                                 try {
                                     if (xml.autoOrient.toString() != "undefined")
-                                        layer.autoOrient = sp.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
+                                        layer.autoOrient = $.layer.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
                                 } catch (err) {}
                                 try {
                                     if (xml.preserveTransparency.toString() != "undefined")
@@ -885,7 +934,7 @@
                                     }
                                 } catch (err) {}
                                 try {
-                                   $.layer.prototype.newPropertyGroup(xml.Properties,layer,layer.inPoint);
+                                   $.layer.prototype.newPropertyGroup(xml.Properties,layer);
                                 } catch (err) {}
                                 if (isComp == false) {
                                     try {
@@ -902,7 +951,8 @@
                                 if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
                                     for (isA = 0; isA < app.project.numItems; isA++) {
                                         if (typeof app.project.item(isA + 1).file != "undefiend" && app.project.item(isA + 1).file != null) {
-                                            if (File(app.project.item(isA + 1).file).toString() == File(xml.file.toString()).toString() ||File(app.project.item(isA+1).file.toString()).toString() == File(sp.scriptFolder.toString()+"/tempFile"+decodeURIComponent(File(xml.file.toString()).toString())).toString()) {
+                                            if (File(app.project.item(isA + 1).file).toString() == File(xml.file.toString()).toString() ||
+                                                    File(app.project.item(isA+1).file.toString()).toString() == File(this.tempFolder.toString()+decodeURIComponent(File(xml.file.toString()).toString())).toString()) {
                                                 isExist = true;
                                                 thisItem = app.project.item(isA + 1);
                                                 break;
@@ -933,9 +983,9 @@
                                     try {
                                         if (File(xml.file.toString()).exists) {
                                             var waitIm = File(xml.file.toString());
-                                            }else if(File(sp.scriptFolder.toString()+sp.slash+"tempFile"+sp.slash+decodeURIComponent(File(xml.file.toString()).toString())).exists){
+                                            }else if(File(this.tempFolder.toString()+this.slash+decodeURIComponent(File(xml.file.toString()).toString())).exists){
                                                 if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
-                                                    genFilePath = File(genFileFolder.toString()+sp.slash +"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    genFilePath = File(genFileFolder.toString()+this.slash +"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
                                                     }else{
                                                         genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
                                                         }
@@ -948,12 +998,12 @@
                                                       xml.file.toString().indexOf(".jpg") != -1 || 
                                                       xml.file.toString().indexOf(".tiff") != -1 || 
                                                       xml.file.toString().indexOf(".png") != -1) {
-                                                    genFileFolder = Folder(sp.scriptFolder.toString() +sp.slash+ "tempFile");
+                                                    genFileFolder = Folder(this.tempFolder);
                                                     if (!genFileFolder.exists) {
                                                         genFileFolder.create();
                                                     }
                                                 if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
-                                                    genFilePath = File(genFileFolder.toString() +sp.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    genFilePath = File(genFileFolder.toString() +this.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
                                                     }else{
                                                         genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
                                                         }
@@ -971,7 +1021,7 @@
                                                                     }
                                                             }
                                                         if(!genFilePath.parent.exists)
-                                                            genFilePath=File(sp.scriptFolder.toString()+sp.slash+"tempFile"+sp.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
+                                                            genFilePath=File(this.tempFolder.toString()+this.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
                                                         genFilePath.open("w");
                                                         genFilePath.encoding = "BINARY";
                                                         isWrite=genFilePath.write(waitToWrite);
@@ -981,12 +1031,12 @@
                                                                xml.file.toString().indexOf(".flac") != -1 ||
                                                                xml.file.toString().indexOf(".mp3") != -1 || 
                                                                xml.file.toString().indexOf(".wav") != -1) {
-                                                    genFileFolder = Folder(sp.scriptFolder.toString() +sp.slash+ "tempFile");
+                                                    genFileFolder = Folder(this.tempFolder);
                                                     if (!genFileFolder.exists) {
                                                         genFileFolder.create();
                                                     }
                                                 if(decodeURIComponent(File(xml.file.toString()).toString())[0]=="~"){
-                                                    genFilePath = File(genFileFolder.toString() +sp.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
+                                                    genFilePath = File(genFileFolder.toString() +this.slash+"D"+ decodeURIComponent(File(xml.file.toString()).toString()));
                                                     }else{
                                                         genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
                                                         }
@@ -1004,7 +1054,7 @@
                                                                     }
                                                             }
                                                         if(!genFilePath.parent.exists)
-                                                            genFilePath=File(sp.scriptFolder.toString()+"/tempFile/"+decodeURIComponent(File(xml.file.toString()).name.toString()));
+                                                            genFilePath=File(this.tempFolder+this.slash+decodeURIComponent(File(xml.file.toString()).name.toString()));
                                                         genFilePath.open("w");
                                                         genFilePath.encoding = "BINARY";
                                                         genFilePath.write(waitToWrite);
@@ -1086,16 +1136,16 @@
                                           try {
                                               if (layers.property(parseInt(xml.child(addi).@propertyIndex)).matchName == "ADBE Mask Atom") {
                                                   try {
-                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode = sp.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode, parseInt(xml.child(addi).@maskmode));
+                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode =$.layer.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode, parseInt(xml.child(addi).@maskmode));
                                                   } catch (err) {}
                                                   layers.property(parseInt(xml.child(addi).@propertyIndex)).inverted = (xml.child(addi).@inverted.toString() == "false") ? false : true;
                                                   layers.property(parseInt(xml.child(addi).@propertyIndex)).rotoBezier = (xml.child(addi).@rotoBezier.toString() == "false") ? false : true;
                                                   layers.property(parseInt(xml.child(addi).@propertyIndex)).color = [xml.child(addi).@color.toString().split(",")[0], xml.child(addi).@color.toString().split(",")[1], xml.child(addi).@color.toString().split(",")[2]];
                                                   try {
-                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur = sp.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur, parseInt(xml.child(addi).@maskMotionBlur));
+                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur = $.layer.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur, parseInt(xml.child(addi).@maskMotionBlur));
                                                   } catch (err) {}
                                                   try {
-                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff = sp.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff, parseInt(xml.child(addi).@maskFeatherFalloff));
+                                                      layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff = $.layer.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff, parseInt(xml.child(addi).@maskFeatherFalloff));
                                                   } catch (err) {}
                                               }
                                           } catch (err) {}
@@ -1161,10 +1211,7 @@
                                           }
                                       }
                                   } else if (xml.child(addi).name() == "prop") {
-                                        if(sp.offsetKeyframeValue== true && sp.onlyEffectValue == true)
                                           $.layer.prototype.newProperty(xml.child(addi),layers,inTime)
-                                        else
-                                          $.layer.prototype.newProperty(xml.child(addi),layers)
                                   }
 
                                   if (xml.child(addi).name() == "prop") {
@@ -1264,7 +1311,8 @@
                                                   var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
                                                   var myScaleProperty = layers.property(xml.@matchName);
                                                   try {
-                                                      if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD && sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
+                                                      if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD && 
+                                                            $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
                                                           var clamp = parseFloat(xml.child(ia + 4).InIn);
                                                           if (clamp < 0.1) {
                                                               clamp = 0.1;
@@ -1278,7 +1326,7 @@
                                                           try {
                                                               myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
                                                           } catch (err) {}
-                                                      } else if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
+                                                      } else if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
 
                                                           var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
                                                           if (clamp < 0.1) {
@@ -1303,7 +1351,7 @@
                                                           try {
                                                               myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn1], [easeOut, easeOut1]);
                                                           } catch (err) {}
-                                                      } else if (sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
+                                                      } else if ($.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
                                                           var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
                                                           if (clamp < 0.1) {
                                                               clamp = 0.1;
@@ -1339,8 +1387,8 @@
                                                           } catch (err) {}
                                                       }
                                                           try {
-                                                               var inIn = sp.getDistance(myScaleProperty.keyInInterpolationType (ia+1),parseInt(xml.child(ia+4).inInterType));
-                                                               var outIn = sp.getDistance(myScaleProperty.keyOutInterpolationType (ia+1),parseInt(xml.child(ia+4).outInterType));
+                                                               var inIn = $.layer.getDistance(myScaleProperty.keyInInterpolationType (ia+1),parseInt(xml.child(ia+4).inInterType));
+                                                               var outIn = $.layer.getDistance(myScaleProperty.keyOutInterpolationType (ia+1),parseInt(xml.child(ia+4).outInterType));
                                                                myScaleProperty.setInterpolationTypeAtKey (ia + 1, inIn,outIn);
                                                            } catch (err) {}   
                                                           try {
@@ -1369,7 +1417,7 @@
                                                       myText.strokeWidth = xml.strokeWidth.toString();
                                                   }
                                                   try {
-                                                      myText.justification = sp.getDistance(myText.justification, parseInt(xml.justification));
+                                                      myText.justification = $.layer.getDistance(myText.justification, parseInt(xml.justification));
                                                   } catch (err) {}
                                                   var nextText = myText;
                                               } catch (err) {}
@@ -1386,7 +1434,6 @@
                                               var div = xml.keyTime.toString().split(",");
                                               var vas = xml.keyValue.toString().split(",");
                                               for (ia = 0; ia < div.length; ia++) {
-                                                  //times.push(div[ia]);
                                                   if(typeof inTime =="undefined"){
                                                   times.push(div[ia]);
                                                   }else{
@@ -1409,7 +1456,7 @@
                                                       myText.strokeWidth = xml.child(0).keyValue.child(ib).strokeWidth.toString();
                                                   }
                                                   try {
-                                                      myText.justification = sp.getDistance(myText.justification, parseInt(xml.child(0).keyValue.child(ib).justification));
+                                                      myText.justification = $.layer.getDistance(myText.justification, parseInt(xml.child(0).keyValue.child(ib).justification));
                                                   } catch (err) {}
                                                   nextText = myText;
                                                   try {
@@ -1427,7 +1474,6 @@
                                               var times = [];
                                               var div = xml.keyTime.toString().split(",");
                                               for (ia = 0; ia < div.length; ia++) {
-                                                 // times.push(div[ia]);
                                                   if(typeof inTime =="undefined"){
                                                   times.push(div[ia]);
                                                   }else{
@@ -1478,7 +1524,6 @@
                                               var shapes = [];
                                               var div = xml.keyTime.toString().split(",");
                                               for (ia = 0; ia < div.length; ia++) {
-                                                  //times.push(div[ia]);
                                                   if(typeof inTime =="undefined"){
                                                   times.push(div[ia]);
                                                   }else{
@@ -1534,18 +1579,19 @@
                                                   var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
                                                   var myScaleProperty = layers.property(xml.@matchName);
                                                   try {
-                                                      if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD && sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
+                                                      if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD &&
+                                                            $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
                                                           try {
                                                               myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
                                                           } catch (err) {}
-                                                      } else if (sp.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
+                                                      } else if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
                                                           myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn], [easeOut, easeOut]);
-                                                      } else if (sp.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
+                                                      } else if ($.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
                                                           myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn, easeIn], [easeOut, easeOut, easeOut]);
                                                       }
                                                            try {
-                                                               var inIn = sp.getDistance(myScaleProperty.keyInInterpolationType (ia+1),parseInt(xml.inInterType));
-                                                               var outIn = sp.getDistance(myScaleProperty.keyOutInterpolationType (ia+1),parseInt(xml.outInterType));
+                                                               var inIn = $.layer.getDistance(myScaleProperty.keyInInterpolationType (ia+1),parseInt(xml.inInterType));
+                                                               var outIn = $.layer.getDistance(myScaleProperty.keyOutInterpolationType (ia+1),parseInt(xml.outInterType));
                                                                myScaleProperty.setInterpolationTypeAtKey (ia + 1, inIn,outIn);
                                                            } catch (err) {}    
                                                           try {
@@ -1563,20 +1609,12 @@
           
           
           toLayer: function(thisComp,xml){
-                      this.materialFolder = sp.materialFolder;
-                      this.isOnlyEffect =sp.onlyEffectValue;
-                      this.isCleanGroup= sp.cleanGroupValue;
-                      this.isKeyframeOffset=sp.offsetKeyframeValue;
-                      this.compFolder=sp.compFolder;
-                      this.sourceFolder= sp.sourceFolder;
-                      
-                      
                       xml = xml || this.item;
                       var helperObj = this.helperObj;
                       
                       var layerArr = [];
 
-                      sp.forEach(xml,function(item,index){
+                      $.layer.forEach(xml,function(item,index){
                               
                               sp.layerArr[sp.layerArr.length]=layerArr[layerArr.length]=$.layer.prototype.newLayer(item,thisComp);  
                               sp.layerParentNameArr.push(item.parent.toString());
@@ -1590,6 +1628,7 @@
           
           });
       
+    //not create new layers but create properties on selected layers 
     $.layer.newProperties = function(effectxml,selectedLayers,options){
                      
                        var idArr=[
@@ -1600,6 +1639,9 @@
                                          
                         var idGen=[];
                         var idDel=[];
+                        
+                       var isCleanGroup = options.isCleanGroup;
+                       var isKeyframeOffset = options.isKeyframeOffset;
                         
                         var newPropertiesSettingArr = options.newPropertiesSettingArr;
                         var cleanPropertiesSettingArr = options.cleanPropertiesSettingArr
@@ -1620,10 +1662,10 @@
                                           if(xml.@matchName == "ADBE Text Properties"){
                                                 xml.child(0).setLocalName("textignore");
                                                 if(effectxml.children().length()>=4){
-                                                      sp.lookUpInArray(xml.child(3).@matchName,idGen)==false && xml.child(3).setLocalName ("ignore");           
+                                                      $.layer.lookUpInArray(xml.child(3).@matchName,idGen)==false && xml.child(3).setLocalName ("ignore");           
                                                 }
                                           }
-                                          if(sp.lookUpInArray(xml.@matchName,idGen)==false){
+                                          if($.layer.lookUpInArray(xml.@matchName,idGen)==false){
                                                       xml.@matchName != "ADBE Text Properties" && xml.setLocalName("ignore");
                                                 }
                                           
@@ -1634,10 +1676,10 @@
                    
                         //~ Delete propertyGroup in layers
           
-                        if( sp.cleanGroupValue==true){
+                        if( isCleanGroup==true){
                               selectedLayers.forEach(function(layer,index){
-                                          Array.prototype.forEachPropertyGroup.call (layer,function(thisGroup,index){
-                                                      if(sp.lookUpInArray(thisGroup.matchName,idDel)==true){
+                                          $.layer.forEachPropertyGroup.call (layer,function(thisGroup,index){
+                                                      if($.layer.lookUpInArray(thisGroup.matchName,idDel)==true){
                                                                   if(thisGroup.matchName != "ADBE Layer Styles"){
                                                                               for(var i=thisGroup.numProperties;i>0;i--){
                                                                                           try{thisGroup.property(i).remove();}catch(err){}
@@ -1649,7 +1691,7 @@
                                                                               }
                                                             }
                                                       if(thisGroup.matchName=="ADBE Text Properties"){
-                                                                  if(sp.lookUpInArray(thisGroup.property(4).matchName,idDel)==true){
+                                                                  if($.layer.lookUpInArray(thisGroup.property(4).matchName,idDel)==true){
                                                                               for(var i=thisGroup.property(4).numProperties;i>0;i--){
                                                                                           try{thisGroup.property(4).property(i).remove();}catch(err){}
                                                                                        }
@@ -1661,15 +1703,63 @@
                                     })
                                 } 
                                     selectedLayers.forEach(function(layer,index){
-                                            if(sp.offsetKeyframeValue==true)
+                                            if (isKeyframeOffset == true)
                                                       $.layer.prototype.newPropertyGroup(effectxml,layer,layer.inPoint)
                                             else
                                                       $.layer.prototype.newPropertyGroup(effectxml,layer)
-                                          })
+                                    })
 
 
                 };//~Clean group and ignore end
-
+            
+     $.layer.forEach = function(xml,callback,context){
+            if(!(xml instanceof XML)) return;
+            var i,
+                len;
+                for(i=0,len = xml.children().length();i<len;i++){
+                        if(callback.call(context,xml.child(i),i,xml) ===false){
+                                break;
+                            }
+                    }
+            }
+    
+    $.layer.forEachLayer  = function(callback, context) {
+                      if (Object.prototype.toString.call(this) === "[object LayerCollection]") {
+                          var i,
+                              len;
+                          for (i = 1, len = this.length; i <= len; i++) {
+                              if (typeof callback === "function"  && Object.prototype.hasOwnProperty.call(this, i)) {
+                                  if (callback.call(context, this[i], i, this) === false) {
+                                      break; // or return;
+                                  }
+                              }
+                          }
+                      }
+                   }       
+    $.layer.forEachPropertyGroup = function(callback, context) {
+                          var i,
+                              len;
+                          for (i = 1, len = this.numProperties; i <= len; i++) {
+                                  if (callback.call(context, this.property(i), i, this) === false) {
+                                      break; // or return;
+                                  }
+                          }
+                   }
+    $.layer.lookUpInArray:function(text,arr){
+                            var len = arr.length;
+                            for(var i=0;i<len;i++){
+                                    if(arr[i]==text)
+                                        return true;
+                                }
+                            return false;
+                        },  
+                    
+    $.layer.getDistance: function (a, b) {
+                return parseInt((a.toString().substring(0, 2) - b.toString().substring(0, 2))) * 100 + parseInt(b);
+    },
+    
+    $.layer.tempFolder = 
+    
     $.layer.prototype.init.prototype = $.layer.prototype;
     $.global._layer = $.layer;
     return $.layer;

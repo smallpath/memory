@@ -534,7 +534,8 @@
                               else
                                 var itemName = sp.savePng(imageFile);
 
-                              var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
+                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml,sp.gv.lastSelectedItem.index);
                               
                               sp.gv.lastSelectedItem.image = null;
@@ -558,7 +559,6 @@
                         
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
-                              var helperObj = {};
                               
                               sp.newItemOrCover = 'newItem';
                               
@@ -567,7 +567,7 @@
                                 var itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text,itemName));
                               else
                                 var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
-                              var xml = sp.getXmlFromLayers(thisComp,thisComp.selectedLayers,itemName,helperObj);
+                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
                               var item = sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
@@ -1117,10 +1117,6 @@ this,
                     return file;
             },
         
-            getDistance: function (a, b) {
-                return parseInt((a.toString().substring(0, 2) - b.toString().substring(0, 2))) * 100 + parseInt(b);
-            },
-        
             getGlobalIndexFromFileName:function(name){
                 var content = new XML(this.settingsFile.readd());
                 var thisIndex = -1;
@@ -1511,6 +1507,9 @@ this,
                                                   options.newPropertiesSettingArr = [];
                                                   options.cleanPropertiesSettingArr = [];
                                                   
+                                                  var isCleanGroup = options.isCleanGroup;
+                                                  var isKeyframeOffset = options.isKeyframeOffset;
+                                                  
                                                    for(var i=1;i<=9;i++){
                                                           if (sp.getSetting("_1_"+i)=="1"){
                                                               options.newPropertiesSettingArr.push(1);
@@ -1526,12 +1525,14 @@ this,
                                                     }
                                                   
                                                   
-                                                  var returnXml= $.layer.prototype.newPerperties(layerXml.child(0).Properties,selectedLayers,options);
-                              
-                                                                              
+                                                  var returnXml= $.layer.prototype.newPerperties(layerXml.child(0).Properties,selectedLayers,options);                                  
                                          },         
                                     newLayers : function(elementXml,comp){
-                                                  var options = {};
+                                                  var options = {
+                                                      slash:"/",
+                                                      scriptFolder : Folder(sp.scriptFolder.toString() + sp.prototype.slash+"tempFile")
+                                                  };
+                                              
                                                   var layerArr = $.layer(elementXml,options).toLayer(comp);
   
                                                   return layerArr;
@@ -1557,56 +1558,7 @@ this,
                                                  }
                                            file.writee(newXml);
                                     },
-                              
-                                    getXmlFromLayers : function(comp,layers,elementName,helperObj){
-                                                helperObj["_"+comp.id] = helperObj["_"+comp.id] || {};
-                                                helperObj["elementArr"] = helperObj["elementArr"] || [];
-                                                var elementArr = helperObj.elementArr;
-                                                if(elementArr.length ==0)
-                                                      var elementxml = new XML("<Element name=\""+elementName+"\"></Element>");
-                                                else
-                                                      var elementxml = new XML("<Comptent name=\"" + elementName + "\"></Comptent>");
-                                                      
-                                                      
-                                                var loopFunc = function(thisLayer,index){
-                                                                var thisIndex = elementArr.length ==0? index+1: index;
-                                                                var xml = new $.layer(thisLayer,helperObj).toXML(thisIndex);
-
-                                                                if (thisLayer.source instanceof CompItem) {
-                                                                        if (helperObj.hasOwnProperty ("_"+thisLayer.source.id)) {
-                                                                                elementxmltemp = helperObj["_"+thisLayer.source.id]["ele"];
-                                                                                xml.Properties.appendChild(elementxmltemp);
-                                                                        } else {
-                                                                            elementArr.push(elementxml);
-                                                                            var comptentXml = sp.prototype.getXmlFromLayers(thisLayer.source,
-                                                                                                                                                            thisLayer.source.layers,
-                                                                                                                                                            encodeURIComponent(thisLayer.source.name),
-                                                                                                                                                            helperObj)
-                                                                            
-                                                                            xml.Properties.appendChild (comptentXml);
-                                                                            elementxml = elementArr.pop();
-                                                                        }
-                                                                }
-                                                                elementxml.appendChild (xml);
-                                                      };
-                                                if(elementArr.length ==0)
-                                                     layers.forEach(loopFunc);
-                                               else
-                                                     Array.prototype.forEachLayer.call(layers,loopFunc);
-                                                
-                                                if(elementArr.length !=0){
-                                                              var cTemp = new XML(elementxml);
-                                                              for (var i = 0; i < cTemp.children().length(); i++) {
-                                                                  cTemp.child(i).setChildren(1);
-                                                              }
-                                                              helperObj["_" + comp.id]["ele"] = cTemp;
-                                                      }
-                                                
-                                                return elementxml;
-                                      },
-
-                                    
-                               
+                  
             })
 
     sp.prototype.init.prototype = sp.prototype;
@@ -1650,29 +1602,7 @@ this,
                     }
                 }
              }             
-             Array.prototype.forEachLayer = function(callback, context) {
-                      if (Object.prototype.toString.call(this) === "[object LayerCollection]") {
-                          var i,
-                              len;
-                          for (i = 1, len = this.length; i <= len; i++) {
-                              if (typeof callback === "function"  && Object.prototype.hasOwnProperty.call(this, i)) {
-                                  if (callback.call(context, this[i], i, this) === false) {
-                                      break; // or return;
-                                  }
-                              }
-                          }
-                      }
-                   }             
-             Array.prototype.forEachPropertyGroup = function(callback, context) {
-                          var i,
-                              len;
-                          for (i = 1, len = this.numProperties; i <= len; i++) {
-                                  if (callback.call(context, this.property(i), i, this) === false) {
-                                      break; // or return;
-                                  }
-                          }
-                   }
-               
+           
        sp.extend(sp,{
            forEach:function(xml,callback,context){
             if(!(xml instanceof XML)) return;
@@ -1718,7 +1648,7 @@ this,
     
 })(sp),
 
-//~ Save presets and load presets file and parse them
+//~ Save default presets if there isn't, then load presets and parse them
 (function(sp){
 
     var keyNameArr = [];
@@ -1804,17 +1734,6 @@ this,
       
       sp.frameSecond  = parseInt(sp.getSetting("frameSecond"));
       sp.frameNum = parseInt(sp.getSetting("frameNum"));
-      
-      var options = {
-          saveMaterialValue : sp.saveMaterialValue,
-          isOnlyEffect : sp.onlyEffectValue ,
-          isCleanGroup : sp.cleanGroupValue,
-          isKeyframeOffset : sp.offsetKeyframeValue,
-          
-          sourceFolder
-          compFolder:
-          materialFolder:
-      };
     
       !sp.roamingFolder.exists && sp.roamingFolder.create();
       !sp.materialFolder.exists && sp.materialFolder.create();
