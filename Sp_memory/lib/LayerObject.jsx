@@ -1758,9 +1758,9 @@
 
     }; //~Clean group and ignore end
 
-
+    //correct the value of property which's type is layerIndex or maskIndex     
     $.layer.correctProperty = function() {
-        //~  Correct the value of property which's type is layerIndex or maskIndex     
+
         $.layer.forEach.call($.layer.layerTypePropertyArr, function(item, index) {
             try {
                 item.setValue($.layer.layerTypePropertyValueArr[index]);
@@ -1768,8 +1768,8 @@
         });
     }
 
+    //translate the error expressions to avoid script freezing caused by different language version of AfterEffects 
     $.layer.fixExpression = function() {
-        //~   Translate the error expressions to avoid script freezing caused by different language version of AfterEffects 
         var translatedExpPropertyArr = [];
         $.layer.forEach.call($.layer.expPropertyArr, function(item, index) {
             try {
@@ -1787,7 +1787,8 @@
         }
     }
 
-    $.layer.setParent = function() { //~ Set the parent of layer using Layer.setParentWithJump()
+    //set the parent of layer using Layer.setParentWithJump()
+    $.layer.setParent = function() { 
         $.layer.forEach.call($.layer.layerArr, function(item, index) {
             try {
                 if (parseInt($.layer.layerParentNameArr[index]) == $.layer.layerParentNameArr[index])
@@ -1895,6 +1896,10 @@
     $.layer.pictureMaxLength = 10485760;
     
     $.layer.translate = function(){};
+    
+    $.layer.name = "AE Layer library"
+    $.layer.version = 1.0;
+    $.layer.email = "smallpath2013@gmail.com";
 
     $.layer.prototype.init.prototype = $.layer.prototype;
     $.global._layer = $.layer;
