@@ -39,7 +39,6 @@
     gv.leftClick = fns.leftClick;
     gv.rightClick = fns.rightClick;
     gv.leftDoubleClick = fns.newLayer;
-//~     gv.mouseOut = sp.fns.moveOut;
     gv.mouseMove = fns.moveOver;
     parentDroplist.onChange = fns.parentDroplistChange;
     droplist.onChange = fns.droplistChange;
@@ -177,13 +176,7 @@
                                                                                             currentItem["tempItem"].image=currentFile;
                                                                                         
                                                                                     }else{
-
-                                                                                            var currentImg = currentItem["tempImg"];
-                                                                                            if(currentImg){
-                                                                                                currentItem["tempItem"].image=currentImg;
-                                                                                            }
                                                                                             currentItem["currentIndex"] = 0;
-//~                                                                                             sp.previewHelper["item"+itemIndex] = {}; 
                                                                                         }
                                                                                     }
                                                                                 }
@@ -909,6 +902,7 @@
                     droplist.size = [win.size[0]-64,group11.size[1]-3];
                     droplist.location.x = 60;
                     sp.parentDroplist.size.width = 60;
+                    sp.parentDroplist.size.height = droplist.size.height;
                     sp.parentDroplist.itemSize.width = 33;
                     droplist.itemSize.width = droplist.size.width - 27;
                     sp.gv.refresh();
