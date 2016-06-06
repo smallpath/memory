@@ -311,6 +311,7 @@
                  e.event.targetScrollBar = false;
                  e.refresh();
              });
+         /*
              eventRect.addEventListener('mouseout', function(event) {
                  e.event.leftButtonPressed = false;
                  e.event.rightButtonPressed = false;
@@ -319,6 +320,7 @@
                  e.mouseOut();
                  e.refresh();
              });
+             */
 
              list.onDraw = e.listDraw;
              list.GV = e;
