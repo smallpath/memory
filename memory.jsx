@@ -155,7 +155,13 @@
                         
                         for(var i =0,len = maxLen;i<=len;i++){
                                     var stringToCall = 
-                                                                """ var len = sp.gv.children.length; 
+                                                                """ 
+                                                                
+                                                                if(sp){
+                                                                    if(sp.gv){
+                                                                        if(sp.gv.children){
+                                                                    
+                                                                        var len = sp.gv.children.length; 
                                                                         for(var itemIndex=0;itemIndex<len;itemIndex++){
                                                                             var currentItem = sp.previewHelper["item"+itemIndex];
                                                                             if(currentItem){
@@ -182,7 +188,14 @@
                                                                                     }
                                                                                 }
                                                                         }
-                                                                    sp.gv.refresh();
+                                                                    if(isValid(sp.gv.list))
+                                                                        sp.gv.refresh();
+                                                                    
+                                                                    }
+                                                                 }
+                                                              }   
+                                                              
+
                                                                 """;                          
                                     sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, true));
 
@@ -256,7 +269,10 @@
                         
 
                         for(var i =0,len = sp.previewHelper["item"+index]["tempFiles"].length;i<=len;i++){
-                                    var stringToCall = """     
+                                    var stringToCall = """if(sp){
+                                                                    if(sp.gv){
+                                                                        if(sp.gv.children){
+                                                                    
                                                                         var len = sp.gv.children.length;
                                                                         for(var itemIndex=0;itemIndex<len;itemIndex++){
                                                                             var currentItem = sp.previewHelper["item"+itemIndex];
@@ -280,7 +296,12 @@
                                                                                       }
                                                                                     }
                                                                         }
-                                                                    sp.gv.refresh();
+                                                                    if(isValid(sp.gv.list))
+                                                                        sp.gv.refresh();
+                                                                    
+                                                                    }
+                                                                 }
+                                                              }  
                                                                 """;
                                     sp.renderTaskArray.push(app.scheduleTask (stringToCall, 0+oneFrame*i, false));
                             }
