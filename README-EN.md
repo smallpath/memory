@@ -23,11 +23,13 @@ Script layouts automatically according to window size.Moreover,it has right-clic
 7. Supporting cross-version.For example, if you save a composition layer in AE CC2015,Memory can generate that layer perfectly in AE CS4
 
 ## Installation
-Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Sp_memory-EN.zip`  
+Go to [release page](https://github.com/Smallpath/Memory/releases).Download the latest version by clicking `Sp_memory.zip`  
 Extract the `Sp_memory.jsxbin` to your AE script folder,something like `Support Files\Scripts\ScriptUI Panels`  
 If your windows is win8 or win10, make sure AE is running under the administrator access  
 In AE, go to `Edit->Preferences->General`,make sure `Allow scripts to write File and access Network` is checked  
 Open script from `Window->Sp_memory.jsxbin`
+
+The default language is not English. To force English, just add a `force_en.txt` file in `Sp_memory` folder and restart script.
 
 ## Usage
 >[Usage](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL-EN.md)

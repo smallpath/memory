@@ -1727,13 +1727,12 @@ this,
        
      var loc = function(string){
             if(sp.lang === 0){
-                /* sp.lang = sp.getSetting ("language");*/
-                    sp.lang = "ch";
-                /* 
+                    sp.lang = sp.getSetting ("language");
+                
                     if(sp.isForceEnglish()){
                             sp.lang = "en";
                     }
-                    */
+                    
             }
             return string[sp.lang];
          }
