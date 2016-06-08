@@ -1,57 +1,67 @@
 ﻿    function createMenu(CurrentPosition) {
-      try {
-        var StringList = [
-          loc(sp.settings),
-          loc(sp.importPicture),
-          loc(sp.addModule), loc(sp.deleteModule),
-          loc(sp.importFile), loc(sp.exportFile),
-          loc(sp.addGroup), loc(sp.deleteGroup),
-          loc(sp.addElement), loc(sp.deleteElement),
-          loc(sp.create), loc(sp.cover),
-
-          loc(sp.isShow), loc(sp.isName),
-
-          loc(sp.isSavePreview), loc(sp.isOffset),
-
-          loc(sp.isPrecomp), loc(sp.isEffect),
-
-          loc(sp.cleanProperty), loc(sp.offsetKey)
+        var itemList = [
+          {name:loc(sp.settings),type:"button"},{name:loc(sp.settings),type:"dropdownlist"},
+          
+          {name: (sp.gv.selection.length == 0) ? loc(sp.previewAll) : loc(sp.previewSelected),type:"button"},{name:loc(sp.yushe),type:"button"},
+           
+          {name: loc(sp.searchWindow),type:"button"},{name:loc(sp.getReport),type:"button"},
+          {name: loc(sp.changeName),type:"button"},{name:loc(sp.importPicture),type:"button"},
+          {name: loc(sp.addModule),type:"button"},{name:loc(sp.deleteModule),type:"button"},
+          {name: loc(sp.importFile),type:"button"},{name:loc(sp.exportFile),type:"button"},
+          {name: loc(sp.addGroup),type:"button"},{name:loc(sp.deleteGroup),type:"button"},
+          {name: loc(sp.addElement),type:"button"},{name:loc(sp.cover),type:"button"},
+          {name: loc(sp.create),type:"button"},{name:loc(sp.deleteElement),type:"button"},
+          
+          {name: loc(sp.isShow),type:"checkbox"},{name:loc(sp.isName),type:"checkbox"},
+          {name: loc(sp.isSavePreview),type:"checkbox"},{name:loc(sp.isOffset),type:"checkbox"},
+          {name: loc(sp.isPrecomp),type:"checkbox"},{name:loc(sp.isEffect),type:"checkbox"},
+          {name: loc(sp.cleanProperty),type:"checkbox"},{name:loc(sp.offsetKey),type:"checkbox"},
+          
         ];
-        var length = StringList.length;
+        
+        var length = itemList.length;
+        
         var Space = 102 / 5;
-        var h;
         var buttonWidth = 40;
         var checkBoxWidth = 41;
         var buttonHeight = 20;
         var checkBoxHeight = 21;
+        
         if (sp.lang == "ch")
-          var h = 180;
+          var maxWidth = 180;
         else
-          var h = 190;
-        var ShortMenu = new Window("palette", "huhu", [0, 0, h, length * Space / 2 + 42], {
+          var maxWidth = 190;
+          
+        var ShortMenu = new Window("palette", "huhu", [0, 0, maxWidth, length * Space / 2+2], {
           borderless: true
         });
 
-        for (var n = 0; n < length; n++) {
-          if (n == 0) {
-            ShortMenu._0 = ShortMenu.add("button", [0, 0, h / 2, 22], StringList[0]);
-          } else if (n <= 11) {
-            if (n % 2 == 0) {
-              ShortMenu["_" + (n + 1)] = ShortMenu.add("button", [0, (parseInt((n) / 2) * buttonHeight + buttonWidth), h / 2, (22 + parseInt((n) / 2) * buttonHeight + buttonWidth)], StringList[n]);
-            } else {
-              ShortMenu["_" + (n + 1)] = ShortMenu.add("button", [h / 2, (parseInt((n - 1) / 2) * buttonHeight + buttonWidth), h, (22 + parseInt((n - 1) / 2) * buttonHeight + buttonWidth)], StringList[n]);
-            }
-          } else {
-            if (n % 2 == 0) {
-              ShortMenu["_" + (n + 1)] = ShortMenu.add("checkbox", [0, (parseInt((n) / 2) * checkBoxHeight + checkBoxWidth), h / 2, (22 + parseInt((n) / 2) * checkBoxHeight + checkBoxWidth)], StringList[n]);
-            } else {
-              ShortMenu["_" + (n + 1)] = ShortMenu.add("checkbox", [h / 2, (parseInt((n - 1) / 2) * checkBoxHeight + checkBoxWidth), h, (22 + parseInt((n - 1) / 2) * checkBoxHeight + checkBoxWidth)], StringList[n]);
-            }
-          }
-        }
+        for (var i = 0; i < length; i++) {
+              var itemWidth, itemHeight;
+              if(itemList[i].type == "button"){
+                    itemWidth = buttonWidth;
+                    itemHeight = buttonHeight;
+              }else if(itemList[i].type == "checkbox"){
+                    itemWidth = checkBoxWidth;
+                    itemHeight = checkBoxHeight;
+              }else if(itemList[i].type == "dropdownlist"){
+                    itemWidth = buttonWidth;
+                    itemHeight = buttonHeight;
+              }
+          
+              if (i % 2 == 0) {
+                ShortMenu[itemList[i].name] = ShortMenu.add(itemList[i].type, [0, (parseInt((i) / 2) * itemHeight), maxWidth / 2, (22 + parseInt((i) / 2) * itemHeight)], itemList[i].name);
+              } else {
+                ShortMenu[itemList[i].name] = ShortMenu.add(itemList[i].type, [maxWidth / 2, (parseInt((i - 1) / 2) * itemHeight), maxWidth, (22 + parseInt((i - 1) / 2) * itemHeight)], itemList[i].name);
+              }
+      }
+    /*
         ShortMenu._preview = ShortMenu.add("button", [0, 20, h / 2, 42], (sp.gv.selection.length == 0) ? loc(sp.previewAll) : loc(sp.previewSelected));
+        
         ShortMenu._yushe = ShortMenu.add("button", [h / 2, 20, h, 42], loc(sp.yushe));
+        
         ShortMenu._c = ShortMenu.add("button", [0, 42, h / 2, 62], loc(sp.changeName));
+        
         ShortMenu._1 = ShortMenu.add("dropdownlist", [h / 2, 0, h, 22]);
         ShortMenu._1.add("item", loc(sp.save));
         ShortMenu._1.add("item", loc(sp.exp));
@@ -240,18 +250,16 @@
           } else {
             isCheckBoxClicked = true;
           }
-        });
+        });*/
 
         ShortMenu.onDeactivate = function() {
           ShortMenu.close();
         }
-
+        
         ShortMenu.frameLocation = CurrentPosition;
         ShortMenu.show();
         ShortMenu.addEventListener("keydown", function(event) {
           ShortMenu.close();
         });
-      } catch (err) {
-        err.printa()
-      }
-    }
+
+}

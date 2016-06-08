@@ -162,5 +162,7 @@ F键:覆盖选中元素.
         needLayers:{en:"Please select at least one layer in the current comp",ch:"请选中至少一个层"},
         needModule:{en:"Please create a module first",ch:"请先新建一个模块"},
         isSavePreview:{ en: "Save preview", ch: "存储预览" },
+        searchWindow:{ en: "Search", ch:"搜索"},
+        getReport:{en: "Get report",ch:"生成报告"},
         
         })
