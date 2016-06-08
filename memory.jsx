@@ -1349,7 +1349,7 @@ this,
                             jishushuzu.push(layers[iq].index);
                         }
                         for (iq = 0; iq < layers.length; iq++) {
-                            wocaoName = layers[iq].name;
+                            var wocaoName = layers[iq].name;
                             waitToPre[waitToPre.length] = layers[iq].duplicate();
                             waitToPre[iq].name = wocaoName;
                         }
@@ -1357,7 +1357,7 @@ this,
                         for (iq = 0; iq < cunLengthA; iq++) {
                             wwwww.push(waitToPre[iq].index);
                         }
-                        precomposeComp = comps.layers.precompose(wwwww, "tempA", true);
+                        var precomposeComp = comps.layers.precompose(wwwww, "tempA", true);
                         comps.layer("tempA").copyToComp(tempComp2);
                         comps.layer("tempA").remove();
                         for (iq = 0; iq < cunLengthA; iq++) {

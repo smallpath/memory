@@ -363,6 +363,7 @@
         },
 
         getProperty: function(thisProperty) {
+            var text;
             if (thisProperty.numKeys != 0) {
                 var keyTime = [];
                 var keyValue = [];
@@ -388,7 +389,7 @@
                     propxml.keyValue.setChildren(new XML("<zhanwei>wa</zhanwei>"));
                     for (var propi = 1; propi <= thisProperty.numKeys; propi++) {
                         text = "<shapeValue></shapeValue>";
-                        shapexml = new XML(text);
+                        var shapexml = new XML(text);
                         keyTime.push(thisProperty.keyTime(propi));
                         closed = XML("<closed>" + thisProperty.keyValue(propi).closed + "</closed>");
                         vertices = XML("<vertices>" + thisProperty.keyValue(propi).vertices.toString() + "</vertices>");
@@ -813,13 +814,13 @@
                 } catch (err) {}
                 try {
                     if (xml.@type == "Comp") {
-                        for (isA = 0; isA < app.project.numItems; isA++) {
+                        for (var isA = 0; isA < app.project.numItems; isA++) {
                             if (app.project.item(isA + 1) instanceof CompItem && app.project.item(isA + 1).name == decodeURIComponent(xml.compname.toString())) {
                                 if (app.project.item(isA + 1).numLayers == xml.Properties.Comptent.children().length()) {
                                     var thisItem = app.project.item(isA + 1);
                                     isComp = true;
                                     zhuan = false;
-                                    for (isB = 0; isB < app.project.item(isA + 1).numLayers; isB++) {
+                                    for (var isB = 0; isB < app.project.item(isA + 1).numLayers; isB++) {
                                         zhuan = true;
                                         if (app.project.item(isA + 1).layer(isB + 1).name != decodeURIComponent(xml.Properties.Comptent.child(isB).@name)) {
                                             isComp = false;
@@ -1344,7 +1345,7 @@
                     var times = [];
                     var div = xml.keyTime.toString().split(",");
                     var vas = xml.keyValue.toString().split(",");
-                    for (ia = 0; ia < div.length; ia++) {
+                    for (var ia = 0; ia < div.length; ia++) {
 
                         if (typeof inTime == "undefined") {
                             times.push(div[ia]);
@@ -1352,7 +1353,7 @@
                             times.push(parseFloat(div[ia]) + parseFloat(inTime));
                         }
                     }
-                    for (ia = 0; ia < div.length; ia++) {
+                    for (var ia = 0; ia < div.length; ia++) {
                         for (ib = 0; ib < vas.length / div.length; ib++) {
                             valueTemp.push(xml.keyValue.toString().split(",")[ia * vas.length / div.length + ib]);
                         }
@@ -1376,7 +1377,7 @@
                         var ease = xml..Ease;
                         len = ease.length();
                     }
-                    for (ia = 0; ia < len; ia++) {
+                    for (var ia = 0; ia < len; ia++) {
                         var clamp = parseFloat(xml.child(ia + 4).InIn);
                         if (clamp < 0.1) {
                             clamp = 0.1;
@@ -1511,14 +1512,14 @@
                     var times = [];
                     var div = xml.keyTime.toString().split(",");
                     var vas = xml.keyValue.toString().split(",");
-                    for (ia = 0; ia < div.length; ia++) {
+                    for (var ia = 0; ia < div.length; ia++) {
                         if (typeof inTime == "undefined") {
                             times.push(div[ia]);
                         } else {
                             times.push(parseFloat(div[ia]) + parseFloat(inTime));
                         }
                     }
-                    for (ib = 0; ib < div.length; ib++) {
+                    for (var ib = 0; ib < div.length; ib++) {
                         var myText = null;
                         myText = layers.property(xml.child(0).@matchName).valueAtTime(times[ib], true);
                         myText.text = xml.child(0).keyValue.child(ib).text.toString();
@@ -1551,14 +1552,14 @@
                     var valueTemp = [];
                     var times = [];
                     var div = xml.keyTime.toString().split(",");
-                    for (ia = 0; ia < div.length; ia++) {
+                    for (var ia = 0; ia < div.length; ia++) {
                         if (typeof inTime == "undefined") {
                             times.push(div[ia]);
                         } else {
                             times.push(parseFloat(div[ia]) + parseFloat(inTime));
                         }
                     }
-                    for (ib = 0; ib < div.length; ib++) {
+                    for (var ib = 0; ib < div.length; ib++) {
                         var myMarker = new MarkerValue("zhanwei");
                         myMarker.comment = xml.child(0).keyValue.child(ib).comment.toString();
                         myMarker.duration = xml.child(0).keyValue.child(ib).duration.toString();
@@ -1581,7 +1582,7 @@
                     var verts = xml.vertices.toString().split(",");
                     var inTan = xml.inTan.toString().split(",");
                     var outTan = xml.outTan.toString().split(",");
-                    for (ic = 0; ic < verts.length / 2; ic++) {
+                    for (var ic = 0; ic < verts.length / 2; ic++) {
                         vertsArr.push([verts[ic * 2], verts[ic * 2 + 1]]);
                         inTanArr.push([inTan[ic * 2], inTan[ic * 2 + 1]]);
                         outTanArr.push([outTan[ic * 2], outTan[ic * 2 + 1]]);
@@ -1601,18 +1602,18 @@
                     var times = [];
                     var shapes = [];
                     var div = xml.keyTime.toString().split(",");
-                    for (ia = 0; ia < div.length; ia++) {
+                    for (var ia = 0; ia < div.length; ia++) {
                         if (typeof inTime == "undefined") {
                             times.push(div[ia]);
                         } else {
                             times.push(parseFloat(div[ia]) + parseFloat(inTime));
                         }
                     }
-                    for (ic = 0; ic < xml.keyValue.children().length(); ic++) {
+                    for (var ic = 0; ic < xml.keyValue.children().length(); ic++) {
                         var verts = xml.keyValue.child(ic).vertices.toString().split(",");
                         var inTan = xml.keyValue.child(ic).inTan.toString().split(",");
                         var outTan = xml.keyValue.child(ic).outTan.toString().split(",");
-                        for (ib = 0; ib < verts.length / 2; ib++) {
+                        for (var ib = 0; ib < verts.length / 2; ib++) {
                             vertsArr.push([verts[ib * 2], verts[ib * 2 + 1]]);
                             inTanArr.push([inTan[ib * 2], inTan[ib * 2 + 1]]);
                             outTanArr.push([outTan[ib * 2], outTan[ib * 2 + 1]]);
@@ -1644,7 +1645,7 @@
                         var ease = xml..Ease;
                         len = ease.length();
                     }
-                    for (ia = 0; ia < len; ia++) {
+                    for (var ia = 0; ia < len; ia++) {
                         var clamp = parseFloat(xml.child(ia + 4).InIn);
                         if (clamp < 0.1) {
                             clamp = 0.1;
@@ -1980,7 +1981,6 @@
     $.layer.email = "smallpath2013@gmail.com";
 
     $.layer.prototype.init.prototype = $.layer.prototype;
-    $.global._layer = $.layer;
     return $.layer;
 
 })();
