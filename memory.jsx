@@ -3,7 +3,7 @@
       
 (function(global){
 
-    #include 'Sp_memory/lib/LayerObject.jsx'
+    #include 'Sp_memory/lib/AfterEffectsLayer.jsx'
     $.layer.slash = sp.slash;
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + "tempFile");
     

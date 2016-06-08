@@ -1,4 +1,4 @@
-﻿//~  Layer object to handle with layers of after effects, for saving and generating
+﻿//~  AfterEffectsLayer object to handle with layers of after effects, for saving and generating
 (function() {
 
     $.layer = function(item, options) {
