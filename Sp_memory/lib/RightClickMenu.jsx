@@ -1,8 +1,8 @@
 ﻿    function createMenu(CurrentPosition) {
         var itemList = [
-          {name:loc(sp.settings),type:"button"},{name:loc(sp.settings),type:"dropdownlist"},
+          {name:loc(sp.settings),type:"button"},{name:"helperScripts",type:"dropdownlist"},
           
-          {name: (sp.gv.selection.length == 0) ? loc(sp.previewAll) : loc(sp.previewSelected),type:"button"},{name:loc(sp.yushe),type:"button"},
+          {name: "preview",type:"button"},{name:loc(sp.yushe),type:"button"},
            
           {name: loc(sp.searchWindow),type:"button"},{name:loc(sp.getReport),type:"button"},
           {name: loc(sp.changeName),type:"button"},{name:loc(sp.importPicture),type:"button"},
@@ -55,31 +55,23 @@
                 ShortMenu[itemList[i].name] = ShortMenu.add(itemList[i].type, [maxWidth / 2, (parseInt((i - 1) / 2) * itemHeight), maxWidth, (22 + parseInt((i - 1) / 2) * itemHeight)], itemList[i].name);
               }
       }
-    /*
-        ShortMenu._preview = ShortMenu.add("button", [0, 20, h / 2, 42], (sp.gv.selection.length == 0) ? loc(sp.previewAll) : loc(sp.previewSelected));
-        
-        ShortMenu._yushe = ShortMenu.add("button", [h / 2, 20, h, 42], loc(sp.yushe));
-        
-        ShortMenu._c = ShortMenu.add("button", [0, 42, h / 2, 62], loc(sp.changeName));
-        
-        ShortMenu._1 = ShortMenu.add("dropdownlist", [h / 2, 0, h, 22]);
-        ShortMenu._1.add("item", loc(sp.save));
-        ShortMenu._1.add("item", loc(sp.exp));
-        ShortMenu._1.add("item", loc(sp.aep));
-        ShortMenu._1.add("item", loc(sp.preset));
-        ShortMenu._1.add("item", loc(sp.curve));
-        ShortMenu._1.selection = 0;
-        ShortMenu._1.enabled = true;
-        ShortMenu._13.value = sp.showThumbValue;
-        ShortMenu._14.value = sp.autoNameValue;
-        ShortMenu._15.value = sp.savePreviewValue;
-        ShortMenu._16.value = sp.saveMaterialValue;
-        ShortMenu._17.value = sp.preComposeValue;
-        ShortMenu._18.value = sp.onlyEffectValue;
-        ShortMenu._19.value = sp.cleanGroupValue;
-        ShortMenu._20.value = sp.offsetKeyframeValue;
 
-        ShortMenu._1.onChange = ShortMenu._1.onChanging = function() {
+      var isCheckBoxClicked = false;
+
+        ShortMenu[itemList[0].name].onClick = function() {
+          isCheckBoxClicked = false;
+          ShortMenu.hide();
+          settingsButtonFunc();
+        }
+
+        ShortMenu[itemList[1].name].add("item", loc(sp.save));
+        ShortMenu[itemList[1].name].add("item", loc(sp.exp));
+        ShortMenu[itemList[1].name].add("item", loc(sp.aep));
+        ShortMenu[itemList[1].name].add("item", loc(sp.preset));
+        ShortMenu[itemList[1].name].add("item", loc(sp.curve));
+        ShortMenu[itemList[1].name].selection = 0;
+        
+        ShortMenu[itemList[1].name].onChange = ShortMenu[itemList[1].name].onChanging = function(){
           try {
             //run sp_translate script
             this.selection.index == 1 &&
@@ -105,161 +97,178 @@
           this.selection = 0;
         }
 
-        var isCheckBoxClicked = false;
 
-
-
-        ShortMenu._yushe.onClick = function() {
-          presetWindow();
+      ShortMenu[itemList[2].name].onClick = function(){
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._preview.onClick = function() {
-          isCheckBoxClicked = false;
-          ShortMenu.close();
+          ShortMenu.hide();
           sp.fns.previewAll();
-        }
-
-        ShortMenu._c.onClick = function() {
+      }      
+  
+      ShortMenu[itemList[3].name].onClick = function(){
+          isCheckBoxClicked = false;
+          ShortMenu.hide();
+          presetWindow();
+      }
+  
+      ShortMenu[itemList[4].name].onClick = function(){ 
+          isCheckBoxClicked = false;
+          ShortMenu.hide();
+          sp.fns.searchWindow();
+      }  
+  
+      ShortMenu[itemList[5].name].onClick = function(){  
+          isCheckBoxClicked = false;
+          ShortMenu.hide();
+          sp.fns.getReport();
+      }  
+  
+      ShortMenu[itemList[6].name].onClick = function(){ 
+          isCheckBoxClicked = false;
+          ShortMenu.hide();
           sp.fns.changeName();
+      }  
+  
+      ShortMenu[itemList[7].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._0.onClick = function() {
-          settingsButtonFunc();
-          isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._2.onClick = function() {
+          ShortMenu.hide();
           sp.fns.importImage();
+      }
+  
+      ShortMenu[itemList[8].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._3.onClick = function() {
+          ShortMenu.hide();
           sp.fns.addModule();
+      }    
+  
+      ShortMenu[itemList[9].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._4.onClick = function() {
+          ShortMenu.hide();
           sp.fns.deleteModule();
+      }  
+  
+      ShortMenu[itemList[10].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._5.onClick = function() {
+          ShortMenu.hide();
           sp.fns.importFiles();
+      }  
+  
+      ShortMenu[itemList[11].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._6.onClick = function() {
+          ShortMenu.hide();
           sp.fns.exportFile();
+      }
+  
+      ShortMenu[itemList[12].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._7.onClick = function() {
+          ShortMenu.hide();
           sp.fns.addGroup();
+      }  
+  
+      ShortMenu[itemList[13].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._8.onClick = function() {
+          ShortMenu.hide();
           sp.fns.deleteGroup();
+      }
+    
+      ShortMenu[itemList[14].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._9.onClick = function() {
-          isCheckBoxClicked = false;
-          ShortMenu.close();
+          ShortMenu.hide();
           sp.fns.newItem();
-        }
-
-        ShortMenu._10.onClick = function() {
-          sp.fns.deleteItem();
+      }  
+  
+      ShortMenu[itemList[15].name].onClick = function(){ 
           isCheckBoxClicked = false;
-          ShortMenu.close();
-        }
-
-        ShortMenu._11.onClick = function() {
-          isCheckBoxClicked = false;
-          ShortMenu.close();
-          sp.fns.newLayer();
-        }
-
-        ShortMenu._12.onClick = function() {
-          isCheckBoxClicked = false;
-          ShortMenu.close();
+          ShortMenu.hide();
           sp.fns.cover();
-        }
-
-        ShortMenu._13.onClick = function() {
+      }
+      
+      ShortMenu[itemList[16].name].onClick = function(){ 
+          isCheckBoxClicked = false;
+          ShortMenu.hide();
+          sp.fns.newLayer();
+      }  
+  
+      ShortMenu[itemList[17].name].onClick = function(){ 
+          isCheckBoxClicked = false;
+          ShortMenu.hide();
+          sp.fns.deleteItem();
+      }  
+  
+      ShortMenu[itemList[18].name].value = sp.showThumbValue;
+      ShortMenu[itemList[19].name].value = sp.autoNameValue;
+      ShortMenu[itemList[20].name].value = sp.savePreviewValue;
+      ShortMenu[itemList[21].name].value = sp.saveMaterialValue;
+      ShortMenu[itemList[22].name].value = sp.preComposeValue;
+      ShortMenu[itemList[23].name].value = sp.onlyEffectValue;
+      ShortMenu[itemList[24].name].value = sp.cleanGroupValue;
+      ShortMenu[itemList[25].name].value = sp.offsetKeyframeValue;
+      
+      ShortMenu[itemList[18].name].onClick = function(){ 
           sp.showThumbValue = this.value;
           gv.showText = this.value;
           sp.saveSetting("showThumb", this.value.toString());
           isCheckBoxClicked = true;
           sp.gv.refresh();
-        }
-        ShortMenu._14.onClick = function() { //-14对deleteAlert
+      }
+        
+      ShortMenu[itemList[19].name].onClick = function(){ 
           sp.autoNameValue = this.value;
           sp.saveSetting("autoName", this.value.toString());
           isCheckBoxClicked = true;
-        }
-        ShortMenu._15.onClick = function() { //-15对preCompose
+      }
+  
+      ShortMenu[itemList[20].name].onClick = function(){ 
           sp.savePreviewValue = this.value;
           sp.saveSetting("savePreview", this.value.toString());
           isCheckBoxClicked = true;
-        }
-        ShortMenu._16.onClick = function() {
+      }
+    
+      ShortMenu[itemList[21].name].onClick = function(){ 
           sp.saveMaterialValue = this.value;
           sp.saveSetting("saveMaterial", this.value.toString());
           isCheckBoxClicked = true;
-        }
-        ShortMenu._17.onClick = function() { //-17 对autoName
+      }    
+  
+      ShortMenu[itemList[22].name].onClick = function(){ 
           sp.preComposeValue = this.value;
           sp.saveSetting("preCompose", this.value.toString());
           isCheckBoxClicked = true;
-        }
-        ShortMenu._18.onClick = function() {
+      }  
+  
+      ShortMenu[itemList[23].name].onClick = function(){ 
           sp.onlyEffectValue = this.value;
           sp.saveSetting("onlyEffect", this.value.toString());
           isCheckBoxClicked = true;
-        }
-        ShortMenu._19.onClick = function() {
+      }  
+  
+      ShortMenu[itemList[24].name].onClick = function(){ 
           sp.cleanGroupValue = this.value;
           sp.saveSetting("cleanGroup", this.value.toString());
           isCheckBoxClicked = true;
-        }
-        ShortMenu._20.onClick = function() {
+      }
+    
+      ShortMenu[itemList[25].name].onClick = function(){ 
           sp.offsetKeyframeValue = this.value;
           sp.saveSetting("offsetKeyframe", this.value.toString());
           isCheckBoxClicked = true;
-        }
-
-
+      }
 
         ShortMenu.addEventListener("blur", function() {
           if (isCheckBoxClicked == false) {
-            ShortMenu.close();
+            ShortMenu.hide();
           } else {
             isCheckBoxClicked = true;
           }
-        });*/
+        });
 
         ShortMenu.onDeactivate = function() {
-          ShortMenu.close();
+          ShortMenu.hide();
         }
         
         ShortMenu.frameLocation = CurrentPosition;
-        ShortMenu.show();
         ShortMenu.addEventListener("keydown", function(event) {
-          ShortMenu.close();
+          ShortMenu.hide();
         });
 
+        return ShortMenu;
 }

@@ -58,9 +58,9 @@
     
     win.onResize =win.onResizing =fns.winResize;
     
-    if(win instanceof Panel){    //~ Show Panel
+    if(win instanceof Panel){   
             win.layout.layout(1);         
-        }else{                            //~ Show Palette and set its size && location
+        }else{                            
 
             win.location= sp.getSetting("winLocation").split(",");
 //~             win.location = [100,200];
@@ -75,10 +75,15 @@
     
 
 
-    
 
     function fns(){
             var keepRef = this;
+            this.searchWindow = function(){
+               alert("searchWindow"); 
+            },
+            this.getReport = function(){
+                alert("getReport");
+            },
             this.previewAll = function(){
                 
                     if(sp.gv.children.length ==0) return; 
@@ -395,7 +400,7 @@
                 },
             
             this.newLayer  = function(){
-                        if(!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
+                        if(!sp.gv.lastSelectedItem) return alert(loc(sp.needElements));
                         if(!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
                         if(sp.onlyEffectValue==true && app.project.activeItem.selectedLayers.length == 0) return alert(loc(sp.needLayers));
                         
@@ -954,7 +959,12 @@
                         currentPosition=[event.screenX-180,event.screenY];
 
                     try{
-                        createMenu(currentPosition);
+                        if(!sp.menu){
+                            sp.menu = createMenu(currentPosition);
+                       }
+                        sp.menu["preview"].text = (sp.gv.selection.length == 0) ? loc(sp.previewAll) : loc(sp.previewSelected);
+                        sp.menu.frameLocation = currentPosition;
+                        sp.menu.show();
                     }catch(err){err.printa()}
                     
                 }
