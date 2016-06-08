@@ -243,6 +243,7 @@
                 var groupxml = [];
                 var prop;
                 var va;
+                var text;
                 for (var i = 1; i <= ref.numProperties; i++) {
                     prop = ref.property(i);
                     if ((prop.propertyType == PropertyType.PROPERTY)) {
@@ -286,21 +287,45 @@
 
                             var propName = prop.name.toString() ;
                             var matchName = prop.matchName.toString();
-
-                            $.layer.forEach.call($.layer.decodedArr,function(item,index){
-                                    var reg = new RegExp(item,"g");
-                                    propName = propName.replace(reg,$.layer.encodedArr[index]);
-                                    matchName = matchName.replace(reg,$.layer.encodedArr[index]);
-                            });
  
                             if (prop.matchName == "ADBE Mask Atom") {
                                 try {
                                     text = "<Group name=\"" + propName + "\" matchName=\"" + matchName + "\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\" maskFeatherFalloff=\"" + prop.maskFeatherFalloff.toString() + "\" enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    try{
+                                        var temp = new XML(text);
+                                    }catch(err){
+                                        var obj = {
+                                            propName:propName,
+                                            matchName:matchName,
+                                        }
+                                        $.layer.encode(obj);
+                                        text = "<Group name=\"" + obj.propName + "\" matchName=\"" + obj.matchName + "\" isEncoded=\"true\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\" maskFeatherFalloff=\"" + prop.maskFeatherFalloff.toString() + "\" enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    }
                                 } catch (err) {
                                     text = "<Group name=\"" + propName + "\" matchName=\"" + matchName + "\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\"  enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    try{
+                                        var temp = new XML(text);
+                                    }catch(err){
+                                        var obj = {
+                                            propName:propName,
+                                            matchName:matchName,
+                                        }
+                                        $.layer.encode(obj);
+                                        text =  "<Group name=\"" + obj.propName + "\" matchName=\"" + obj.matchName + "\" isEncoded=\"true\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\"  enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    }
                                 }
                             } else {
                                 text = "<Group name=\"" + propName + "\" matchName=\"" + matchName + "\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    try{
+                                        var temp = new XML(text);
+                                    }catch(err){
+                                        var obj = {
+                                            propName:propName,
+                                            matchName:matchName,
+                                        }
+                                        $.layer.encode(obj);
+                                        text = "<Group name=\"" + obj.propName + "\" matchName=\"" + obj.matchName + "\" isEncoded=\"true\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
+                                    }
                             }
                             try {
                                 if (prop.matchName == "ADBE Glo2") {
@@ -1166,14 +1191,19 @@
 
         newPropertyGroup: function(xml, layers, inTime) {
             for (var addi = 0; addi < xml.children().length(); addi++) {
-                    var matchName = xml.child(addi).@matchName.toString();
-                    var propName = xml.child(addi).@name.toString();
-                        $.layer.forEach.call($.layer.encodedArr,function(item,index){
-                                var reg = new RegExp(item,"g");
-                                propName = propName.replace(reg,$.layer.decodedArr[index]);
-                                matchName = matchName.replace(reg,$.layer.decodedArr[index]);
-                        });
-                if (xml.child(addi).name() == "Group") {
+                var currentXML = xml.child(addi);
+                    var matchName = currentXML.@matchName.toString();
+                    var propName = currentXML.@name.toString();
+                    if(currentXML.@isEncoded.toString() != ""){
+                        var obj = {
+                            matchName:matchName,
+                            propName:propName
+                        };
+                        $.layer.decode(obj);
+                        matchName = obj.matchName;
+                        propName = propName;
+                    }
+                if (currentXML.name() == "Group") {
                     prop = 0;
                     try {
                         if (layers.canAddProperty(matchName)) {
@@ -1181,28 +1211,28 @@
                             var prop = layers.addProperty(matchName);
 
                             try {
-                                if (layers.property(parseInt(xml.child(addi).@propertyIndex)).matchName == "ADBE Mask Atom") {
+                                if (layers.property(parseInt(currentXML.@propertyIndex)).matchName == "ADBE Mask Atom") {
                                     try {
-                                        layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode = $.layer.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMode, parseInt(xml.child(addi).@maskmode));
+                                        layers.property(parseInt(currentXML.@propertyIndex)).maskMode = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskMode, parseInt(currentXML.@maskmode));
                                     } catch (err) {}
-                                    layers.property(parseInt(xml.child(addi).@propertyIndex)).inverted = (xml.child(addi).@inverted.toString() == "false") ? false : true;
-                                    layers.property(parseInt(xml.child(addi).@propertyIndex)).rotoBezier = (xml.child(addi).@rotoBezier.toString() == "false") ? false : true;
-                                    layers.property(parseInt(xml.child(addi).@propertyIndex)).color = [xml.child(addi).@color.toString().split(",")[0], xml.child(addi).@color.toString().split(",")[1], xml.child(addi).@color.toString().split(",")[2]];
+                                    layers.property(parseInt(currentXML.@propertyIndex)).inverted = (currentXML.@inverted.toString() == "false") ? false : true;
+                                    layers.property(parseInt(currentXML.@propertyIndex)).rotoBezier = (currentXML.@rotoBezier.toString() == "false") ? false : true;
+                                    layers.property(parseInt(currentXML.@propertyIndex)).color = [currentXML.@color.toString().split(",")[0], currentXML.@color.toString().split(",")[1], currentXML.@color.toString().split(",")[2]];
                                     try {
-                                        layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur = $.layer.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskMotionBlur, parseInt(xml.child(addi).@maskMotionBlur));
+                                        layers.property(parseInt(currentXML.@propertyIndex)).maskMotionBlur = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskMotionBlur, parseInt(currentXML.@maskMotionBlur));
                                     } catch (err) {}
                                     try {
-                                        layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff = $.layer.getDistance(layers.property(parseInt(xml.child(addi).@propertyIndex)).maskFeatherFalloff, parseInt(xml.child(addi).@maskFeatherFalloff));
+                                        layers.property(parseInt(currentXML.@propertyIndex)).maskFeatherFalloff = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskFeatherFalloff, parseInt(currentXML.@maskFeatherFalloff));
                                     } catch (err) {}
                                 }
                             } catch (err) {}
-                        } else if (xml.child(addi).@matchName.toString() == "ADBE Layer Styles") {
-                            var group = xml.child(addi).children();
+                        } else if (currentXML.@matchName.toString() == "ADBE Layer Styles") {
+                            var group = currentXML.children();
                             var layerStyleArr = [];
                             var cunName = [];
                             for (var shenqi = 0; shenqi < group.length(); shenqi++) {
-                                layerStyleArr.push(xml.child(addi).child(shenqi).@matchName);
-                                cunName.push(xml.child(addi).child(shenqi).@name);
+                                layerStyleArr.push(currentXML.child(shenqi).@matchName);
+                                cunName.push(currentXML.child(shenqi).@name);
                             }
                             for (var shenqi = 0; shenqi < layerStyleArr.length; shenqi++) {
                                 if (layerStyleArr[shenqi].indexOf("/") != -1) {
@@ -1220,12 +1250,12 @@
                         }
                     } catch (err) {}
                     try {
-                        if (xml.child(addi).@enabled != "None") {
-                            if (layers.property(parseInt(xml.child(addi).@propertyIndex)).canSetEnabled == true) {
+                        if (currentXML.@enabled != "None") {
+                            if (layers.property(parseInt(currentXML.@propertyIndex)).canSetEnabled == true) {
                                 if (prop == 0) {
-                                    layers.property(parseInt(xml.child(addi).@propertyIndex)).enabled = (xml.child(addi).@enabled == "true") ? true : false;
+                                    layers.property(parseInt(currentXML.@propertyIndex)).enabled = (currentXML.@enabled == "true") ? true : false;
                                 } else {
-                                    layers.property(parseInt(prop.propertyIndex)).enabled = (xml.child(addi).@enabled == "true") ? true : false;
+                                    layers.property(parseInt(prop.propertyIndex)).enabled = (currentXML.@enabled == "true") ? true : false;
                                 }
                             }
                         }
@@ -1233,40 +1263,40 @@
                     try {
                         if (prop == 0) {
                             if (layers.propertyType == PropertyType.INDEXED_GROUP) {
-                                layers.property(parseInt(xml.child(addi).@propertyIndex)).name = propName;
+                                layers.property(parseInt(currentXML.@propertyIndex)).name = propName;
                             }
                         } else {
                             if (layers.propertyType == PropertyType.INDEXED_GROUP)
                                 layers.property(prop.propertyIndex).name = propName;
                         }
                     } catch (err) {}
-                    if (xml.child(addi).children().length() > 0) {
-                        if (prop == 0 && xml.child(addi).@matchName != "ADBE Mask Parade" && xml.child(addi).@matchName != "ADBE Effect Parade" && xml.child(addi).@matchName != "ADBE Layer Styles") {
+                    if (currentXML.children().length() > 0) {
+                        if (prop == 0 && currentXML.@matchName != "ADBE Mask Parade" && currentXML.@matchName != "ADBE Effect Parade" && currentXML.@matchName != "ADBE Layer Styles") {
                             try {
-                                $.layer.prototype.newPropertyGroup(xml.child(addi), layers.property(parseInt(xml.child(addi).@propertyIndex)), inTime);
+                                $.layer.prototype.newPropertyGroup(currentXML, layers.property(parseInt(currentXML.@propertyIndex)), inTime);
                             } catch (err) {}
                         } else {
-                            if (xml.child(addi).@matchName != "ADBE Mask Parade" && xml.child(addi).@matchName != "ADBE Effect Parade" && xml.child(addi).@matchName != "ADBE Layer Styles") {
+                            if (currentXML.@matchName != "ADBE Mask Parade" && currentXML.@matchName != "ADBE Effect Parade" && currentXML.@matchName != "ADBE Layer Styles") {
                                 try {
-                                    $.layer.prototype.newPropertyGroup(xml.child(addi), layers.property(prop.propertyIndex), inTime);
+                                    $.layer.prototype.newPropertyGroup(currentXML, layers.property(prop.propertyIndex), inTime);
                                 } catch (err) {}
                             } else {
                                 try {
-                                    $.layer.prototype.newPropertyGroup(xml.child(addi), layers.property(matchName), inTime);
+                                    $.layer.prototype.newPropertyGroup(currentXML, layers.property(matchName), inTime);
                                 } catch (err) {}
                             }
                         }
                     }
-                } else if (xml.child(addi).name() == "prop") {
-                    $.layer.prototype.newProperty(xml.child(addi), layers, inTime)
+                } else if (currentXML.name() == "prop") {
+                    $.layer.prototype.newProperty(currentXML, layers, inTime)
                 }
 
-                if (xml.child(addi).name() == "prop") {
-                    if (xml.child(addi).exp.toString() != "") {
+                if (currentXML.name() == "prop") {
+                    if (currentXML.exp.toString() != "") {
                         try {
 
                             $.layer.expPropertyArr.push(matchName);
-                            layers.property(matchName).expression = decodeURIComponent(xml.child(addi).exp.toString());
+                            layers.property(matchName).expression = decodeURIComponent(currentXML.exp.toString());
 
                         } catch (err) {};
                     }
@@ -1277,19 +1307,14 @@
         newProperty: function(xml, layers, inTime) {
             var matchName = xml.@matchName.toString();
             var propName = xml.@name.toString();
-                $.layer.forEach.call($.layer.encodedArr,function(item,index){
-                        var reg = new RegExp(item,"g");
-                        propName = propName.replace(reg,$.layer.decodedArr[index]);
-                        matchName = matchName.replace(reg,$.layer.decodedArr[index]);
-                });
-            var bool1 = layers.property(matchName).matchName != "ADBE Text Document";
-            var bool2 = layers.property(matchName).matchName != "ADBE Marker";
-            var bool3 = layers.property(matchName).matchName != "ADBE Mask Shape";
-            var bool4 = layers.property(matchName).matchName != "ADBE Vector Shape";
-            var bool5 = layers.matchName != "ADBE Text Animator Properties";
-            var bool6 = layers.matchName != "ADBE Vector Stroke Dashes";
-            if (bool1 && bool2 && bool3 && bool4) {
-                if (!bool5 || !bool6) {
+            var isNotText = layers.property(matchName).matchName != "ADBE Text Document";
+            var isNotMarker = layers.property(matchName).matchName != "ADBE Marker";
+            var isNotMaskShape = layers.property(matchName).matchName != "ADBE Mask Shape";
+            var isNotVectorShape = layers.property(matchName).matchName != "ADBE Vector Shape";
+            var isNotTextAnimatorProp = layers.matchName != "ADBE Text Animator Properties";
+            var isNotDash = layers.matchName != "ADBE Vector Stroke Dashes";
+            if (isNotText && isNotMarker && isNotMaskShape && isNotVectorShape) {
+                if (!isNotTextAnimatorProp || !isNotDash) {
                     if (layers.canAddProperty(matchName)) {
                         layers.addProperty(matchName);
                     }
@@ -1520,7 +1545,7 @@
                         } catch (err) {}
                     }
                 }
-            } else if (!bool2) {
+            } else if (!isNotMarker) {
                 if (xml.@key == 0) {} else {
                     var values = [];
                     var valueTemp = [];
@@ -1547,7 +1572,7 @@
                         } catch (err) {}
                     }
                 }
-            } else if (!bool3 || !bool4) {
+            } else if (!isNotMaskShape || !isNotVectorShape) {
                 if (xml.@key == "0") {
                     var myShape = new Shape();
                     var vertsArr = [];
@@ -1663,7 +1688,7 @@
             xml = xml || this.item;
             
             if($.layer.layerArr.length == 0){
-              var isFirstStage = true;  
+              var isFirstStage = true;
             }else{
               var isFirstStage = false;
             }
@@ -1931,6 +1956,24 @@
     
     $.layer.encodedArr = ["amp;","lt;","gt;","quot;","apos;"];
     $.layer.decodedArr = ["&","<",">","\"","'"];
+    
+    $.layer.encode = function(obj){
+        $.layer.forEach.call($.layer.decodedArr,function(item,index){
+                var reg = new RegExp(item,"g");
+                for(var j in obj){
+                    obj[j] = obj[j].replace(reg,$.layer.encodedArr[index]);
+                }
+        });
+    }    
+
+    $.layer.decode = function(obj){
+        $.layer.forEach.call($.layer.encodedArr,function(item,index){
+                var reg = new RegExp(item,"g");
+                for(var j in obj){
+                    obj[j] = obj[j].replace(reg,$.layer.decodedArr[index]);
+                }
+        });
+    }
     
     $.layer.name = "AE Layer library"
     $.layer.version = 1.0;
