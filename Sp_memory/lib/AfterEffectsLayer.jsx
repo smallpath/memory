@@ -1378,29 +1378,27 @@
                         len = ease.length();
                     }
                     for (var ia = 0; ia < len; ia++) {
+                        
                         var clamp = parseFloat(xml.child(ia + 4).InIn);
-                        if (clamp < 0.1) {
-                            clamp = 0.1;
-                        }
+                            clamp = $.layer.clampInfluence(clamp);
                         var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed), clamp);
+                        
                         var clampb = parseFloat(xml.child(ia + 4).OutIn);
-                        if (clampb < 0.1) {
-                            clampb = 0.1;
-                        }
+                        clampb = $.layer.clampInfluence(clampb);
                         var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
+                        
                         var myScaleProperty = layers.property(matchName);
                         try {
                             if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD &&
                                 $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
+                                    
                                 var clamp = parseFloat(xml.child(ia + 4).InIn);
-                                if (clamp < 0.1) {
-                                    clamp = 0.1;
-                                }
+                                clamp = $.layer.clampInfluence(clamp);
                                 var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed), clamp);
+                                
                                 var clampb = parseFloat(xml.child(ia + 4).OutIn);
-                                if (clampb < 0.1) {
-                                    clampb = 0.1;
-                                }
+                                clampb = $.layer.clampInfluence(clampb);
+
                                 var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
                                 try {
                                     myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
@@ -1408,59 +1406,49 @@
                             } else if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
 
                                 var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
-                                if (clamp < 0.1) {
-                                    clamp = 0.1;
-                                }
+                                clamp = $.layer.clampInfluence(clamp);
                                 var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[0]), clamp);
+                                
                                 var clampb = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[0]);
-                                if (clampb < 0.1) {
-                                    clampb = 0.1;
-                                }
+                                clampb = $.layer.clampInfluence(clampb);
                                 var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[0]), clampb);
+                                
                                 var clamp1 = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[1]);
-                                if (clamp1 < 0.1) {
-                                    clamp1 = 0.1;
-                                }
+                                clamp1 = $.layer.clampInfluence(clamp1);
                                 var easeIn1 = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[1]), clamp1);
+                                
                                 var clampb1 = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[1]);
-                                if (clampb1 < 0.1) {
-                                    clampb1 = 0.1;
-                                }
+                                clampb1 = $.layer.clampInfluence(clampb1);
                                 var easeOut1 = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[1]), clampb1);
+                                
                                 try {
                                     myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn1], [easeOut, easeOut1]);
                                 } catch (err) {}
                             } else if ($.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
                                 var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
-                                if (clamp < 0.1) {
-                                    clamp = 0.1;
-                                }
+                                clamp = $.layer.clampInfluence(clamp);
                                 var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[0]), clamp);
+                                
                                 var clampb = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[0]);
-                                if (clampb < 0.1) {
-                                    clampb = 0.1;
-                                }
+                                clampb = $.layer.clampInfluence(clampb);
                                 var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[0]), clampb);
+                                
                                 var clamp1 = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[1]);
-                                if (clamp1 < 0.1) {
-                                    clamp1 = 0.1;
-                                }
+                                clamp1 = $.layer.clampInfluence(clamp1);
                                 var easeIn1 = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[1]), clamp1);
+                                
                                 var clampb1 = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[1]);
-                                if (clampb1 < 0.1) {
-                                    clampb1 = 0.1;
-                                }
+                                clampb1 = $.layer.clampInfluence(clampb1);
                                 var easeOut1 = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[1]), clampb1);
+                                
                                 var clamp2 = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[2]);
-                                if (clamp2 < 0.1) {
-                                    clamp2 = 0.1;
-                                }
+                                clamp2 = $.layer.clampInfluence(clamp2);
                                 var easeIn2 = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed.toString().split(",")[2]), clamp2);
+                                
                                 var clampb2 = parseFloat(xml.child(ia + 4).OutIn.toString().split(",")[2]);
-                                if (clampb2 < 0.1) {
-                                    clampb2 = 0.1;
-                                }
+                                clampb2 = $.layer.clampInfluence(clampb2);
                                 var easeOut2 = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed.toString().split(",")[2]), clampb2);
+                                
                                 try {
                                     myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn1, easeIn2], [easeOut, easeOut1, easeOut2]);
                                 } catch (err) {}
@@ -1647,15 +1635,13 @@
                     }
                     for (var ia = 0; ia < len; ia++) {
                         var clamp = parseFloat(xml.child(ia + 4).InIn);
-                        if (clamp < 0.1) {
-                            clamp = 0.1;
-                        }
+                        clamp = $.layer.clampInfluence(clamp);
                         var easeIn = new KeyframeEase(parseFloat(xml.child(ia + 4).InSpeed), clamp);
+                        
                         var clampb = parseFloat(xml.child(ia + 4).OutIn);
-                        if (clampb < 0.1) {
-                            clampb = 0.1;
-                        }
+                                clampb = $.layer.clampInfluence(clampb);
                         var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
+                        
                         var myScaleProperty = layers.property(matchName);
                         try {
                             if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD &&
@@ -1856,6 +1842,15 @@
 
     $.layer.isType = function(obj, type) {
         return Object.prototype.toString.call(obj) == "[object " + type + "]";
+    }
+
+    $.layer.clampInfluence = function(clamp){
+         if (clamp < 0.1) {
+                 clamp = 0.1;
+         }else if(clamp>=100){
+                 clamp = 100;
+         }
+        return clamp;
     }
 
     $.layer.arrayIndexOf = function(arr,item){
