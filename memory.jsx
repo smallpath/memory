@@ -78,12 +78,6 @@
 
     function fns(){
             var keepRef = this;
-            this.searchWindow = function(){
-               alert("searchWindow"); 
-            },
-            this.getReport = function(){
-                alert("getReport");
-            },
             this.previewAll = function(){
                 
                     if(sp.gv.children.length ==0) return; 
