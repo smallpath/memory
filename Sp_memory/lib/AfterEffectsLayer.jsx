@@ -1509,28 +1509,28 @@
                     }
                     for (var ib = 0; ib < div.length; ib++) {
                         var myText = null;
-                        myText = layers.property(xml.child(0).@matchName).valueAtTime(times[ib], true);
-                        myText.text = xml.child(0).keyValue.child(ib).text.toString();
-                        myText.font = xml.child(0).keyValue.child(ib).font.toString();
-                        myText.fontSize = parseInt(xml.child(0).keyValue.child(ib).fontSize);
-                        myText.applyFill = (xml.child(0).keyValue.child(ib).applyFill.toString() == "true") ? true : false;
-                        myText.applyStroke = (xml.child(0).keyValue.child(ib).applyStroke.toString() == "true") ? true : false;
-                        if (xml.child(0).keyValue.child(ib).applyFill.toString() == "true")
-                            myText.fillColor = [xml.child(0).keyValue.child(ib).fillColor.toString().split(",")[0], xml.child(0).keyValue.child(ib).fillColor.toString().split(",")[1], xml.child(0).keyValue.child(ib).fillColor.toString().split(",")[2]];
-                        if (xml.child(0).keyValue.child(ib).applyStroke.toString() == "true") {
-                            myText.strokeColor = [xml.child(0).keyValue.child(ib).strokeColor.toString().split(",")[0], xml.child(0).keyValue.child(ib).strokeColor.toString().split(",")[1], xml.child(0).keyValue.child(ib).strokeColor.toString().split(",")[2]];
-                            myText.strokeOverFill = xml.child(0).keyValue.child(ib).strokeOverFill.toString();
-                            myText.strokeWidth = xml.child(0).keyValue.child(ib).strokeWidth.toString();
+                        myText = layers.property(matchName).valueAtTime(times[ib], true);
+                        myText.text = xml.keyValue.child(ib).text.toString();
+                        myText.font = xml.keyValue.child(ib).font.toString();
+                        myText.fontSize = parseInt(xml.keyValue.child(ib).fontSize);
+                        myText.applyFill = (xml.keyValue.child(ib).applyFill.toString() == "true") ? true : false;
+                        myText.applyStroke = (xml.keyValue.child(ib).applyStroke.toString() == "true") ? true : false;
+                        if (xml.keyValue.child(ib).applyFill.toString() == "true")
+                            myText.fillColor = [xml.keyValue.child(ib).fillColor.toString().split(",")[0], xml.keyValue.child(ib).fillColor.toString().split(",")[1], xml.keyValue.child(ib).fillColor.toString().split(",")[2]];
+                        if (xml.keyValue.child(ib).applyStroke.toString() == "true") {
+                            myText.strokeColor = [xml.keyValue.child(ib).strokeColor.toString().split(",")[0], xml.keyValue.child(ib).strokeColor.toString().split(",")[1], xml.keyValue.child(ib).strokeColor.toString().split(",")[2]];
+                            myText.strokeOverFill = xml.keyValue.child(ib).strokeOverFill.toString();
+                            myText.strokeWidth = xml.keyValue.child(ib).strokeWidth.toString();
                         }
                         try {
-                            myText.justification = $.layer.getDistance(myText.justification, parseInt(xml.child(0).keyValue.child(ib).justification));
+                            myText.justification = $.layer.getDistance(myText.justification, parseInt(xml.keyValue.child(ib).justification));
                         } catch (err) {}
                         nextText = myText;
                         try {
-                            layers.property(xml.child(0).@matchName).setValueAtTime(times[ib], myText);
+                            layers.property(matchName).setValueAtTime(times[ib], myText);
                         } catch (err) {}
                         try {
-                            layers.property(xml.child(0).@matchName).setValueAtTime(times[ib], nextText);
+                            layers.property(matchName).setValueAtTime(times[ib], nextText);
                         } catch (err) {}
                     }
                 }
