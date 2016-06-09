@@ -1549,15 +1549,15 @@
                     }
                     for (var ib = 0; ib < div.length; ib++) {
                         var myMarker = new MarkerValue("zhanwei");
-                        myMarker.comment = xml.child(0).keyValue.child(ib).comment.toString();
-                        myMarker.duration = xml.child(0).keyValue.child(ib).duration.toString();
-                        myMarker.chapter = xml.child(0).keyValue.child(ib).chapter.toString();
-                        myMarker.cuePointName = xml.child(0).keyValue.child(ib).cuePointName.toString();
-                        myMarker.eventCuePoint = xml.child(0).keyValue.child(ib).eventCuePoint.toString();
-                        myMarker.url = xml.child(0).keyValue.child(ib).url.toString();
-                        myMarker.frameTarget = xml.child(0).keyValue.child(ib).frameTarget.toString();
+                        myMarker.comment = xml.keyValue.child(ib).comment.toString();
+                        myMarker.duration = xml.keyValue.child(ib).duration.toString();
+                        myMarker.chapter = xml.keyValue.child(ib).chapter.toString();
+                        myMarker.cuePointName = xml.keyValue.child(ib).cuePointName.toString();
+                        myMarker.eventCuePoint = xml.keyValue.child(ib).eventCuePoint.toString();
+                        myMarker.url = xml.keyValue.child(ib).url.toString();
+                        myMarker.frameTarget = xml.keyValue.child(ib).frameTarget.toString();
                         try {
-                            layers.property(xml.child(0).@matchName).setValueAtTime(times[ib], myMarker);
+                            layers.property(matchName).setValueAtTime(times[ib], myMarker);
                         } catch (err) {}
                     }
                 }
