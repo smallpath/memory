@@ -1171,9 +1171,7 @@
                             } catch (err) {}
                             layer.source.parentFolder = $.layer.sourceFolder;
                         } else {
-                            // alert("Wrong file type can not be imported !");
                             layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
-                            alert(1);
                         }
                     } catch (err) {}
                 }
@@ -1183,12 +1181,10 @@
                     return layer;
                 } else {
                     layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
-                            alert(2);
                     return layer;
                 }
             } catch (err) {
                 layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
-                            alert(3);
                 return layer;
             }
         },
@@ -1406,7 +1402,7 @@
                                 myScaleProperty.setSpatialTangentsAtKey(ia+1,inSpatialArr,outSpatialArr);
                             }
                             
-                        }catch(err){alert(err)}
+                        }catch(err){}
                         try {
                             if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD &&
                                 $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
