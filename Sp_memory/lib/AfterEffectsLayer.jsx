@@ -648,6 +648,7 @@
 
         newLayer: function(xml, thisComp) {
             var layer;
+            $.layer.beforeEachLayerCreated(decodeURIComponent(xml.@name));
             try {
                 if (xml.@type == "Solid" || xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" || xml.@type == "Comp") {
                     solidcolor = [xml.solidColor.toString().split(",")[0], xml.solidColor.toString().split(",")[1], xml.solidColor.toString().split(",")[2]];
@@ -1989,6 +1990,9 @@
     $.layer.name = "AE Layer library"
     $.layer.version = 1.0;
     $.layer.email = "smallpath2013@gmail.com";
+    
+    $.layer.beforeEachLayerCreated = function(){};
+    $.layer.beforeEachLayerSaved = function(){};
 
     $.layer.prototype.init.prototype = $.layer.prototype;
     return $.layer;

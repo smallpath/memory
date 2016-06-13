@@ -63,10 +63,10 @@
         }else{                            
 
             win.location= sp.getSetting("winLocation").split(",");
-//~             win.location = [100,200];
+            if(win.location[0]<=0 || win.location[1]<=0)
+                win.location = [100,200];
             win.show();      
             win.size= sp.getSetting ("winSize").split(",");
-//~             win.size = [100,200];
             win.onClose= fns.winClose;
     }
 
@@ -404,6 +404,21 @@
                               
                         var precomposeName = decodeURIComponent(xml.@name);
                         
+                        var progressWin = new Window("window");
+                        progressWin.size = [250,90];
+                        progressWin.alignChildren = ["fill","fill"];
+                        var progress = progressWin.add("progressbar", undefined, 0, 100);
+                        
+                        var progressText = progressWin.add("statictext");
+                        progressText.text = "开始"
+                        progressWin.show();
+                        progressWin.update();
+
+                        $.layer.beforeEachLayerCreated = function(name){
+                                progressText.text = "Process layer: "+ name; 
+                                progressWin.update();
+                        }
+                        
                         
                         app.beginUndoGroup("Undo new");
                         app.beginSuppressDialogs();
@@ -442,15 +457,13 @@
                                     sourceFolder.numItems == 0 && sourceFolder.remove();
                                     compFolder.numItems == 0 && compFolder.remove();
                                     
-                                                                  return;
+
                         }else{
 
                                     var activeCompLayersArr = app.project.activeItem.selectedLayers;
                                     sp.newProperties(xml,app.project.activeItem.selectedLayers,sp.cleanGroupValue,sp.offsetKeyframeValue); 
                               
-                              }
-                                                                         
-                                 
+                              }                        
                                  
                                 app.endSuppressDialogs (false);
                                 app.endUndoGroup(); 
@@ -476,7 +489,6 @@
                                               app.project.activeItem.selectedLayers[0].outPoint=outPointArr[0];
                                         app.endUndoGroup();
                                   }
-                              
                               
                                   //~ Return the layer array
                                   if(sp.onlyEffectValue == false){
