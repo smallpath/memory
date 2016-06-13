@@ -486,6 +486,10 @@
                     for (var propi = 1; propi <= thisProperty.numKeys; propi++) {
                         ease = "<Ease></Ease>";
                         var easexml = new XML(ease);
+                        try{
+                            easexml.keyInSpatialTangent = thisProperty.keyInSpatialTangent(propi);
+                            easexml.keyOutSpatialTangent = thisProperty.keyOutSpatialTangent(propi);
+                        }catch(err){}
                         if (thisProperty.keyInTemporalEase(1).length == 1) {
                             easexml.InSpeed = thisProperty.keyInTemporalEase(propi)[0].speed;
                             easexml.InIn = thisProperty.keyInTemporalEase(propi)[0].influence;
@@ -1378,6 +1382,12 @@
                         len = ease.length();
                     }
                     for (var ia = 0; ia < len; ia++) {
+                        var myScaleProperty = layers.property(matchName);
+                        
+                        try{
+                            var type =  $.layer.getDistance(myScaleProperty.propertyValueType, parseInt(xml.inType.split(",")[0]));
+                        }catch(err){}
+                        
                         
                         var clamp = parseFloat(xml.child(ia + 4).InIn);
                             clamp = $.layer.clampInfluence(clamp);
@@ -1387,7 +1397,16 @@
                         clampb = $.layer.clampInfluence(clampb);
                         var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
                         
-                        var myScaleProperty = layers.property(matchName);
+                        try{
+                            var inSpatialArr  = xml.child(ia + 4).keyInSpatialTangent.toString().split(",");
+                            var outSpatialArr = xml.child(ia + 4).keyOutSpatialTangent.toString().split(",");
+                            if(type ==  PropertyValueType.TwoD_SPATIAL){
+                                myScaleProperty.setSpatialTangentsAtKey(ia+1,inSpatialArr,outSpatialArr);
+                            }else if(type == PropertyValueType.ThreeD_SPATIAL){
+                                myScaleProperty.setSpatialTangentsAtKey(ia+1,inSpatialArr,outSpatialArr);
+                            }
+                            
+                        }catch(err){alert(err)}
                         try {
                             if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD &&
                                 $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
