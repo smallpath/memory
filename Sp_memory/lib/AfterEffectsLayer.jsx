@@ -93,8 +93,6 @@
             }
             layerInf.geoType = "null";
             layerInf.name = thisLayer.name;
-            
-            $.layer.beforeEachLayerSaved(thisLayer.name);
 
             var text = "<Layer type=\"" + layerInf.type + "\" name=\"" + encodeURIComponent(layerInf.name) + "\"></Layer>"
             var layerInfo = new XML(text);
@@ -166,38 +164,39 @@
         },
 
         getCompLayerAttr: function(layerInfo, thisLayer) {
-            $.layer.beforeEachCompSaved(thisLayer.name);
-            layerInfo.frameDuration = thisLayer.source.frameDuration;
-            layerInfo.dropFrame = thisLayer.source.dropFrame;
-            layerInfo.workAreaStart = thisLayer.source.workAreaStart;
-            layerInfo.workAreaDuration = thisLayer.source.workAreaDuration;
-            layerInfo.hideShyLayers = thisLayer.source.hideShyLayers;
-            layerInfo.motionBlur = thisLayer.source.motionBlur;
-            layerInfo.draft3d = thisLayer.source.draft3d;
-            layerInfo.frameBlending = thisLayer.source.frameBlending;
-            layerInfo.preserveNestedFrameRate = thisLayer.source.preserveNestedFrameRate;
-            layerInfo.preserveNestedResolution = thisLayer.source.preserveNestedResolution;
-            layerInfo.bgColor = thisLayer.source.bgColor;
-            layerInfo.resolutionFactor = thisLayer.source.resolutionFactor;
-            layerInfo.shutterAngle = thisLayer.source.shutterAngle;
-            layerInfo.shutterPhase = thisLayer.source.shutterPhase;
-            layerInfo.motionBlurSamplesPerFrame = thisLayer.source.motionBlurSamplesPerFrame;
-            layerInfo.motionBlurAdaptiveSampleLimit = thisLayer.source.motionBlurAdaptiveSampleLimit;
-            layerInfo.renderer = thisLayer.source.renderer;
-            layerInfo.compframeDuration = thisLayer.source.frameDuration;
-            layerInfo.comppixelAspect = thisLayer.source.pixelAspect;
-            layerInfo.compframeRate = thisLayer.source.frameRate;
-            layerInfo.compduration = thisLayer.source.duration;
-            layerInfo.compwidth = thisLayer.source.width;
-            layerInfo.compheight = thisLayer.source.height;
-            layerInfo.compname = encodeURIComponent(thisLayer.source.name);
-            layerInfo.comptime = thisLayer.source.time;
+            var source = thisLayer.source;
+            layerInfo.frameDuration = source.frameDuration;
+            layerInfo.dropFrame = source.dropFrame;
+            layerInfo.workAreaStart = source.workAreaStart;
+            layerInfo.workAreaDuration = source.workAreaDuration;
+            layerInfo.hideShyLayers = source.hideShyLayers;
+            layerInfo.motionBlur = source.motionBlur;
+            layerInfo.draft3d = source.draft3d;
+            layerInfo.frameBlending = source.frameBlending;
+            layerInfo.preserveNestedFrameRate = source.preserveNestedFrameRate;
+            layerInfo.preserveNestedResolution = source.preserveNestedResolution;
+            layerInfo.bgColor = source.bgColor;
+            layerInfo.resolutionFactor = source.resolutionFactor;
+            layerInfo.shutterAngle = source.shutterAngle;
+            layerInfo.shutterPhase = source.shutterPhase;
+            layerInfo.motionBlurSamplesPerFrame = source.motionBlurSamplesPerFrame;
+            layerInfo.motionBlurAdaptiveSampleLimit = source.motionBlurAdaptiveSampleLimit;
+            layerInfo.renderer = source.renderer;
+            layerInfo.compframeDuration = source.frameDuration;
+            layerInfo.comppixelAspect = source.pixelAspect;
+            layerInfo.compframeRate = source.frameRate;
+            layerInfo.compduration = source.duration;
+            layerInfo.compwidth = source.width;
+            layerInfo.compheight = source.height;
+            layerInfo.compname = encodeURIComponent(source.name);
+            layerInfo.comptime = source.time;
             return layerInfo;
         },
 
         getMaterial: function(layerInf, layerInfo, helperObj, thisLayer) {
             layerInfo.file = thisLayer.source.mainSource.file;
             if (this.isSaveMaterial == true) {
+                
                 var tempArr = $.layer.pictureType;
                 if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").slice(-1), tempArr)) {
                     if (thisLayer.source.mainSource.file.length <= $.layer.pictureMaxLength) {
@@ -217,6 +216,7 @@
 
                     }
                 }
+            
                 var tempArr = $.layer.musicType;
                 if ($.layer.lookUpInArray(thisLayer.source.mainSource.file.name.split(".").slice(-1), tempArr)) {
                     if (thisLayer.source.mainSource.file.length <= $.layer.musicMaxLength) {
@@ -236,6 +236,7 @@
                     }
                 }
             }
+        
             return layerInfo
         },
 
@@ -651,7 +652,7 @@
 
         newLayer: function(xml, thisComp) {
             var layer;
-            $.layer.beforeEachLayerCreated(decodeURIComponent(xml.@name))
+
             try {
                 if (xml.@type == "Solid" || xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" || xml.@type == "Comp") {
                     solidcolor = [xml.solidColor.toString().split(",")[0], xml.solidColor.toString().split(",")[1], xml.solidColor.toString().split(",")[2]];
@@ -713,98 +714,117 @@
                     } catch (err) {};
                 }
             } catch (err) {}
-            if (xml.@type != "Comp") {
+            
                 try {
                     layer.moveAfter(thisComp.layer(parseInt(xml.index)));
                 } catch (err) {};
+                
                 try {
                     layer.label = parseInt(xml.label.toString())
                 } catch (err) {}
+                
                 try {
                     if (xml.geoType == "small" || xml.geoType == "large") {
                         layer.containingComp.renderer = "ADBE Picasso";
                     }
                 } catch (err) {}
+                
                 try {
                     if (xml.inPoint != "undefined") {
                         layer.inPoint = parseFloat(xml.inPoint);
                     }
                 } catch (err) {}
+                
                 try {
                     if (xml.outPoint != "undefined")
                         layer.outPoint = parseFloat(xml.outPoint);
                 } catch (err) {}
+                
                 try {
-                    if (xml.solo != "undefined")
-                        layer.solo = (xml.solo.toString() == "true") ? true : false;
+                    if (xml.solo.toString() == "true")
+                        layer.solo = true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.enabled != "undefined")
-                        layer.enabled = (xml.enabled.toString() == "true") ? true : false;
+                    if (xml.enabled.toString() == "false")
+                        layer.enabled = false;
                 } catch (err) {}
+                
                 try {
-                    if (xml.three != "undefined")
-                        layer.threeDLayer = (xml.three.toString() == "true") ? true : false;
+                    if (xml.three.toString() == "true")
+                        layer.threeDLayer = true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.timeRemap.toString() != "undefined") {
-                        if (xml.timeRemap.toString() == "true") {
-                            layer.timeRemapEnabled = true;
-                        }
+                    if (xml.timeRemap.toString() == "true") {
+                        layer.timeRemapEnabled = true;
                     }
                 } catch (err) {}
+                
                 try {
-                    layer.collapseTransformation = (xml.collapseTransformation.toString() == "true") ? true : false;
+                    if(xml.collapseTransformation.toString() == "true")
+                    layer.collapseTransformation =  true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.audioEnabled.toString() != "") {
-                        layer.audioEnabled = (xml.audioEnabled.toString() == "true") ? true : false;
+                    if (xml.audioEnabled.toString() == "false") {
+                        layer.audioEnabled = false;
                     }
                 } catch (err) {}
+                
                 try {
                     if (xml.trackMatteType != "undefined")
                         layer.trackMatteType = $.layer.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
                 } catch (err) {}
+                
                 try {
-                    if (xml.shy != "undefined")
-                        layer.shy = (xml.shy.toString() == "true") ? true : false;
+                    if (xml.shy.toString() == "true")
+                        layer.shy =  true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.motionBlur == true)
+                    if (xml.motionBlur.toString() == "true")
                         layer.motionBlur = true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.guideLayer == true)
+                    if (xml.guideLayer.toString() == "true")
                         layer.guideLayer = true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.environmentLayer == true)
+                    if (xml.environmentLayer.toString() == "true")
                         layer.environmentLayer = true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.adjustmentLayer == true)
+                    if (xml.adjustmentLayer.toString() == "true")
                         layer.adjustmentLayer = true;
                 } catch (err) {}
+                
                 try {
                     if (xml.blendingMode.toString() != "undefined")
                         layer.blendingMode = $.layer.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
                 } catch (err) {}
+                
                 try {
                     if (xml.autoOrient.toString() != "undefined")
                         layer.autoOrient = $.layer.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
                 } catch (err) {}
+                
                 try {
-                    if (xml.preserveTransparency.toString() != "undefined")
-                        layer.preserveTransparency = (xml.preserveTransparency.toString() == "true") ? true : false;
+                    if (xml.preserveTransparency.toString() == "true")
+                        layer.preserveTransparency =  true;
                 } catch (err) {}
+                
                 try {
-                    if (xml.separated.toString() != "undefined") {
-                        layer.property("ADBE Transform Group")("ADBE Position").dimensionsSeparated = (xml.separated.toString() == "true") ? true : false;
+                    if (xml.separated.toString() == "true") {
+                        layer.property("ADBE Transform Group")("ADBE Position").dimensionsSeparated = true;
                     }
                 } catch (err) {}
-            }
+
             try {
-                if (xml.@type != "VideoWithSound" && xml.@type != "Comp") {
+                if (xml.@type != "VideoWithSound") {
                     try {
                         $.layer.prototype.newPropertyGroup(xml.Properties, layer);
                     } catch (err) {}
@@ -816,7 +836,7 @@
 
         newComp: function(xml, thisComp) {
             var layer = null;
-            $.layer.beforeEachCompCreated(decodeURIComponent(xml.compname.toString()))
+
             if (xml.@type == "Comp") {
                 try {
                     var isComp = false;
@@ -916,103 +936,7 @@
                     } catch (err) {}
                 }
                 layer.name = decodeURIComponent(xml.@name);
-                try {
-                    layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                } catch (err) {};
-                try {
-                    layer.label = parseInt(xml.label.toString())
-                } catch (err) {}
-                try {
-                    layer.stretch = parseFloat(xml.stretch);
-                } catch (err) {}
-                try {
-                    if (xml.startTime != "undefined") {
-                        layer.startTime = parseFloat(xml.startTime);
-                    }
-                } catch (err) {}
-                try {
-                    if (xml.inPoint != "undefined") {
-                        layer.inPoint = parseFloat(xml.inPoint);
-                    }
-                } catch (err) {}
-                try {
-                    if (xml.outPoint != "undefined")
-                        layer.outPoint = parseFloat(xml.outPoint);
-                } catch (err) {}
-                try {
-                    if (xml.solo != "undefined")
-                        layer.solo = (xml.solo.toString() == "true") ? true : false;
-                } catch (err) {}
-                try {
-                    if (xml.enabled != "undefined")
-                        layer.enabled = (xml.enabled.toString() == "true") ? true : false;
-                } catch (err) {}
-                try {
-                    if (xml.three != "undefined")
-                        layer.threeDLayer = (xml.three.toString() == "true") ? true : false;
-                } catch (err) {}
-                try {
-                    if (xml.timeRemap.toString() != "undefined") {
-                        if (xml.timeRemap.toString() == "true") {
-                            layer.timeRemapEnabled = true;
-                            try {
-                                layer.property("ADBE Time Remapping").removeKey(2);
-                            } catch (err) {}
-                        }
-                    }
-                } catch (err) {}
-                try {
-                    layer.collapseTransformation = (xml.collapseTransformation.toString() == "true") ? true : false;
-                } catch (err) {}
-                try {
-                    if (xml.audioEnabled.toString() != "") {
-                        layer.audioEnabled = (xml.audioEnabled.toString() == "true") ? true : false;
-                    }
-                } catch (err) {}
-                try {
-                    if (xml.trackMatteType != "undefined")
-                        layer.trackMatteType = $.layer.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
-                } catch (err) {}
-                try {
-                    if (xml.shy != "undefined")
-                        layer.shy = (xml.shy.toString() == "true") ? true : false;
-                } catch (err) {}
-                try {
-                    if (xml.motionBlur == true)
-                        layer.motionBlur = true;
-                } catch (err) {}
-                try {
-                    if (xml.guideLayer == true)
-                        layer.guideLayer = true;
-                } catch (err) {}
-                try {
-                    if (xml.environmentLayer == true)
-                        layer.environmentLayer = true;
-                } catch (err) {}
-                try {
-                    if (xml.adjustmentLayer == true)
-                        layer.adjustmentLayer = true;
-                } catch (err) {}
-                try {
-                    if (xml.blendingMode.toString() != "undefined")
-                        layer.blendingMode = $.layer.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
-                } catch (err) {}
-                try {
-                    if (xml.autoOrient.toString() != "undefined")
-                        layer.autoOrient = $.layer.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
-                } catch (err) {}
-                try {
-                    if (xml.preserveTransparency.toString() != "undefined")
-                        layer.preserveTransparency = (xml.preserveTransparency.toString() == "true") ? true : false;
-                } catch (err) {}
-                try {
-                    if (xml.separated.toString() != "undefined") {
-                        layer.property("ADBE Transform Group")("ADBE Position").dimensionsSeparated = (xml.separated.toString() == "true") ? true : false;
-                    }
-                } catch (err) {}
-                try {
-                    $.layer.prototype.newPropertyGroup(xml.Properties, layer);
-                } catch (err) {}
+                
                 if (isComp == false) {
                     try {
                         $.layer.prototype.toLayer(comp, xml.Properties.Comptent);
@@ -1259,9 +1183,11 @@
                         if (currentXML.@enabled != "None") {
                             if (layers.property(parseInt(currentXML.@propertyIndex)).canSetEnabled == true) {
                                 if (prop == 0) {
-                                    layers.property(parseInt(currentXML.@propertyIndex)).enabled = (currentXML.@enabled == "true") ? true : false;
+                                    if(currentXML.@enabled == "false")
+                                        layers.property(parseInt(currentXML.@propertyIndex)).enabled = false;
                                 } else {
-                                    layers.property(parseInt(prop.propertyIndex)).enabled = (currentXML.@enabled == "true") ? true : false;
+                                    if(currentXML.@enabled == "false")
+                                        layers.property(parseInt(prop.propertyIndex)).enabled = false;
                                 }
                             }
                         }
@@ -1479,8 +1405,8 @@
                                 myScaleProperty.setInterpolationTypeAtKey(ia + 1, inIn, outIn);
                             } catch (err) {}
                             try {
-                                var isRoving = ((xml.child(ia + 4).isRoving).toString() == "true") ? true : false;
-                                myScaleProperty.setRovingAtKey(ia + 1, isRoving);
+                                if ((xml.child(ia + 4).isRoving).toString() == "true")
+                                    myScaleProperty.setRovingAtKey(ia + 1, true);
                             } catch (err) {}
                         } catch (err) {}
                     }
@@ -1680,8 +1606,8 @@
                                 myScaleProperty.setInterpolationTypeAtKey(ia + 1, inIn, outIn);
                             } catch (err) {}
                             try {
-                                var isRoving = ((xml.isRoving).toString() == "true") ? true : false;
-                                myScaleProperty.setRovingAtKey(ia + 1, isRoving);
+                                if ((xml.isRoving).toString() == "true")
+                                    myScaleProperty.setRovingAtKey(ia + 1, true);
                             } catch (err) {}
                         } catch (err) {}
                     }
@@ -1694,7 +1620,7 @@
         toLayer: function(thisComp, xml) {
             xml = xml || this.item;
             
-            if($.layer.layerArr.length == 0){
+            if($.layer.numLayers == 0){
               var isFirstStage = true;
               app.beginSuppressDialogs();
             }else{
@@ -1704,6 +1630,8 @@
             var layerArr = [];
 
             $.layer.forEachXML(xml, function(item, index) {
+                $.layer.numLayers++;
+                
                 $.layer.layerArr[$.layer.layerArr.length] = layerArr[layerArr.length] = $.layer.prototype.newLayer(item, thisComp);
             
                 $.layer.layerParentNameArr.push(item.parent.toString());
@@ -1952,7 +1880,8 @@
 
     $.layer.tempFolder = new Folder(new File($.fileName).parent.toString());
     $.layer.slash = "/";
-
+    
+    $.layer.numLayers = 0;
     $.layer.layerTypePropertyArr = [];
     $.layer.layerTypePropertyValueArr = [];
     $.layer.expPropertyArr = [];
@@ -1960,6 +1889,7 @@
     $.layer.layerParentNameArr = [];
 
     $.layer.clearHelperArr = function() {
+        $.layer.numLayers = 0;
         $.layer.layerTypePropertyArr = [];
         $.layer.layerTypePropertyValueArr = [];
         $.layer.expPropertyArr = [];
@@ -2001,20 +1931,7 @@
     $.layer.name = "AE Layer library"
     $.layer.version = 1.0;
     $.layer.email = "smallpath2013@gmail.com";
-    
-    $.layer.beforeEachLayerCreated = function(name){
-        writeLn("Create layer: "+ name);
-    }  
 
-    $.layer.beforeEachCompCreated =function(name){
-        writeLn("Create comp: "+ name);
-    }
-    $.layer.beforeEachLayerSaved = function(name){
-        writeLn("Save layer: "+ name)
-    };
-    $.layer.beforeEachCompSaved = function(name){
-        writeLn("Save comp: "+ name)
-    };
 
     $.layer.prototype.init.prototype = $.layer.prototype;
     return $.layer;

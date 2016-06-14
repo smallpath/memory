@@ -404,7 +404,6 @@
                               
                         var precomposeName = decodeURIComponent(xml.@name);
                         
-                        
                         app.beginUndoGroup("Undo new"); 
                         
                         if(sp.onlyEffectValue == false){
@@ -432,7 +431,11 @@
                                         sourceFolder:sp.sourceFolder,
                                     };
                               
+                                    $.hiresTimer/1000000;
+                              
                                     var activeCompLayersArr = sp.newLayers(xml,app.project.activeItem,options);
+                                    
+                                    $.writeln($.hiresTimer/1000000);
 
                
                                     app.project.activeItem.time = currentTime;      
@@ -448,9 +451,8 @@
                               
                               }                        
                                  
-                        
-                                 
                         app.endUndoGroup(); 
+                        
                         
                                 
                                  //~ Precompose layers and cut their length,no matter whether they are created by newLayers() or selected by user.
