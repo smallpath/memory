@@ -653,195 +653,141 @@
         newLayer: function(xml, thisComp) {
             var layer;
 
-            try {
+
                 if (xml.@type == "Solid" || xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" || xml.@type == "Comp") {
                     solidcolor = [xml.solidColor.toString().split(",")[0], xml.solidColor.toString().split(",")[1], xml.solidColor.toString().split(",")[2]];
                     if (xml.solidColor.toString() != "") {
-                        var layer = thisComp.layers.addSolid(solidcolor, decodeURIComponent(xml.@name), parseInt(xml.width), parseInt(xml.height), 1);
-                        layer.name = decodeURIComponent(xml.@name);
-                        try {
-                            layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                        } catch (err) {};
+                        layer = thisComp.layers.addSolid(solidcolor, decodeURIComponent(xml.@name), parseInt(xml.width), parseInt(xml.height), 1);
                     } else if (xml.@type == "Comp") {
                         layer = this.newComp(xml, thisComp);
                     } else if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
-                        try {
-                            layer = this.newMaterial(xml, thisComp);
-                            
-                        } catch (err) {
-                            layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", parseInt(xml.width), parseInt(xml.height), 1);
-                        }
-                        try {
-                            if (layer.name != decodeURIComponent(xml.@name)) {
-                                layer.name = decodeURIComponent(xml.@name);
-                            }
-                        } catch (err) {}
+                        layer = this.newMaterial(xml, thisComp);   
                     }
                 } else if (xml.@type == "Text") {
-                    try {
-                        var layer = (xml.textType.toString() == "point") ? thisComp.layers.addText() : thisComp.layers.addBoxText([xml.boxSize.toString().split(",")[0], xml.boxSize.toString().split(",")[1]]);
-                    } catch (err) {
-                        var layer = thisComp.layers.addText();
-                    }
-                    layer.name = decodeURIComponent(xml.@name);
-                    try {
-                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                    } catch (err) {};
+                    var layer = (xml.textType.toString() == "point") ? thisComp.layers.addText() : thisComp.layers.addBoxText([xml.boxSize.toString().split(",")[0], xml.boxSize.toString().split(",")[1]]);
                 } else if (xml.@type == "Shape") {
                     var layer = thisComp.layers.addShape();
-                    layer.name = decodeURIComponent(xml.@name);
-                    try {
-                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                    } catch (err) {};
                 } else if (xml.@type == "null") {
                     var layer = thisComp.layers.addNull();
-                    layer.name = decodeURIComponent(xml.@name);
-                    try {
-                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                    } catch (err) {};
                 } else if (xml.@type == "Light") {
                     var layer = thisComp.layers.addLight(decodeURIComponent(xml.@name), [0, 0]);
                     layer.lightType = $.layer.getDistance(layer.lightType, parseInt(xml.light));
-                    layer.name = decodeURIComponent(xml.@name);
-                    try {
-                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                    } catch (err) {};
                 } else if (xml.@type == "Camera") {
                     var layer = thisComp.layers.addCamera(decodeURIComponent(xml.@name), [0, 0]);
-                    layer.name = decodeURIComponent(xml.@name);
-                    try {
-                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                    } catch (err) {};
                 }
-            } catch (err) {}
             
-                try {
-                    layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                } catch (err) {};
+                layer.name = decodeURIComponent(xml.@name);
                 
-                try {
+                    if(layer.index !=parseInt(xml.index))
+                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+                
                     layer.label = parseInt(xml.label.toString())
-                } catch (err) {}
+ 
                 
-                try {
+
                     if (xml.geoType == "small" || xml.geoType == "large") {
                         layer.containingComp.renderer = "ADBE Picasso";
                     }
-                } catch (err) {}
+
                 
-                try {
+
                     if (xml.inPoint != "undefined") {
                         layer.inPoint = parseFloat(xml.inPoint);
                     }
-                } catch (err) {}
+
                 
-                try {
+
                     if (xml.outPoint != "undefined")
                         layer.outPoint = parseFloat(xml.outPoint);
-                } catch (err) {}
+
                 
-                try {
+
                     if (xml.solo.toString() == "true")
                         layer.solo = true;
-                } catch (err) {}
+
                 
-                try {
+
                     if (xml.enabled.toString() == "false")
                         layer.enabled = false;
-                } catch (err) {}
+
                 
-                try {
+
                     if (xml.three.toString() == "true")
                         layer.threeDLayer = true;
-                } catch (err) {}
+
                 
-                try {
+
                     if (xml.timeRemap.toString() == "true") {
                         layer.timeRemapEnabled = true;
                     }
-                } catch (err) {}
+
                 
-                try {
-                    if(xml.collapseTransformation.toString() == "true")
-                    layer.collapseTransformation =  true;
-                } catch (err) {}
+
+                    if(xml.collapseTransformation.toString() == "true" && layer.canSetCollapseTransformation == true)
+                        layer.collapseTransformation =  true;
+
                 
-                try {
+
                     if (xml.audioEnabled.toString() == "false") {
                         layer.audioEnabled = false;
                     }
-                } catch (err) {}
-                
-                try {
-                    if (xml.trackMatteType != "undefined")
+
+                    if (xml.trackMatteType != "undefined"){
                         layer.trackMatteType = $.layer.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
-                } catch (err) {}
+                    }
                 
-                try {
-                    if (xml.shy.toString() == "true")
+                    if (xml.shy.toString() == "true"){
                         layer.shy =  true;
-                } catch (err) {}
+                    }
                 
-                try {
-                    if (xml.motionBlur.toString() == "true")
+                    if (xml.motionBlur.toString() == "true"){
                         layer.motionBlur = true;
-                } catch (err) {}
-                
-                try {
-                    if (xml.guideLayer.toString() == "true")
+                    }
+
+                    if (xml.guideLayer.toString() == "true"){
                         layer.guideLayer = true;
-                } catch (err) {}
-                
-                try {
-                    if (xml.environmentLayer.toString() == "true")
+                    }
+
+                    if (xml.environmentLayer.toString() == "true"){
                         layer.environmentLayer = true;
-                } catch (err) {}
-                
-                try {
-                    if (xml.adjustmentLayer.toString() == "true")
+                    }
+
+                    if (xml.adjustmentLayer.toString() == "true"){
                         layer.adjustmentLayer = true;
-                } catch (err) {}
+                    }
                 
-                try {
-                    if (xml.blendingMode.toString() != "undefined")
+                    if (xml.blendingMode.toString() != "undefined"){
                         layer.blendingMode = $.layer.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
-                } catch (err) {}
-                
-                try {
-                    if (xml.autoOrient.toString() != "undefined")
+                    }
+
+                    if (xml.autoOrient.toString() != "undefined"){
                         layer.autoOrient = $.layer.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
-                } catch (err) {}
-                
-                try {
-                    if (xml.preserveTransparency.toString() == "true")
+                    }
+
+                    if (xml.preserveTransparency.toString() == "true"){
                         layer.preserveTransparency =  true;
-                } catch (err) {}
-                
-                try {
+                    }
+
                     if (xml.separated.toString() == "true") {
                         layer.property("ADBE Transform Group")("ADBE Position").dimensionsSeparated = true;
                     }
-                } catch (err) {}
 
-            try {
                 if (xml.@type != "VideoWithSound") {
-                    try {
                         $.layer.prototype.newPropertyGroup(xml.Properties, layer);
-                    } catch (err) {}
                 }
-            } catch (err) {};
+
             return layer;
 
         },
 
         newComp: function(xml, thisComp) {
-            var layer = null;
+            var layer;
+            var thisItem;
 
             if (xml.@type == "Comp") {
-                try {
                     var isComp = false;
-                } catch (err) {}
-                try {
+
+
                     if (xml.@type == "Comp") {
                         for (var isA = 0; isA < app.project.numItems; isA++) {
                             if (app.project.item(isA + 1) instanceof CompItem && app.project.item(isA + 1).name == decodeURIComponent(xml.compname.toString())) {
@@ -862,14 +808,11 @@
                             }
                         }
                     }
-                } catch (err) {}
+
                 if (isComp == true) {
-                    try {
                         layer = thisComp.layers.add(thisItem);
-                    } catch (err) {}
                 } else {
-                    try {
-                        try {
+
                             var comp = app.project.items.addComp(decodeURIComponent(xml.compname.toString()),
                                 parseInt(xml.compwidth), parseInt(xml.compheight),
                                 parseFloat(xml.comppixelAspect), parseFloat(xml.compduration),
@@ -878,69 +821,55 @@
                             if (comp.id != app.project.activeItem.id) {
                                 comp.parentFolder = $.layer.compFolder;
                             }
-                        } catch (err) {}
-                        try {
+
                             comp.frameDuration = parseFloat(xml.frameDuration);
-                        } catch (err) {}
-                        try {
-                            comp.dropFrame = parseInt(xml.dropFrame);
-                        } catch (err) {}
-                        try {
+
+                            if (xml.dropFrame.toString() == "true")
+                                comp.dropFrame = true;
+                                
                             comp.workAreaStart = parseFloat(xml.workAreaStart);
-                        } catch (err) {}
-                        try {
+                                
                             comp.workAreaDuration = parseFloat(xml.workAreaDuration);
-                        } catch (err) {}
-                        try {
-                            comp.hideShyLayers = parseInt(xml.hideShyLayers);
-                        } catch (err) {}
-                        try {
-                            comp.motionBlur = parseInt(xml.motionBlur);
-                        } catch (err) {}
-                        try {
-                            comp.draft3d = parseInt(xml.draft3d);
-                        } catch (err) {}
-                        try {
-                            comp.frameBlending = parseInt(xml.frameBlending);
-                        } catch (err) {}
-                        try {
-                            comp.preserveNestedFrameRate = parseInt(comp.preserveNestedFrameRate);
-                        } catch (err) {}
-                        try {
-                            comp.preserveNestedResolution = parseInt(comp.preserveNestedResolution);
-                        } catch (err) {}
-                        try {
-                            comp.bgColor = [parseFloat(xml.bgColor.toString().split(",")[0]), parseFloat(xml.bgColor.toString().split(",")[1]), parseFloat(xml.bgColor.toString().split(",")[2])];
-                        } catch (err) {}
-                        try {
-                            comp.resolutionFactor = [parseFloat(xml.resolutionFactor.toString().split(",")[0]), parseFloat(xml.resolutionFactor.toString().split(",")[1])];
-                        } catch (err) {}
-                        try {
+                                
+                            if (xml.hideShyLayers.toString() == "true")
+                                comp.hideShyLayers = true;
+                                
+                            if (xml.motionBlur.toString() == "true")
+                                comp.motionBlur = true;
+                                
+                            if (xml.draft3d.toString() == "true")
+                                comp.draft3d =  true;
+
+                                
+                            if (xml.preserveNestedFrameRate.toString() == "true")
+                                comp.preserveNestedFrameRate =  true;
+                                
+                            if (xml.preserveNestedResolution.toString() == "true")
+                                comp.preserveNestedResolution =  true;
+                                
+                            var arr = xml.bgColor.toString().split(",");
+                            comp.bgColor = [parseFloat(arr[0]), parseFloat(arr[1]), parseFloat(arr[2])];
+                                
+                            comp.resolutionFactor = [parseInt(xml.resolutionFactor.toString().split(",")[0]), parseInt(xml.resolutionFactor.toString().split(",")[1])];
+                                
                             comp.shutterAngle = parseFloat(xml.shutterAngle);
-                        } catch (err) {}
-                        try {
+                                
                             comp.shutterPhase = parseFloat(xml.shutterPhase);
-                        } catch (err) {}
-                        try {
+                                
                             comp.motionBlurSamplesPerFrame = parseInt(xml.motionBlurSamplesPerFrame);
-                        } catch (err) {}
-                        try {
+                                
                             comp.motionBlurAdaptiveSampleLimit = parseInt(xml.motionBlurAdaptiveSampleLimit);
-                        } catch (err) {}
-                        try {
-                            comp.renderer = xml.renderer.toString();
-                        } catch (err) {}
-                        try {
+                                
+                            if (xml.renderer.toString() != "ADBE Advanced 3d")
+                                comp.renderer = xml.renderer.toString();
+
                             layer = thisComp.layers.add(comp);
-                        } catch (err) {}
-                    } catch (err) {}
+
+
                 }
-                layer.name = decodeURIComponent(xml.@name);
                 
                 if (isComp == false) {
-                    try {
                         $.layer.prototype.toLayer(comp, xml.Properties.Comptent);
-                    } catch (err) {};
                 }
             }
             return layer;
