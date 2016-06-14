@@ -4,16 +4,16 @@
 (function(global){
 
     #include 'Sp_memory/lib/AfterEffectsLayer.jsx'
-    $.layer.slash = sp.slash;
-    $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + "tempFile");
-    
-    
     #include 'Sp_memory/lib/StringResource.jsx'
     #include 'Sp_memory/lib/HelperScripts.jsx'
     #include 'Sp_memory/lib/SubSystems.jsx'
     #include 'Sp_memory/lib/RightClickMenu.jsx'
     #include 'Sp_memory/lib/GridView.jsx'
     #include 'Sp_memory/lib/UIParser.jsx'
+      
+    $.layer.slash = sp.slash;
+    $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + "tempFile");
+    $.layer.translate = translate;
       
       
     var fns = sp.fns = new fns();
@@ -404,25 +404,8 @@
                               
                         var precomposeName = decodeURIComponent(xml.@name);
                         
-                        var progressWin = new Window("window");
-                        progressWin.size = [250,90];
-                        progressWin.alignChildren = ["fill","fill"];
-                        var progress = progressWin.add("progressbar", undefined, 0, 100);
                         
-                        var progressText = progressWin.add("statictext");
-                        progressText.text = "开始"
-                        progressWin.show();
-                        progressWin.update();
-
-                        $.layer.beforeEachLayerCreated = function(name){
-                                progressText.text = "Process layer: "+ name; 
-                                progressWin.update();
-                        }
-                        
-                        
-                        app.beginUndoGroup("Undo new");
-                        app.beginSuppressDialogs();
-                        
+                        app.beginUndoGroup("Undo new"); 
                         
                         if(sp.onlyEffectValue == false){
 
@@ -465,8 +448,10 @@
                               
                               }                        
                                  
-                                app.endSuppressDialogs (false);
-                                app.endUndoGroup(); 
+                        
+                                 
+                        app.endUndoGroup(); 
+                        
                                 
                                  //~ Precompose layers and cut their length,no matter whether they are created by newLayers() or selected by user.
                                  if(sp.preComposeValue == true){

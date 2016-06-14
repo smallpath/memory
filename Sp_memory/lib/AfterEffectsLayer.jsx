@@ -93,6 +93,8 @@
             }
             layerInf.geoType = "null";
             layerInf.name = thisLayer.name;
+            
+            $.layer.beforeEachLayerSaved(thisLayer.name);
 
             var text = "<Layer type=\"" + layerInf.type + "\" name=\"" + encodeURIComponent(layerInf.name) + "\"></Layer>"
             var layerInfo = new XML(text);
@@ -164,6 +166,7 @@
         },
 
         getCompLayerAttr: function(layerInfo, thisLayer) {
+            $.layer.beforeEachCompSaved(thisLayer.name);
             layerInfo.frameDuration = thisLayer.source.frameDuration;
             layerInfo.dropFrame = thisLayer.source.dropFrame;
             layerInfo.workAreaStart = thisLayer.source.workAreaStart;
@@ -648,7 +651,7 @@
 
         newLayer: function(xml, thisComp) {
             var layer;
-            $.layer.beforeEachLayerCreated(decodeURIComponent(xml.@name));
+            $.layer.beforeEachLayerCreated(decodeURIComponent(xml.@name))
             try {
                 if (xml.@type == "Solid" || xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" || xml.@type == "Comp") {
                     solidcolor = [xml.solidColor.toString().split(",")[0], xml.solidColor.toString().split(",")[1], xml.solidColor.toString().split(",")[2]];
@@ -813,6 +816,7 @@
 
         newComp: function(xml, thisComp) {
             var layer = null;
+            $.layer.beforeEachCompCreated(decodeURIComponent(xml.compname.toString()))
             if (xml.@type == "Comp") {
                 try {
                     var isComp = false;
@@ -850,7 +854,7 @@
                                 parseInt(xml.compwidth), parseInt(xml.compheight),
                                 parseFloat(xml.comppixelAspect), parseFloat(xml.compduration),
                                 parseFloat(xml.compframeRate));
-                               
+
                             if (comp.id != app.project.activeItem.id) {
                                 comp.parentFolder = $.layer.compFolder;
                             }
@@ -1692,6 +1696,7 @@
             
             if($.layer.layerArr.length == 0){
               var isFirstStage = true;
+              app.beginSuppressDialogs();
             }else{
               var isFirstStage = false;
             }
@@ -1706,6 +1711,7 @@
 
 
             if (isFirstStage == true) {
+                app.endSuppressDialogs (false);
                 $.layer.correctProperty();
                 $.layer.fixExpression();
                 $.layer.setParent();
@@ -1722,6 +1728,7 @@
 
 
     $.layer.newProperties = function(effectxml, selectedLayers, options) {
+        app.beginSuppressDialogs();
 
         var idArr = [
             "ADBE Mask Parade", "ADBE Effect Parade", "ADBE Transform Group",
@@ -1800,6 +1807,7 @@
 
 
             })
+            app.endSuppressDialogs(false);
         }
     
         $.layer.forEach.call(selectedLayers,function(layer, index) {
@@ -1828,17 +1836,20 @@
     //translate the error expressions to avoid script freezing caused by different language version of AfterEffects 
     $.layer.fixExpression = function() {
         var translatedExpPropertyArr = [];
+        
+        app.beginSuppressDialogs();
         $.layer.forEach.call($.layer.expPropertyArr, function(item, index) {
             try {
-                app.beginSuppressDialogs();
                 try {
                     item.expressionEnabled = true;
                     var testItsValue = item.valueAtTime(0, false);
+                } catch (eer) {
                     item.expressionEnabled == false && translatedExpPropertyArr.push(item);
-                } catch (eer) {};
-                app.endSuppressDialogs(false);
+                };
             } catch (err) {}
         });
+        app.endSuppressDialogs(false);
+        
         if (typeof $.layer.translate == "function") {
             translatedExpPropertyArr.length != 0 && $.layer.translate(this, translatedExpPropertyArr);
         }
@@ -1991,8 +2002,19 @@
     $.layer.version = 1.0;
     $.layer.email = "smallpath2013@gmail.com";
     
-    $.layer.beforeEachLayerCreated = function(){};
-    $.layer.beforeEachLayerSaved = function(){};
+    $.layer.beforeEachLayerCreated = function(name){
+        writeLn("Create layer: "+ name);
+    }  
+
+    $.layer.beforeEachCompCreated =function(name){
+        writeLn("Create comp: "+ name);
+    }
+    $.layer.beforeEachLayerSaved = function(name){
+        writeLn("Save layer: "+ name)
+    };
+    $.layer.beforeEachCompSaved = function(name){
+        writeLn("Save comp: "+ name)
+    };
 
     $.layer.prototype.init.prototype = $.layer.prototype;
     return $.layer;
