@@ -868,6 +868,13 @@
 
                 }
                 
+
+                layer.strectch = parseFloat(xml.stretch);
+
+                if (xml.startTime != "undefined") {
+                    layer.startTime = parseFloat(xml.startTime);
+                }
+                
                 if (isComp == false) {
                         $.layer.prototype.toLayer(comp, xml.Properties.Comptent);
                 }
@@ -878,7 +885,7 @@
         newMaterial: function(xml, thisComp) {
             var isExist = false;
             var waitIm;
-            try {
+
                 if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound") {
                     for (isA = 0; isA < app.project.numItems; isA++) {
                         if (typeof app.project.item(isA + 1).file != "undefiend" && app.project.item(isA + 1).file != null) {
@@ -891,24 +898,19 @@
                         }
                     }
                 }
-            } catch (err) {}
-            try {
+
+
                 if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && isExist) {
                     layer = thisComp.layers.add(thisItem);
-                    layer.name = decodeURIComponent(xml.@name);
-                    try {
-                        layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                    } catch (err) {};
-                    try {
+
                         layer.strectch = parseFloat(xml.stretch);
-                    } catch (err) {}
-                    try {
+
                         if (xml.startTime != "undefined") {
                             layer.startTime = parseFloat(xml.startTime);
                         }
-                    } catch (err) {}
+
                 }
-            } catch (err) {}
+
             try {
                 if (xml.@type == "VideoWithSound" || xml.@type == "VideoWithoutSound" && !(isExist)) {
                     try {
@@ -1073,18 +1075,18 @@
                                 if (layers.property(parseInt(currentXML.@propertyIndex)).matchName == "ADBE Mask Atom") {
                                     try {
                                         layers.property(parseInt(currentXML.@propertyIndex)).maskMode = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskMode, parseInt(currentXML.@maskmode));
-                                    } catch (err) {}
+                                    } catch (err) {err.printc()}
                                     layers.property(parseInt(currentXML.@propertyIndex)).inverted = (currentXML.@inverted.toString() == "false") ? false : true;
                                     layers.property(parseInt(currentXML.@propertyIndex)).rotoBezier = (currentXML.@rotoBezier.toString() == "false") ? false : true;
                                     layers.property(parseInt(currentXML.@propertyIndex)).color = [currentXML.@color.toString().split(",")[0], currentXML.@color.toString().split(",")[1], currentXML.@color.toString().split(",")[2]];
                                     try {
                                         layers.property(parseInt(currentXML.@propertyIndex)).maskMotionBlur = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskMotionBlur, parseInt(currentXML.@maskMotionBlur));
-                                    } catch (err) {}
+                                    } catch (err) {err.printc()}
                                     try {
                                         layers.property(parseInt(currentXML.@propertyIndex)).maskFeatherFalloff = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskFeatherFalloff, parseInt(currentXML.@maskFeatherFalloff));
-                                    } catch (err) {}
+                                    } catch (err) {err.printc()}
                                 }
-                            } catch (err) {}
+                            } catch (err) {err.printc()}
                         } else if (currentXML.@matchName.toString() == "ADBE Layer Styles") {
                             var group = currentXML.children();
                             var layerStyleArr = [];
@@ -1103,7 +1105,7 @@
                                         } else if (layers.propertyGroup(layers.propertyDepth).containingComp.id == app.project.activeItem.id) {
                                             app.executeCommand(app.findMenuCommandId(cunName[shenqi]));
                                         }
-                                    } catch (err) {}
+                                    } catch (err) {err.printc()}
                                 }
                             }
                         }
@@ -1120,7 +1122,7 @@
                                 }
                             }
                         }
-                    } catch (err) {}
+                    } catch (err) {err.printc()}
                     try {
                         if (prop == 0) {
                             if (layers.propertyType == PropertyType.INDEXED_GROUP) {
@@ -1130,21 +1132,21 @@
                             if (layers.propertyType == PropertyType.INDEXED_GROUP)
                                 layers.property(prop.propertyIndex).name = propName;
                         }
-                    } catch (err) {}
+                    } catch (err) {err.printc()}
                     if (currentXML.children().length() > 0) {
                         if (prop == 0 && currentXML.@matchName != "ADBE Mask Parade" && currentXML.@matchName != "ADBE Effect Parade" && currentXML.@matchName != "ADBE Layer Styles") {
                             try {
                                 $.layer.prototype.newPropertyGroup(currentXML, layers.property(parseInt(currentXML.@propertyIndex)), inTime);
-                            } catch (err) {}
+                            } catch (err) {err.printc()}
                         } else {
                             if (currentXML.@matchName != "ADBE Mask Parade" && currentXML.@matchName != "ADBE Effect Parade" && currentXML.@matchName != "ADBE Layer Styles") {
                                 try {
                                     $.layer.prototype.newPropertyGroup(currentXML, layers.property(prop.propertyIndex), inTime);
-                                } catch (err) {}
+                                } catch (err) {err.printc()}
                             } else {
                                 try {
                                     $.layer.prototype.newPropertyGroup(currentXML, layers.property(matchName), inTime);
-                                } catch (err) {}
+                                } catch (err) {err.printc()}
                             }
                         }
                     }
@@ -1155,10 +1157,20 @@
                 if (currentXML.name() == "prop") {
                     if (currentXML.exp.toString() != "") {
                         try {
+                            
+                            var expArr = [];
+                            
+                            var expProperty = layers.property(matchName);
+                            
+                            expArr.push(expProperty.propertyIndex);
+                            for(var i=1,len= expProperty.propertyDepth;i<len;i++){
+                                expArr.push(expProperty.propertyGroup(i).propertyIndex);
+                            }
+                            expArr.push(expProperty.propertyGroup(i));
 
-                            $.layer.expPropertyArr.push(matchName);
-                            layers.property(matchName).expression = decodeURIComponent(currentXML.exp.toString());
-
+                            $.layer.expPropertyArr.push(expArr);
+                            
+                            expProperty.expression = decodeURIComponent(currentXML.exp.toString());
                         } catch (err) {};
                     }
                 }
@@ -1696,19 +1708,32 @@
         
         app.beginSuppressDialogs();
         $.layer.forEach.call($.layer.expPropertyArr, function(item, index) {
-            try {
                 try {
                     item.expressionEnabled = true;
                     var testItsValue = item.valueAtTime(0, false);
                 } catch (eer) {
-                    item.expressionEnabled == false && translatedExpPropertyArr.push(item);
+                    translatedExpPropertyArr.push(item);
                 };
-            } catch (err) {}
         });
         app.endSuppressDialogs(false);
         
+        
+
+            var targetExpArr = [];
+            
+            for(var i =0;i<translatedExpPropertyArr.length;i++){
+                    var refArr = translatedExpPropertyArr[i];
+                    var prop = refArr[refArr.length-1];
+                    var j = refArr.length-1;
+                    while(j>0){
+                      prop = prop.property(refArr[j-1]);
+                      j--;
+                    }
+                    targetExpArr.push(prop)
+            }
+        
         if (typeof $.layer.translate == "function") {
-            translatedExpPropertyArr.length != 0 && $.layer.translate(this, translatedExpPropertyArr);
+            targetExpArr.length != 0 && $.layer.translate(this, targetExpArr);
         }
     }
 

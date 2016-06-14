@@ -161,38 +161,38 @@ var tsp={
 
   this.findReplace = function(prop, langId, compid) {
       try{
-    var expr = prop.expression;
-    var oldExp = prop.expression;
-    if (expr != "") {
-      for (var l = 0; l < this.supportedLanguages; l++) {
-        if (l != langId) {
-          for (var i = 0; i < this.hotWords.length; i++) {
-            if (this.hotWords[i][l] != "None") {
-              var regExp = new RegExp(this.hotWords[i][l], "g");
-              var tempexp = expr;
-              expr = expr.replace(regExp, this.hotWords[i][langId]);
+            var expr = prop.expression;
+            var oldExp = prop.expression;
+            if (expr != "") {
+              for (var l = 0; l < this.supportedLanguages; l++) {
+                if (l != langId) {
+                  for (var i = 0; i < this.hotWords.length; i++) {
+                    if (this.hotWords[i][l] != "None") {
+                      var regExp = new RegExp(this.hotWords[i][l], "g");
+                      var tempexp = expr;
+                      expr = expr.replace(regExp, this.hotWords[i][langId]);
+                    }
+                  }
+                }
+              }
+              app.beginSuppressDialogs();
+              try {
+                prop.expression = expr;
+              } catch (e) {
+                try {
+                  prop.expressionEnabled = true;
+                  testeee = prop.valueAtTime(0, false);
+                  if (lista.selection.index == 0) {
+                    if (prop.expressionEnabled == false)
+                      prop.expression = oldExp;
+                  }
+                } catch (er) {
+                  //writeLn("Skip wrong expressions.");
+                  wrongcomps.push(compid);
+                };
+              }
+              app.endSuppressDialogs(false);
             }
-          }
-        }
-      }
-      app.beginSuppressDialogs();
-      try {
-        prop.expression = expr;
-      } catch (e) {
-        try {
-          prop.expressionEnabled = true;
-          testeee = prop.valueAtTime(0, false);
-          if (lista.selection.index == 0) {
-            if (prop.expressionEnabled == false)
-              prop.expression = oldExp;
-          }
-        } catch (er) {
-          //writeLn("Skip wrong expressions.");
-          wrongcomps.push(compid);
-        };
-      }
-      app.endSuppressDialogs(false);
-    }
         }catch(err){}
   };
 
@@ -387,7 +387,7 @@ var tsp={
     var addbtn=winTempA.addbtn;
     var outFile;
 
-    lista.selection = 2;
+    lista.selection = 0;
 
   about.onClick = function() {
     var text = loc(tsp.str);
@@ -626,7 +626,6 @@ if(typeof expProps =="undefined"){
         var selProps = expProps;
         var i= -1;
         for(var ic=0;ic<selProps.length;ic++){
-          if (lista.selection.index == 0) {
             switch (app.language) {
               case Language.ENGLISH:
                 you.findReplace(selProps[ic], 0, i);
@@ -640,29 +639,20 @@ if(typeof expProps =="undefined"){
               default:
                 break;
             }
-          } else if (lista.selection.index == 1) {
-            you.findReplace(selProps[ic], 0, i);
-          } else if (lista.selection.index == 2) {
-            you.findReplace(selProps[ic], 1, i);
-          } else if (lista.selection.index == 3) {
-            you.findReplace(selProps[ic], 2, i);
-          } else if (lista.selection.index == 4) {
-            you.findReplace(selProps[ic], 3, i);
-          }
       }
             clearOutput();
     if(wrongcomps.length!=0){
             if(loc(tsp.trans) == "Translate")
-            writeLn(wrongcomps.length+" wrong expressions found,which can not be translated.");
+                writeLn(wrongcomps.length+" wrong expressions found,which can not be translated.");
             else
-            writeLn("存在"+wrongcomps.length+"个不能被正确翻译的表达式");
-        }else{
+                writeLn("存在"+wrongcomps.length+"个不能被正确翻译的表达式");
+    }else{
             if(loc(tsp.trans) == "Translate")
-            writeLn(selProps.length+" wrong expressions were translated correctly.");
+                writeLn(selProps.length+" wrong expressions were translated correctly.");
             else
-            writeLn("存在"+selProps.length+"个已经被正确翻译的表达式");
-            }
-    }catch(err){}
+                writeLn("存在"+selProps.length+"个已经被正确翻译的表达式");
+    }
+}catch(err){}
     }
 
   start.onClick = function() {
