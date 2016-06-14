@@ -1055,6 +1055,7 @@
                 var currentXML = xml.child(addi);
                     var matchName = currentXML.@matchName.toString();
                     var propName = currentXML.@name.toString();
+                    var propIndex = parseInt(currentXML.@propertyIndex);
                     if(currentXML.@isEncoded.toString() != ""){
                         var obj = {
                             matchName:matchName,
@@ -1066,27 +1067,21 @@
                     }
                 if (currentXML.name() == "Group") {
                     prop = 0;
-                    try {
+
                         if (layers.canAddProperty(matchName)) {
 
                             var prop = layers.addProperty(matchName);
 
-                            try {
-                                if (layers.property(parseInt(currentXML.@propertyIndex)).matchName == "ADBE Mask Atom") {
-                                    try {
-                                        layers.property(parseInt(currentXML.@propertyIndex)).maskMode = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskMode, parseInt(currentXML.@maskmode));
-                                    } catch (err) {err.printc()}
-                                    layers.property(parseInt(currentXML.@propertyIndex)).inverted = (currentXML.@inverted.toString() == "false") ? false : true;
-                                    layers.property(parseInt(currentXML.@propertyIndex)).rotoBezier = (currentXML.@rotoBezier.toString() == "false") ? false : true;
-                                    layers.property(parseInt(currentXML.@propertyIndex)).color = [currentXML.@color.toString().split(",")[0], currentXML.@color.toString().split(",")[1], currentXML.@color.toString().split(",")[2]];
-                                    try {
-                                        layers.property(parseInt(currentXML.@propertyIndex)).maskMotionBlur = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskMotionBlur, parseInt(currentXML.@maskMotionBlur));
-                                    } catch (err) {err.printc()}
-                                    try {
-                                        layers.property(parseInt(currentXML.@propertyIndex)).maskFeatherFalloff = $.layer.getDistance(layers.property(parseInt(currentXML.@propertyIndex)).maskFeatherFalloff, parseInt(currentXML.@maskFeatherFalloff));
-                                    } catch (err) {err.printc()}
+
+                                if (layers.property(propIndex).matchName == "ADBE Mask Atom") {
+                                    layers.property(propIndex).maskMode = $.layer.getDistance(layers.property(propIndex).maskMode, parseInt(currentXML.@maskmode));
+                                    layers.property(propIndex).inverted = (currentXML.@inverted.toString() == "false") ? false : true;
+                                    layers.property(propIndex).rotoBezier = (currentXML.@rotoBezier.toString() == "false") ? false : true;
+                                    layers.property(propIndex).color = [currentXML.@color.toString().split(",")[0], currentXML.@color.toString().split(",")[1], currentXML.@color.toString().split(",")[2]];
+                                    layers.property(propIndex).maskMotionBlur = $.layer.getDistance(layers.property(propIndex).maskMotionBlur, parseInt(currentXML.@maskMotionBlur));
+                                    layers.property(propIndex).maskFeatherFalloff = $.layer.getDistance(layers.property(propIndex).maskFeatherFalloff, parseInt(currentXML.@maskFeatherFalloff));
                                 }
-                            } catch (err) {err.printc()}
+
                         } else if (currentXML.@matchName.toString() == "ADBE Layer Styles") {
                             var group = currentXML.children();
                             var layerStyleArr = [];
@@ -1097,7 +1092,6 @@
                             }
                             for (var shenqi = 0; shenqi < layerStyleArr.length; shenqi++) {
                                 if (layerStyleArr[shenqi].indexOf("/") != -1) {
-                                    try {
                                         if (layers.propertyDepth == 0) {
                                             if (layers.containingComp.id == app.project.activeItem.id)
                                                 app.executeCommand(app.findMenuCommandId(cunName[shenqi]));
@@ -1105,48 +1099,40 @@
                                         } else if (layers.propertyGroup(layers.propertyDepth).containingComp.id == app.project.activeItem.id) {
                                             app.executeCommand(app.findMenuCommandId(cunName[shenqi]));
                                         }
-                                    } catch (err) {err.printc()}
                                 }
                             }
                         }
-                    } catch (err) {}
-                    try {
+
                         if (currentXML.@enabled != "None") {
-                            if (layers.property(parseInt(currentXML.@propertyIndex)).canSetEnabled == true) {
+                            if (layers.property(propIndex).canSetEnabled == true) {
                                 if (prop == 0) {
                                     if(currentXML.@enabled == "false")
-                                        layers.property(parseInt(currentXML.@propertyIndex)).enabled = false;
+                                        layers.property(propIndex).enabled = false;
                                 } else {
                                     if(currentXML.@enabled == "false")
                                         layers.property(parseInt(prop.propertyIndex)).enabled = false;
                                 }
                             }
                         }
-                    } catch (err) {err.printc()}
-                    try {
+
+
                         if (prop == 0) {
                             if (layers.propertyType == PropertyType.INDEXED_GROUP) {
-                                layers.property(parseInt(currentXML.@propertyIndex)).name = propName;
+                                layers.property(propIndex).name = propName;
                             }
                         } else {
                             if (layers.propertyType == PropertyType.INDEXED_GROUP)
                                 layers.property(prop.propertyIndex).name = propName;
                         }
-                    } catch (err) {err.printc()}
+
                     if (currentXML.children().length() > 0) {
                         if (prop == 0 && currentXML.@matchName != "ADBE Mask Parade" && currentXML.@matchName != "ADBE Effect Parade" && currentXML.@matchName != "ADBE Layer Styles") {
-                            try {
-                                $.layer.prototype.newPropertyGroup(currentXML, layers.property(parseInt(currentXML.@propertyIndex)), inTime);
-                            } catch (err) {err.printc()}
+                                $.layer.prototype.newPropertyGroup(currentXML, layers.property(propIndex), inTime);
                         } else {
                             if (currentXML.@matchName != "ADBE Mask Parade" && currentXML.@matchName != "ADBE Effect Parade" && currentXML.@matchName != "ADBE Layer Styles") {
-                                try {
                                     $.layer.prototype.newPropertyGroup(currentXML, layers.property(prop.propertyIndex), inTime);
-                                } catch (err) {err.printc()}
                             } else {
-                                try {
                                     $.layer.prototype.newPropertyGroup(currentXML, layers.property(matchName), inTime);
-                                } catch (err) {err.printc()}
                             }
                         }
                     }
