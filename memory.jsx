@@ -1814,11 +1814,13 @@ Tips:
         var allFiles = sp.scriptFolder.getFiles();
         var xmlFinalArr = [];
         newsettingsxml.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
+        var i = 0;
         allFiles.forEach(function(item,index){
                 if(item.toString().indexOf(".xml")!=-1 && item.name.indexOf("settings.xml") ==-1){
                         newsettingsxml.ListItems.appendChild(new XML("<Name>" + item.displayName.replace(".xml","") + "</Name>"));
-                        newsettingsxml.ParentGroup.child(0).appendChild(new XML("<Index>"+index.toString()+"</Index>"))
-                    }
+                        newsettingsxml.ParentGroup.child(0).appendChild(new XML("<Index>"+ i +"</Index>"))
+                        i++;
+                }
             })
         sp.settingsFile.writee(newsettingsxml);
     }    
