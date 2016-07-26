@@ -3,18 +3,18 @@
 # Memory
 这是后期合成软件[Adobe After Effects](https://en.wikipedia.org/wiki/Adobe_After_Effects)的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
-##环境要求
+## 环境要求
 Windows系统;AE版本为CC,CC2014与CC2015
 
-##脚本界面
+## 脚本界面
 支持动态预览元素内容  
 ![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)  
 ![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)  
-![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.PNG)  
 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间  
+![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.PNG)  
 
 
-##脚本功能
+## 脚本功能
 1. 脚本界面支持预览动画,可以设置预览动画的帧率和帧数
 2. 支持一切层,包括形状层,文字层,图片音频层,甚至`合成层`
 3. 支持一切属性,包括层本身属性以及层内部属性组,例如插件,遮罩,文字动画器,形状效果器,图层样式等等
