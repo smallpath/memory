@@ -13,7 +13,6 @@ Windows系统;AE版本为CC,CC2014与CC2015
 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间  
 ![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.PNG)  
 
-
 ## 脚本功能
 1. 脚本界面支持预览动画,可以设置预览动画的帧率和帧数
 2. 支持一切层,包括形状层,文字层,图片音频层,甚至`合成层`
@@ -23,14 +22,33 @@ Windows系统;AE版本为CC,CC2014与CC2015
 6. 支持自定义预设,脚本提供插件,遮罩,动画器等9种属性组的自由搭配选项
 7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CC上正确地生成
 
-
 ## 脚本安装
-进入[此页面](https://github.com/Smallpath/Memory/releases),通过`右键->另存为`进行脚本的下载  
+进入[此页面](https://raw.githubusercontent.com/Smallpath/Memory/master/Sp_memory.jsxbin),通过`右键->另存为`进行脚本的下载  
 请将`Sp_memory.jsxbin`脚本放置在你的AE脚本文件夹中,通常在`path\to\ae\Support Files\Scripts\ScriptUI Panels`  
 在AE中打开`窗口`菜单中的`Sp_memory.jsxbin`即可
 
-win8-win10用户请使用管理员权限运行AE  
-如过是首次使用脚本,请在AE中打开`编辑->预选项->一般`,勾选`允许脚本访问文件与网络`  
+注: [Release](https://github.com/Smallpath/Memory/releases)页面中包含三个拥有预览动画的素材包用于演示,请在解压后,在脚本界面上`右键->导入组`并全选素材文件
+
+## 常见使用问题
+- 脚本无法新建组与保存层,错误代码提示1251  
+  - win8-win10用户请使用管理员权限运行AE  
+  - 如果是首次使用脚本,请在AE中打开`编辑->预选项->一般`,勾选`允许脚本访问文件与网络`  
+  
+- 我存储的素材如何备份?
+  - 直接备份脚本同目录的`Sp_memory`文件夹即可
+  
+- 我正在使用Sp_memory v3之前的版本,应该怎样正确升级?
+  - 直接替换脚本即可,Sp_memory能够向下兼容
+  
+- v3版本无法预览之前存储的元素,应该怎样解决?
+  - `右键->重载组内预览动画`,即可进行预览动画的生成
+  
+- v2支持CS3至CC2015,为什么v3只支持CC至CC2015?
+  - 因为预览特性对AE环境非常苛刻,目前只有CC及以上版本能够通过测试
+  - 但是,v3存储的元素,一样能够正确导出到v2中并进行层的生成
+  
+- Sp_memory v3是否有更多的`Motion Graphics`素材包以供下载?
+  - 因为版权原因,v3只提供三个素材包作为示范,用户可以通过`右键->自动存储每一层`功能来批量存储`Motion Graphics`
 
 
 ## 脚本使用教程
