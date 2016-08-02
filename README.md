@@ -21,16 +21,17 @@ Windows系统;AE版本为CC,CC2014与CC2015
 4. 支持图片和音频,即使他们被移动或删除,脚本也可以正确生成
 5. 由语言版本不同造成的表达式报错将被自动修复,支持英文,中文,日文三种语言
 6. 支持自定义预设,脚本提供插件,遮罩,动画器等9种属性组的自由搭配选项
-7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CS4上正确地生成
+7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CC上正确地生成
 
 
 ## 脚本安装
-进入[版本发布页面](https://github.com/Smallpath/Memory/releases),下载最新版的`Sp_memory-EN.zip`  
-AE版本为CC-CC2015的,请将压缩包中的`Sp_memory.jsxbin`,`Sp_memory文件夹`放置在你的AE脚本文件夹中,例如`Support Files\Scripts\ScriptUI Panels`  
-AE版本为CS3-CS6的,请解压`Sp_memory(CS3-CS6).jsxbin`与`Sp_memory文件夹`  
-win8与win10用户请用管理员权限运行AE,右键AE->兼容性->勾选`以管理员身份运行此程序`  
-在AE中打开编辑->预选项->一般,勾选`允许脚本访问文件与网络`  
-在AE中打开窗口菜单中的`Sp_memory.jsxbin`,即可
+进入[此页面](https://github.com/Smallpath/Memory/releases),通过`右键->另存为`进行脚本的下载  
+请将`Sp_memory.jsxbin`脚本放置在你的AE脚本文件夹中,通常在`path\to\ae\Support Files\Scripts\ScriptUI Panels`  
+在AE中打开`窗口`菜单中的`Sp_memory.jsxbin`即可
+
+win8-win10用户请使用管理员权限运行AE  
+如过是首次使用脚本,请在AE中打开`编辑->预选项->一般`,勾选`允许脚本访问文件与网络`  
+
 
 ## 脚本使用教程
 >[文字教程](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL.md)
