@@ -298,7 +298,7 @@
                                     try{
                                         var temp = new XML(text);
                                     }catch(err){
-                                        $.layer.errorInfoArr.push(err);
+                                        $.layer.errorInfoArr.push({line:$.line,error:err});
                                         var obj = {
                                             propName:propName,
                                             matchName:matchName,
@@ -307,12 +307,12 @@
                                         text = "<Group name=\"" + obj.propName + "\" matchName=\"" + obj.matchName + "\" isEncoded=\"true\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\" maskFeatherFalloff=\"" + prop.maskFeatherFalloff.toString() + "\" enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
                                     }
                                 } catch (err) {
-                                    $.layer.errorInfoArr.push(err);
+                                    $.layer.errorInfoArr.push({line:$.line,error:err});
                                     text = "<Group name=\"" + propName + "\" matchName=\"" + matchName + "\" type=\"" + prop.propertyType.toString() + "\" propertyIndex=\"" + prop.propertyIndex.toString() + "\" maskmode=\"" + prop.maskMode.toString() + "\" inverted=\"" + prop.inverted.toString() + "\" rotoBezier=\"" + prop.rotoBezier.toString() + "\" maskMotionBlur=\"" + prop.maskMotionBlur.toString() + "\" color=\"" + prop.color.toString() + "\"  enabled=\"" + ((prop.canSetEnabled == false) ? "None" : prop.enabled).toString() + "\"></Group>";
                                     try{
                                         var temp = new XML(text);
                                     }catch(err){
-                                        $.layer.errorInfoArr.push(err);
+                                        $.layer.errorInfoArr.push({line:$.line,error:err});
                                         var obj = {
                                             propName:propName,
                                             matchName:matchName,
@@ -326,7 +326,7 @@
                                     try{
                                         var temp = new XML(text);
                                     }catch(err){
-                                        $.layer.errorInfoArr.push(err);
+                                        $.layer.errorInfoArr.push({line:$.line,error:err});
                                         var obj = {
                                             propName:propName,
                                             matchName:matchName,
@@ -339,17 +339,17 @@
                                 if (prop.matchName == "ADBE Glo2") {
                                     try {
                                         $.layer.glowtype = prop.property("ADBE Glo2-0007").value;
-                                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                                 }
 
                                 try{
                                     var currentXml = new XML(text);
                                 }catch(err){
-                                    $.layer.errorInfoArr.push(err);
+                                    $.layer.errorInfoArr.push({line:$.line,error:err});
                                 }
                                 
                                 $.layer.prototype.addToLastChild(layerxml, currentXml , prop.propertyDepth, []);
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             arguments.callee(prop, layerxml, layerInfo);
                         }
                     }
@@ -500,7 +500,7 @@
                             easexml.keyInSpatialTangent = thisProperty.keyInSpatialTangent(propi);
                             easexml.keyOutSpatialTangent = thisProperty.keyOutSpatialTangent(propi);
                         }catch(err){
-                            $.layer.errorInfoArr.push(err);
+                            $.layer.errorInfoArr.push({line:$.line,error:err});
                         }
                         if (thisProperty.keyInTemporalEase(1).length == 1) {
                             easexml.InSpeed = thisProperty.keyInTemporalEase(propi)[0].speed;
@@ -521,10 +521,10 @@
                         try {
                             easexml.inInterType = thisProperty.keyInInterpolationType(propi);
                             easexml.outInterType = thisProperty.keyOutInterpolationType(propi);
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                         try {
                             easexml.isRoving = thisProperty.keyRoving(propi);
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                         propxml.appendChild(easexml);
                     }
                 }
@@ -774,14 +774,14 @@
                     }
                 
                 }catch(err){
-                    $.layer.errorInfoArr.push(err);
+                    $.layer.errorInfoArr.push({line:$.line,error:err});
                 }
 
                 if (xml.@type != "VideoWithSound") {
                         try{
                             $.layer.prototype.newPropertyGroup(xml.Properties, layer);
                         }catch(err){
-                            $.layer.errorInfoArr.push(err);
+                            $.layer.errorInfoArr.push({line:$.line,error:err});
                         }
                 }
 
@@ -876,10 +876,12 @@
                                 
                             if (xml.renderer.toString() != "ADBE Advanced 3d")
                                 comp.renderer = xml.renderer.toString();
-
-                            layer = thisComp.layers.add(comp);
-
-                            }catch(err){$.layer.errorInfoArr.push(err);}
+                                
+                        }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
+                        
+                        try{
+                             layer = thisComp.layers.add(comp);
+                        }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                 }
                 
                 try{
@@ -889,12 +891,12 @@
                         layer.startTime = parseFloat(xml.startTime);
                     }
             
-                }catch(err){$.layer.errorInfoArr.push(err);}
+                }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                 
                 if (isComp == false) {
                     try{
                         $.layer.prototype.toLayer(comp, xml.Properties.Comptent);
-                    }catch(err){$.layer.errorInfoArr.push(err);}
+                    }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                 }
             }
             return layer;
@@ -999,9 +1001,9 @@
                                         }
                                     }
                                     waitIm = genFilePath;
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             }
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                         try {
                             
                             var im = new ImportOptions();
@@ -1009,9 +1011,9 @@
                             try {
                                 im.sequence = false;
                                 im.forceAlphabetical = false;
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                         } catch (err) {
-                            $.layer.errorInfoArr.push(err);
+                            $.layer.errorInfoArr.push({line:$.line,error:err});
                             layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
                             return layer;
                         }
@@ -1022,15 +1024,15 @@
                             layer.name = decodeURIComponent(xml.@name);
                             try {
                                 layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                            } catch (err) {$.layer.errorInfoArr.push(err);};
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});};
                             try {
                                 layer.strectch = parseFloat(xml.stretch);
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             try {
                                 if (xml.startTime != "undefined") {
                                     layer.startTime = parseFloat(xml.startTime);
                                 }
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             layer.source.parentFolder = $.layer.sourceFolder;
                         } else if (im.canImportAs(ImportAsType.FOOTAGE)) {
                             im.importAs = ImportAsType.FOOTAGE;
@@ -1039,22 +1041,22 @@
                             layer.name = decodeURIComponent(xml.@name);
                             try {
                                 layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-                            } catch (err) {$.layer.errorInfoArr.push(err);};
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});};
                             try {
                                 layer.strectch = parseFloat(xml.stretch);
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             try {
                                 if (xml.startTime != "undefined") {
                                     layer.startTime = parseFloat(xml.startTime);
                                 }
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             layer.source.parentFolder = $.layer.sourceFolder;
                         } else {
                             layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
                         }
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                 }
-            } catch (err) {$.layer.errorInfoArr.push(err);}
+            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
             try {
                 if (layer instanceof AVLayer) {
                     return layer;
@@ -1063,7 +1065,7 @@
                     return layer;
                 }
             } catch (err) {
-                $.layer.errorInfoArr.push(err);
+                $.layer.errorInfoArr.push({line:$.line,error:err});
                 layer = thisComp.layers.addSolid([0, 0, 0], "fail to import", 100, 100, 1);
                 return layer;
             }
@@ -1087,7 +1089,7 @@
                     }
                 if (currentXML.name() == "Group") {
                     prop = 0;
-
+                    try{
                         if (layers.canAddProperty(matchName)) {
                             try{
                                 var prop = layers.addProperty(matchName);
@@ -1100,7 +1102,7 @@
                                     layers.property(propIndex).maskMotionBlur = $.layer.getDistance(layers.property(propIndex).maskMotionBlur, parseInt(currentXML.@maskMotionBlur));
                                     layers.property(propIndex).maskFeatherFalloff = $.layer.getDistance(layers.property(propIndex).maskFeatherFalloff, parseInt(currentXML.@maskFeatherFalloff));
                                 }
-                            }catch(err){$.layer.errorInfoArr.push(err);}
+                            }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
 
                         } else if (currentXML.@matchName.toString() == "ADBE Layer Styles") {
                             try{
@@ -1122,9 +1124,13 @@
                                             }
                                     }
                                 }
-                            }catch(err){$.layer.errorInfoArr.push(err);}
+                            }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                         }
 
+                        
+                    }catch(err){
+                        $.layer.errorInfoArr.push({line:$.line,error:err});
+                    }
                         try{
                             if (currentXML.@enabled != "None") {
                                 if (layers.property(propIndex).canSetEnabled == true) {
@@ -1137,7 +1143,7 @@
                                     }
                                 }
                             }
-                        }catch(err){$.layer.errorInfoArr.push(err);}
+                        }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
 
                     try{
                         if (prop == 0) {
@@ -1148,7 +1154,7 @@
                             if (layers.propertyType == PropertyType.INDEXED_GROUP)
                                 layers.property(prop.propertyIndex).name = propName;
                         }
-                    }catch(err){$.layer.errorInfoArr.push(err);}
+                    }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                     
                     
                     try{
@@ -1163,11 +1169,11 @@
                                 }
                             }
                         }
-                    }catch(err){$.layer.errorInfoArr.push(err);}
+                    }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                 } else if (currentXML.name() == "prop") {
                     try{
                         $.layer.prototype.newProperty(currentXML, layers, inTime)
-                    }catch(err){$.layer.errorInfoArr.push(err);}
+                    }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                 }
 
                 if (currentXML.name() == "prop") {
@@ -1190,7 +1196,7 @@
                             expProperty.expression = decodeURIComponent(currentXML.exp.toString());
                         } catch (err) {
                             /* ignore*/
-//~                             $.layer.errorInfoArr.push(err);
+//~                             $.layer.errorInfoArr.push({line:$.line,error:err});
                         };
                     }
                 }
@@ -1226,7 +1232,7 @@
                     } catch (err) {
                         /* ignore*/
                         if(err.toString().indexOf("hidden") == -1)
-                            $.layer.errorInfoArr.push(err);
+                            $.layer.errorInfoArr.push({line:$.line,error:err});
                     }
                     try {
                         var a = layers.property(matchName).propertyValueType.toString();
@@ -1234,7 +1240,7 @@
                             $.layer.layerTypePropertyArr.push(layers.property(matchName));
                             $.layer.layerTypePropertyValueArr.push(value);
                         }
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                 } else {
                     var values = [];
                     var valueTemp = [];
@@ -1258,7 +1264,7 @@
                     }
                     try {
                         layers.property(matchName).setValuesAtTimes(times, values);
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     var inSpeedArr = [];
                     var inInArr = [];
                     var outSpeedArr = [];
@@ -1278,7 +1284,7 @@
                         
                         try{
                             var type =  $.layer.getDistance(myScaleProperty.propertyValueType, parseInt(xml.inType.split(",")[0]));
-                        }catch(err){$.layer.errorInfoArr.push(err);}
+                        }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                         
                         
                         var clamp = parseFloat(xml.child(ia + 4).InIn);
@@ -1299,7 +1305,7 @@
                                     myScaleProperty.setSpatialTangentsAtKey(ia+1,inSpatialArr,outSpatialArr);
                             }
                             
-                        }catch(err){$.layer.errorInfoArr.push(err);}
+                        }catch(err){$.layer.errorInfoArr.push({line:$.line,error:err});}
                         try {
                             if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.TwoD &&
                                 $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
@@ -1314,7 +1320,7 @@
                                 var easeOut = new KeyframeEase(parseFloat(xml.child(ia + 4).OutSpeed), clampb);
                                 try {
                                     myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             } else if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
 
                                 var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
@@ -1335,7 +1341,7 @@
                                 
                                 try {
                                     myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn1], [easeOut, easeOut1]);
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             } else if ($.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
                                 var clamp = parseFloat(xml.child(ia + 4).InIn.toString().split(",")[0]);
                                 clamp = $.layer.clampInfluence(clamp);
@@ -1363,19 +1369,19 @@
                                 
                                 try {
                                     myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn1, easeIn2], [easeOut, easeOut1, easeOut2]);
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             }
                             try {
                                 var inIn = $.layer.getDistance(myScaleProperty.keyInInterpolationType(ia + 1), parseInt(xml.child(ia + 4).inInterType));
                                 var outIn = $.layer.getDistance(myScaleProperty.keyOutInterpolationType(ia + 1), parseInt(xml.child(ia + 4).outInterType));
                                 if(!isNaN(inIn) && !isNaN(outIn))
                                     myScaleProperty.setInterpolationTypeAtKey(ia + 1, inIn, outIn);
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             try {
                                 if ((xml.child(ia + 4).isRoving).toString() == "true")
                                     myScaleProperty.setRovingAtKey(ia + 1, true);
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     }
                 }
             } else if (layers.property(matchName).matchName == "ADBE Text Document") {
@@ -1398,15 +1404,15 @@
                         }
                         try {
                             myText.justification = $.layer.getDistance(myText.justification, parseInt(xml.justification));
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                         var nextText = myText;
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     try {
                         layers.property(matchName).setValue(myText);
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     try {
                         layers.property(matchName).setValue(nextText);
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                 } else {
                     var values = [];
                     var valueTemp = [];
@@ -1437,14 +1443,14 @@
                         }
                         try {
                             myText.justification = $.layer.getDistance(myText.justification, parseInt(xml.keyValue.child(ib).justification));
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                         nextText = myText;
                         try {
                             layers.property(matchName).setValueAtTime(times[ib], myText);
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                         try {
                             layers.property(matchName).setValueAtTime(times[ib], nextText);
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     }
                 }
             } else if (!isNotMarker) {
@@ -1471,7 +1477,7 @@
                         myMarker.frameTarget = xml.keyValue.child(ib).frameTarget.toString();
                         try {
                             layers.property(matchName).setValueAtTime(times[ib], myMarker);
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     }
                 }
             } else if (!isNotMaskShape || !isNotVectorShape) {
@@ -1494,7 +1500,7 @@
                     myShape.closed = (xml.closed == true) ? true : false;
                     try {
                         layers.property(matchName).setValue(myShape);
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                 } else {
                     var myShape = new Shape();
                     var vertsArr = [];
@@ -1531,7 +1537,7 @@
                     }
                     try {
                         layers.property(matchName).setValuesAtTimes(times, shapes);
-                    } catch (err) {$.layer.errorInfoArr.push(err);}
+                    } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     var inSpeedArr = [];
                     var inInArr = [];
                     var outSpeedArr = [];
@@ -1561,7 +1567,7 @@
                                 $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) != PropertyValueType.ThreeD) {
                                 try {
                                     myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             } else if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.TwoD) {
                                 myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn], [easeOut, easeOut]);
                             } else if ($.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(",")[0]) == PropertyValueType.ThreeD) {
@@ -1571,12 +1577,12 @@
                                 var inIn = $.layer.getDistance(myScaleProperty.keyInInterpolationType(ia + 1), parseInt(xml.inInterType));
                                 var outIn = $.layer.getDistance(myScaleProperty.keyOutInterpolationType(ia + 1), parseInt(xml.outInterType));
                                 myScaleProperty.setInterpolationTypeAtKey(ia + 1, inIn, outIn);
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             try {
                                 if ((xml.isRoving).toString() == "true")
                                     myScaleProperty.setRovingAtKey(ia + 1, true);
-                            } catch (err) {$.layer.errorInfoArr.push(err);}
-                        } catch (err) {$.layer.errorInfoArr.push(err);}
+                            } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
+                        } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                     }
                 }
             }
@@ -1680,13 +1686,13 @@
                             for (var i = thisGroup.numProperties; i > 0; i--) {
                                 try {
                                     thisGroup.property(i).remove();
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             }
                         } else {
                             for (var i = thisGroup.numProperties; i > 0; i--) {
                                 try {
                                     thisGroup.property(i).enabled = false;
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             }
                         }
                     }
@@ -1695,7 +1701,7 @@
                             for (var i = thisGroup.property(4).numProperties; i > 0; i--) {
                                 try {
                                     thisGroup.property(4).property(i).remove();
-                                } catch (err) {$.layer.errorInfoArr.push(err);}
+                                } catch (err) {$.layer.errorInfoArr.push({line:$.line,error:err});}
                             }
                         }
                     }
@@ -1883,10 +1889,10 @@
     $.layer.writeErrorFile = function(){
         var str = "";
         $.layer.forEach.call($.layer.errorInfoArr,function(item,index){
-                str += "Line#"+item.line.toString() + "\t" + item.toString()+"\r\n";
+                str += "Catched-Line# "+item.line+ "\tHappened-Line# "+item.error.line.toString() + "\t" + item.error.toString()+"\r\n";
         });
         var file = new File($.layer.tempFolder.toString()+$.layer.slash.toString()+"error.txt");
-        alert($.layer.errorInfoArr.length);
+        writeLn("Find "+$.layer.errorInfoArr.length+ " errors");
         file.writee(str);
     }
 

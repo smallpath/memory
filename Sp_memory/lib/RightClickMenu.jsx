@@ -63,11 +63,11 @@
           settingsButtonFunc();
         }
 
-        ShortMenu["helperScripts"].add("item", loc(sp.save));
-        ShortMenu["helperScripts"].add("item", loc(sp.exp));
-        ShortMenu["helperScripts"].add("item", loc(sp.aep));
-        ShortMenu["helperScripts"].add("item", loc(sp.preset));
-        ShortMenu["helperScripts"].add("item", loc(sp.curve));
+        ShortMenu["helperScripts"].add("item", loc(sp.helperScripts));
+        ShortMenu["helperScripts"].add("item", loc(sp.expressionTranslate));
+        ShortMenu["helperScripts"].add("item", loc(sp.reloadGroup));
+        ShortMenu["helperScripts"].add("item", loc(sp.saveEachLayer));
+        ShortMenu["helperScripts"].add("item", loc(sp.cutLength));
         ShortMenu["helperScripts"].selection = 0;
         
         ShortMenu["helperScripts"].onChange = ShortMenu["helperScripts"].onChanging = function(){
