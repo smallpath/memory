@@ -939,22 +939,22 @@
                     if (!event) return;
                     if (event.button == 2 && event.detail == 1 && event.altKey == false) {
                     var currentPosition = [event.screenX, event.screenY];
-                    var strF=$.screens[0].toString();
-                    var fStr="";
-                    for(var guStr=0;guStr<strF.length;guStr++){
-                            if(strF[guStr+4]!="-"&&strF[guStr+4]!=":"){
-                                fStr+=strF[guStr+4];
-                               } else{
-                                    break;
-                                    }
-                        }
-                    if(currentPosition[0]+180>parseInt(fStr))
+                    var screenString=$.screens[0].toString();
+                    var finalPositionXString="";
+                    for(var i=0;i<screenString.length;i++){
+                            if(screenString[i+4]!="-"&&screenString[i+4]!=":"){
+                                finalPositionXString+=screenString[i+4];
+                            } else{
+                                break;
+                            }
+                    }
+                    if(currentPosition[0]+180>parseInt(finalPositionXString))
                         currentPosition=[event.screenX-180,event.screenY];
 
                     try{
                         if(!sp.menu){
-                            sp.menu = createMenu(currentPosition);
-                       }
+                            sp.menu = createMenu();
+                        }
                         sp.menu["preview"].text = (sp.gv.selection.length == 0) ? loc(sp.previewAll) : loc(sp.previewSelected);
                         sp.menu.frameLocation = currentPosition;
                         sp.menu.show();
