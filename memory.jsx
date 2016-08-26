@@ -331,6 +331,7 @@
             this.addModule = function(){
                     var newEleName = prompt(loc(sp.setName), "Default");
                     if (!newEleName){ return;}
+                    newEleName.trim();
                     if(sp.lookUpTextInChildren(newEleName,sp.parentDroplist.items)){alert(loc(sp.existName));return;}
                     
                     var content = new XML(sp.settingsFile.readd());
@@ -534,7 +535,10 @@
                               var itemName = prompt(loc(sp.setName), "Name");
                         else
                               var itemName = thisComp.selectedLayers[0].name.replace("/", "_").replace(".", "_");
+
                         if(sp.autoNameValue == false && itemName == "" || itemName == null) return;
+                        
+                        itemName.trim();
                         
                               app.beginSuppressDialogs();
                               app.beginUndoGroup("Undo save");
@@ -548,12 +552,7 @@
                                 var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
                                 
                               var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
-                              /*
-                              var tempFile = new File("~/Desktop/test.xml");
-                              tempFile.writee(xml);
                               
-                              return;
-                              */
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
                               var item = sp.gv.add(decodeURIComponent (itemName),sp.getImage(sp.droplist.selection.text,itemName));
@@ -658,7 +657,10 @@
                     var newEleName = prompt(loc(sp.setName), "Default");
                     if (!newEleName){ return;}
                     if(!sp.parentDroplist.selection) return alert(loc(sp.needModule));
+                    newEleName.trim();
                     if(sp.xmlFileNames.has(newEleName)){alert(loc(sp.existName));return;}
+                    
+
                     
                     var file = sp.getFileByName(newEleName);
                     sp.getImageFolderByName(newEleName);
@@ -799,6 +801,7 @@
                     if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
                     var newEleName = prompt(loc(sp.setName), sp.gv.lastSelectedItem.text);
                     if (!newEleName){ alert(loc(sp.blankName));return;}
+                    newEleName.trim();
                     if(sp.lookUpTextInChildren(newEleName,sp.gv.children)){alert(loc(sp.existName));return;}
                     
                     var file = sp.getFileByName(sp.droplist.selection.text);
@@ -1560,13 +1563,17 @@ this,
 (function(sp){
             #include 'Sp_memory/lib/OperatorOverload.jsx'
       
+            String.prototype.trim = function () {
+                return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+            };
+      
             Array.prototype.has= function(value){
-                        for(var i=0,len = this.length;i<len;i++){
-                                if(this[i] == value)
-                                    return true;
-                            }
-                        return false;
-                  }
+                for(var i=0,len = this.length;i<len;i++){
+                        if(this[i] == value)
+                            return true;
+                    }
+                return false;
+            }
       
       
             //~   getter/setter for  last  element of array
