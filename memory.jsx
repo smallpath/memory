@@ -5,6 +5,7 @@
 
     #include 'Sp_memory/lib/AfterEffectsLayer.jsx'
     #include 'Sp_memory/lib/StringResource.jsx'
+    #include 'Sp_memory/lib/ColorPicker.jsx'
     #include 'Sp_memory/lib/HelperScripts.jsx'
     #include 'Sp_memory/lib/SubSystems.jsx'
     #include 'Sp_memory/lib/RightClickMenu.jsx'
