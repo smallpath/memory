@@ -3,6 +3,7 @@
       
 (function(global){
 
+    #include 'Sp_memory/lib/Json.jsx'
     #include 'Sp_memory/lib/AfterEffectsLayer.jsx'
     #include 'Sp_memory/lib/StringResource.jsx'
     #include 'Sp_memory/lib/ColorPicker.jsx'
