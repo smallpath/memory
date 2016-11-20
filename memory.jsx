@@ -1000,7 +1000,8 @@ this,
                             app.version.indexOf("13.5") !=-1  ||
                             app.version.indexOf("13.6") !=-1  ||
                             app.version.indexOf("13.7") !=-1  ||
-                            app.version.indexOf("13.8") !=-1
+                            app.version.indexOf("13.8") !=-1  ||
+                            app.version.indexOf("14") !=-1
                           )? true:false,
                             
             
