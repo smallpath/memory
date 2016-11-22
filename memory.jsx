@@ -35,7 +35,7 @@
     //~ Set GridView's attributes
     gv.limitText = sp.getSettingAsBool ("limitText");
     gv.showText = sp.showThumbValue ;
-    gv.version =  parseInt(app.version.split(".")[0])==12?"CC":"CC2014";
+    gv.version = ( parseInt(app.version.split(".")[0])==12 || parseInt(app.version.split(".")[0])==14)?"CC":"CC2014";
     
     //~ Binding eventHandlers to mouse click and Window
     gv.leftClick = fns.leftClick;
