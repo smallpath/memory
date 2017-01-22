@@ -516,7 +516,7 @@
                               else
                                 var itemName = sp.savePng(imageFile);
 
-                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName,sp);
                               
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml,sp.gv.lastSelectedItem.index);
                               
@@ -553,7 +553,7 @@
                               else
                                 var itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text,itemName));
                                 
-                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName);
+                              var xml = sp.getXmlFromLayers(thisComp.selectedLayers,itemName,sp);
                               
                               sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text),xml);
                               
@@ -1501,7 +1501,7 @@ this,
                                                   return layerArr;
                                           },
                                       
-                                    getXmlFromLayers: function(layers,itemName){
+                                    getXmlFromLayers: function(layers,itemName,sp){
                                             var options = {
                                                 isSaveMaterial : sp.saveMaterialValue,
                                             };
