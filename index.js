@@ -1,14 +1,14 @@
 try {
   (function(global) {
-    require('lib/Json.jsx')
-    require('lib/AfterEffectsLayer.jsx')
-    require('lib/StringResource.jsx')
-    require('lib/ColorPicker.jsx')
-    require('lib/HelperScripts.jsx')
-    require('lib/SubSystems.jsx')
-    require('lib/RightClickMenu.jsx')
-    require('lib/GridView.jsx')
-    require('lib/UIParser.jsx')
+    require('lib/Json')
+    require('lib/AfterEffectsLayer')
+    require('lib/StringResource')
+    require('lib/ColorPicker')
+    require('lib/HelperScripts')
+    require('lib/SubSystems')
+    require('lib/RightClickMenu')
+    require('lib/GridView')
+    require('lib/UIParser')
 
     $.layer.slash = sp.slash
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile')
@@ -1415,7 +1415,7 @@ try {
 
     // ~ Add methods to objects
     (function(sp) {
-      require('lib/OperatorOverload.jsx')
+      require('lib/OperatorOverload')
 
       String.prototype.trim = function() {
         return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '')

@@ -2,30 +2,25 @@ var path = require('path')
 
 module.exports = {
   entry: {
-    app: './index.jsx'
+    app: './index.js'
   },
   output: {
     path: path.join(__dirname, './dist'),
     filename: 'Sp_memory.jsx'
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js'],
     alias: {
-      'src': path.resolve(__dirname, './Sp_memory'),
-      'lib': path.resolve(__dirname, './Sp_memory/lib'),
-      'helper': path.resolve(__dirname, './Sp_memory/lib/HelperScripts')
+      'lib': path.resolve(__dirname, './lib'),
+      'helper': path.resolve(__dirname, './lib/HelperScripts')
     }
   },
   module: {
     loaders: [
       {
         test: /\.js$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         exclude: /node_modules/
-      },
-      {
-        test: /\.json$/,
-        loader: 'json'
       }
     ]
   }

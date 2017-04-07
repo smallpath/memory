@@ -1,7 +1,3 @@
-*.jsxinc
-
-/Sp_memory/*
-
-!/Sp_memory/lib/
-
 node_modules
+
+Sp_memory
