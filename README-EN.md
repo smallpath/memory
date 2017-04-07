@@ -39,8 +39,8 @@ The default language is not English. To force English, just add a `force_en.txt`
 >[Change Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS-EN.md)
 
 ## Thanks To
-- 阿木亮([GridView.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/GridView.jsx),[UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
-- 水果硬糖([UIParser.jsx](https://github.com/Smallpath/Memory/blob/master/Sp_memory/lib/UIParser.jsx))
+- 阿木亮([GridView.js](https://github.com/Smallpath/Memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
+- 水果硬糖([UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
 
 ## License
 ```

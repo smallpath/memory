@@ -16,7 +16,7 @@ try {
 
     sp.fns = new Fns()
 
-    // ~ Create UI
+    //  Create UI
     var win = global instanceof Panel ? global : new Window('window', sp.scriptName, undefined, { resizeable: true })
     var group1 = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}")
     var group11 = group1.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}")
@@ -24,12 +24,12 @@ try {
     var droplist = sp.droplist = group11.add('Dropdownlist{}')
     var gv = sp.gv = new GridView(group1)
 
-    // ~ Set GridView's attributes
+    // Set GridView's attributes
     gv.limitText = sp.getSettingAsBool('limitText')
     gv.showText = sp.showThumbValue
     gv.version = (parseInt(app.version.split('.')[0]) === 12 || parseInt(app.version.split('.')[0]) === 14) ? 'CC' : 'CC2014'
 
-    // ~ Binding eventHandlers to mouse click and Window
+    // Binding eventHandlers to mouse click and Window
     gv.leftClick = sp.fns.leftClick
     gv.rightClick = sp.fns.rightClick
     gv.leftDoubleClick = sp.fns.newLayer
@@ -94,15 +94,15 @@ try {
               }
             }
           } catch (err) {
-            // ~                                 cout<<"----"+decodeURIComponent ( targetFolder.toString())+'\r\nseq folder not found\r'+iter ;
+            // cout<<"----"+decodeURIComponent ( targetFolder.toString())+'\r\nseq folder not found\r'+iter ;
           }
 
           if (!targetFolder.exists) {
-            // ~                                 cout<<decodeURIComponent ( targetFolder.toString())+'\r\nseq folder not found\r'+iter;
+            // cout<<decodeURIComponent ( targetFolder.toString())+'\r\nseq folder not found\r'+iter;
             continue
           }
           if (!img.exists) {
-            // ~                                 cout<<'image not found\r'+iter ;
+            // cout<<'image not found\r'+iter ;
             continue
           }
 
@@ -380,11 +380,11 @@ try {
             sourceFolder: sp.sourceFolder
           }
 
-          // ~                                     $.hiresTimer/1000000;
+          //                                      $.hiresTimer/1000000;
 
           var activeCompLayersArr = sp.newLayers(xml, app.project.activeItem, options)
 
-          // ~                                     $.writeln($.hiresTimer/1000000);
+          //                                      $.writeln($.hiresTimer/1000000);
 
           app.project.activeItem.time = currentTime
 
@@ -397,7 +397,7 @@ try {
 
         app.endUndoGroup()
 
-        // ~ Precompose layers and cut their length,no matter whether they are created by newLayers() or selected by user.
+        //  Precompose layers and cut their length,no matter whether they are created by newLayers() or selected by user.
         if (sp.preComposeValue === true) {
           var indexArr = []
           var inPointArr = []
@@ -419,7 +419,7 @@ try {
           app.endUndoGroup()
         }
 
-        // ~ Return the layer array
+        //  Return the layer array
         if (sp.onlyEffectValue === false) {
           return activeCompLayersArr
         } else {
@@ -544,19 +544,19 @@ try {
 
         var preIndex = sp.getGlobalIndexFromFileName(selectionText)
 
-        // ~delete the child
+        // delete the child
         xml.ListItems.child(preIndex).setLocalName('waitToDelete')
         delete xml.ListItems.waitToDelete
         sp.settingsFile.writee(xml)
         sp.deleteIndexAndReload(preIndex)
 
-        // ~ delete the imagesFolder
+        //  delete the imagesFolder
 
         var imageFolder = sp.getImageFolderByName(selectionText)
         $.global.deleteThisFolder(imageFolder)
         imageFolder.remove()
 
-        // ~delete the files
+        // delete the files
         var file = sp.getFileByName(selectionText)
         file.remove()
 
@@ -825,7 +825,7 @@ try {
         } else if (key.ctrlKey === false && key.shiftKey === false && alt === true) {
           keepRef.newItem(event)
         } else if (key.ctrlKey === true && key.shiftKey === true && alt === true) {
-          // ~                                                         alert(sp.gv.lastSelectedItem.index);
+          //                                                          alert(sp.gv.lastSelectedItem.index);
         }
       }
       this.shortMenu = function(event) {
@@ -853,13 +853,13 @@ try {
           } catch (err) { err.printa() }
         }
       }
-    }// ~ fns function end
+    }//  fns function end
   })(
 
-    // ~ global
+    //  global
     this,
 
-    // ~ create singleton helper object for script,and store it into Global
+    //  create singleton helper object for script,and store it into Global
     (function() {
       var sp = function() {
         return new sp.prototype.init()
@@ -908,7 +908,7 @@ try {
           return this
         },
 
-        // ~            give source to target
+        //             give source to target
         extend: function(target, source) {
           for (var i in source) target[i] = source[i]
           return target
@@ -1361,7 +1361,7 @@ try {
 
           var layerXml = new XML(xml)
 
-          // ~ Ignore xml according to presets.Empty groups according to presets
+          //  Ignore xml according to presets.Empty groups according to presets
           var options = {}
           options.newPropertiesSettingArr = []
           options.cleanPropertiesSettingArr = []
@@ -1408,7 +1408,7 @@ try {
       return $.global.sp
     })(),
 
-    // ~ Add methods to objects
+    //  Add methods to objects
     (function(sp) {
       require('lib/OperatorOverload')
 
@@ -1458,7 +1458,7 @@ try {
       }
     })(sp),
 
-    // ~ Save default presets if there isn't, then load presets and parse them
+    //  Save default presets if there isn't, then load presets and parse them
     (function(sp) {
       var keyNameArr = []
       var valueArr = []
@@ -1542,6 +1542,7 @@ try {
       sp.frameSecond = parseInt(sp.getSetting('frameSecond'))
       sp.frameNum = parseInt(sp.getSetting('frameNum'))
 
+      !sp.scriptFolder.exists && sp.scriptFolder.create()
       !sp.roamingFolder.exists && sp.roamingFolder.create()
       !sp.materialFolder.exists && sp.materialFolder.create()
 
@@ -1609,7 +1610,7 @@ Tips:
     })(sp),
 
     (function() {
-      // ~ if the file is not here,create it
+      //  if the file is not here,create it
       if (!(sp.settingsFile.exists) || sp.settingsFile.length === 0) {
         if (sp.settingsFile.exists) sp.settingsFile.remove()
         var settingsText =
@@ -1639,7 +1640,7 @@ Tips:
         sp.settingsFile.writee(newsettingsxml)
       }
 
-      // ~ If the file do not have the ParentGroup,add parentGroup to it
+      //  If the file do not have the ParentGroup,add parentGroup to it
       var content = new XML(sp.settingsFile.readd())
       if (!content.hasOwnProperty('ParentGroup')) { content.appendChild(new XML('<ParentGroup/>')) }
       if (content.ParentGroup.children().length() === 0) {
@@ -1650,7 +1651,7 @@ Tips:
         sp.settingsFile.writee(content)
       }
 
-      // ~ If the file do not have a group,give it
+      //  If the file do not have a group,give it
       content = new XML(sp.settingsFile.readd())
       if (!content.hasOwnProperty('ListItems')) { content.appendChild(new XML('<ListItems/>')) }
       if (content.ListItems.children().length() === 0) {
