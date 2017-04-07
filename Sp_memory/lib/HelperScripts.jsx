@@ -1,4 +1,4 @@
-﻿#include 'HelperScripts/Translate.jsx'
-#include 'HelperScripts/CutLength.jsx'
-#include 'HelperScripts/ReloadPic.jsx'
-#include 'HelperScripts/AutoSave.jsx'
+require('HelperScripts/Translate.jsx')
+require('HelperScripts/CutLength.jsx')
+require('HelperScripts/ReloadPic.jsx')
+require('HelperScripts/AutoSave.jsx')
