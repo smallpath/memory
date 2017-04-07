@@ -8,10 +8,10 @@ Windows系统;AE版本为CC,CC2014与CC2015
 
 ## 脚本界面
 支持动态预览元素内容  
-![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)  
-![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)  
+![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.gif)  
+![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/2.gif)  
 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间  
-![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.PNG)  
+![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.PNG)  
 
 ## 脚本功能
 1. 脚本界面支持预览动画,可以设置预览动画的帧率和帧数
@@ -23,9 +23,9 @@ Windows系统;AE版本为CC,CC2014与CC2015
 7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CC上正确地生成
 
 ## 脚本安装
-进入[此页面](https://raw.githubusercontent.com/Smallpath/Memory/master/Sp_memory.jsxbin),通过`右键->另存为`进行脚本的下载  
-请将`Sp_memory.jsxbin`脚本放置在你的AE脚本文件夹中,通常在`path\to\ae\Support Files\Scripts\ScriptUI Panels`  
-在AE中打开`窗口`菜单中的`Sp_memory.jsxbin`即可
+进入[此页面](https://raw.githubusercontent.com/Smallpath/Memory/master/dist/Sp_memory.jsx),通过`右键->另存为`进行脚本的下载  
+请将`Sp_memory.jsx`脚本放置在你的AE脚本文件夹中,通常在`path\to\ae\Support Files\Scripts\ScriptUI Panels`  
+在AE中打开`窗口`菜单中的`Sp_memory.jsx`即可
 
 注: [Release](https://github.com/Smallpath/Memory/releases)页面中包含三个拥有预览动画的素材包用于演示,请在解压后,在脚本界面上`右键->导入组`并全选素材文件
 

@@ -8,9 +8,9 @@ Windows system;AE CC,CC2014 and CC2015
 
 ## User Interface
 Memory supports preview animation,what you have watched is what it will be after generating layers  
-![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1.gif)  
-![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/2.gif)  
-![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/_screenshot/1_en.PNG)  
+![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.gif)  
+![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/2.gif)  
+![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1_en.PNG)  
 Script layouts automatically according to window size.Moreover,it has right-click menu to reduce space for you
 
 ## Script Feature
