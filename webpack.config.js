@@ -1,29 +1,26 @@
+var path = require('path')
 
 module.exports = {
   entry: {
     app: './memory.jsx'
   },
   output: {
-    path: config.build.assetsRoot,
-    filename: '[name].jsx'
+    path: path.join(__dirname, './'),
+    filename: 'Sp_memory.jsx'
   },
   resolve: {
-    extensions: ['', '.js', '.jsx'],
-    fallback: [path.join(__dirname, '../node_modules')],
+    extensions: ['.js', '.jsx'],
     alias: {
-      'src': path.resolve(__dirname, '../Sp_memory'),
-      'lib': path.resolve(__dirname, '../Sp_memory/lib')
+      'src': path.resolve(__dirname, './Sp_memory'),
+      'lib': path.resolve(__dirname, './Sp_memory/lib'),
+      'helper': path.resolve(__dirname, './Sp_memory/lib/HelperScripts')
     }
-  },
-  resolveLoader: {
-    fallback: [path.join(__dirname, '../node_modules')]
   },
   module: {
     loaders: [
       {
         test: /\.js$/,
         loader: 'babel',
-        include: projectRoot,
         exclude: /node_modules/
       },
       {

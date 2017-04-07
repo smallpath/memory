@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config ./webpack.config.js",
     "lint": "eslint --ext .jsx *.jsx */*.jsx Sp_memory/*/*.jsx",
     "fix": "eslint --fix *.jsx */*.jsx Sp_memory/*/*.jsx"
   },

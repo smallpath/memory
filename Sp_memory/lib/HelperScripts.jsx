@@ -1,4 +1,4 @@
-require('HelperScripts/Translate.jsx')
-require('HelperScripts/CutLength.jsx')
-require('HelperScripts/ReloadPic.jsx')
-require('HelperScripts/AutoSave.jsx')
+require('helper/Translate.jsx')
+require('helper/CutLength.jsx')
+require('helper/ReloadPic.jsx')
+require('helper/AutoSave.jsx')
