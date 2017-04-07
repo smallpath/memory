@@ -1,4 +1,4 @@
-##[English Document](https://github.com/Smallpath/Memory/blob/master/README-EN.md)
+## [English Document](https://github.com/Smallpath/Memory/blob/master/README-EN.md)
 
 # Memory
 这是后期合成软件[Adobe After Effects](https://en.wikipedia.org/wiki/Adobe_After_Effects)的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层

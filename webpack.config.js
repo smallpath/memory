@@ -2,10 +2,10 @@ var path = require('path')
 
 module.exports = {
   entry: {
-    app: './memory.jsx'
+    app: './index.jsx'
   },
   output: {
-    path: path.join(__dirname, './'),
+    path: path.join(__dirname, './dist'),
     filename: 'Sp_memory.jsx'
   },
   resolve: {

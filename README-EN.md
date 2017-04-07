@@ -1,4 +1,4 @@
-##[简体中文文档](https://github.com/Smallpath/Memory/blob/master/README-CH.md)
+## [简体中文文档](https://github.com/Smallpath/Memory/blob/master/README-CH.md)
 
 # Memory
 This is a script for Adobe After Effects.It can save any layer even `composition layer` in AE ,so you can create these layers in another project,another version of ae and even another computer
