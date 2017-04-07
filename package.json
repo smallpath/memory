@@ -1,0 +1,36 @@
+{
+  "name": "memory",
+  "version": "3.0.0",
+  "description": "a script for adobe after effects to save any layers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --ext .jsx *.jsx */*.jsx Sp_memory/*/*.jsx",
+    "fix": "eslint --fix *.jsx */*.jsx Sp_memory/*/*.jsx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://Smallpath@github.com/Smallpath/Memory.git"
+  },
+  "keywords": [
+    "ae",
+    "layer",
+    "sp_memory"
+  ],
+  "author": "smallpath",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Smallpath/Memory/issues"
+  },
+  "homepage": "https://github.com/Smallpath/Memory#readme",
+  "devDependencies": {
+    "babel-eslint": "^7.2.1",
+    "eslint": "^3.19.0",
+    "eslint-config-standard": "^10.2.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-node": "^4.2.2",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "webpack": "^2.3.3"
+  }
+}
