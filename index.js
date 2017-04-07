@@ -1,6 +1,6 @@
 try {
   (function(global) {
-    require('lib/Json')
+    require('babel-polyfill')
     require('lib/AfterEffectsLayer')
     require('lib/StringResource')
     require('lib/ColorPicker')
@@ -130,43 +130,38 @@ try {
         var maxLen = lenArr[lenArr.length - 1].length
 
         for (var i = 0, len = maxLen; i <= len; i++) {
-          var stringToCall =
-            ` 
-                                                                
-                                                                if(sp){
-                                                                    if(sp.gv){
-                                                                        if(sp.gv.children){
-                                                                    
-                                                                        var len = sp.gv.children.length; 
-                                                                        for(var itemIndex=0;itemIndex<len;itemIndex++){
-                                                                            var currentItem = sp.previewHelper["item"+itemIndex];
-                                                                            if(currentItem){
+          var stringToCall = `
+          if (sp) {
+            if (sp.gv) {
+              if (sp.gv.children) {
 
-                                                                                var currentIndex = currentItem["currentIndex"];
-                                                                                currentItem["currentIndex"]++;
-                                                                                var currentIndexTemp = currentItem["tempFiles"];
-                                                                                if(currentIndexTemp){
-                                                                                    var currentFile = currentIndexTemp[currentIndex];
-                                                                                    if(currentFile){
+                var len = sp.gv.children.length;
+                for (var itemIndex = 0; itemIndex < len; itemIndex++) {
+                  var currentItem = sp.previewHelper["item" + itemIndex];
+                  if (currentItem) {
 
-                                                                                        if(currentItem["tempItem"])
-                                                                                            currentItem["tempItem"].image=currentFile;
-                                                                                        
-                                                                                    }else{
-                                                                                            currentItem["currentIndex"] = 0;
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                        }
-                                                                    if(isValid(sp.gv.list))
-                                                                        sp.gv.refresh();
-                                                                    
-                                                                    }
-                                                                 }
-                                                              }   
-                                                              
+                    var currentIndex = currentItem["currentIndex"];
+                    currentItem["currentIndex"]++;
+                    var currentIndexTemp = currentItem["tempFiles"];
+                    if (currentIndexTemp) {
+                      var currentFile = currentIndexTemp[currentIndex];
+                      if (currentFile) {
 
-                                                                `
+                        if (currentItem["tempItem"])
+                          currentItem["tempItem"].image = currentFile;
+
+                      } else {
+                        currentItem["currentIndex"] = 0;
+                      }
+                    }
+                  }
+                }
+                if (isValid(sp.gv.list))
+                  sp.gv.refresh();
+
+              }
+            }
+          }`
           sp.renderTaskArray.push(app.scheduleTask(stringToCall, 0 + oneFrame * i, true))
         }
 
@@ -227,40 +222,40 @@ try {
         if (sp.previewHelper['item' + index]['tempFiles'].length === 0) return
 
         for (var i = 0, len = sp.previewHelper['item' + index]['tempFiles'].length; i <= len; i++) {
-          var stringToCall = `if(sp){
-                                                                  if(sp.gv){
-                                                                      if(sp.gv.children){
-                                                                  
-                                                                      var len = sp.gv.children.length;
-                                                                      for(var itemIndex=0;itemIndex<len;itemIndex++){
-                                                                          var currentItem = sp.previewHelper["item"+itemIndex];
-                                                                          if(currentItem){
-                                                                              var currentIndex = currentItem["currentIndex"];
-                                                                              currentItem["currentIndex"]++;
-                
-                                                                              var currentIndexTemp = currentItem["tempFiles"];
-                                                                              if(currentIndexTemp){
-                                                                                  var currentFile = currentIndexTemp[currentIndex];
-                                                                                  if(currentFile){
-                                                                                          if(currentItem["tempItem"])
-                                                                                              currentItem["tempItem"].image=currentFile;
-                                                                                      }else{
-                                                                                          var currentImg = currentItem["tempImg"];
-                                                                                          if(currentImg){
-                                                                                              currentItem["tempItem"].image=currentImg;
-                                                                                          }
-                                                                                          sp.previewHelper["item"+itemIndex] = {}; 
-                                                                                      }
-                                                                                    }
-                                                                                  }
-                                                                      }
-                                                                  if(isValid(sp.gv.list))
-                                                                      sp.gv.refresh();
-                                                                  
-                                                                  }
-                                                                }
-                                                            }  
-                                                              `
+          var stringToCall = `
+          if (sp) {
+            if (sp.gv) {
+              if (sp.gv.children) {
+
+                var len = sp.gv.children.length;
+                for (var itemIndex = 0; itemIndex < len; itemIndex++) {
+                  var currentItem = sp.previewHelper["item" + itemIndex];
+                  if (currentItem) {
+                    var currentIndex = currentItem["currentIndex"];
+                    currentItem["currentIndex"]++;
+
+                    var currentIndexTemp = currentItem["tempFiles"];
+                    if (currentIndexTemp) {
+                      var currentFile = currentIndexTemp[currentIndex];
+                      if (currentFile) {
+                        if (currentItem["tempItem"])
+                          currentItem["tempItem"].image = currentFile;
+                      } else {
+                        var currentImg = currentItem["tempImg"];
+                        if (currentImg) {
+                          currentItem["tempItem"].image = currentImg;
+                        }
+                        sp.previewHelper["item" + itemIndex] = {};
+                      }
+                    }
+                  }
+                }
+                if (isValid(sp.gv.list))
+                  sp.gv.refresh();
+
+              }
+            }
+          }`
           sp.renderTaskArray.push(app.scheduleTask(stringToCall, 0 + oneFrame * i, false))
         }
 
@@ -529,7 +524,7 @@ try {
         if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement))
         var file = File.openDialog('Please select pictures', false)
         if (!file) return
-        if (file.name.split('.').last() !== 'jpg' && file.name.split('.').last() !== 'png') return
+        if (file.name.split('.').pop() !== 'jpg' && file.name.split('.').pop() !== 'png') return
         var imageFile = sp.getImageFile(sp.droplist.selection.text, sp.gv.lastSelectedItem.text)
 
         sp.cropImage(file, imageFile)
@@ -579,7 +574,7 @@ try {
         if (!newEleName) { return }
         if (!sp.parentDroplist.selection) return alert(loc(sp.needModule))
         newEleName.trim()
-        if (sp.xmlFileNames.has(newEleName)) { alert(loc(sp.existName)); return }
+        if (sp.xmlFileNames.includes(newEleName)) { alert(loc(sp.existName)); return }
 
         var file = sp.getFileByName(newEleName)
         sp.getImageFolderByName(newEleName)
@@ -1417,37 +1412,6 @@ try {
     (function(sp) {
       require('lib/OperatorOverload')
 
-      String.prototype.trim = function() {
-        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '')
-      }
-
-      Array.prototype.has = function(value) {
-        for (var i = 0, len = this.length; i < len; i++) {
-          if (this[i] === value) { return true }
-        }
-        return false
-      }
-
-      // ~   getter/setter for  last  element of array
-      Array.prototype.last = function(value) {
-        if (typeof value === 'undefined') { return this[this.length - 1] } else { this[this.length - 1] = value }
-      }
-
-      // ~     add array.forEach()
-      Array.prototype.forEach = function(callback, context) {
-        if (Object.prototype.toString.call(this) === '[object Array]') {
-          var i,
-            len
-          for (i = 0, len = this.length; i < len; i++) {
-            if (typeof callback === 'function' && Object.prototype.hasOwnProperty.call(this, i)) {
-              if (callback.call(context, this[i], i, this) === false) {
-                break // or return;
-              }
-            }
-          }
-        }
-      }
-
       sp.extend(sp, {
         forEach: function(xml, callback, context) {
           if (!(xml instanceof XML)) return
@@ -1514,53 +1478,52 @@ try {
       }
 
       keyNameArr.pushh('thisSelection')
-        .pushh('limitText')
-        .pushh('thumbType')
-        .pushh('winLocation')
-        .pushh('winSize')
-        .pushh('coverChange')
-        .pushh('folderName')
-        .pushh('effectName')
-        .pushh('deleteAlert')
-        .pushh('preCompose')
-        .pushh('saveMaterial')
-        .pushh('autoName')
-        .pushh('onlyEffect')
-        .pushh('cleanGroup')
-        .pushh('offsetKeyframe')
-        .pushh('language')
-        .pushh('showThumb')
-        .pushh('parentSelection')
-        .pushh('frameSecond')
-        .pushh('frameNum')
-        .pushh('savePreview')
+                .pushh('limitText')
+                .pushh('thumbType')
+                .pushh('winLocation')
+                .pushh('winSize')
+                .pushh('coverChange')
+                .pushh('folderName')
+                .pushh('effectName')
+                .pushh('deleteAlert')
+                .pushh('preCompose')
+                .pushh('saveMaterial')
+                .pushh('autoName')
+                .pushh('onlyEffect')
+                .pushh('cleanGroup')
+                .pushh('offsetKeyframe')
+                .pushh('language')
+                .pushh('showThumb')
+                .pushh('parentSelection')
+                .pushh('frameSecond')
+                .pushh('frameNum')
+                .pushh('savePreview')
 
       valueArr.pushh('1')
-        .pushh('true')
-        .pushh('false')
-        .pushh('200,500')
-        .pushh('300,500')
-        .pushh('false')
-        .pushh('Sp_memory Folder')
-        .pushh('Effects,Effect,effect,effects,特效,效果')
-        .pushh('true')
-        .pushh('false')
-        .pushh('true')
-        .pushh('true')
-        .pushh('false')
-        .pushh('false')
-        .pushh('false')
-        .pushh('ch')
-        .pushh('true')
-        .pushh('0')
-        .pushh('33')
-        .pushh('30')
-        .pushh('true')
+              .pushh('true')
+              .pushh('false')
+              .pushh('200,500')
+              .pushh('300,500')
+              .pushh('false')
+              .pushh('Sp_memory Folder')
+              .pushh('Effects,Effect,effect,effects,特效,效果')
+              .pushh('true')
+              .pushh('false')
+              .pushh('true')
+              .pushh('true')
+              .pushh('false')
+              .pushh('false')
+              .pushh('false')
+              .pushh('ch')
+              .pushh('true')
+              .pushh('0')
+              .pushh('33')
+              .pushh('30')
+              .pushh('true')
 
       keyNameArr.forEach(function(item, index) {
-        (function(item, value) {
-          if (sp.haveSetting(item) === false) { sp.saveSetting(item, value) }
-        })(item, valueArr[index])
+        var value = valueArr[index]
+        if (sp.haveSetting(item) === false) sp.saveSetting(item, value)
       })
 
       sp.showThumbValue = sp.getSettingAsBool('showThumb')
