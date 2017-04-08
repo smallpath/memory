@@ -1,6 +1,6 @@
 try {
   (function(global) {
-    require('babel-polyfill')
+    // require('babel-polyfill')
     require('lib/AfterEffectsLayer')
     require('lib/StringResource')
     require('lib/ColorPicker')
@@ -1147,7 +1147,7 @@ try {
           var indexArr = []
 
           this.forEach(settingxml.ParentGroup, function(item, index) {
-            if (item['@groupName'] === groupName) {
+            if (item['@groupName'].toString() === groupName) {
               for (var j = 0; j < item.children().length(); j++) {
                 indexArr.push(parseInt(item.child(j).toString()))
               }
@@ -1158,8 +1158,9 @@ try {
           this.forEach(settingxml.ListItems, function(item, index) {
             this.push(item.toString())
           }, this.xmlFileNames)
-          for (var i = 0, len = indexArr.length; i < len; i++) { listArr.push(settingxml.ListItems.child(indexArr[i]).toString()) }
-
+          for (var i = 0, len = indexArr.length; i < len; i++) {
+            listArr.push(settingxml.ListItems.child(indexArr[i]).toString())
+          }
           listArr.forEach(function(item, index) {
             this.add('item', item)
           }, this.droplist)
@@ -1424,6 +1425,28 @@ try {
           }
         }
       })
+
+      Array.prototype.includes = function(value) {
+        for (var i = 0, len = this.length; i < len; i++) {
+          if (this[i] === value) {
+            return true
+          }
+        }
+        return false
+      }
+
+      Array.prototype.forEach = function(callback, context) {
+        if (Object.prototype.toString.call(this) === '[object Array]') {
+          var i, len
+          for (i = 0, len = this.length; i < len; i++) {
+            if (typeof callback === 'function' && Object.prototype.hasOwnProperty.call(this, i)) {
+              if (callback.call(context, this[i], i, this) === false) {
+                break
+              }
+            }
+          }
+        }
+      }
 
       Error.prototype.print = Error.prototype.print || function() {
         return 'Line #' + this.line.toString() + '\r\n' + this.toString()
