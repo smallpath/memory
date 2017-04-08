@@ -1233,8 +1233,10 @@ try {
           var nameStr = ''
           pngPath = File(pngPath)
 
-          if (this.newItemOrCover === 'newItem' || (this.newItemOrCover === 'cover' && this.coverChangeValue === true)) {
-            if (this.newItemOrCover === 'newItem') {
+          var isNewItem = this.newItemOrCover === 'newItem'
+          var isCover = (this.newItemOrCover === 'cover' && this.coverChangeValue === true)
+          if (isNewItem || isCover) {
+            if (isNewItem) {
               while (pngPath.exists) {
                 pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png'
                 pngPath = File(pngPath)
@@ -1293,9 +1295,10 @@ try {
             }
             var nameStr = ''
             pngPath = File(pngPath)
-
-            if (this.newItemOrCover === 'newItem' || (this.newItemOrCover === 'cover' && this.coverChangeValue === true)) {
-              if (this.newItemOrCover === 'newItem') {
+            var isNewItem = this.newItemOrCover === 'newItem'
+            var isCover = (this.newItemOrCover === 'cover' && this.coverChangeValue === true)
+            if (isNewItem || isCover) {
+              if (isNewItem) {
                 while (pngPath.exists) {
                   pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png'
                   pngPath = File(pngPath)
@@ -1317,6 +1320,7 @@ try {
               for (i = 0; i < num; i++) {
                 var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num
                 var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png')
+
                 if (this.thumbTypeValue) {
                   app.activeViewer.views[0].saveBlittedImageToPng(time, seqPath, 1000, "what's this? I don't know")
                 } else {
@@ -1425,6 +1429,10 @@ try {
           }
         }
       })
+
+      String.prototype.trim = String.prototype.trim || function() {
+        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '')
+      }
 
       Array.prototype.includes = function(value) {
         for (var i = 0, len = this.length; i < len; i++) {

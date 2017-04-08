@@ -1033,8 +1033,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                     }
 
                     var waitToWrite = decodeURIComponent(xml.fileBin.toString());
-
-                    if (!genFilePath.exists || genFilePath.exists && genFilePath.length !== waitToWrite.length) {
+                    var notExists = !genFilePath.exists;
+                    var genFileLengthNotEqual = genFilePath.exists && genFilePath.length !== waitToWrite.length;
+                    if (notExists || genFileLengthNotEqual) {
                       if (!genFilePath.parent.exists) {
                         genFilePath.create();
                       }
@@ -1061,7 +1062,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                       genFilePath.parent.create();
                     }
                     waitToWrite = decodeURIComponent(xml.fileBin.toString());
-                    if (!genFilePath.exists || genFilePath.exists && genFilePath.length !== waitToWrite.length) {
+                    notExists = !genFilePath.exists;
+                    genFileLengthNotEqual = genFilePath.exists && genFilePath.length !== waitToWrite.length;
+                    if (notExists || genFileLengthNotEqual) {
                       if (!genFilePath.parent.exists) {
                         genFilePath.create();
                       }
@@ -6828,8 +6831,10 @@ try {
         var nameStr = '';
         pngPath = File(pngPath);
 
-        if (this.newItemOrCover === 'newItem' || this.newItemOrCover === 'cover' && this.coverChangeValue === true) {
-          if (this.newItemOrCover === 'newItem') {
+        var isNewItem = this.newItemOrCover === 'newItem';
+        var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
+        if (isNewItem || isCover) {
+          if (isNewItem) {
             while (pngPath.exists) {
               pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
               pngPath = File(pngPath);
@@ -6892,9 +6897,10 @@ try {
           }
           var nameStr = '';
           pngPath = File(pngPath);
-
-          if (this.newItemOrCover === 'newItem' || this.newItemOrCover === 'cover' && this.coverChangeValue === true) {
-            if (this.newItemOrCover === 'newItem') {
+          var isNewItem = this.newItemOrCover === 'newItem';
+          var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
+          if (isNewItem || isCover) {
+            if (isNewItem) {
               while (pngPath.exists) {
                 pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
                 pngPath = File(pngPath);
@@ -6916,6 +6922,7 @@ try {
             for (i = 0; i < num; i++) {
               var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
               var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
+
               if (this.thumbTypeValue) {
                 app.activeViewer.views[0].saveBlittedImageToPng(time, seqPath, 1000, "what's this? I don't know");
               } else {
@@ -7021,6 +7028,10 @@ try {
         }
       }
     });
+
+    String.prototype.trim = String.prototype.trim || function () {
+      return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    };
 
     Array.prototype.includes = function (value) {
       for (var i = 0, len = this.length; i < len; i++) {
@@ -7659,7 +7670,13 @@ function translate(thisObj, expProps) {
       var prop;
       for (var i = 1; i <= ref.numProperties; i++) {
         prop = ref.property(i);
-
+        var isLayerStyle = prop.matchName === 'ADBE Layer Styles' && prop.canSetEnabled === false;
+        var isMaterial = prop.matchName === 'ADBE Material Options Group' && prop.propertyGroup(prop.propertyDepth).threeDLayer === false;
+        var isAudio = prop.matchName === 'ADBE Audio Group' && prop.propertyGroup(prop.propertyDepth).hasAudio === false;
+        var isExtra = prop.matchName === 'ADBE Extrsn Options Group';
+        var isPlane = prop.matchName === 'ADBE Plane Options Group';
+        var isVector = prop.matchName === 'ADBE Vector Materials Group';
+        var shouldRecursiveScan = !(isLayerStyle || isMaterial || isAudio || isExtra || isPlane || isVector);
         if (checkb.value === true) {
           if (prop.propertyType === PropertyType.PROPERTY && prop.expression !== '' && prop.canSetExpression && prop.expressionEnabled === true) {
             global.propArr.push(prop);
@@ -7668,7 +7685,7 @@ function translate(thisObj, expProps) {
             global.comps.add(compindex);
             global.layerTemp.add(ja);
           } else if (prop.propertyType === PropertyType.INDEXED_GROUP || prop.propertyType === PropertyType.NAMED_GROUP) {
-            if (prop.matchName === 'ADBE Layer Styles' && prop.canSetEnabled === false || prop.matchName === 'ADBE Material Options Group' && prop.propertyGroup(prop.propertyDepth).threeDLayer === false || prop.matchName === 'ADBE Audio Group' && prop.propertyGroup(prop.propertyDepth).hasAudio === false || prop.matchName === 'ADBE Extrsn Options Group' || prop.matchName === 'ADBE Plane Options Group' || prop.matchName === 'ADBE Vector Materials Group') {} else {
+            if (shouldRecursiveScan) {
               recursiveScanLayerForExpr(prop, compindex, ja);
             }
           }
@@ -7680,7 +7697,7 @@ function translate(thisObj, expProps) {
             global.comps.add(compindex);
             global.layerTemp.add(ja);
           } else if (prop.propertyType === PropertyType.INDEXED_GROUP || prop.propertyType === PropertyType.NAMED_GROUP) {
-            if (prop.matchName === 'ADBE Layer Styles' && prop.canSetEnabled === false || prop.matchName === 'ADBE Material Options Group' && prop.propertyGroup(prop.propertyDepth).threeDLayer === false || prop.matchName === 'ADBE Audio Group' && prop.propertyGroup(prop.propertyDepth).hasAudio === false || prop.matchName === 'ADBE Extrsn Options Group' || prop.matchName === 'ADBE Plane Options Group' || prop.matchName === 'ADBE Vector Materials Group') {} else {
+            if (shouldRecursiveScan) {
               recursiveScanLayerForExpr(prop, compindex, ja);
             }
           }
@@ -7692,7 +7709,7 @@ function translate(thisObj, expProps) {
             global.comps.add(compindex);
             global.layerTemp.add(ja);
           } else if (prop.propertyType === PropertyType.INDEXED_GROUP || prop.propertyType === PropertyType.NAMED_GROUP) {
-            if (prop.matchName === 'ADBE Layer Styles' && prop.canSetEnabled === false || prop.matchName === 'ADBE Material Options Group' && prop.propertyGroup(prop.propertyDepth).threeDLayer === false || prop.matchName === 'ADBE Audio Group' && prop.propertyGroup(prop.propertyDepth).hasAudio === false || prop.matchName === 'ADBE Extrsn Options Group' || prop.matchName === 'ADBE Plane Options Group' || prop.matchName === 'ADBE Vector Materials Group') {} else {
+            if (shouldRecursiveScan) {
               recursiveScanLayerForExpr(prop, compindex, ja);
             }
           }
