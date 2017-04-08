@@ -328,7 +328,7 @@ try {
 
         var xml = new XML(sp.settingsFile.readd())
         sp.forEach(xml.ParentGroup, function(item, index) {
-          if (item['@groupName'] === groupName) {
+          if (item['@groupName'].toString() === groupName) {
             item.setLocalName('waitToDelete')
           }
         })
@@ -352,7 +352,7 @@ try {
         var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd())
         xml = xml.child(sp.gv.lastSelectedItem.index)
 
-        var precomposeName = decodeURIComponent(xml['@name'])
+        var precomposeName = decodeURIComponent(xml['@name'].toString())
 
         app.beginUndoGroup('Undo new')
 
@@ -585,7 +585,7 @@ try {
 
         var groupName = sp.parentDroplist.selection.text
         sp.forEach(xml.ParentGroup, function(item, index) {
-          if (item['@groupName'] === groupName) {
+          if (item['@groupName'].toString() === groupName) {
             item.appendChild(new XML('<Index>' + (xml.ListItems.children().length() - 1).toString() + '</Index>'))
           }
         })
@@ -675,7 +675,7 @@ try {
             image.close()
           }, item)
           sp.forEach(xml.seq, function(folder, folderIndex) {
-            var name = decodeURIComponent(folder['@name'])
+            var name = decodeURIComponent(folder['@name'].toString())
             var parentFolder = sp.getImageFolderByName(this.name.replace('.xml', ''))
             var targetFolder = new Folder(parentFolder.toString() + sp.slash + name)
             if (!targetFolder.exists) { targetFolder.create() }
@@ -716,7 +716,7 @@ try {
         var xml = new XML(file.readd())
         var image = sp.getImage(sp.droplist.selection.text, sp.gv.lastSelectedItem.text)
 
-        if (sp.gv.lastSelectedItem.text === decodeURIComponent(xml.child(sp.gv.lastSelectedItem.index)['@name'])) {
+        if (sp.gv.lastSelectedItem.text === decodeURIComponent(xml.child(sp.gv.lastSelectedItem.index)['@name'].toString())) {
           xml.child(sp.gv.lastSelectedItem.index)['@name'] = encodeURIComponent(newEleName.toString())
           file.writee(xml)
         }

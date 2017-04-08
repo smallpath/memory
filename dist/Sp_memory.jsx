@@ -732,30 +732,32 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     newLayer: function newLayer(xml, thisComp) {
       var layer;
 
-      if (xml['@type'] === 'Solid' || xml['@type'] === 'VideoWithSound' || xml['@type'] === 'VideoWithoutSound' || xml['@type'] === 'Comp') {
+      var type = xml['@type'].toString();
+      var name = xml['@name'].toString();
+      if (type === 'Solid' || type === 'VideoWithSound' || type === 'VideoWithoutSound' || type === 'Comp') {
         var solidcolor = xml.solidColor.toString().split(',').slice(0, 3);
         if (xml.solidColor.toString() !== '') {
-          layer = thisComp.layers.addSolid(solidcolor, decodeURIComponent(xml['@name']), parseInt(xml.width), parseInt(xml.height), 1);
-        } else if (xml['@type'] === 'Comp') {
+          layer = thisComp.layers.addSolid(solidcolor, decodeURIComponent(name), parseInt(xml.width), parseInt(xml.height), 1);
+        } else if (type === 'Comp') {
           layer = this.newComp(xml, thisComp);
-        } else if (xml['@type'] === 'VideoWithSound' || xml['@type'] === 'VideoWithoutSound') {
+        } else if (type === 'VideoWithSound' || type === 'VideoWithoutSound') {
           layer = this.newMaterial(xml, thisComp);
         }
-      } else if (xml['@type'] === 'Text') {
-        layer = xml.textType.toString() === 'point' ? thisComp.layers.addText() : thisComp.layers.addBoxText([xml.boxSize.toString().split(',')[0], xml.boxSize.toString().split(',')[1]]);
-      } else if (xml['@type'] === 'Shape') {
+      } else if (type === 'Text') {
+        layer = xml.textType.toString() === 'point' ? thisComp.layers.addText() : thisComp.layers.addBoxText(xml.boxSize.toString().split(',').slice(0, 2));
+      } else if (type === 'Shape') {
         layer = thisComp.layers.addShape();
-      } else if (xml['@type'] === 'null') {
+      } else if (type === 'null') {
         layer = thisComp.layers.addNull();
-      } else if (xml['@type'] === 'Light') {
-        layer = thisComp.layers.addLight(decodeURIComponent(xml['@name']), [0, 0]);
+      } else if (type === 'Light') {
+        layer = thisComp.layers.addLight(decodeURIComponent(name), [0, 0]);
         layer.lightType = $.layer.getDistance(layer.lightType, parseInt(xml.light));
-      } else if (xml['@type'] === 'Camera') {
-        layer = thisComp.layers.addCamera(decodeURIComponent(xml['@name']), [0, 0]);
+      } else if (type === 'Camera') {
+        layer = thisComp.layers.addCamera(decodeURIComponent(name), [0, 0]);
       }
 
       try {
-        layer.name = decodeURIComponent(xml['@name']);
+        layer.name = decodeURIComponent(name);
 
         if (layer.index !== parseInt(xml.index)) {
           layer.moveAfter(thisComp.layer(parseInt(xml.index)));
@@ -763,15 +765,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         layer.label = parseInt(xml.label.toString());
 
-        if (xml.geoType === 'small' || xml.geoType === 'large') {
+        if (xml.geoType.toString() === 'small' || xml.geoType.toString() === 'large') {
           layer.containingComp.renderer = 'ADBE Picasso';
         }
 
-        if (xml.inPoint !== 'undefined') {
+        if (xml.inPoint.toString() !== 'undefined') {
           layer.inPoint = parseFloat(xml.inPoint);
         }
 
-        if (xml.outPoint !== 'undefined') {
+        if (xml.outPoint.toString() !== 'undefined') {
           layer.outPoint = parseFloat(xml.outPoint);
         }
 
@@ -799,7 +801,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           layer.audioEnabled = false;
         }
 
-        if (xml.trackMatteType !== 'undefined') {
+        if (typeof xml.trackMatteType !== 'undefined') {
           layer.trackMatteType = $.layer.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
         }
 
@@ -823,11 +825,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           layer.adjustmentLayer = true;
         }
 
-        if (xml.blendingMode.toString() !== 'undefined') {
+        if (typeof xml.blendingMode.toString() !== 'undefined') {
           layer.blendingMode = $.layer.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
         }
 
-        if (xml.autoOrient.toString() !== 'undefined') {
+        if (typeof xml.autoOrient.toString() !== 'undefined') {
           layer.autoOrient = $.layer.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
         }
 
@@ -856,10 +858,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var layer;
       var thisItem;
 
-      if (xml['@type'] === 'Comp') {
+      if (xml['@type'].toString() === 'Comp') {
         var isComp = false;
 
-        if (xml['@type'] === 'Comp') {
+        if (xml['@type'].toString() === 'Comp') {
           for (var isA = 0; isA < app.project.numItems; isA++) {
             if (app.project.item(isA + 1) instanceof CompItem && app.project.item(isA + 1).name === decodeURIComponent(xml.compname.toString())) {
               if (app.project.item(isA + 1).numLayers === xml.Properties.Comptent.children().length()) {
@@ -994,7 +996,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         layer.strectch = parseFloat(xml.stretch);
 
-        if (xml.startTime !== 'undefined') {
+        if (typeof xml.startTime !== 'undefined') {
           layer.startTime = parseFloat(xml.startTime);
         }
       }
@@ -1005,13 +1007,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             try {
               var genFileFolder;
               var genFilePath;
-              if (File(xml.file.toString()).exists) {
-                waitIm = File(xml.file.toString());
-              } else if (File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(File(xml.file.toString()).toString())).exists) {
-                if (decodeURIComponent(File(xml.file.toString()).toString())[0] === '~') {
-                  genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(File(xml.file.toString()).toString()));
+              var file = File(xml.file.toString());
+              if (file.exists) {
+                waitIm = file;
+              } else if (File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(file.toString())).exists) {
+                if (decodeURIComponent(file.toString())[0] === '~') {
+                  genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(file.toString()));
                 } else {
-                  genFilePath = File(genFileFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString()));
+                  genFilePath = File(genFileFolder.toString() + decodeURIComponent(file.toString()));
                 }
                 waitIm = genFilePath;
               } else if (xml.fileBin.toString() !== '') {
@@ -1021,10 +1024,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                     if (!genFileFolder.exists) {
                       genFileFolder.create();
                     }
-                    if (decodeURIComponent(File(xml.file.toString()).toString())[0] === '~') {
-                      genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(File(xml.file.toString()).toString()));
+                    if (decodeURIComponent(file.toString())[0] === '~') {
+                      genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(file.toString()));
                     } else {
-                      genFilePath = File(genFileFolder.toString() + $.layer.slash + decodeURIComponent(File(xml.file.toString()).toString()));
+                      genFilePath = File(genFileFolder.toString() + $.layer.slash + decodeURIComponent(file.toString()));
                     }
                     if (!genFilePath.parent.exists) {
                       genFilePath.parent.create();
@@ -1037,7 +1040,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                         genFilePath.create();
                       }
                       if (!genFilePath.parent.exists) {
-                        genFilePath = File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(File(xml.file.toString()).name.toString()));
+                        genFilePath = File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(file.name.toString()));
                       }
 
                       genFilePath.open('w');
@@ -1050,10 +1053,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                     if (!genFileFolder.exists) {
                       genFileFolder.create();
                     }
-                    if (decodeURIComponent(File(xml.file.toString()).toString())[0] === '~') {
-                      genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(File(xml.file.toString()).toString()));
+                    if (decodeURIComponent(file.toString())[0] === '~') {
+                      genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(file.toString()));
                     } else {
-                      genFilePath = File(genFileFolder.toString() + +$.layer.slash + decodeURIComponent(File(xml.file.toString()).toString()));
+                      genFilePath = File(genFileFolder.toString() + +$.layer.slash + decodeURIComponent(file.toString()));
                     }
                     if (!genFilePath.parent.exists) {
                       genFilePath.parent.create();
@@ -1064,7 +1067,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                         genFilePath.create();
                       }
                       if (!genFilePath.parent.exists) {
-                        genFilePath = File($.layer.tempFolder + $.layer.slash + decodeURIComponent(File(xml.file.toString()).name.toString()));
+                        genFilePath = File($.layer.tempFolder + $.layer.slash + decodeURIComponent(file.name.toString()));
                       }
                       genFilePath.open('w');
                       genFilePath.encoding = 'BINARY';
@@ -5284,7 +5287,47 @@ function UIParser(global) {
   };
   _.extend(_.windows, _.proto);
 
-  _.JSON = $.global.JSON;
+  _.JSON = {
+    parse: function parse(strJSON) {
+      return eval('(' + strJSON + ')');
+    },
+    stringify: function () {
+      var toString = Object.prototype.toString;
+      var isArray = Array.isArray || function (a) {
+        return toString.call(a) === '[object Array]';
+      };
+      var escMap = { '"': '\\"', '\\': '\\\\', '\b': '\\b', '\f': '\\f', '\n': '\\n', '\r': '\\r', '\t': '\\t' };
+      var escFunc = function escFunc(m) {
+        return escMap[m] || '\\u' + (m.charCodeAt(0) + 0x10000).toString(16).substr(1);
+      };
+      var escRE = /[\\"\u0000-\u001F\u2028\u2029]/g;
+      return function stringify(value) {
+        if (value == null) {
+          return 'null';
+        } else if (typeof value === 'number') {
+          return isFinite(value) ? value.toString() : 'null';
+        } else if (typeof value === 'boolean') {
+          return value.toString();
+        } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+          if (typeof value.toJSON === 'function') {
+            return stringify(value.toJSON());
+          } else if (isArray(value)) {
+            var res = '[';
+            for (var i = 0; i < value.length; i++) {
+              res += (i ? ', ' : '') + stringify(value[i]);
+            }return res + ']';
+          } else if (toString.call(value) === '[object Object]') {
+            var tmp = [];
+            for (var k in value) {
+              if (value.hasOwnProperty(k)) tmp.push(stringify(k) + ': ' + stringify(value[k]));
+            }
+            return '{' + tmp.join(', ') + '}';
+          }
+        }
+        return '"' + value.toString().replace(escRE, escFunc) + '"';
+      };
+    }()
+  };
   _.xml = {
     read: function read(xmlFile) {
       xmlFile.open('r');
@@ -5825,7 +5868,7 @@ try {
 
         var xml = new XML(sp.settingsFile.readd());
         sp.forEach(xml.ParentGroup, function (item, index) {
-          if (item['@groupName'] === groupName) {
+          if (item['@groupName'].toString() === groupName) {
             item.setLocalName('waitToDelete');
           }
         });
@@ -5849,7 +5892,7 @@ try {
         var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
         xml = xml.child(sp.gv.lastSelectedItem.index);
 
-        var precomposeName = decodeURIComponent(xml['@name']);
+        var precomposeName = decodeURIComponent(xml['@name'].toString());
 
         app.beginUndoGroup('Undo new');
 
@@ -6098,7 +6141,7 @@ try {
 
         var groupName = sp.parentDroplist.selection.text;
         sp.forEach(xml.ParentGroup, function (item, index) {
-          if (item['@groupName'] === groupName) {
+          if (item['@groupName'].toString() === groupName) {
             item.appendChild(new XML('<Index>' + (xml.ListItems.children().length() - 1).toString() + '</Index>'));
           }
         });
@@ -6190,7 +6233,7 @@ try {
             image.close();
           }, item);
           sp.forEach(xml.seq, function (folder, folderIndex) {
-            var name = decodeURIComponent(folder['@name']);
+            var name = decodeURIComponent(folder['@name'].toString());
             var parentFolder = sp.getImageFolderByName(this.name.replace('.xml', ''));
             var targetFolder = new Folder(parentFolder.toString() + sp.slash + name);
             if (!targetFolder.exists) {
@@ -6237,7 +6280,7 @@ try {
         var xml = new XML(file.readd());
         var image = sp.getImage(sp.droplist.selection.text, sp.gv.lastSelectedItem.text);
 
-        if (sp.gv.lastSelectedItem.text === decodeURIComponent(xml.child(sp.gv.lastSelectedItem.index)['@name'])) {
+        if (sp.gv.lastSelectedItem.text === decodeURIComponent(xml.child(sp.gv.lastSelectedItem.index)['@name'].toString())) {
           xml.child(sp.gv.lastSelectedItem.index)['@name'] = encodeURIComponent(newEleName.toString());
           file.writee(xml);
         }
