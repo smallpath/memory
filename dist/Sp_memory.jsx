@@ -3195,9 +3195,11 @@ function GridView(parent, attrs) {
       e.resizeItems();
       e.resizeScrollBar();
 
+      g.newPath();
       g.rectPath(0, 0, e.list.size[0] - e.scrollBarWidth * e.scrollScale, e.list.size[1]);
       g.fillPath(bgBrush);
 
+      g.newPath();
       for (var i = 0; i < items.length; i++) {
         if (items[i].backgroundColor) continue;
         g.rectPath(items[i].rect[0], items[i].rect[1] - e.scrollBarValue, items[i].rect[2], items[i].rect[3] - items[i].fontRect[3]);
@@ -3207,6 +3209,7 @@ function GridView(parent, attrs) {
       for (i = 0; i < items.length; i++) {
         if (items[i].backgroundColor) {
           var brush = g.newBrush(g.PenType.SOLID_COLOR, items[i].backgroundColor);
+          g.newPath();
           g.rectPath(items[i].rect[0], items[i].rect[1] - e.scrollBarValue, items[i].rect[2], items[i].rect[3]);
           g.fillPath(brush);
         }
@@ -3222,6 +3225,7 @@ function GridView(parent, attrs) {
         }
       }
 
+      g.newPath();
       for (i = 0; i < items.length; i++) {
         if (!items[i].selected) {
           if (items[i].strokeColor) continue;
@@ -3236,6 +3240,7 @@ function GridView(parent, attrs) {
       for (i = 0; i < items.length; i++) {
         if (items[i].strokeColor) {
           var pen = g.newPen(g.PenType.SOLID_COLOR, items[i].strokeColor, e.itemStrokeSize);
+          g.newPath();
           g.rectPath(items[i].rect[0], items[i].rect[1] - e.scrollBarValue, items[i].rect[2], items[i].rect[3]);
           a = items[i].rect[1] + items[i].imageRect[1] - e.scrollBarValue + items[i].imageRect[3];
           if (a > 0 && a - items[i].imageRect[3] < e.GV.size[1]) {
@@ -3244,6 +3249,7 @@ function GridView(parent, attrs) {
         }
       }
 
+      g.newPath();
       for (i = 0; i < items.length; i++) {
         if (items[i].selected) {
           a = items[i].rect[1] + items[i].imageRect[1] - e.scrollBarValue + items[i].imageRect[3];
@@ -3255,6 +3261,7 @@ function GridView(parent, attrs) {
       g.strokePath(selectedPen);
 
       if (e.showText) {
+        g.newPath();
         for (i = 0; i < items.length; i++) {
           if (!items[i].selected) {
             if (items[i].strokeColor) continue;
@@ -3266,6 +3273,7 @@ function GridView(parent, attrs) {
         for (i = 0; i < items.length; i++) {
           if (items[i].strokeColor) {
             brush = g.newBrush(g.PenType.SOLID_COLOR, items[i].strokeColor);
+            g.newPath();
             g.rectPath(items[i].rect[0] + items[i].fontRect[0], items[i].rect[1] + items[i].fontRect[1] - e.scrollBarValue, items[i].fontRect[2], items[i].fontRect[3]);
             a = items[i].rect[1] + items[i].imageRect[1] - e.scrollBarValue + items[i].imageRect[3];
             if (a > 0 && a - items[i].imageRect[3] < e.GV.size[1]) {
@@ -3274,6 +3282,7 @@ function GridView(parent, attrs) {
           }
         }
 
+        g.newPath();
         for (i = 0; i < items.length; i++) {
           if (items[i].selected) {
             a = items[i].rect[1] + items[i].imageRect[1] - e.scrollBarValue + items[i].imageRect[3];
@@ -3324,9 +3333,11 @@ function GridView(parent, attrs) {
         }
       }
       if (e.scrollScale) {
+        g.newPath();
         g.rectPath(e.list.size[0] - e.scrollBarWidth, 0, e.scrollBarWidth, e.list.size[1]);
         g.fillPath(scrollBarBrush);
 
+        g.newPath();
         g.rectPath(e.scrollBlockRect[0], e.scrollBlockRect[1], e.scrollBlockRect[2], e.scrollBlockRect[3]);
         g.fillPath(scrollBlockBrush);
       }
