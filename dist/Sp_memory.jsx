@@ -755,7 +755,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       } else if (type === 'Camera') {
         layer = thisComp.layers.addCamera(decodeURIComponent(name), [0, 0]);
       }
-
       try {
         layer.name = decodeURIComponent(name);
 
@@ -1601,7 +1600,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           myShape.vertices = vertsArr;
           myShape.inTangents = inTanArr;
           myShape.outTangents = outTanArr;
-          myShape.closed = xml.closed === true;
+          myShape.closed = xml.closed.toString() === 'true';
           try {
             layers.property(matchName).setValue(myShape);
           } catch (err) {
@@ -1635,7 +1634,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             myShape.vertices = vertsArr;
             myShape.inTangents = inTanArr;
             myShape.outTangents = outTanArr;
-            myShape.closed = xml.keyValue.child(ic).closed === true;
+            myShape.closed = xml.keyValue.child(ic).closed.toString() === 'true';
             shapes.push(myShape);
             vertsArr = [];
             inTanArr = [];
