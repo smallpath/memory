@@ -1861,7 +1861,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   $.layer.setParent = function () {
     $.layer.forEach.call($.layer.layerArr, function (item, index) {
       try {
-        if (parseInt($.layer.layerParentNameArr[index]) === $.layer.layerParentNameArr[index]) {
+        if (!isNaN(parseInt($.layer.layerParentNameArr[index]))) {
           item.setParentWithJump(item.containingComp.layer(parseInt($.layer.layerParentNameArr[index])));
         } else {
           item.setParentWithJump(item.containingComp.layer($.layer.layerParentNameArr[index]));
