@@ -4,8 +4,9 @@
   "description": "a script for adobe after effects to save any layers",
   "main": "index.js",
   "scripts": {
+    "dev": "webpack --config ./webpack.config.js --watch --progress --hide-modules",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config ./webpack.config.js",
+    "build": "webpack --config ./webpack.config.js --progress --hide-modules",
     "lint": "eslint . --quiet",
     "fix": "eslint . --fix --quiet"
   },

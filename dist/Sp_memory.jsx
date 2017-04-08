@@ -4011,7 +4011,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var layer;
 
       if (xml['@type'] === 'Solid' || xml['@type'] === 'VideoWithSound' || xml['@type'] === 'VideoWithoutSound' || xml['@type'] === 'Comp') {
-        var solidcolor = [xml.solidColor.toString().split(',')[0], xml.solidColor.toString().split(',')[1], xml.solidColor.toString().split(',')[2]];
+        var solidcolor = xml.solidColor.toString().split(',').slice(0, 3);
         if (xml.solidColor.toString() !== '') {
           layer = thisComp.layers.addSolid(solidcolor, decodeURIComponent(xml['@name']), parseInt(xml.width), parseInt(xml.height), 1);
         } else if (xml['@type'] === 'Comp') {
@@ -4120,13 +4120,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         $.layer.errorInfoArr.push({ line: $.line, error: err });
       }
 
-      if (xml['@type'] !== 'VideoWithSound') {
-        try {
-          $.layer.prototype.newPropertyGroup(xml.Properties, layer);
-        } catch (err) {
-          $.layer.errorInfoArr.push({ line: $.line, error: err });
-        }
+      try {
+        $.layer.prototype.newPropertyGroup(xml.Properties, layer);
+      } catch (err) {
+        $.layer.errorInfoArr.push({ line: $.line, error: err });
       }
+
 
       return layer;
     },
@@ -6995,7 +6994,7 @@ function createMenu() {
 
   ShortMenu[loc(sp.isShow)].onClick = function () {
     sp.showThumbValue = this.value;
-    $.global.gv.showText = this.value;
+    $.global.sp.gv.showText = this.value;
     sp.saveSetting('showThumb', this.value.toString());
     isCheckBoxClicked = true;
     sp.gv.refresh();
@@ -15305,6 +15304,7 @@ try {
     sp.frameSecond = parseInt(sp.getSetting('frameSecond'));
     sp.frameNum = parseInt(sp.getSetting('frameNum'));
 
+    !sp.scriptFolder.exists && sp.scriptFolder.create();
     !sp.roamingFolder.exists && sp.roamingFolder.create();
     !sp.materialFolder.exists && sp.materialFolder.create();
 
