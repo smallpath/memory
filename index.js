@@ -13,8 +13,40 @@ try {
     $.layer.slash = sp.slash
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile')
     $.layer.translate = $.global.translate
+    $.layer.didCreateLayer = function() {
+      ProgressBar.value = count++
+      ProgressText.text = 'Processing things ' + (count + 1) + ' from 10000'
+      PBWin.update()
+      win.update && win.update()
+    }
+    var count = 0
+    $.layer.willCreateLayers = function() {
+      if (count === 0) {
+        PBWin = new Window('palette', 'Progress', [0, 0, 300, 70])
+        ProgressText = PBWin.add('statictext', [12, 10, 190, 30], 'Progress')
+        ProgressBar = PBWin.add('progressbar', [10, 40, 290, 60], 0, 10000)
+        PBWin.show()
+        PBWin.center()
+      }
+    }
+    $.layer.didCreateLayers = function() {
+      count = 0
+      PBWin.close()
+    }
+
+    var PBWin, ProgressText, ProgressBar
 
     sp.fns = new Fns()
+
+
+    // for (var d = 0; d < 50; d++) {
+    //   ProgressBar.value = d
+    //   ProgressText.text = 'Processing things "+ (ProgressBar.value+1) + " from "+ 10000'
+    //   PBWin.update()
+    //   $.sleep(200)
+    // }
+
+    // alert("Done")
 
     //  Create UI
     var win = global instanceof Panel ? global : new Window('window', sp.scriptName, undefined, { resizeable: true })

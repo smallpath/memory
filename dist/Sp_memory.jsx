@@ -1702,6 +1702,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         isFirstStage = true;
         $.layer.clearHelperArr();
         app.beginSuppressDialogs();
+        $.layer.willCreateLayers();
       } else {
         isFirstStage = false;
       }
@@ -1712,6 +1713,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         $.layer.numLayers++;
         try {
           $.layer.layerArr[$.layer.layerArr.length] = layerArr[layerArr.length] = $.layer.prototype.newLayer(item, thisComp);
+          $.layer.didCreateLayer();
         } catch (err) {
           $.layer.errorInfoArr.push(err);
         }
@@ -1725,6 +1727,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         $.layer.setParent();
         $.layer.writeErrorFile();
         $.layer.clearHelperArr();
+        $.layer.didCreateLayers();
       }
 
       return layerArr;
@@ -1991,6 +1994,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   $.layer.pictureMaxLength = 10485760;
 
   $.layer.translate = function () {};
+  $.layer.didCreateLayer = function () {};
+  $.layer.willCreateLayers = function () {};
+  $.layer.didCreateLayers = function () {};
 
   $.layer.en = encodeURIComponent;
   $.layer.de = decodeURIComponent;
@@ -5614,6 +5620,28 @@ try {
     $.layer.slash = sp.slash;
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
     $.layer.translate = $.global.translate;
+    $.layer.didCreateLayer = function () {
+      ProgressBar.value = count++;
+      ProgressText.text = 'Processing things ' + (count + 1) + ' from 10000';
+      PBWin.update();
+      win.update && win.update();
+    };
+    var count = 0;
+    $.layer.willCreateLayers = function () {
+      if (count === 0) {
+        PBWin = new Window('palette', 'Progress', [0, 0, 300, 70]);
+        ProgressText = PBWin.add('statictext', [12, 10, 190, 30], 'Progress');
+        ProgressBar = PBWin.add('progressbar', [10, 40, 290, 60], 0, 10000);
+        PBWin.show();
+        PBWin.center();
+      }
+    };
+    $.layer.didCreateLayers = function () {
+      count = 0;
+      PBWin.close();
+    };
+
+    var PBWin, ProgressText, ProgressBar;
 
     sp.fns = new Fns();
 
