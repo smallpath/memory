@@ -41,7 +41,7 @@ try {
       win.update && win.update()
     }
     $.layer.didCreateLayers = function() {
-      // ProgressWin.close()
+      ProgressWin.close()
     }
 
     var ProgressWin, ProgressText, ProgressBar

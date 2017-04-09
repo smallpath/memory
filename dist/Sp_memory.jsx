@@ -5655,7 +5655,9 @@ try {
       ProgressWin.update && ProgressWin.update();
       win.update && win.update();
     };
-    $.layer.didCreateLayers = function () {};
+    $.layer.didCreateLayers = function () {
+      ProgressWin.close();
+    };
 
     var ProgressWin, ProgressText, ProgressBar;
 
