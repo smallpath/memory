@@ -14,8 +14,10 @@ try {
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile')
     $.layer.translate = $.global.translate
 
+    var prefixString = loc(sp.processingPrefix)
+    var suffixString = loc(sp.processAfter)
     $.layer.willCreateLayers = function(len) {
-      ProgressWin = new Window('palette', 'Progress')
+      ProgressWin = new Window('palette', loc(sp.processTitle))
       var group = ProgressWin.add(`Group{orientation:'column',alignment: ['fill','fill'],
         ProgressText: StaticText {text:"", justify:'center'},
         ProgressBar: Progressbar{alignment: ['fill','fill'],value:0, minvalue:0, maxvalue:${len}}
@@ -26,19 +28,20 @@ try {
       len.toString().split('').forEach(function(item) {
         replaced += '  '
       })
-      ProgressText.text = 'Processing things ' + replaced + '0 from ' + len
+      var divide = replaced + '0' + '/' + ProgressBar.maxvalue
+      ProgressText.text = prefixString + divide + suffixString
       ProgressWin.show()
-      // ProgressWin.layout.layout(true)
       ProgressWin.center()
     }
     $.layer.didCreateLayer = function(count) {
       ProgressBar.value = ProgressBar.value + count
-      ProgressText.text = 'Processing things ' + ProgressBar.value + ' from ' + ProgressBar.maxvalue
+      var divide = ProgressBar.value + '/' + ProgressBar.maxvalue
+      ProgressText.text = prefixString + divide + suffixString
       ProgressWin.update && ProgressWin.update()
       win.update && win.update()
     }
     $.layer.didCreateLayers = function() {
-      ProgressWin.close()
+      // ProgressWin.close()
     }
 
     var ProgressWin, ProgressText, ProgressBar

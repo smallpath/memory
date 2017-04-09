@@ -3947,8 +3947,10 @@ sp.extend(sp, {
   needModule: { en: 'Please create a module first', ch: '请先新建一个模块' },
   isSavePreview: { en: 'Save preview', ch: '存储预览' },
   searchWindow: { en: 'Search', ch: '搜索' },
-  getReport: { en: 'Get report', ch: '生成报告' }
-
+  getReport: { en: 'Get report', ch: '生成报告' },
+  processTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
+  processingPrefix: { en: 'Processing the ', ch: '正在生成第' },
+  processAfter: { en: ' th layer', ch: ' 个层' }
 });
 
 /***/ }),
@@ -5630,8 +5632,10 @@ try {
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
     $.layer.translate = $.global.translate;
 
+    var prefixString = loc(sp.processingPrefix);
+    var suffixString = loc(sp.processAfter);
     $.layer.willCreateLayers = function (len) {
-      ProgressWin = new Window('palette', 'Progress');
+      ProgressWin = new Window('palette', loc(sp.processTitle));
       var group = ProgressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n        ProgressText: StaticText {text:"", justify:\'center\'},\n        ProgressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n      }');
       ProgressText = group.ProgressText;
       ProgressBar = group.ProgressBar;
@@ -5639,20 +5643,19 @@ try {
       len.toString().split('').forEach(function (item) {
         replaced += '  ';
       });
-      ProgressText.text = 'Processing things ' + replaced + '0 from ' + len;
+      var divide = replaced + '0' + '/' + ProgressBar.maxvalue;
+      ProgressText.text = prefixString + divide + suffixString;
       ProgressWin.show();
-
       ProgressWin.center();
     };
     $.layer.didCreateLayer = function (count) {
       ProgressBar.value = ProgressBar.value + count;
-      ProgressText.text = 'Processing things ' + ProgressBar.value + ' from ' + ProgressBar.maxvalue;
+      var divide = ProgressBar.value + '/' + ProgressBar.maxvalue;
+      ProgressText.text = prefixString + divide + suffixString;
       ProgressWin.update && ProgressWin.update();
       win.update && win.update();
     };
-    $.layer.didCreateLayers = function () {
-      ProgressWin.close();
-    };
+    $.layer.didCreateLayers = function () {};
 
     var ProgressWin, ProgressText, ProgressBar;
 
