@@ -883,6 +883,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         if (isComp === true) {
           layer = thisComp.layers.add(thisItem);
+          layer.countForImport = xml.descendants('Layer').length() + 1;
         } else {
           var comp = app.project.items.addComp(decodeURIComponent(xml.compname.toString()), parseInt(xml.compwidth), parseInt(xml.compheight), parseFloat(xml.comppixelAspect), parseFloat(xml.compduration), parseFloat(xml.compframeRate));
 
@@ -992,7 +993,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var isVideo = xml['@type'].toString() === 'VideoWithSound' || xml['@type'].toString() === 'VideoWithoutSound';
       if (isVideo && isExist) {
         layer = thisComp.layers.add(thisItem);
-
         layer.strectch = parseFloat(xml.stretch);
 
         if (typeof xml.startTime !== 'undefined') {
@@ -1698,11 +1698,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     toLayer: function toLayer(thisComp, xml) {
       xml = xml || this.item;
       var isFirstStage;
+      var len = xml.descendants('Layer').length();
+
+
       if ($.layer.numLayers === 0) {
         isFirstStage = true;
         $.layer.clearHelperArr();
         app.beginSuppressDialogs();
-        $.layer.willCreateLayers();
+        $.layer.willCreateLayers(len);
       } else {
         isFirstStage = false;
       }
@@ -1712,8 +1715,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       $.layer.forEachXML(xml, function (item, index) {
         $.layer.numLayers++;
         try {
-          $.layer.layerArr[$.layer.layerArr.length] = layerArr[layerArr.length] = $.layer.prototype.newLayer(item, thisComp);
-          $.layer.didCreateLayer();
+          var thisLayer = $.layer.layerArr[$.layer.layerArr.length] = layerArr[layerArr.length] = $.layer.prototype.newLayer(item, thisComp);
+          var shouldCall = !(thisLayer.source instanceof CompItem);
+          if (shouldCall) {
+            $.layer.didCreateLayer(1);
+          } else {
+            $.writeln(thisLayer.countForImport);
+            $.layer.didCreateLayer(thisLayer.countForImport || 1);
+          }
         } catch (err) {
           $.layer.errorInfoArr.push(err);
         }
@@ -5620,28 +5629,32 @@ try {
     $.layer.slash = sp.slash;
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
     $.layer.translate = $.global.translate;
-    $.layer.didCreateLayer = function () {
-      ProgressBar.value = count++;
-      ProgressText.text = 'Processing things ' + (count + 1) + ' from 10000';
-      PBWin.update();
+
+    $.layer.willCreateLayers = function (len) {
+      ProgressWin = new Window('palette', 'Progress');
+      var group = ProgressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n        ProgressText: StaticText {text:"", justify:\'center\'},\n        ProgressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n      }');
+      ProgressText = group.ProgressText;
+      ProgressBar = group.ProgressBar;
+      var replaced = '';
+      len.toString().split('').forEach(function (item) {
+        replaced += '  ';
+      });
+      ProgressText.text = 'Processing things ' + replaced + '0 from ' + len;
+      ProgressWin.show();
+
+      ProgressWin.center();
+    };
+    $.layer.didCreateLayer = function (count) {
+      ProgressBar.value = ProgressBar.value + count;
+      ProgressText.text = 'Processing things ' + ProgressBar.value + ' from ' + ProgressBar.maxvalue;
+      ProgressWin.update && ProgressWin.update();
       win.update && win.update();
     };
-    var count = 0;
-    $.layer.willCreateLayers = function () {
-      if (count === 0) {
-        PBWin = new Window('palette', 'Progress', [0, 0, 300, 70]);
-        ProgressText = PBWin.add('statictext', [12, 10, 190, 30], 'Progress');
-        ProgressBar = PBWin.add('progressbar', [10, 40, 290, 60], 0, 10000);
-        PBWin.show();
-        PBWin.center();
-      }
-    };
     $.layer.didCreateLayers = function () {
-      count = 0;
-      PBWin.close();
+      ProgressWin.close();
     };
 
-    var PBWin, ProgressText, ProgressBar;
+    var ProgressWin, ProgressText, ProgressBar;
 
     sp.fns = new Fns();
 
