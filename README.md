@@ -1,4 +1,4 @@
-## [English Document](https://github.com/Smallpath/Memory/blob/master/README-EN.md)
+## [English Document](https://github.com/Smallpath/Memory/blob/master/wiki/README-EN.md)
 
 # Memory
 这是后期合成软件[Adobe After Effects](https://en.wikipedia.org/wiki/Adobe_After_Effects)的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
@@ -56,6 +56,21 @@ Windows系统;AE版本为CC,CC2014与CC2015
 
 ## 版本更新记录
 >[更新历史](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS.md)
+
+# 开发
+- [x] Node.js > v4.0
+- [x] Yarn.js
+
+```
+# 安装依赖
+yarn
+
+# 开发
+yarn run dev
+
+# 构建
+yarn run build
+```
 
 ## 感谢
 - 阿木亮([GridView.js](https://github.com/Smallpath/Memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
