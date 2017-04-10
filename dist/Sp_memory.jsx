@@ -3959,7 +3959,7 @@ sp.extend(sp, {
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var settingsButtonFunc = function settingsButtonFunc() {
+var settingsButtonFunc = $.global.settingsButtonFunc = function () {
   var _ = $.global.UIParser(global);
 
   var UIJson = {
@@ -4504,7 +4504,7 @@ function moduleWindow(groupItem, win) {
     resizeable: 0,
     maximizeButton: 0
   });
-  var outRes = 'Group{\n                            orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],                            helpTip:StaticText{text:\'' + loc(sp.moduleHelpTip) + '\'},\n                            wlist:ListBox{properties:{multiselect:0}},\n                            oc:Group{\n                                alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n                                ok:Button{text:\'' + loc(sp.changeModuleName) + '\'},\n                                cancel:Button{text:\'' + loc(sp.quit) + '\'}\n                            }}';
+  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    helpTip:StaticText{text:\'' + loc(sp.moduleHelpTip) + '\'},\n    wlist:ListBox{properties:{multiselect:0}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.changeModuleName) + '\'},\n        cancel:Button{text:\'' + loc(sp.quit) + '\'}\n    }\n  }';
   try {
     outRes = moveWin.add(outRes);
   } catch (err) {
@@ -4606,7 +4606,7 @@ function moveWindow(xmlItem, groupItem, win) {
     resizeable: 0,
     maximizeButton: 0
   });
-  var outRes = 'Group{\n                            orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],                            wlist:ListBox{properties:{multiselect:0}},\n                            oc:Group{\n                                alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n                                ok:Button{text:\'' + loc(sp.ok) + '\'},\n                                cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n                            }}';
+  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    wlist:ListBox{properties:{multiselect:0}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.ok) + '\'},\n        cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n    }\n  }';
   try {
     outRes = moveWin.add(outRes);
   } catch (err) {
@@ -4658,7 +4658,7 @@ function outputWindow() {
     resizeable: 0,
     maximizeButton: 0
   });
-  var outRes = 'Group{\n                            orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],                            wlist:ListBox{properties:{multiselect:1}},\n                            oc:Group{\n                                alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n                                ok:Button{text:\'' + loc(sp.ok) + '\'},\n                                cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n                            }}';
+  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    wlist:ListBox{properties:{multiselect:1}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.ok) + '\'},\n        cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n    }\n  }';
   try {
     outRes = outWin.add(outRes);
   } catch (err) {
@@ -4803,64 +4803,22 @@ $.global.upAndDownWindow = function (cu) {
 $.global.deleteThisFolder = deleteThisFolder;
 function deleteThisFolder(folder) {
   var waitClFile = folder.getFiles();
-  for (var waitA = 0; waitA < waitClFile.length; waitA++) {
-    if (waitClFile[waitA] instanceof Folder) {
-      deleteThisFolder(waitClFile[waitA]);
-      waitClFile[waitA].remove();
+  for (var i = 0; i < waitClFile.length; i++) {
+    if (waitClFile[i] instanceof Folder) {
+      deleteThisFolder(waitClFile[i]);
+      waitClFile[i].remove();
     } else {
-      waitClFile[waitA].remove();
+      waitClFile[i].remove();
     }
   }
 }
 
 $.global.presetWindow = function () {
   var jinWin = new Window('dialog', loc(sp.settingPre));
-  var jinRes = "group{\
-                  orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-                  guluG:Group{\
-                  orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-                  jinGroup:Group{\
-                  orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-                  isJin:StaticText{text:'" + loc(sp.isEffect) + "'}\
-                  isJinSt:StaticText{text:'" + loc(sp.jinOne) + "',properties:{multiline:1}}\
-                  jin:Panel{\
-                  orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-                  _1:Checkbox{text:'" + loc(sp._1) + "'},\
-                  _2:Checkbox{text:'" + loc(sp._2) + "'},\
-                  _3:Checkbox{text:'" + loc(sp._3) + "'},\
-                  _4:Checkbox{text:'" + loc(sp._4) + "'},\
-                  _5:Checkbox{text:'" + loc(sp._5) + "'},\
-                  _6:Checkbox{text:'" + loc(sp._6) + "'},\
-                  _7:Checkbox{text:'" + loc(sp._7) + "'},\
-                  _8:Checkbox{text:'" + loc(sp._8) + "'},\
-                  _9:Checkbox{text:'" + loc(sp._9) + "'},\
-                  }\
-                  },\
-                  delGroup:Group{\
-                  orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-                  isJin:StaticText{text:'" + loc(sp.cleanProperty) + "'}\
-                  isJinSt:StaticText{text:'" + loc(sp.jinTwo) + "',properties:{multiline:1}}\
-                  del:Panel{\
-                  orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],\
-                  _1:Checkbox{text:'" + loc(sp._1) + "'},\
-                  _2:Checkbox{text:'" + loc(sp._2) + "'},\
-                  _3:Checkbox{text:'" + loc(sp._3) + "',enabled:0},\
-                  _4:Checkbox{text:'" + loc(sp._4) + "',enabled:0},\
-                  _5:Checkbox{text:'" + loc(sp._5) + "'},\
-                  _6:Checkbox{text:'" + loc(sp._6) + "'},\
-                  _7:Checkbox{text:'" + loc(sp._7) + "'},\
-                  _8:Checkbox{text:'" + loc(sp._8) + "',enabled:0},\
-                  _9:Checkbox{text:'" + loc(sp._9) + "',enabled:0},\
-                  }\
-                  },\
-                  },\
-                  oc:Group{\
-                  orientation:'row',alignment:['fill','center'],alignChildren:['center','fill'],\
-                  ok:Button{text:'Ok',preferredSize:[160,30]},\
-                  }\
-                }";
+  var jinRes = 'group{\n    orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n    guluG:Group{\n      orientation:\'row\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n      jinGroup:Group{\n        orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n        isJin:StaticText{text:\'' + loc(sp.isEffect) + '\'}\n        isJinSt:StaticText{text:\'' + loc(sp.jinOne) + '\',properties:{multiline:1}}\n        jin:Panel{\n          orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n          _1:Checkbox{text:\'' + loc(sp._1) + '\'},\n          _2:Checkbox{text:\'' + loc(sp._2) + '\'},\n          _3:Checkbox{text:\'' + loc(sp._3) + '\'},\n          _4:Checkbox{text:\'' + loc(sp._4) + '\'},\n          _5:Checkbox{text:\'' + loc(sp._5) + '\'},\n          _6:Checkbox{text:\'' + loc(sp._6) + '\'},\n          _7:Checkbox{text:\'' + loc(sp._7) + '\'},\n          _8:Checkbox{text:\'' + loc(sp._8) + '\'},\n          _9:Checkbox{text:\'' + loc(sp._9) + '\'},\n        }\n      },\n      delGroup:Group{\n        orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n        isJin:StaticText{text:\'' + loc(sp.cleanProperty) + '\'},\n        isJinSt:StaticText{text:\'' + loc(sp.jinTwo) + '\',properties:{multiline:1}},\n        del:Panel{\n          orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n          _1:Checkbox{text:\'' + loc(sp._1) + '\'},\n          _2:Checkbox{text:\'' + loc(sp._2) + '\'},\n          _3:Checkbox{text:\'' + loc(sp._3) + '\',enabled:0},\n          _4:Checkbox{text:\'' + loc(sp._4) + '\',enabled:0},\n          _5:Checkbox{text:\'' + loc(sp._5) + '\'},\n          _6:Checkbox{text:\'' + loc(sp._6) + '\'},\n          _7:Checkbox{text:\'' + loc(sp._7) + '\'},\n          _8:Checkbox{text:\'' + loc(sp._8) + '\',enabled:0},\n          _9:Checkbox{text:\'' + loc(sp._9) + '\',enabled:0},\n        }\n      },\n    },\n    oc:Group{\n      orientation:\'row\',alignment:[\'fill\',\'center\'],alignChildren:[\'center\',\'fill\'],\n      ok:Button{text:\'Ok\',preferredSize:[160,30]},\n    }\n  }';
   var jinGulu = jinWin.add(jinRes);
-  for (var i = 1; i <= 9; i++) {
+
+  var _loop = function _loop(i) {
     if (app.settings.haveSetting('Sp_memory', '_1_' + i) === false) {
       if (i === 1 || i === 2 || i === 5) {
         app.settings.saveSetting('Sp_memory', '_1_' + i, '1');
@@ -4875,8 +4833,13 @@ $.global.presetWindow = function () {
         app.settings.saveSetting('Sp_memory', '_1_' + i, jinGulu.guluG.jinGroup.jin['_' + i].value === true ? '1' : '0');
       };
     } catch (err) {}
+  };
+
+  for (var i = 1; i <= 9; i++) {
+    _loop(i);
   }
-  for (i = 1; i <= 9; i++) {
+
+  var _loop2 = function _loop2(i) {
     if (app.settings.haveSetting('Sp_memory', '_2_' + i) === false) {
       app.settings.saveSetting('Sp_memory', '_2_' + i, '0');
     }
@@ -4888,6 +4851,10 @@ $.global.presetWindow = function () {
         app.settings.saveSetting('Sp_memory', '_2_' + i, jinGulu.guluG.delGroup.del['_' + i].value === true ? '1' : '0');
       };
     } catch (err) {}
+  };
+
+  for (var i = 1; i <= 9; i++) {
+    _loop2(i);
   }
   jinGulu.oc.ok.onClick = function () {
     jinWin.close();
@@ -4906,6 +4873,7 @@ $.global.presetWindow = function () {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+$.global.UIParser = UIParser;
 function UIParser(global) {
   var _ = global._ = function (selector) {
     if (_.isUI(selector.type)) {
