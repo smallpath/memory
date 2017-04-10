@@ -16,6 +16,7 @@ try {
 
     var prefixString = loc(sp.processingPrefix)
     var suffixString = loc(sp.processAfter)
+    var ProgressWin, ProgressText, ProgressBar
     $.layer.willCreateLayers = function(len) {
       ProgressWin = new Window('palette', loc(sp.processTitle))
       var group = ProgressWin.add(`Group{orientation:'column',alignment: ['fill','fill'],
@@ -43,8 +44,6 @@ try {
     $.layer.didCreateLayers = function() {
       ProgressWin.close()
     }
-
-    var ProgressWin, ProgressText, ProgressBar
 
     sp.fns = new Fns()
 
@@ -855,7 +854,7 @@ try {
         } else if (key.ctrlKey === false && key.shiftKey === false && alt === true) {
           keepRef.newItem(event)
         } else if (key.ctrlKey === true && key.shiftKey === true && alt === true) {
-          //                                                          alert(sp.gv.lastSelectedItem.index);
+          // alert(sp.gv.lastSelectedItem.index);
         }
       }
       this.shortMenu = function(event) {
@@ -883,13 +882,13 @@ try {
           } catch (err) { err.printa() }
         }
       }
-    }//  fns function end
+    }// fns function end
   })(
 
-    //  global
+    // global
     this,
 
-    //  create singleton helper object for script,and store it into Global
+    // create singleton helper object for script,and store it into Global
     (function() {
       var sp = function() {
         return new sp.prototype.init()
@@ -938,7 +937,6 @@ try {
           return this
         },
 
-        //             give source to target
         extend: function(target, source) {
           for (var i in source) target[i] = source[i]
           return target
