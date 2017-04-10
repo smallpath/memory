@@ -49,6 +49,12 @@ try {
     sp.fns = new Fns()
 
     //  Create UI
+    $.global.callbackBeforeWebpackBuild && $.global.callbackBeforeWebpackBuild()
+    if (!(global instanceof Panel)) {
+      $.global.callbackBeforeWebpackBuild = function() {
+        win.close()
+      }
+    }
     var win = global instanceof Panel ? global : new Window('window', sp.scriptName, undefined, { resizeable: true })
     var group1 = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}")
     var group11 = group1.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}")
