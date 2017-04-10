@@ -418,11 +418,11 @@ try {
             sourceFolder: sp.sourceFolder
           }
 
-          //                                      $.hiresTimer/1000000;
+          // $.hiresTimer/1000000;
 
           var activeCompLayersArr = sp.newLayers(xml, app.project.activeItem, options)
 
-          //                                      $.writeln($.hiresTimer/1000000);
+          // $.writeln($.hiresTimer/1000000);
 
           app.project.activeItem.time = currentTime
 

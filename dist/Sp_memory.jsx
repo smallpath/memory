@@ -1720,7 +1720,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           if (shouldCall) {
             $.layer.didCreateLayer(1);
           } else {
-            $.writeln(thisLayer.countForImport);
             $.layer.didCreateLayer(thisLayer.countForImport || 1);
           }
         } catch (err) {
