@@ -1,13 +1,20 @@
 var path = require('path')
-var RunEstkScriptPlugin = require('./runEstkScriptPlugin')
+var plugins = []
 
-var shell = `"${process.env.AE}" -r ${path.join(__dirname, '../dist/Sp_memory.jsx')}`
+var isDev = process.env.NODE_ENV !== 'production'
+if (isDev) {
+  var ae = require('after-effects')
+  var afterfx = path.join(ae.scriptsDir, '../afterfx.exe')
+  var WebpackShellPlugin = require('./WebpackShellPlugin')
 
-var plugins = process.env.NODE_ENV !== 'production' ? [
-  new RunEstkScriptPlugin({
-    onBuildEnd: [shell]
-  })
-] : []
+  var shell = `"${afterfx}" -r ${path.join(__dirname, '../dist/Sp_memory.jsx')}`
+
+  plugins = [
+    new WebpackShellPlugin({
+      onBuildEnd: [shell]
+    })
+  ]
+}
 
 module.exports = {
   entry: {
