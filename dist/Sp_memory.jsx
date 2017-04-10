@@ -5796,7 +5796,6 @@ try {
         sp.isOutside = false;
         sp.isLoopPreview = false;
       };
-
       this.leftClick = function () {
         if (sp.isLoopPreview === false) return;
 
@@ -5881,7 +5880,6 @@ try {
         sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
         sp.gv.refresh();
       };
-
       this.newLayer = function () {
         if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElements));
         if (!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
@@ -5962,7 +5960,6 @@ try {
           return null;
         }
       };
-
       this.cover = function () {
         if (!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
         var thisComp = app.project.activeItem;
@@ -5999,7 +5996,6 @@ try {
         app.endUndoGroup();
         app.endSuppressDialogs(false);
       };
-
       this.newItem = function () {
         try {
           if (!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
@@ -6039,7 +6035,6 @@ try {
           err.printc();err.printa();
         }
       };
-
       this.deleteItem = function () {
         if (sp.gv.selection.length === 0) return alert(loc(sp.needElements));
         if (sp.deleteAlertValue === true) {
@@ -6073,7 +6068,6 @@ try {
         sp.droplist.notify('onChange');
         sp.gv.refresh();
       };
-
       this.importImage = function () {
         if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
         var file = File.openDialog('Please select pictures', false);
@@ -6085,7 +6079,6 @@ try {
         sp.gv.lastSelectedItem.image = imageFile;
         sp.gv.refresh();
       };
-
       this.deleteGroup = function () {
         if (!sp.parentDroplist.selection) return;
         if (!sp.droplist.selection) return;
@@ -6118,7 +6111,6 @@ try {
         sp.droplist.selection = selection - 1;
         sp.gv.refresh();
       };
-
       this.addGroup = function () {
         var newEleName = prompt(loc(sp.setName), 'Default');
         if (!newEleName) {
@@ -6151,7 +6143,6 @@ try {
         sp.droplist.selection = sp.droplist.items.length - 1;
         sp.gv.refresh();
       };
-
       this.exportFile = function () {
         var exportFolder = Folder.selectDialog('Please select folder');
         if (!exportFolder) return;
@@ -6211,7 +6202,6 @@ try {
         clearOutput();
         writeLn('Complete!');
       };
-
       this.importFiles = function () {
         var files = File.openDialog('Please select xmls', '*.xml', true);
         if (!files) return;
@@ -6353,17 +6343,19 @@ try {
         sp.gv.refresh();
       };
       this.winResize = function () {
-        group1.location = [2, 0];
+        var spacing = 2;
+        var parentDroplistWidth = 100;
+        group1.location = [spacing, 0];
         group1.size = [win.size[0], win.size[1]];
         gv.size([group1.size[0], group1.size[1] - 20]);
         group11.location = [1, 1];
         group11.size.width = win.size[0] + 12;
-        droplist.size = [win.size[0] - 64, group11.size[1] - 3];
-        droplist.location.x = 60;
-        sp.parentDroplist.size.width = 60;
-        sp.parentDroplist.size.height = droplist.size.height;
-        sp.parentDroplist.itemSize.width = 33;
+        droplist.size = [win.size[0] - parentDroplistWidth - spacing * 2, group11.size[1] - 3];
+        droplist.location.x = parentDroplistWidth;
         droplist.itemSize.width = droplist.size.width - 27;
+        sp.parentDroplist.size.width = parentDroplistWidth;
+        sp.parentDroplist.size.height = droplist.size.height;
+        sp.parentDroplist.itemSize.width = parentDroplistWidth - 27;
         sp.gv.refresh();
       };
       this.winClose = function () {
