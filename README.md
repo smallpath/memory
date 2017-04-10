@@ -3,6 +3,12 @@
 # Memory
 这是后期合成软件[Adobe After Effects](https://en.wikipedia.org/wiki/Adobe_After_Effects)的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
+# 3.1 TODO
+- [x] 更换打包工具以提供直观的报错定位
+- [x] 生成层进度条
+- [ ] 存储层进度条
+- [ ] so on...
+
 ## 环境要求
 Windows系统;AE版本为CC,CC2014与CC2015
 
