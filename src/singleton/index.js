@@ -391,16 +391,17 @@ module.exports = (function() {
         var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq')
         !targetFolder.exists && targetFolder.create()
         var num = this.frameNum
+        this.willSavePreviews(num)
         for (var i = 0; i < num; i++) {
           try {
             var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num
             var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png')
-
             tempComp2.saveFrameToPng(time, seqPath)
-
+            this.didSavePreview()
             app.purge(PurgeTarget.IMAGE_CACHES)
           } catch (err) { }
         }
+        this.didSavePreviews()
       }
       BGtemp.source.remove()
       tempComp2.remove()
@@ -448,11 +449,11 @@ module.exports = (function() {
           }
           this.cropImage(pngPath, pngPath)
         }
-
         if (this.savePreviewValue === true) {
           var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq')
           !targetFolder.exists && targetFolder.create()
           var num = this.frameNum
+          this.willSavePreviews(num)
           var timeArr = this.getTimeInfoArr(comps)
           for (i = 0; i < num; i++) {
             var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num
@@ -464,10 +465,11 @@ module.exports = (function() {
               comps.saveFrameToPng(time, seqPath)
             }
             this.cropImage(seqPath, seqPath)
+            this.didSavePreview()
             app.purge(PurgeTarget.IMAGE_CACHES)
           }
+          this.didSavePreviews()
         }
-
         for (i = 0; i < otherIndexArr.length; i++) {
           try {
             thisLayer = comps.layer(otherIndexArr[i])

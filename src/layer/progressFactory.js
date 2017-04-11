@@ -1,7 +1,8 @@
 var global = $.global
 
-var progressFactory = global.progressFactory = {
+var progressFactory = {
   createWindow: function(len, title, prefixString, suffixString) {
+    if (global.progressWin) return
     global.progressWin = new Window('palette', title)
     var group = global.progressWin.add(`Group{orientation:'column',alignment: ['fill','fill'],
       progressText: StaticText {text:"", justify:'center',properties:{multiline:1}},
@@ -37,6 +38,9 @@ var progressFactory = global.progressFactory = {
     var time = (Date.now() - global.progressWin.startTime) / 1000
     var report = timePrefix + time.toString() + timeSuffix
     writeLn(report)
+    global.progressWin = null
+    global.progressText = null
+    global.progressBar = null
     return time
   }
 }
@@ -49,7 +53,7 @@ var savingSuffixString = loc(sp.savingProcessAfter)
 var savingTitle = loc(sp.savingProcessTitle)
 $.layer.willSaveLayers = function(layers) {
   var len = $.layer.countLayers(layers, true)
-  $.global.progressFactory.createWindow(
+  progressFactory.createWindow(
     len,
     savingTitle,
     savingPrefixString,
@@ -57,7 +61,7 @@ $.layer.willSaveLayers = function(layers) {
   )
 }
 $.layer.didSaveLayer = function(count) {
-  $.global.progressFactory.update(
+  progressFactory.update(
     count,
     savingPrefixString,
     savingSuffixString,
@@ -67,7 +71,7 @@ $.layer.didSaveLayer = function(count) {
 }
 $.layer.didSaveLayers = function() {
   $.layer.didSaveLayer(0)
-  $.global.progressFactory.complete(savingReport, timeSuffix)
+  progressFactory.complete(savingReport, timeSuffix)
 }
 
 // generating process window
@@ -77,7 +81,7 @@ var creatingSuffixString = loc(sp.creatingProcessAfter)
 var creatingTitle = loc(sp.creatingProcessTitle)
 
 $.layer.willCreateLayers = function(len) {
-  $.global.progressFactory.createWindow(
+  progressFactory.createWindow(
     len,
     creatingTitle,
     creatingPrefixString,
@@ -85,7 +89,7 @@ $.layer.willCreateLayers = function(len) {
   )
 }
 $.layer.didCreateLayer = function(count) {
-  $.global.progressFactory.update(
+  progressFactory.update(
     count,
     creatingPrefixString,
     creatingSuffixString,
@@ -95,7 +99,7 @@ $.layer.didCreateLayer = function(count) {
 }
 $.layer.didCreateLayers = function() {
   $.layer.didCreateLayer(0)
-  $.global.progressFactory.complete(creatingReport, timeSuffix)
+  progressFactory.complete(creatingReport, timeSuffix)
 }
 
 module.exports = progressFactory

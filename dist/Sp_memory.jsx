@@ -3889,13 +3889,16 @@ sp.extend(sp, {
   getReport: { en: 'Get report', ch: '生成报告' },
   creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
   creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
-  creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第' },
+  creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第 ' },
   creatingProcessAfter: { en: ' th layer', ch: ' 层' },
-  savingReport: { en: 'Saving cost: ', ch: '存储层耗时: ' },
+  savingReport: { en: 'Saving cost: ', ch: '总存储耗时: ' },
   savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
-  savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第' },
+  savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第 ' },
   savingProcessAfter: { en: ' th layer', ch: ' 层' },
-  second: { en: 'second', ch: '秒' }
+  second: { en: ' second', ch: ' 秒' },
+  previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
+  previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
+  previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' }
 });
 
 /***/ }),
@@ -5505,6 +5508,7 @@ UIParser.alertHelp = function () {
 
 module.exports = {
   progressFactory: __webpack_require__(19),
+  previewProgress: __webpack_require__(22),
   fns: __webpack_require__(20)
 };
 
@@ -6099,16 +6103,17 @@ module.exports = function () {
         var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
         !targetFolder.exists && targetFolder.create();
         var num = this.frameNum;
+        this.willSavePreviews(num);
         for (var i = 0; i < num; i++) {
           try {
             var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
             var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
-
             tempComp2.saveFrameToPng(time, seqPath);
-
+            this.didSavePreview();
             app.purge(PurgeTarget.IMAGE_CACHES);
           } catch (err) {}
         }
+        this.didSavePreviews();
       }
       BGtemp.source.remove();
       tempComp2.remove();
@@ -6158,11 +6163,11 @@ module.exports = function () {
           }
           this.cropImage(pngPath, pngPath);
         }
-
         if (this.savePreviewValue === true) {
           var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
           !targetFolder.exists && targetFolder.create();
           var num = this.frameNum;
+          this.willSavePreviews(num);
           var timeArr = this.getTimeInfoArr(comps);
           for (i = 0; i < num; i++) {
             var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
@@ -6174,10 +6179,11 @@ module.exports = function () {
               comps.saveFrameToPng(time, seqPath);
             }
             this.cropImage(seqPath, seqPath);
+            this.didSavePreview();
             app.purge(PurgeTarget.IMAGE_CACHES);
           }
+          this.didSavePreviews();
         }
-
         for (i = 0; i < otherIndexArr.length; i++) {
           try {
             thisLayer = comps.layer(otherIndexArr[i]);
@@ -7413,8 +7419,9 @@ $.global.cout = cout;
 
 var global = $.global;
 
-var progressFactory = global.progressFactory = {
+var progressFactory = {
   createWindow: function createWindow(len, title, prefixString, suffixString) {
+    if (global.progressWin) return;
     global.progressWin = new Window('palette', title);
     var group = global.progressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      progressText: StaticText {text:"", justify:\'center\',properties:{multiline:1}},\n      progressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n    }');
     global.progressWin.addEventListener('keydown', function () {
@@ -7447,6 +7454,9 @@ var progressFactory = global.progressFactory = {
     var time = (Date.now() - global.progressWin.startTime) / 1000;
     var report = timePrefix + time.toString() + timeSuffix;
     writeLn(report);
+    global.progressWin = null;
+    global.progressText = null;
+    global.progressBar = null;
     return time;
   }
 };
@@ -7459,14 +7469,14 @@ var savingSuffixString = loc(sp.savingProcessAfter);
 var savingTitle = loc(sp.savingProcessTitle);
 $.layer.willSaveLayers = function (layers) {
   var len = $.layer.countLayers(layers, true);
-  $.global.progressFactory.createWindow(len, savingTitle, savingPrefixString, savingSuffixString);
+  progressFactory.createWindow(len, savingTitle, savingPrefixString, savingSuffixString);
 };
 $.layer.didSaveLayer = function (count) {
-  $.global.progressFactory.update(count, savingPrefixString, savingSuffixString, savingReport, timeSuffix);
+  progressFactory.update(count, savingPrefixString, savingSuffixString, savingReport, timeSuffix);
 };
 $.layer.didSaveLayers = function () {
   $.layer.didSaveLayer(0);
-  $.global.progressFactory.complete(savingReport, timeSuffix);
+  progressFactory.complete(savingReport, timeSuffix);
 };
 
 var creatingReport = loc(sp.creatingReport);
@@ -7475,14 +7485,14 @@ var creatingSuffixString = loc(sp.creatingProcessAfter);
 var creatingTitle = loc(sp.creatingProcessTitle);
 
 $.layer.willCreateLayers = function (len) {
-  $.global.progressFactory.createWindow(len, creatingTitle, creatingPrefixString, creatingSuffixString);
+  progressFactory.createWindow(len, creatingTitle, creatingPrefixString, creatingSuffixString);
 };
 $.layer.didCreateLayer = function (count) {
-  $.global.progressFactory.update(count, creatingPrefixString, creatingSuffixString, creatingReport, timeSuffix);
+  progressFactory.update(count, creatingPrefixString, creatingSuffixString, creatingReport, timeSuffix);
 };
 $.layer.didCreateLayers = function () {
   $.layer.didCreateLayer(0);
-  $.global.progressFactory.complete(creatingReport, timeSuffix);
+  progressFactory.complete(creatingReport, timeSuffix);
 };
 
 module.exports = progressFactory;
@@ -8277,6 +8287,68 @@ try {
 
 module.exports = g;
 
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var global = $.global;
+
+var progressFactory = {
+  createWindow: function createWindow(len, title, prefixString, suffixString) {
+    global.progressWin = new Window('palette', title);
+    var group = global.progressWin.add('Group{\n      orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      progressText: StaticText {text:"", justify:\'center\',properties:{multiline:1}},\n      progressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n    }');
+    global.progressWin.addEventListener('keydown', function () {
+      global.progressWin.close();
+    });
+    global.progressText = group.progressText;
+    global.progressBar = group.progressBar;
+    var replaced = '';
+    len.toString().split('').forEach(function (item) {
+      replaced += '   ';
+    });
+    var divide = replaced + '0' + '/' + global.progressBar.maxvalue + '  ';
+    global.progressText.text = prefixString + divide + suffixString;
+    global.progressWin.show();
+    global.progressWin.center();
+    global.progressWin.startTime = Date.now();
+  },
+  update: function update(len, prefixString, suffixString, timePrefix, timeSuffix, previewTip) {
+    global.progressBar.value = global.progressBar.value + len;
+    var divide = global.progressBar.value + '/' + global.progressBar.maxvalue;
+    var fisrtLine = prefixString + divide + suffixString;
+    var time = (Date.now() - global.progressWin.startTime) / 1000;
+    var secondLine = timePrefix + time.toString() + timeSuffix;
+    global.progressText.text = fisrtLine + '\r\n' + secondLine + '\r\n' + previewTip;
+    global.progressWin.update && global.progressWin.update();
+    global.sp.win.update && global.sp.win.update();
+  },
+  complete: function complete(timePrefix, timeSuffix) {
+    var time = (Date.now() - global.progressWin.startTime) / 1000;
+    var report = timePrefix + time.toString() + timeSuffix;
+    writeLn(report);
+    return time;
+  }
+};
+
+var title = loc(sp.previewTitle);
+var previewPrefix = loc(sp.previewPrefix);
+var timePrefix = loc(sp.previewTime);
+var timeSuffix = loc(sp.second);
+sp.willSavePreviews = function (len) {
+  progressFactory.createWindow(len, title, previewPrefix, timeSuffix);
+};
+sp.didSavePreview = function () {
+  progressFactory.update(1, previewPrefix, '', timePrefix, timeSuffix);
+};
+sp.didSavePreviews = function () {
+  progressFactory.complete(timePrefix, timeSuffix);
+};
+
+module.exports = progressFactory;
 
 /***/ })
 /******/ ]);
