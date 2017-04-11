@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -77,7 +77,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 (function () {
   var encode = encodeURIComponent;
-  var decode = decode;
+  var decode = decodeURIComponent;
 
   $.layer = function (item, options) {
     return new $.layer.prototype.Init(item, options);
@@ -650,7 +650,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     toXML: function toXML(elementName, helperObj) {
       var layers = this.item;
       var comp;
-      if (layers instanceof Array) {
+      var isFirstStage = layers instanceof Array;
+      if (isFirstStage) {
         comp = layers[0].containingComp;
       } else {
         comp = layers[1].containingComp;
@@ -663,7 +664,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       var elementArr = helperObj.elementArr;
       var elementxml;
-      if (elementArr.length === 0) {
+      if (isFirstStage) {
+        $.layer.willSaveLayers(layers);
         elementxml = new XML('<Element name="' + elementName + '"></Element>');
       } else {
         elementxml = new XML('<Comptent name="' + elementName + '"></Comptent>');
@@ -676,28 +678,33 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var loopFunc = function loopFunc(thisLayer, index) {
         var thisIndex = elementArr.length === 0 ? index + 1 : index;
         var xml = $.layer(thisLayer, options).getXmlFromLayer(thisIndex);
-
+        $.layer.didSaveLayer(1);
+        var tempLength;
         if (thisLayer.source instanceof CompItem) {
           if (helperObj.hasOwnProperty('_' + thisLayer.source.id)) {
             var elementxmltemp = helperObj['_' + thisLayer.source.id]['ele'];
+            tempLength = elementxmltemp.descendants('Layer').length();
+            $.layer.didSaveLayer(tempLength);
             xml.Properties.appendChild(elementxmltemp);
           } else {
             elementArr.push(elementxml);
             var comptentXml = $.layer(thisLayer.source.layers, options, helperObj).toXML(encode(thisLayer.source.name), helperObj);
-
+            tempLength = comptentXml.descendants('Layer').length();
+            $.layer.didSaveLayer(tempLength);
             xml.Properties.appendChild(comptentXml);
             elementxml = elementArr.pop();
           }
         }
         elementxml.appendChild(xml);
       };
-      if (elementArr.length === 0) {
+      if (isFirstStage) {
         $.layer.forEach.call(layers, loopFunc);
+        $.layer.didSaveLayers();
       } else {
         $.layer.forEachLayer.call(layers, loopFunc);
       }
 
-      if (elementArr.length !== 0) {
+      if (!isFirstStage) {
         var cTemp = new XML(elementxml);
         for (var i = 0; i < cTemp.children().length(); i++) {
           cTemp.child(i).setChildren(1);
@@ -1110,13 +1117,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           matchName = obj.matchName;
         }
         var prop;
-        var indexProp = layers.property(propIndex);
+
         if (tagName === 'Group') {
           prop = 0;
+
           try {
             if (layers.canAddProperty(matchName)) {
               try {
                 prop = layers.addProperty(matchName);
+
+                var indexProp = layers.property(propIndex);
 
                 if (indexProp.matchName === 'ADBE Mask Atom') {
                   indexProp.maskMode = $.layer.getDistance(indexProp.maskMode, parseInt(currentXML['@maskmode']));
@@ -1160,9 +1170,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           try {
             var enabled = currentXML['@enabled'].toString();
             if (enabled !== 'None') {
-              if (indexProp.canSetEnabled === true) {
+              if (layers.property(propIndex).canSetEnabled === true) {
                 if (prop === 0 && enabled === 'false') {
-                  indexProp.enabled = false;
+                  layers.property(propIndex).enabled = false;
                 } else if (enabled === 'false') {
                   prop.enabled = false;
                 }
@@ -1189,7 +1199,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               var isNotEffect = matchName !== 'ADBE Effect Parade';
               var isNotLayerStyles = matchName !== 'ADBE Layer Styles';
               if (prop === 0 && isNotMask && isNotEffect && isNotLayerStyles) {
-                $.layer.prototype.newPropertyGroup(currentXML, indexProp, inTime);
+                $.layer.prototype.newPropertyGroup(currentXML, layers.property(propIndex), inTime);
               } else {
                 if (isNotMask && isNotEffect && isNotLayerStyles) {
                   $.layer.prototype.newPropertyGroup(currentXML, prop, inTime);
@@ -1941,6 +1951,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   };
 
   $.layer.translate = function () {};
+  $.layer.willSaveLayers = function () {};
+  $.layer.didSaveLayer = function () {};
+  $.layer.didSaveLayers = function () {};
   $.layer.didCreateLayer = function () {};
   $.layer.willCreateLayers = function () {};
   $.layer.didCreateLayers = function () {};
@@ -1964,6 +1977,29 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         obj[j] = obj[j].replace(reg, $.layer.decodedArr[index]);
       }
     });
+  };
+
+  $.layer.countLayers = function (layers, isFirstStage, helperObj) {
+    isFirstStage = isFirstStage || false;
+    helperObj = helperObj || {};
+    var count = 0;
+    var startIndex = isFirstStage ? 0 : 1;
+    var maxLength = isFirstStage ? layers.length : layers.length + 1;
+    for (var i = startIndex; i < maxLength; i++) {
+      count++;
+      var layer = layers[i];
+      if (layer.source instanceof CompItem) {
+        var id = layer.source.id;
+        if (helperObj[id]) {
+          count += layer.source.numLayers;
+        } else {
+          helperObj[id] = true;
+          count += $.layer.countLayers(layer.source.layers, false, helperObj);
+        }
+      }
+    }
+
+    return count;
   };
 
   $.layer.name = 'AE Layer library';
@@ -3475,50 +3511,13 @@ function GridView(parent, attrs) {
 "use strict";
 
 
-__webpack_require__(13);
-__webpack_require__(11);
-__webpack_require__(12);
-__webpack_require__(10);
+__webpack_require__(17);
+__webpack_require__(15);
+__webpack_require__(16);
+__webpack_require__(14);
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function OperatorOverload(call, operator) {
-  var meta = ['+', '-', '~', '*', '/', '%', '^', '<', '<=', '==', '<<', '>>', '>>>', '&', '|', '==='];
-  var toObject = function toObject() {
-    for (var i = 0; i < arguments.length; i++) {
-      this[arguments[i]] = true;
-    }
-    return this;
-  };
-  var metaObj = toObject.apply({}, meta);
-  if (!metaObj.hasOwnProperty(operator)) {
-    return alert('Operator not supported.');
-  }
-
-  this.call = call;
-  this[operator] = function (operand, rev) {
-    this.call(operand, rev);
-    return this;
-  };
-  return this;
-}
-
-var cout = $.global.cout = new OperatorOverload(function (operand, rev) {
-  if (!rev) {
-    $.writeln(operand);
-  } else {
-    alert(operand);
-  }
-}, '<<');
-$.global.cout = cout;
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3754,7 +3753,7 @@ function createMenu() {
 }
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3883,13 +3882,16 @@ sp.extend(sp, {
   isSavePreview: { en: 'Save preview', ch: '存储预览' },
   searchWindow: { en: 'Search', ch: '搜索' },
   getReport: { en: 'Get report', ch: '生成报告' },
-  processTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
-  processingPrefix: { en: 'Processing the ', ch: '正在生成第' },
-  processAfter: { en: ' th layer', ch: ' 个层' }
+  creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
+  creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第' },
+  creatingProcessAfter: { en: ' th layer', ch: ' 层' },
+  savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
+  savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第' },
+  savingProcessAfter: { en: ' th layer', ch: ' 层' }
 });
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4798,10 +4800,10 @@ $.global.presetWindow = function () {
   jinWin.center();
   jinWin.show();
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5487,1269 +5489,651 @@ UIParser.alertHelp = function () {
 };
 
 /***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  progressFactory: __webpack_require__(19),
+  fns: __webpack_require__(20)
+};
+
+/***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-try {
-  (function (global) {
-    __webpack_require__(0);
-    __webpack_require__(6);
-    __webpack_require__(1);
-    __webpack_require__(3);
-    __webpack_require__(7);
-    __webpack_require__(5);
-    __webpack_require__(2);
-    __webpack_require__(8);
+module.exports = function () {
+  __webpack_require__(18);
 
-    $.layer.slash = sp.slash;
-    $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
-    $.layer.translate = $.global.translate;
-
-    var prefixString = loc(sp.processingPrefix);
-    var suffixString = loc(sp.processAfter);
-    var ProgressWin, ProgressText, ProgressBar;
-    $.layer.willCreateLayers = function (len) {
-      ProgressWin = new Window('palette', loc(sp.processTitle));
-      var group = ProgressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n        ProgressText: StaticText {text:"", justify:\'center\'},\n        ProgressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n      }');
-      ProgressText = group.ProgressText;
-      ProgressBar = group.ProgressBar;
-      var replaced = '';
-      len.toString().split('').forEach(function (item) {
-        replaced += '  ';
-      });
-      var divide = replaced + '0' + '/' + ProgressBar.maxvalue;
-      ProgressText.text = prefixString + divide + suffixString;
-      ProgressWin.show();
-      ProgressWin.center();
-    };
-    $.layer.didCreateLayer = function (count) {
-      ProgressBar.value = ProgressBar.value + count;
-      var divide = ProgressBar.value + '/' + ProgressBar.maxvalue;
-      ProgressText.text = prefixString + divide + suffixString;
-      ProgressWin.update && ProgressWin.update();
-      win.update && win.update();
-    };
-    $.layer.didCreateLayers = function () {
-      ProgressWin.close();
-    };
-
-    sp.fns = new Fns();
-
-    $.global.callbackBeforeWebpackBuild && $.global.callbackBeforeWebpackBuild();
-    if (!(global instanceof Panel)) {
-      $.global.callbackBeforeWebpackBuild = function () {
-        win.close();
-      };
+  sp.extend(sp, {
+    forEach: function forEach(xml, callback, context) {
+      if (!(xml instanceof XML)) return;
+      var i, len;
+      for (i = 0, len = xml.children().length(); i < len; i++) {
+        if (callback.call(context, xml.child(i), i, xml) === false) {
+          break;
+        }
+      }
     }
-    var win = global instanceof Panel ? global : new Window('window', sp.scriptName, undefined, { resizeable: true });
-    var group1 = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}");
-    var group11 = group1.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}");
-    var parentDroplist = sp.parentDroplist = group11.add('Dropdownlist{}');
-    var droplist = sp.droplist = group11.add('Dropdownlist{}');
-    var gv = sp.gv = new GridView(group1);
+  });
 
-    gv.limitText = sp.getSettingAsBool('limitText');
-    gv.showText = sp.showThumbValue;
-    gv.version = parseInt(app.version.split('.')[0]) === 12 || parseInt(app.version.split('.')[0]) === 14 ? 'CC' : 'CC2014';
+  String.prototype.trim = String.prototype.trim || function () {
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+  };
 
-    gv.leftClick = sp.fns.leftClick;
-    gv.rightClick = sp.fns.rightClick;
-    gv.leftDoubleClick = sp.fns.newLayer;
-    gv.mouseMove = sp.fns.moveOver;
-    parentDroplist.onChange = sp.fns.parentDroplistChange;
-    droplist.onChange = sp.fns.droplistChange;
+  Array.prototype.includes = function (value) {
+    for (var i = 0, len = this.length; i < len; i++) {
+      if (this[i] === value) {
+        return true;
+      }
+    }
+    return false;
+  };
 
-    sp.reloadParentDroplist();
-    var selection = parseInt(sp.getSetting('parentSelection'));
-    parentDroplist.selection = selection <= parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
-    selection = parseInt(sp.getSetting('thisSelection'));
-    droplist.selection = selection <= droplist.items.length - 1 && selection >= 0 ? selection : 0;
+  Array.prototype.forEach = function (callback, context) {
+    if (Object.prototype.toString.call(this) === '[object Array]') {
+      var i, len;
+      for (i = 0, len = this.length; i < len; i++) {
+        if (typeof callback === 'function' && Object.prototype.hasOwnProperty.call(this, i)) {
+          if (callback.call(context, this[i], i, this) === false) {
+            break;
+          }
+        }
+      }
+    }
+  };
 
-    sp.renderTaskArray.forEach(function (item, index) {
-      app.cancelTask(item);
-    });
-    sp.renderTaskArray.length = 0;
-    sp.previewHelper = {};
+  Error.prototype.print = Error.prototype.print || function () {
+    return 'Line #' + this.line.toString() + '\r\n' + this.toString();
+  };
 
-    win.onResize = win.onResizing = sp.fns.winResize;
+  Error.prototype.printc = Error.prototype.printc || function () {
+    cout << '\n---------';
+    cout << this.print();
+    cout << '---------\n';
+  };
 
-    if (win instanceof Panel) {
-      win.layout.layout(1);
+  Error.prototype.printa = Error.prototype.printa || function () {
+    this.print() << cout;
+  };
+
+  File.prototype.writee = function (str) {
+    this.open('w');
+    this.write(str);
+    this.close();
+  };
+
+  File.prototype.readd = function () {
+    this.open('r');
+    var temp = this.read();
+    this.close();
+    return temp;
+  };
+
+  Array.prototype.pushh = function (str) {
+    this.push(str);
+    return this;
+  };
+}();
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function () {
+  var keyNameArr = [];
+  var valueArr = [];
+
+  for (var i = 1; i <= 9; i++) {
+    keyNameArr.push('_1_' + i);
+    if (i === 1 || i === 2 || i === 5) {
+      valueArr.push('1');
     } else {
-      win.location = sp.getSetting('winLocation').split(',');
-      if (win.location[0] <= 0 || win.location[1] <= 0) {
-        win.location = [100, 200];
+      valueArr.push('0');
+    }
+  }
+
+  for (i = 1; i <= 9; i++) {
+    keyNameArr.push('_2_' + i);
+    valueArr.push('0');
+  }
+
+  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview');
+
+  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true');
+
+  keyNameArr.forEach(function (item, index) {
+    var value = valueArr[index];
+    if (sp.haveSetting(item) === false) sp.saveSetting(item, value);
+  });
+
+  sp.showThumbValue = sp.getSettingAsBool('showThumb');
+  sp.deleteAlertValue = sp.getSettingAsBool('deleteAlert');
+  sp.preComposeValue = sp.getSettingAsBool('preCompose');
+  sp.saveMaterialValue = sp.getSettingAsBool('saveMaterial');
+  sp.autoNameValue = sp.getSettingAsBool('autoName');
+  sp.onlyEffectValue = sp.getSettingAsBool('onlyEffect');
+  sp.cleanGroupValue = sp.getSettingAsBool('cleanGroup');
+  sp.offsetKeyframeValue = sp.getSettingAsBool('offsetKeyframe');
+  sp.savePreviewValue = sp.getSettingAsBool('savePreview');
+
+  sp.thumbTypeValue = sp.getSettingAsBool('thumbType');
+  sp.coverChangeValue = sp.getSettingAsBool('coverChange');
+
+  sp.frameSecond = parseInt(sp.getSetting('frameSecond'));
+  sp.frameNum = parseInt(sp.getSetting('frameNum'));
+
+  !sp.scriptFolder.exists && sp.scriptFolder.create();
+  !sp.roamingFolder.exists && sp.roamingFolder.create();
+  !sp.materialFolder.exists && sp.materialFolder.create();
+
+  var loc = function loc(string) {
+    if (sp.lang === 0) {
+      sp.lang = sp.getSetting('language');
+
+      if (sp.isForceEnglish()) {
+        sp.lang = 'en';
       }
-      win.show();
-      win.size = sp.getSetting('winSize').split(',');
-      win.onClose = sp.fns.winClose;
+    }
+    return string[sp.lang];
+  };
+
+  $.global.loc = loc;
+
+  sp.extend(sp, {
+    beyondCS6: true,
+    versionUpdateInfo: {
+      ch: '\u5C42\u5B58\u50A8\u811A\u672CSp_Memory 3.0 @\u79CB\u98CE_\u5C0F\u5F84\n\n\u529F\u80FD\u6DFB\u52A0:\n1.\u9ED8\u8BA4\u5F00\u542F\u9884\u89C8\u52A8\u753B\u529F\u80FD\n2.\u5B58\u50A8\u5C42\u65F6\u9ED8\u8BA4\u5B58\u50A8\u9884\u89C8\u52A8\u753B,\u53EF\u8BBE\u5B9A\u9884\u89C8\u7684\u5E27\u7387\u548C\u5E27\u6570\n3.\u5BFC\u5165\u5BFC\u51FA\u529F\u80FD\u652F\u6301\u9884\u89C8\u52A8\u753B\n3.\u6DFB\u52A0\u7EC4\u7684\u5206\u7C7B-\u6A21\u5757\n\n\u53F3\u952E\u83DC\u5355\u65B0\u589E:\n1.\u9884\u89C8\u5168\u90E8/\u9884\u89C8\u9009\u4E2D\n2.\u65B0\u5EFA\u6A21\u5757\n3.\u5220\u9664\u6A21\u5757\n\n\n\u5C0F\u63D0\u793A:\n1.\u57283.x\u7248\u672C\u524D\u4FDD\u5B58\u7684\u7EC4,\u53EF\u4EE5\u7528"\u53F3\u952E->\u8F85\u52A9\u811A\u672C->\u91CD\u8F7D\u7EC4\u5185\u9884\u89C8\u52A8\u753B"\u6765\u4E3A\u7EC4\u6240\u6709\u5143\u7D20\u8FDB\u884C\u6279\u91CF\u751F\u6210\u9884\u89C8\u52A8\u753B\n2.\u53EF\u4F7F\u7528ctrl\u4E0Eshift\u5BF9\u5143\u7D20\u8FDB\u884C\u81EA\u7531\u9009\u62E9,\u4E4B\u540E\u53F3\u952E->\u9884\u89C8\u9009\u4E2D,\u5373\u53EF\u540C\u65F6\u9884\u89C8\u6240\u6709\u88AB\u9009\u4E2D\u5143\u7D20\u7684\u52A8\u753B\n3.\u5728\u672A\u9009\u4E2D\u4EFB\u4F55\u5143\u7D20\u65F6,\u53F3\u952E->\u9884\u89C8\u5168\u90E8,\u5373\u53EF\u9884\u89C8\u7EC4\u5185\u7684\u5168\u90E8\u5143\u7D20\u7684\u52A8\u753B\n4.\u5728\u8BBE\u7F6E\u7A97\u53E3\u4E2D,\u9009\u4E2D\u4E00\u4E2A\u7EC4,\u4E4B\u540E\u70B9\u51FB"\u526A\u5207\u9009\u4E2D\u7EC4\u5230\u5176\u4ED6\u6A21\u5757",\u53EF\u5C06\u7EC4\u79FB\u52A8\u5230\u5176\u4ED6\u6A21\u5757\u4E2D\n\n\n',
+      en: 'Sp_memory 3.0 @smallpath\n                    \nNew Feature:\n1.Enable preview element\n2.Create preview animation while saving layers,you can set the frame rate and frame number\n3.Export/Import group support preview animation\n4.Add module - the group of group\n\nTips:\n1.When your group is saved  before v3.0,you can use "RightClick->Helper scripts->Reload previews of group" to create all the preview animation\n2.Use ctrl key and shift key to select element,then use "RightClick->Preview selected" to preview the animations of selected element at the same time.\n3.When there isn\'t any element being selected, us "RightClick->Preview all" to preview all the animations of group.\n4.To cut the group from its module into another module,use "Cut selected group to other module" in the settings window\n                    \n'
+    }
+  });
+
+  if (sp.haveSetting('version') === false || sp.getSetting('version') < sp.version) {
+    alert(loc(sp.versionUpdateInfo));
+    sp.saveSetting('version', sp.version);
+  }
+}();
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function () {
+  var sp = function sp() {
+    return new sp.prototype.init();
+  };
+
+  sp.prototype = {
+
+    scriptName: 'Sp_memory',
+    scriptVersion: '3.0',
+    version: 3.0,
+    slash: '/',
+
+    setting: app.settings,
+    inXml: null,
+
+    isCC2015: !!(app.version.indexOf('13.5') !== -1 || app.version.indexOf('13.6') !== -1 || app.version.indexOf('13.7') !== -1 || app.version.indexOf('13.8') !== -1 || app.version.indexOf('14') !== -1),
+
+    ui: 1,
+    lang: 0,
+
+    ip: '139.129.132.60',
+    downloadLink: 'http://139.129.132.60/script/Sp_memory',
+    weiboLink: 'http://weibo.com/u/3893928357',
+
+    noImage: '\x89PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\0d\0\0\0<\b\x06\0\0\0\x90?\x1F\xCE\0\0\t/IDATx\x9C\xED\x9BiL\x13]\x17\xC7\xFF\xED\xB0\xB4u\x01,QpA\x94\xB4\xFAA\x89J\t\xA8X5b\x1E\x8D1~0\xD1D\xFC 1\xA81FI\x8C\x9A(\x89\x8D\x0B.\x89!j\x88\xB2\x18\x17\xF0\x93Jp%\x1A\xC5\x88\x80\xDA\xD4\x05\x85Z!\x80\x82\x16D,\xB6,-]8\xCF\x07_&\x8E-L\xCD\xD3\xF7y\xE7\xD5\xF9%7\xE9\x9C{\xEE\x99\xE5?w\xEE\x9Ds\xA7\x12\0\x04\x11\xC1 \xFD_\x1F\x80\b\x17Q\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\fQ\x10\x81\x11\xC4\xE7 \x95J1z\xF4h\x84\x84\x84x\xD5\x11\x11\\.\x17\xACV+\x88\xFE\xCC\f\x8CD"\x01\x000\f\x03\xB9\\\x8E\xD0\xD0PH\xA5\xDE\xF7\xB9\xD3\xE9\x84\xCDf\xC3\xC0\xC0\xC0\xB0\xF1x\x05\x19=z4222\x10\x17\x17\x87\xFE\xFE~N\x9D\xCB\xE5BSS\x13\n\x0B\x0B\xE1t:\x7F\xE5<~+\xA4R)"""\x90\x92\x92\x82\xE4\xE4d\xC8d2N}hh(\x1A\x1B\x1BQPP\x80o\xDF\xBE\r\x1B\x8BW\x10\xB9\\\x8E\xA4\xA4$8\x1C\x0E\x98L&N\x9D\xDB\xEDF[[\x1B\xAF\xEA\xBF;\x83O\n\x8B\xC5\x82\xF7\xEF\xDF#44\x94S\xAF\xD1h\x90\x9C\x9C\x8C\xE2\xE2b^A\x80\xEF\xD9\xDE!Ktt4\x15\x15\x15\xD1\xFA\xF5\xEB\x87\xF5\x13\xCB\xD0e\xFD\xFA\xF5TTTD\xD1\xD1\xD1\xBC\xBE\xE2\xA0.0DA\x04\x06\xAF \x83\xCFG\xB7\xDB\xFDo\x1C\xCFo\x89\xDB\xED\x86\xCB\xE5\xF2k&\xCA+\x88\xD3\xE9\x84\xC9dBGGG@\x0E\xEEO\xA4\xA3\xA3\x03&\x93\xC9\xAF\x99\xA8\x04<K\xB8\x12\x89\x04\xC1\xC1\xC1\xF0x<\xF0x<\x81:\xC6?\n\x86a\xC00\x8C_\xBD\x84W\x10\x91\x7F\x17qP\x17\x18\xA2 \x02C\x14D`\xF0\xA6N\xFC%66\x16\x1F?~\xF4\x9A\x1EO\x9B6\r2\x99\f555\x1C{RR\x12\xD2\xD2\xD2 \x95JQRR\x82\xF2\xF2\xF2!cGEEA\xADV\xA3\xA2\xA2\x02\x000n\xDC8X\xADV8\x1C\x0E/\xDFQ\xA3F!((\b]]]^u\x87\x0F\x1FFnn.\xCCf\xF3\x90\xFB\n\x0B\x0B\xC3\xF6\xED\xDB1a\xC2\x04\xB4\xB5\xB5\xE1\xE4\xC9\x93\x9Ct\xC7\xDC\xB9s\x11\x1E\x1E\xCEic2\x99\xD0\xDC\xDC<d\xCC_% \xE9\x81\xA2\xA2"\xBA|\xF9\xB2\x97\xBD\xB4\xB4\x94***\xD8m\x86a\xE8\xC6\x8D\x1Bd\xB7\xDB\xA9\xBD\xBD\x9D\xCCf3\xF5\xF7\xF7SEE\x05\x8D\x1C9\xD2g\xEC\xEC\xECljmme\xB7sss)\'\'\xC7\xA7\xEF\xC5\x8B\x17\xE9\xD0\xA1C^v\x86a\xA8\xA9\xA9\x89\xF2\xF3\xF3\x87<\x87={\xF6\x90\xD9l&\x87\xC3Af\xB3\x99\xFA\xFA\xFA\xA8\xA3\xA3\x83rssY\x9F\xB7o\xDF\xD2\xCF\\\xBAt)`i\x96\x80=\xB2\xFA\xFA\xFA\xB0j\xD5*\xA4\xA7\xA7s\xECn\xB7\x9B3\xFF\xBEr\xE5\n\xB4Z-rrr\x10\x13\x13\x83I\x93&A\xA7\xD3A\xADV\xE3\xEE\xDD\xBBC\xC6w\xB9\\\xECo\xA5R\x89\xD4\xD4T/\x1F\x86a0w\xEE\\DGG{\xD5m\xDA\xB4\t\xB1\xB1\xB1\x987o\x9E\xCF\xF8\x1B6l@VV\x16>~\xFC\x88\xA5K\x97b\xFC\xF8\xF1\xD0h4\xD0\xEB\xF5\xD8\xB8q#\x8A\x8A\x8A\0|\x7F/\xBBy\xF3&\xB4Z-[\xF6\xED\xDB7\xFC\xC5\xF9E\x02\xA2l^^\x1E\xD9\xEDvjmm\xA5\x98\x98\x18\xD6~\xF5\xEAU\xBA\x7F\xFF>\x01\xA0\xF8\xF8x\xEA\xE9\xE9!\x9DN\xE7\xD5>##\x83\xFA\xFA\xFA|&1\xB3\xB3\xB3\xA9\xA9\xA9\x89\xDD.++#\xB7\xDBMiii\x1C\xBF\xCC\xCCL\x1A\x18\x18\xA0\xD2\xD2R\xAF\x18\xE5\xE5\xE5T__Ov\xBB\x9D\x96/_\xCE\xA9\x93H$T[[K\x06\x83\x81\x18\x86\xF1j{\xE2\xC4\tJHH \0TSSC\x05\x05\x05\x01\xEB\x11?\x97\x80\x0E\xEAF\xA3\x11N\xA7\x13W\xAE\\a\x17n~d\xDB\xB6m0\x9B\xCD8p\xE0\x80W]AA\x01jkk\xB1z\xF5j\xDE\xFDDFF\xA2\xBB\xBB\x1B\x1B7n\xE4\xD8\xD7\xACY\x03\x9B\xCD\x86\xB0\xB00\x8E=**\ns\xE6\xCC\xC1\xE5\xCB\x97a2\x99\xB0u\xEBVN\xBDV\xAB\x85J\xA5\xC2\xA1C\x87|\xBE\xFC\xEE\xDC\xB9\x13\xCF\x9F?\xE7=\xAE@\x10PA\\.\x17v\xEC\xD8\x81\xE9\xD3\xA7\xE3\xCC\x993^\xF5QQQhnn\x1Er\xFD\xA4\xB1\xB1\x11J\xA5\x92w?c\xC7\x8EEyy94\x1A\r\xE2\xE2\xE2\0\0\x89\x89\x89\x88\x8F\x8FGuu5"##9\xFE:\x9D\x0E\xBD\xBD\xBD8v\xEC\x18\xAA\xAA\xAA\xA0\xD1h8\x8BH\x8B\x17/\x86\xC5b\xC1\xF5\xEB\xD7\xFD:\xCF\xB5k\xD7\xE2\xEB\xD7\xAFl9{\xF6\xAC_\xED\xFC!`\xB3\xACAn\xDD\xBA\x85\x0B\x17. ==\xDDkL\x18L\x1F\f\x85\xCB\xE5Bpp\xF0\xB0\xF1CBB\x10\x11\x11\x81\xE3\xC7\x8FC\xA5R\xE1\xE0\xC1\x83X\xB7n\x1D\xF6\xEE\xDD\x0B\xA3\xD1\x88\xABW\xAF\xE2\xC8\x91#\x9C6\xF3\xE6\xCD\x83\xDB\xEDFqq1\x14\n\x05\x94J%v\xEF\xDE\xCD\xF6\xD4\xC1\xD4\xD0\xCFi\x8D\xDA\xDAZv\xE9Z&\x93a\xD9\xB2e\0\xBE\xDF8eee\xAC\xDF\x9D;wx\xAE\x8A\xFF\xFCW\xDEC233\xF1\xFA\xF5k\x9C8q\x82s\'Z,\x16L\x9E<y\xC8v\x93\'O\x86\xC5b\x196vll,\xA4R)\xDE\xBD{\x87\xBBw\xEFb\xC1\x82\x05\b\x0F\x0F\xC7\xFC\xF9\xF3q\xFD\xFAu<y\xF2\x04#G\x8Ed{\xC9\x8A\x15+\xA0R\xA9\xE0v\xBB1{\xF6lL\x9B6\r\x16\x8B\x05\x7F\xFD\xF5\x17\x1B\xF3\xF1\xE3\xC7\x18;v,\xB4Z-g_\xF7\xEE\xDD\xC3\xC3\x87\x0F\xD1\xD2\xD2\x02\xA5R\x89/_\xBE\0\0\f\x06\x03\xF6\xEE\xDD\xCB\x96\xCA\xCA\xCA_\xBEF\xC3\x11\xB0A\xFD\xE9\xD3\xA7\xECvTT\x14}\xF8\xF0\x81\xACV+;\xA8/Y\xB2\x84\xECv;m\xDE\xBC\xD9\xAB}JJ\n\xD9l6\xCA\xCC\xCC\x1CvPOOO\xA7\xF6\xF6v\x02@\n\x85\x82>\x7F\xFELF\xA3\x91ZZZ(88\x98d2\x19uwwSjj*\x01\xA0[\xB7n\xD1\xCB\x97/9\xF1\xB6l\xD9B===\xA4V\xAB\t\xF8>%\xAE\xAF\xAF\xA7G\x8F\x1E\xF9<\xB7\x92\x92\x12\xAA\xAB\xAB\xFB\xFF\x1B\xD4\x7F\xA4\xBD\xBD\x1D\xBBv\xED\xE2\xD8\x1E<x\0\x83\xC1\0\x9DN\x87\xB4\xB44\xD6\xBEh\xD1"\x9C?\x7F\x1E\xEF\xDF\xBF\xC7\xA9S\xA7\x86\x8D;c\xC6\f\xF6N\xED\xEB\xEBCee%T*\x15***\xE0r\xB9\xE0p8`\xB1X\xA0\xD1h\xA0P(\x90\x90\x90\x80\xAA\xAA*N\x8C\xFC\xFC|\xB4\xB5\xB5\xB1\xD3U\x8F\xC7\x83s\xE7\xCE!11\x11\xA5\xA5\xA5\x90\xCB\xE5\xAC\xEF\xFE\xFD\xFB\x91\x9A\x9A\x8A\xDB\xB7o\xB3\xB6\x90\x90\x10\x84\x87\x87\xB3\xE5\xE75\xF4\x7FJ@\x94\xCD\xCF\xCF\'\xBD^\xEF\xD3\xFEc\xCF\x89\x88\x88 \xBD^O\x0E\x87\x83\xDE\xBCyC\xAF^\xBD\xA2\xDE\xDE^\xAA\xAB\xAB#\x95J\xE53vvv6577\x13\0*..\xE6\xBCh\xCE\x9A5\x8B\xACV+M\x9D:\x95\xB5\xBDx\xF1\x82\n\x0B\x0B\xE9\xF0\xE1\xC3\xD4\xD5\xD5Ec\xC6\x8C\xF1\x8AY\\\\L\r\r\r$\x91HX\xDB\xE9\xD3\xA7\xC9j\xB5\xD2\xA7O\x9F\xE8\xC9\x93\'d4\x1A\xC9n\xB7\xD3\x8D\x1B7X\xBF7o\xDEPww7uuu\xB1%///`=\x84\x01\xA0\x0B\x84\xAA===\xF8\xF0\xE1\x83\xD7\xF4\xF0\xF6\xED\xDB\xE8\xEC\xECd\xBFXq8\x1C(,,\x84\xCDf\x83B\xA1@WW\x17JJJ\x90\x96\x96\x86\xCE\xCEN\x9F\xB1\x07g3\xD5\xD5\xD5\x18\x18\x18\xC0\xF3\xE7\xCFQWW\x07\xE0{Olhh@uu5\xEB\xDF\xDF\xDF\x8Fg\xCF\x9E\xA1\xB3\xB3\x13\xD5\xD5\xD5>\x9F\xF1\x06\x83\x012\x99\fz\xBD\x9E}q-++\xC3\xBD{\xF7\xA0T*\xE1v\xBB\xD1\xDA\xDA\x8A\xA3G\x8F"++\x8Bm\x17\x14\x14\x04\xA3\xD1\b\x83\xC1\xC0\x96k\xD7\xAE\xA1\xA5\xA5\xE5\x9F]\xC0\xFF \xAE\x87\b\f1\xDB+0DA\x04\x06\xAF \x12\x89\x04\f\xC3\xF8\xFC^U\xC4?\xA4R)\x18\x86\xF1\x99N\xF2\xF2\xE5s`\x18\x06\x91\x91\x91\x181bD@\x0E\xEEOd\xC4\x88\x11\x88\x8C\x8C\x04\xC30\xBC\xBE\xBC\x82(\x14\n\xA4\xA6\xA6B\xADV\x07\xE4\xE0\xFED\xD4j5\x96.]\n\x85B\xC1\xEB\xCB+\x88\\.\xC7\xC2\x85\x0B\xD9$\x9E\xC8\xAF\x13\x17\x17\x07\xADV\xCBy\xE1\x1C\n^A\xA4R)\xE4r\xB9\xCF\xFF\x87\x88\xF8GHH\b\xE4r\xB9_\xE3\xB08R\x0B\fQ\x10\x81\xE1\xD7z\x88B\xA1\xC0\xCA\x95+1q\xE2D\x8E}0\xBDPRR2\xEC:\xC7\xEF\x8ET*EXX\x18\x12\x12\x120s\xE6L\xAFd\xE3\xEC\xD9\xB3\x11\x14\xE4\xDF\xD2\x13\xAF\x97\xDDn\xC7\xB3g\xCF0}\xFAt\xAF\x81\xDD\xE9t\xC2\xE3\xF1\xF85\xBF\xFE]\x91H$\xEC\xF7\xCFJ\xA5\x12S\xA6L\xF1\x1A\xBC{{{a2\x99`\xB7\xDB\xF9\xE3\x81\'\x97%\xFE\xE9sx\x02\xFD\xA7O1\xB9(0\xC4A]`\x88\x82\b\fQ\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\x8C\xBF\x01O\xC5\x98\x01\xABf\xE6Y\0\0\0\0IEND\xAEB`\x82',
+
+    xmlFileNames: [],
+    xmlGroupNames: [],
+    xmlCurrentFileNames: [],
+
+    layerTypePropertyArr: [],
+    layerTypePropertyValueArr: [],
+
+    expPropertyArr: [],
+
+    layerArr: [],
+    layerParentNameArr: [],
+
+    init: function init() {
+      return this;
+    },
+
+    extend: function extend(target, source) {
+      for (var i in source) {
+        target[i] = source[i];
+      }return target;
     }
 
-    win.onResize();
+  };
 
-    function Fns() {
-      var keepRef = this;
-      this.previewAll = function () {
-        if (sp.gv.children.length === 0) return;
+  sp.prototype.extend(sp.prototype, {
 
-        keepRef.moveOut();
+    scriptFile: new File($.fileName),
+    scriptFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory'),
+    materialFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'tempFile'),
+    settingsFile: new File(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'settings.xml'),
+    imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'image'),
+    roamingFolder: new Folder(Folder.userData.fullName + sp.prototype.slash + 'Aescripts' + sp.prototype.slash + 'Sp_memory'),
 
-        var lenArr = [];
-        var oneFrame = sp.frameSecond;
-        sp.previewHelper = {};
-        var items = sp.gv.selection.length === 0 ? sp.gv.children : sp.gv.selection;
+    isOutside: true,
+    isLoopPreview: false,
+    previewHelper: {},
+    renderTaskArray: [],
+    preImageArr: [],
+    newItemOrCover: 'newItem',
 
-        for (var iter = 0, thisLen = items.length; iter < thisLen; iter++) {
-          var item = items[iter];
-          var img = item.image;
-          var index = item.index;
+    haveSetting: function haveSetting(keyName) {
+      return this.setting.haveSetting(this.scriptName, keyName);
+    },
 
-          if (!img.parent) return;
-          var folder = new Folder(img.parent);
+    saveSetting: function saveSetting(keyName, value) {
+      this.setting.saveSetting(this.scriptName, keyName, value);
+    },
 
-          if (!(folder instanceof Folder)) return;
-          var targetFolder = new Folder(folder.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
+    getSetting: function getSetting(keyName) {
+      return this.setting.getSetting(this.scriptName, keyName);
+    },
 
-          try {
-            if (!targetFolder.exists) {
-              if (targetFolder.parent.toString().indexOf('_seq') === -1) {
-                targetFolder = new Folder(folder.parent.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
-                img = new File(folder.parent.toString() + sp.slash + item.text + '.png');
-              }
-            }
-          } catch (err) {}
+    getSettingAsBool: function getSettingAsBool(keyName) {
+      return this.getSetting(keyName) === 'true';
+    },
 
-          if (!targetFolder.exists) {
-            continue;
-          }
-          if (!img.exists) {
-            continue;
-          }
+    getFileByName: function getFileByName(name) {
+      var string = this.scriptFolder.toString() + this.slash + name + '.xml';
+      var file = new File(string);
+      return file;
+    },
 
-          sp.previewHelper['item' + index] = {};
-          sp.previewHelper['item' + index]['tempItem'] = item;
-          sp.previewHelper['item' + index]['tempImg'] = img;
-          sp.previewHelper['item' + index]['currentIndex'] = 0;
-          sp.previewHelper['item' + index]['tempFiles'] = function (f) {
-            var len = f.getFiles().length;
-            var arr = [];
-            for (var i = 0; i < len; i++) {
-              var newFile = new File(f.toString() + sp.slash + i.toString() + '.png');
-              if (newFile.exists) {
-                arr.push(newFile);
-              }
-            }
-            return arr;
-          }(targetFolder);
+    isForceEnglish: function isForceEnglish() {
+      var string = this.scriptFolder.toString() + this.slash + 'force_en.txt';
+      var file = new File(string);
+      return file.exists;
+    },
 
-          lenArr.push(sp.previewHelper['item' + index]['tempFiles']);
+    getImageFolderByName: function getImageFolderByName(name) {
+      var string = this.imageFolder.toString() + this.slash + name + '';
+      var folder = new Folder(string);
+      if (!folder.exists) {
+        folder.create();
+      }
+      return folder;
+    },
+
+    getImage: function getImage(groupName, imageName) {
+      var folder = this.getImageFolderByName(groupName);
+      if (!folder.exists) {
+        folder.create();
+      }
+      var string = folder.toString() + this.slash + imageName + '.png';
+      var file = new File(string);
+      if (file.exists) {
+        return file;
+      } else {
+        return this.noImage;
+      }
+    },
+
+    getImageFile: function getImageFile(groupName, imageName) {
+      var folder = this.getImageFolderByName(groupName);
+      if (!folder.exists) {
+        folder.create();
+      }
+      var string = folder.toString() + this.slash + imageName + '.png';
+      var file = new File(string);
+      return file;
+    },
+
+    getGlobalIndexFromFileName: function getGlobalIndexFromFileName(name) {
+      var content = new XML(this.settingsFile.readd());
+      var thisIndex = -1;
+      this.forEach(content.ListItems, function (item, index) {
+        if (item.toString() === name) {
+          thisIndex = index;
         }
-
-        lenArr.sort(function (a, b) {
-          return a.length - b.length;
-        });
-
-        if (lenArr.length === 0) return;
-
-        var maxLen = lenArr[lenArr.length - 1].length;
-
-        for (var i = 0, len = maxLen; i <= len; i++) {
-          var stringToCall = '\n          if (sp) {\n            if (sp.gv) {\n              if (sp.gv.children) {\n\n                var len = sp.gv.children.length;\n                for (var itemIndex = 0; itemIndex < len; itemIndex++) {\n                  var currentItem = sp.previewHelper["item" + itemIndex];\n                  if (currentItem) {\n\n                    var currentIndex = currentItem["currentIndex"];\n                    currentItem["currentIndex"]++;\n                    var currentIndexTemp = currentItem["tempFiles"];\n                    if (currentIndexTemp) {\n                      var currentFile = currentIndexTemp[currentIndex];\n                      if (currentFile) {\n\n                        if (currentItem["tempItem"])\n                          currentItem["tempItem"].image = currentFile;\n\n                      } else {\n                        currentItem["currentIndex"] = 0;\n                      }\n                    }\n                  }\n                }\n                if (isValid(sp.gv.list))\n                  sp.gv.refresh();\n\n              }\n            }\n          }';
-          sp.renderTaskArray.push(app.scheduleTask(stringToCall, 0 + oneFrame * i, true));
-        }
-
-        sp.isLoopPreview = true;
-      };
-      this.moveOver = function (event, item, isClick) {
-        if (sp.isLoopPreview === true) return;
-
-        if (!item) {
-          sp.isOutside = true;
-          return;
-        }
-
-        if (typeof isClick !== 'undefined') {
-          if (sp.isOutside === true) {
-            return;
-          }
-        } else {
-          if (sp.isOutside === false) {
-            return;
-          }
-        }
-
-        var img = item.image;
-        var index = item.index;
-        var oneFrame = sp.frameSecond;
-
-        if (!img.parent) return;
-        var folder = new Folder(img.parent);
-
-        if (!(folder instanceof Folder)) return;
-        var targetFolder = new Folder(folder.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
-
-        if (!targetFolder.exists) {
-          if (targetFolder.parent.toString().indexOf('_seq') === -1) {
-            targetFolder = new Folder(folder.parent.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
-            img = new File(folder.parent.toString() + sp.slash + item.text + '.png');
-          }
-        }
-
-        if (!targetFolder.exists) {
-          return;
-        }
-        if (!img.exists) {
-          return;
-        }
-
-        sp.previewHelper['item' + index] = {};
-        sp.previewHelper['item' + index]['tempItem'] = item;
-        sp.previewHelper['item' + index]['tempImg'] = img;
-        sp.previewHelper['item' + index]['currentIndex'] = 0;
-        sp.previewHelper['item' + index]['tempFiles'] = function (f) {
-          var len = f.getFiles().length;
-          var arr = [];
-          for (var i = 0; i < len; i++) {
-            var newFile = new File(f.toString() + sp.slash + i.toString() + '.png');
-            if (newFile.exists) {
-              arr.push(newFile);
-            }
-          }
-          return arr;
-        }(targetFolder);
-
-        if (sp.previewHelper['item' + index]['tempFiles'].length === 0) return;
-
-        for (var i = 0, len = sp.previewHelper['item' + index]['tempFiles'].length; i <= len; i++) {
-          var stringToCall = '\n          if (sp) {\n            if (sp.gv) {\n              if (sp.gv.children) {\n\n                var len = sp.gv.children.length;\n                for (var itemIndex = 0; itemIndex < len; itemIndex++) {\n                  var currentItem = sp.previewHelper["item" + itemIndex];\n                  if (currentItem) {\n                    var currentIndex = currentItem["currentIndex"];\n                    currentItem["currentIndex"]++;\n\n                    var currentIndexTemp = currentItem["tempFiles"];\n                    if (currentIndexTemp) {\n                      var currentFile = currentIndexTemp[currentIndex];\n                      if (currentFile) {\n                        if (currentItem["tempItem"])\n                          currentItem["tempItem"].image = currentFile;\n                      } else {\n                        var currentImg = currentItem["tempImg"];\n                        if (currentImg) {\n                          currentItem["tempItem"].image = currentImg;\n                        }\n                        sp.previewHelper["item" + itemIndex] = {};\n                      }\n                    }\n                  }\n                }\n                if (isValid(sp.gv.list))\n                  sp.gv.refresh();\n\n              }\n            }\n          }';
-          sp.renderTaskArray.push(app.scheduleTask(stringToCall, 0 + oneFrame * i, false));
-        }
-
-        sp.isOutside = false;
-        sp.isLoopPreview = false;
-      };
-      this.leftClick = function () {
-        if (sp.isLoopPreview === false) return;
-
-        keepRef.moveOut();
-
-        sp.isLoopPreview = false;
-      };
-      this.moveOut = function () {
-        sp.renderTaskArray.forEach(function (item, index) {
-          app.cancelTask(item);
-        });
-        sp.renderTaskArray.length = 0;
-
-        if (sp.gv.children.length !== 0) {
-          sp.preImageArr.forEach(function (item, index) {
-            sp.gv.children[index].image = item;
-          });
-        }
-
-        sp.previewHelper = {};
-      };
-      this.addModule = function () {
-        var newEleName = prompt(loc(sp.setName), 'Default');
-        if (!newEleName) {
-          return;
-        }
-        newEleName.trim();
-        if (sp.lookUpTextInChildren(newEleName, sp.parentDroplist.items)) {
-          alert(loc(sp.existName));return;
-        }
-
-        var content = new XML(sp.settingsFile.readd());
-        content.ParentGroup.appendChild(new XML("<item groupName = '" + newEleName + "'></item>"));
-        sp.settingsFile.writee(content);
-        sp.reloadParentDroplist();
-        sp.parentDroplist.selection = sp.parentDroplist.items.length - 1;
-        sp.preImageArr = [];
-        var selection = parseInt(sp.getSetting('thisSelection'));
-        sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
-        sp.gv.refresh();
-      };
-      this.deleteModule = function () {
-        if (!sp.parentDroplist.selection) return;
-        var isSureDelete = confirm(loc(sp.deleteModuleAlert));
-        if (isSureDelete === true) isSureDelete = confirm(loc(sp.addAlert) + loc(sp.deleteModuleAlert));
-        if (isSureDelete === false) return;
-
-        var groupName = sp.parentDroplist.selection.text;
-
-        sp.xmlCurrentFileNames.forEach(function (item, index) {
-          var xml = new XML(sp.settingsFile.readd());
-          var selectionText = item;
-
-          var preIndex = sp.getGlobalIndexFromFileName(item);
-          xml.ListItems.child(preIndex).setLocalName('waitToDelete');
-          delete xml.ListItems.waitToDelete;
-          sp.settingsFile.writee(xml);
-          sp.deleteIndexAndReload(preIndex);
-
-          var imageFolder = sp.getImageFolderByName(selectionText);
-          $.global.deleteThisFolder(imageFolder);
-          imageFolder.remove();
-
-          var file = sp.getFileByName(selectionText);
-          file.remove();
-        });
-
-        var xml = new XML(sp.settingsFile.readd());
-        sp.forEach(xml.ParentGroup, function (item, index) {
-          if (item['@groupName'].toString() === groupName) {
-            item.setLocalName('waitToDelete');
-          }
-        });
-        delete xml.ParentGroup.waitToDelete;
-        sp.settingsFile.writee(xml);
-
-        sp.reloadParentDroplist();
-        sp.preImageArr = [];
-        var selection = parseInt(sp.getSetting('parentSelection'));
-        sp.parentDroplist.selection = selection - 1 <= sp.parentDroplist.items.length - 1 && selection - 1 >= 0 ? selection - 1 : 0;
-        selection = parseInt(sp.getSetting('thisSelection'));
-        sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
-        sp.gv.refresh();
-      };
-      this.newLayer = function () {
-        if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElements));
-        if (!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
-        if (sp.onlyEffectValue === true && app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
-
-        var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
-        xml = xml.child(sp.gv.lastSelectedItem.index);
-
-        var precomposeName = decodeURIComponent(xml['@name'].toString());
-
-        app.beginUndoGroup('Undo new');
-
-        if (sp.onlyEffectValue === false) {
-          var folderName = sp.getSetting('folderName');
-          var text = sp.gv.lastSelectedItem.text;
-          var compFolder = app.project.items.addFolder(text + '.sp');
-          var sourceFolder = app.project.items.addFolder('Sources');
-
-          var resultArr = sp.lookUpInItem(folderName, app.project.items);
-          if (resultArr[0] === true) {
-            var parentFolder = resultArr[1];
-            compFolder.parentFolder = parentFolder;
-          } else {
-            parentFolder = app.project.items.addFolder(folderName);
-            compFolder.parentFolder = parentFolder;
-          }
-          sourceFolder.parentFolder = compFolder;
-          sp.compFolder = compFolder;
-          sp.sourceFolder = sourceFolder;
-
-          var currentTime = app.project.activeItem.time;
-          var options = {
-            compFolder: sp.compFolder,
-            sourceFolder: sp.sourceFolder
-          };
-
-          var activeCompLayersArr = sp.newLayers(xml, app.project.activeItem, options);
-
-          app.project.activeItem.time = currentTime;
-
-          sourceFolder.numItems === 0 && sourceFolder.remove();
-          compFolder.numItems === 0 && compFolder.remove();
-        } else {
-          activeCompLayersArr = app.project.activeItem.selectedLayers;
-          sp.newProperties(xml, app.project.activeItem.selectedLayers, sp.cleanGroupValue, sp.offsetKeyframeValue);
-        }
-
-        app.endUndoGroup();
-
-        if (sp.preComposeValue === true) {
-          var indexArr = [];
-          var inPointArr = [];
-          var outPointArr = [];
-
-          activeCompLayersArr.forEach(function (item, index) {
-            indexArr.push(item.index);
-            inPointArr.push(item.inPoint);
-            outPointArr.push(item.outPoint);
-          });
-
-          inPointArr.sort(function (a, b) {
-            return a - b;
-          });
-          outPointArr.sort(function (a, b) {
-            return b - a;
-          });
-
-          app.beginUndoGroup('Undo precomp');
-          app.project.activeItem.layers.precompose(indexArr, precomposeName, true);
-          app.project.activeItem.selectedLayers[0].inPoint = inPointArr[0];
-          app.project.activeItem.selectedLayers[0].outPoint = outPointArr[0];
-          app.endUndoGroup();
-        }
-
-        if (sp.onlyEffectValue === false) {
-          return activeCompLayersArr;
-        } else {
-          return null;
-        }
-      };
-      this.cover = function () {
-        if (!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
-        var thisComp = app.project.activeItem;
-        if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
-        var itemName = sp.gv.lastSelectedItem.text;
-
-        app.beginSuppressDialogs();
-        app.beginUndoGroup('Undo save');
-
-        var imageFile = sp.getImageFile(sp.droplist.selection.text, itemName);
-
-        var seqFolder = new Folder(imageFile.toString().replace(/.png/i, '') + '_seq');
-        if (seqFolder.exists) {
-          $.global.deleteThisFolder(seqFolder);
-          seqFolder.remove();
-        }
-
-        sp.newItemOrCover = 'cover';
-
-        if (sp.isCC2015 === true) {
-          itemName = sp.savePng2(imageFile);
-        } else {
-          itemName = sp.savePng(imageFile);
-        }
-
-        var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp);
-
-        sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text), xml, sp.gv.lastSelectedItem.index);
-
-        sp.gv.lastSelectedItem.image = null;
-        sp.gv.lastSelectedItem.image = sp.getImage(sp.droplist.selection.text, itemName);
-        sp.gv.refresh();
-
-        app.endUndoGroup();
-        app.endSuppressDialogs(false);
-      };
-      this.newItem = function () {
-        try {
-          if (!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
-          var thisComp = app.project.activeItem;
-          if (sp.autoNameValue === false) {
-            var itemName = prompt(loc(sp.setName), 'Name');
-          } else {
-            itemName = thisComp.selectedLayers[0].name.replace('/', '_').replace('.', '_');
-          }
-
-          if (sp.autoNameValue === false && itemName === '' || itemName === null) return;
-
-          itemName.trim();
-
-          app.beginSuppressDialogs();
-          app.beginUndoGroup('Undo save');
-
-          sp.newItemOrCover = 'newItem';
-
-          if (sp.isCC2015 === true) {
-            itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text, itemName));
-          } else {
-            itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text, itemName));
-          }
-
-          var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp);
-
-          sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text), xml);
-
-          var item = sp.gv.add(decodeURIComponent(itemName), sp.getImage(sp.droplist.selection.text, itemName));
-          sp.preImageArr.push(item.image);
-          sp.gv.refresh();
-
-          app.endUndoGroup();
-          app.endSuppressDialogs(false);
-        } catch (err) {
-          err.printc();err.printa();
-        }
-      };
-      this.deleteItem = function () {
-        if (sp.gv.selection.length === 0) return alert(loc(sp.needElements));
-        if (sp.deleteAlertValue === true) {
-          var sure = confirm(loc(sp.sureDelete));
-        }
-        if (sp.deleteAlertValue === true && sure === false) return;
-
-        var file = sp.getFileByName(sp.droplist.selection.text);
-        var xml = new XML(file.readd());
-        sp.gv.selection.forEach(function (item, index) {
-          xml.child(item.index).setLocalName('waitToDelete');
-          var preText = item.text;
-          var image = sp.getImageFile(sp.droplist.selection.text, preText);
-          if (image.exists) {
-            image.remove();
-          }
-          var seqFolder = new Folder(image.toString().replace(/.png/i, '') + '_seq');
-          if (seqFolder.exists) {
-            $.global.deleteThisFolder(seqFolder);
-            seqFolder.remove();
-          }
-        });
-        delete xml.waitToDelete;
-        if (xml.children().length() !== 0) {
-          file.writee(xml);
-        } else {
-          file.writee('<tree></tree>');
-        }
-
-        sp.gv.removeAll();
-        sp.droplist.notify('onChange');
-        sp.gv.refresh();
-      };
-      this.importImage = function () {
-        if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
-        var file = File.openDialog('Please select pictures', false);
-        if (!file) return;
-        if (file.name.split('.').pop() !== 'jpg' && file.name.split('.').pop() !== 'png') return;
-        var imageFile = sp.getImageFile(sp.droplist.selection.text, sp.gv.lastSelectedItem.text);
-
-        sp.cropImage(file, imageFile);
-        sp.gv.lastSelectedItem.image = imageFile;
-        sp.gv.refresh();
-      };
-      this.deleteGroup = function () {
-        if (!sp.parentDroplist.selection) return;
-        if (!sp.droplist.selection) return;
-        var isSureDelete = confirm(loc(sp.isSureGroup));
-        if (isSureDelete === true) isSureDelete = confirm(loc(sp.isSureGroup2));
-        if (isSureDelete === false) return;
-
-        var xml = new XML(sp.settingsFile.readd());
-        var selectionText = sp.droplist.selection.text;
-
-        var preIndex = sp.getGlobalIndexFromFileName(selectionText);
-
-        xml.ListItems.child(preIndex).setLocalName('waitToDelete');
-        delete xml.ListItems.waitToDelete;
-        sp.settingsFile.writee(xml);
-        sp.deleteIndexAndReload(preIndex);
-
-        var imageFolder = sp.getImageFolderByName(selectionText);
-        $.global.deleteThisFolder(imageFolder);
-        imageFolder.remove();
-
-        var file = sp.getFileByName(selectionText);
-        file.remove();
-
-        sp.reloadParentDroplist();
-        sp.parentDroplist.selection = parseInt(sp.getSetting('parentSelection'));
-
-        sp.preImageArr = [];
-        var selection = parseInt(sp.getSetting('thisSelection'));
-        sp.droplist.selection = selection - 1;
-        sp.gv.refresh();
-      };
-      this.addGroup = function () {
-        var newEleName = prompt(loc(sp.setName), 'Default');
-        if (!newEleName) {
-          return;
-        }
-        if (!sp.parentDroplist.selection) return alert(loc(sp.needModule));
-        newEleName.trim();
-        if (sp.xmlFileNames.includes(newEleName)) {
-          alert(loc(sp.existName));return;
-        }
-
-        var file = sp.getFileByName(newEleName);
-        sp.getImageFolderByName(newEleName);
-        var str = '<tree></tree>';
-        file.writee(str);
-        var xml = new XML(sp.settingsFile.readd());
-        xml.ListItems.appendChild(new XML('<Name>' + newEleName + '</Name>'));
-
-        var groupName = sp.parentDroplist.selection.text;
-        sp.forEach(xml.ParentGroup, function (item, index) {
-          if (item['@groupName'].toString() === groupName) {
-            item.appendChild(new XML('<Index>' + (xml.ListItems.children().length() - 1).toString() + '</Index>'));
-          }
-        });
-
-        sp.settingsFile.writee(xml);
-        sp.reloadParentDroplist();
-        sp.preImageArr = [];
-        sp.parentDroplist.selection = parseInt(sp.getSetting('parentSelection'));
-        sp.droplist.selection = sp.droplist.items.length - 1;
-        sp.gv.refresh();
-      };
-      this.exportFile = function () {
-        var exportFolder = Folder.selectDialog('Please select folder');
-        if (!exportFolder) return;
-        if (!(exportFolder instanceof Folder)) return;
-        var sourceFile = sp.getFileByName(sp.droplist.selection.text);
-        var targetFile = File(exportFolder.toString() + sp.slash + sp.droplist.selection.text + '.xml');
-        if (targetFile.exists) {
-          alert(loc(sp.overWritten));return;
-        }
-        if (!sp.droplist.selection) return;
-
-        var images = sp.getImageFolderByName(sp.droplist.selection.text).getFiles();
-        var picXml = new XML('<pic></pic>');
-        var seqXml = new XML('<seq></seq>');
-        images.forEach(function (item, index) {
-          if (item.name.indexOf('.png') !== -1) {
-            item.open('r');
-            item.encoding = 'binary';
-            var str = encodeURIComponent(item.read());
-            item.close();
-            var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(item.name) + '</imgName>');
-            var tempXmlHeres = new XML('<img>' + str + '</img>');
-            var guluTempA = new XML('<imgInfo></imgInfo>');
-            guluTempA.appendChild(tempXmlBigHere);
-            guluTempA.appendChild(tempXmlHeres);
-            picXml.appendChild(guluTempA);
-          } else if (item instanceof Folder && item.name.indexOf('_seq') !== -1) {
-            var thisFolder = item;
-            var folderXml = new XML("<folder name='" + encodeURIComponent(item.name) + "'></folder>");
-            var seqFiles = thisFolder.getFiles();
-            seqFiles.forEach(function (imageFile, imageIndex) {
-              imageFile.open('r');
-              imageFile.encoding = 'binary';
-              var str = encodeURIComponent(imageFile.read());
-              imageFile.close();
-              var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(imageFile.name) + '</imgName>');
-              var tempXmlHeres = new XML('<img>' + str + '</img>');
-              var guluTempA = new XML('<imgInfo></imgInfo>');
-              guluTempA.appendChild(tempXmlBigHere);
-              guluTempA.appendChild(tempXmlHeres);
-              folderXml.appendChild(guluTempA);
-            });
-            seqXml.appendChild(folderXml);
-          }
-        });
-        var xml = new XML(sourceFile.readd());
-        if (picXml.children().length() > 0) {
-          xml.appendChild(picXml);
-        }
-        if (seqXml.children().length() > 0) {
-          xml.appendChild(seqXml);
-        }
-        if (xml.children().length() === 0) {
-          xml = '<tree></tree>';
-        }
-        targetFile.writee(xml);
-        clearOutput();
-        writeLn('Complete!');
-      };
-      this.importFiles = function () {
-        var files = File.openDialog('Please select xmls', '*.xml', true);
-        if (!files) return;
-        if (!sp.parentDroplist.selection) return alert(loc(sp.needModule));
-
-        var selectionIndex = sp.parentDroplist.selection.index;
-        files.forEach(function (item, index) {
-          var file = sp.getFileByName(item.name.replace('.xml', ''));
-          if (file.exists) return;
-          item.copy(file.toString());
-          var xml = new XML(file.readd());
-          sp.forEach(xml.pic, function (item, index) {
-            var image = sp.getImageFile(this.name.replace('.xml', ''), decodeURIComponent(item.imgName.toString()).replace('.png', ''));
-            image.open('w');
-            image.encoding = 'binary';
-            image.write(decodeURIComponent(item.img.toString()));
-            image.close();
-          }, item);
-          sp.forEach(xml.seq, function (folder, folderIndex) {
-            var name = decodeURIComponent(folder['@name'].toString());
-            var parentFolder = sp.getImageFolderByName(this.name.replace('.xml', ''));
-            var targetFolder = new Folder(parentFolder.toString() + sp.slash + name);
-            if (!targetFolder.exists) {
-              targetFolder.create();
-            }
-
-            sp.forEach(folder, function (imageXml, imageIndex) {
-              var imageFile = new File(this.toString() + sp.slash + decodeURIComponent(imageXml.imgName.toString()));
-              imageFile.open('w');
-              imageFile.encoding = 'binary';
-              imageFile.write(decodeURIComponent(imageXml.img.toString()));
-              imageFile.close();
-            }, targetFolder);
-          }, item);
-          delete xml.pic;
-          delete xml.seq;
-          file.writee(xml);
-          xml = new XML(sp.settingsFile.readd());
-          xml.ListItems.appendChild(new XML('<Name>' + decodeURIComponent(item.name.replace('.xml', '')) + '</Name>'));
-          xml.ParentGroup.child(selectionIndex).appendChild(new XML('<Index>' + (xml.ListItems.children().length() - 1).toString() + '</Index>'));
-
-          sp.settingsFile.writee(xml.toString());
-        });
-        sp.reloadParentDroplist();
-        sp.parentDroplist.selection = parseInt(sp.getSetting('parentSelection'));
-        selection = parseInt(sp.getSetting('thisSelection'));
-        sp.preImageArr = [];
-        sp.droplist.selection = sp.droplist.items.length - 1;
-        sp.gv.refresh();
-      };
-      this.changeName = function () {
-        if (!sp.gv.children) return alert(loc(sp.needElement));
-        if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
-        var newEleName = prompt(loc(sp.setName), sp.gv.lastSelectedItem.text);
-        if (!newEleName) {
-          alert(loc(sp.blankName));return;
-        }
-        newEleName.trim();
-        if (sp.lookUpTextInChildren(newEleName, sp.gv.children)) {
-          alert(loc(sp.existName));return;
-        }
-
-        var file = sp.getFileByName(sp.droplist.selection.text);
-        var xml = new XML(file.readd());
-        var image = sp.getImage(sp.droplist.selection.text, sp.gv.lastSelectedItem.text);
-
-        if (sp.gv.lastSelectedItem.text === decodeURIComponent(xml.child(sp.gv.lastSelectedItem.index)['@name'].toString())) {
-          xml.child(sp.gv.lastSelectedItem.index)['@name'] = encodeURIComponent(newEleName.toString());
-          file.writee(xml);
-        }
-
-        var targetImage = sp.noImage;
-        if (image.exists) {
-          var seqFolder = new Folder(image.toString().replace(/.png/i, '') + '_seq');
-          if (seqFolder.exists) {
-            seqFolder.rename(newEleName.toString() + '_seq');
-          }
-          image.rename(newEleName.toString() + '.png');
-          targetImage = sp.getImage(sp.droplist.selection.text, newEleName.toString());
-          if (image.toString() !== targetImage.toString()) {
-            image.remove();
-          }
-        }
-
-        sp.gv.lastSelectedItem.text = newEleName.toString();
-        sp.gv.lastSelectedItem.image = targetImage;
-        sp.gv.refresh();
-      };
-      this.parentDroplistChange = function () {
-        if (!this.selection) return;
-
-        sp.saveSetting('parentSelection', this.selection.index.toString());
-        sp.reloadDroplist();
-        sp.preImageArr = [];
-        var selection = parseInt(sp.getSetting('thisSelection'));
-        sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
-      };
-      this.droplistChange = function () {
-        if (!this.selection) return;
-        var text = this.selection.text;
-        var file = sp.getFileByName(text);
-        if (file === -1) return;
-        var content = file.readd();
-
-        var indexArr = [];
-        var j = -1;
-        try {
-          var thisStr = '<Element name="';
-          j = content.indexOf(thisStr);
-        } catch (err) {
-          alert(err);
-        }
-        while (j !== -1) {
-          var inputStr = '';
-          var k = 0;
-          while (content[j + thisStr.length + k] !== '"') {
-            inputStr += content[j + thisStr.length + k];
-            k++;
-          }
-          indexArr.push(inputStr);
-          j = content.indexOf(thisStr, j + thisStr.length);
-        }
-        sp.gv.removeAll();
-        sp.preImageArr = [];
-        for (var i = 0; i < indexArr.length; i++) {
-          var item = sp.gv.add(decodeURIComponent(indexArr[i]), sp.getImage(this.selection.text, indexArr[i]));
-          sp.preImageArr.push(item.image);
-        }
-        sp.saveSetting('thisSelection', this.selection.index.toString());
-        var arr = sp.getSetting('effectName').split(',');
-        if (sp.lookUpInArray(this.selection.text, arr)) {
-          sp.onlyEffectValue = true;
-        } else {
-          sp.onlyEffectValue = false;
-        }
-        sp.saveSetting('onlyEffect', sp.onlyEffectValue.toString());
-        sp.droplist.itemSize.height = 20;
-        sp.gv.scrollBarValue = 0;
-        sp.gv.refresh();
-      };
-      this.winResize = function () {
-        var spacing = 2;
-        var parentDroplistWidth = 100;
-        group1.location = [spacing, 0];
-        group1.size = [win.size[0], win.size[1]];
-        gv.size([group1.size[0], group1.size[1] - 20]);
-        group11.location = [1, 1];
-        group11.size.width = win.size[0] + 12;
-        droplist.size = [win.size[0] - parentDroplistWidth - spacing * 2, group11.size[1] - 3];
-        droplist.location.x = parentDroplistWidth;
-        droplist.itemSize.width = droplist.size.width - 27;
-        sp.parentDroplist.size.width = parentDroplistWidth;
-        sp.parentDroplist.size.height = droplist.size.height;
-        sp.parentDroplist.itemSize.width = parentDroplistWidth - 27;
-        sp.gv.refresh();
-      };
-      this.winClose = function () {
-        var thisStr = win.size[0].toString() + ',' + win.size[1].toString();
-        sp.saveSetting('winSize', thisStr);
-        thisStr = win.location[0].toString() + ',' + win.location[1].toString();
-        sp.saveSetting('winLocation', thisStr);
-
-        sp.renderTaskArray.forEach(function (item, index) {
-          app.cancelTask(item);
-        });
-        sp.renderTaskArray.length = 0;
-        sp.previewHelper = {};
-      };
-      this.rightClick = function (event) {
-        keepRef.leftClick();
-
-        var alt = event.altKey;
-        var key = ScriptUI.environment.keyboardState;
-        if (key.ctrlKey === false && key.shiftKey === false && alt === false) {
-          keepRef.shortMenu(event);
-        } else if (key.ctrlKey === true && key.shiftKey === false && alt === false) {
-          keepRef.newItem(event);
-        } else if (key.ctrlKey === false && key.shiftKey === true && alt === false) {
-          var currentPosition = [event.screenX - 152, event.screenY];
-          $.global.upAndDownWindow(currentPosition);
-        } else if (key.ctrlKey === false && key.shiftKey === false && alt === true) {
-          keepRef.newItem(event);
-        } else if (key.ctrlKey === true && key.shiftKey === true && alt === true) {}
-      };
-      this.shortMenu = function (event) {
-        if (!event) return;
-        if (event.button === 2 && event.detail === 1 && event.altKey === false) {
-          var currentPosition = [event.screenX, event.screenY];
-          var screenString = $.screens[0].toString();
-          var finalPositionXString = '';
-          for (var i = 0; i < screenString.length; i++) {
-            if (screenString[i + 4] !== '-' && screenString[i + 4] !== ':') {
-              finalPositionXString += screenString[i + 4];
-            } else {
-              break;
-            }
-          }
-          if (currentPosition[0] + 180 > parseInt(finalPositionXString)) {
-            currentPosition = [event.screenX - 180, event.screenY];
-          }
-
-          try {
-            if (!sp.menu) {
-              sp.menu = $.global.createMenu();
-            }
-            sp.menu['preview'].text = sp.gv.selection.length === 0 ? loc(sp.previewAll) : loc(sp.previewSelected);
-            sp.menu.frameLocation = currentPosition;
-            sp.menu.show();
-          } catch (err) {
-            err.printa();
-          }
-        }
-      };
+      });
+      return thisIndex;
+    },
+
+    openLink: function openLink(url) {
+      var cmd = '';
+      if ($.os.indexOf('Win') !== -1) {
+        cmd += 'explorer ' + url;
+      } else {
+        cmd += 'open "' + url + '"';
+      }
+      try {
+        system.callSystem(cmd);
+      } catch (e) {}
+    },
+
+    getVersion: function getVersion(scriptname) {
+      var url = this.ip + '/script/' + scriptname + '.txt';
+
+      var port = 80;
+      var domain = url.split('/')[0] + ':' + port;
+      var call = 'GET ';
+      if (url.indexOf('/') < 0) {
+        call += '/';
+      } else {
+        call += url.substr(url.indexOf('/'));
+      }
+      call += ' HTTP/1.1\n';
+      call += 'Host: ' + domain + '\n\n';
+      call += 'Connection: close\n\n';
+
+      var reply = '';
+      var file = new File();
+      file.encoding = 'binary';
+      file.open('w');
+      var conn = new Socket();
+      conn.encoding = 'binary';
+      if (conn.open(domain, 'binary')) {
+        conn.write(call);
+        reply = conn.read(300);
+        var contentLengthHeader = String(reply.match(/Content-Length: [0-9]*/));
+        var contentLength = contentLengthHeader.substr(16);
+        var headerLength = reply.indexOf('\n\n') + 2;
+        reply += conn.read(contentLength + headerLength - 300);
+        var recievedVersion = reply.toString().substring(reply.toString().lastIndexOf('BeginVersion') + 12, reply.toString().lastIndexOf('EndVersion'));
+        conn.close();
+      } else {
+        reply = '';
+      }
+
+      return recievedVersion;
     }
-  })(undefined, function () {
-    var sp = function sp() {
-      return new sp.prototype.init();
-    };
 
-    sp.prototype = {
+  });
 
-      scriptName: 'Sp_memory',
-      scriptVersion: '3.0',
-      version: 3.0,
-      slash: '/',
-
-      setting: app.settings,
-      inXml: null,
-
-      isCC2015: !!(app.version.indexOf('13.5') !== -1 || app.version.indexOf('13.6') !== -1 || app.version.indexOf('13.7') !== -1 || app.version.indexOf('13.8') !== -1 || app.version.indexOf('14') !== -1),
-
-      ui: 1,
-      lang: 0,
-
-      ip: '139.129.132.60',
-      downloadLink: 'http://139.129.132.60/script/Sp_memory',
-      weiboLink: 'http://weibo.com/u/3893928357',
-
-      noImage: '\x89PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\0d\0\0\0<\b\x06\0\0\0\x90?\x1F\xCE\0\0\t/IDATx\x9C\xED\x9BiL\x13]\x17\xC7\xFF\xED\xB0\xB4u\x01,QpA\x94\xB4\xFAA\x89J\t\xA8X5b\x1E\x8D1~0\xD1D\xFC 1\xA81FI\x8C\x9A(\x89\x8D\x0B.\x89!j\x88\xB2\x18\x17\xF0\x93Jp%\x1A\xC5\x88\x80\xDA\xD4\x05\x85Z!\x80\x82\x16D,\xB6,-]8\xCF\x07_&\x8E-L\xCD\xD3\xF7y\xE7\xD5\xF9%7\xE9\x9C{\xEE\x99\xE5?w\xEE\x9Ds\xA7\x12\0\x04\x11\xC1 \xFD_\x1F\x80\b\x17Q\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\fQ\x10\x81\x11\xC4\xE7 \x95J1z\xF4h\x84\x84\x84x\xD5\x11\x11\\.\x17\xACV+\x88\xFE\xCC\f\x8CD"\x01\x000\f\x03\xB9\\\x8E\xD0\xD0PH\xA5\xDE\xF7\xB9\xD3\xE9\x84\xCDf\xC3\xC0\xC0\xC0\xB0\xF1x\x05\x19=z4222\x10\x17\x17\x87\xFE\xFE~N\x9D\xCB\xE5BSS\x13\n\x0B\x0B\xE1t:\x7F\xE5<~+\xA4R)"""\x90\x92\x92\x82\xE4\xE4d\xC8d2N}hh(\x1A\x1B\x1BQPP\x80o\xDF\xBE\r\x1B\x8BW\x10\xB9\\\x8E\xA4\xA4$8\x1C\x0E\x98L&N\x9D\xDB\xEDF[[\x1B\xAF\xEA\xBF;\x83O\n\x8B\xC5\x82\xF7\xEF\xDF#44\x94S\xAF\xD1h\x90\x9C\x9C\x8C\xE2\xE2b^A\x80\xEF\xD9\xDE!Ktt4\x15\x15\x15\xD1\xFA\xF5\xEB\x87\xF5\x13\xCB\xD0e\xFD\xFA\xF5TTTD\xD1\xD1\xD1\xBC\xBE\xE2\xA0.0DA\x04\x06\xAF \x83\xCFG\xB7\xDB\xFDo\x1C\xCFo\x89\xDB\xED\x86\xCB\xE5\xF2k&\xCA+\x88\xD3\xE9\x84\xC9dBGGG@\x0E\xEEO\xA4\xA3\xA3\x03&\x93\xC9\xAF\x99\xA8\x04<K\xB8\x12\x89\x04\xC1\xC1\xC1\xF0x<\xF0x<\x81:\xC6?\n\x86a\xC00\x8C_\xBD\x84W\x10\x91\x7F\x17qP\x17\x18\xA2 \x02C\x14D`\xF0\xA6N\xFC%66\x16\x1F?~\xF4\x9A\x1EO\x9B6\r2\x99\f555\x1C{RR\x12\xD2\xD2\xD2 \x95JQRR\x82\xF2\xF2\xF2!cGEEA\xADV\xA3\xA2\xA2\x02\x000n\xDC8X\xADV8\x1C\x0E/\xDFQ\xA3F!((\b]]]^u\x87\x0F\x1FFnn.\xCCf\xF3\x90\xFB\n\x0B\x0B\xC3\xF6\xED\xDB1a\xC2\x04\xB4\xB5\xB5\xE1\xE4\xC9\x93\x9Ct\xC7\xDC\xB9s\x11\x1E\x1E\xCEic2\x99\xD0\xDC\xDC<d\xCC_% \xE9\x81\xA2\xA2"\xBA|\xF9\xB2\x97\xBD\xB4\xB4\x94***\xD8m\x86a\xE8\xC6\x8D\x1Bd\xB7\xDB\xA9\xBD\xBD\x9D\xCCf3\xF5\xF7\xF7SEE\x05\x8D\x1C9\xD2g\xEC\xEC\xECljmme\xB7sss)\'\'\xC7\xA7\xEF\xC5\x8B\x17\xE9\xD0\xA1C^v\x86a\xA8\xA9\xA9\x89\xF2\xF3\xF3\x87<\x87={\xF6\x90\xD9l&\x87\xC3Af\xB3\x99\xFA\xFA\xFA\xA8\xA3\xA3\x83rssY\x9F\xB7o\xDF\xD2\xCF\\\xBAt)`i\x96\x80=\xB2\xFA\xFA\xFA\xB0j\xD5*\xA4\xA7\xA7s\xECn\xB7\x9B3\xFF\xBEr\xE5\n\xB4Z-rrr\x10\x13\x13\x83I\x93&A\xA7\xD3A\xADV\xE3\xEE\xDD\xBBC\xC6w\xB9\\\xECo\xA5R\x89\xD4\xD4T/\x1F\x86a0w\xEE\\DGG{\xD5m\xDA\xB4\t\xB1\xB1\xB1\x987o\x9E\xCF\xF8\x1B6l@VV\x16>~\xFC\x88\xA5K\x97b\xFC\xF8\xF1\xD0h4\xD0\xEB\xF5\xD8\xB8q#\x8A\x8A\x8A\0|\x7F/\xBBy\xF3&\xB4Z-[\xF6\xED\xDB7\xFC\xC5\xF9E\x02\xA2l^^\x1E\xD9\xEDvjmm\xA5\x98\x98\x18\xD6~\xF5\xEAU\xBA\x7F\xFF>\x01\xA0\xF8\xF8x\xEA\xE9\xE9!\x9DN\xE7\xD5>##\x83\xFA\xFA\xFA|&1\xB3\xB3\xB3\xA9\xA9\xA9\x89\xDD.++#\xB7\xDBMiii\x1C\xBF\xCC\xCCL\x1A\x18\x18\xA0\xD2\xD2R\xAF\x18\xE5\xE5\xE5T__Ov\xBB\x9D\x96/_\xCE\xA9\x93H$T[[K\x06\x83\x81\x18\x86\xF1j{\xE2\xC4\tJHH \0TSSC\x05\x05\x05\x01\xEB\x11?\x97\x80\x0E\xEAF\xA3\x11N\xA7\x13W\xAE\\a\x17n~d\xDB\xB6m0\x9B\xCD8p\xE0\x80W]AA\x01jkk\xB1z\xF5j\xDE\xFDDFF\xA2\xBB\xBB\x1B\x1B7n\xE4\xD8\xD7\xACY\x03\x9B\xCD\x86\xB0\xB00\x8E=**\ns\xE6\xCC\xC1\xE5\xCB\x97a2\x99\xB0u\xEBVN\xBDV\xAB\x85J\xA5\xC2\xA1C\x87|\xBE\xFC\xEE\xDC\xB9\x13\xCF\x9F?\xE7=\xAE@\x10PA\\.\x17v\xEC\xD8\x81\xE9\xD3\xA7\xE3\xCC\x993^\xF5QQQhnn\x1Er\xFD\xA4\xB1\xB1\x11J\xA5\x92w?c\xC7\x8EEyy94\x1A\r\xE2\xE2\xE2\0\0\x89\x89\x89\x88\x8F\x8FGuu5"##9\xFE:\x9D\x0E\xBD\xBD\xBD8v\xEC\x18\xAA\xAA\xAA\xA0\xD1h8\x8BH\x8B\x17/\x86\xC5b\xC1\xF5\xEB\xD7\xFD:\xCF\xB5k\xD7\xE2\xEB\xD7\xAFl9{\xF6\xAC_\xED\xFC!`\xB3\xACAn\xDD\xBA\x85\x0B\x17. ==\xDDkL\x18L\x1F\f\x85\xCB\xE5Bpp\xF0\xB0\xF1CBB\x10\x11\x11\x81\xE3\xC7\x8FC\xA5R\xE1\xE0\xC1\x83X\xB7n\x1D\xF6\xEE\xDD\x0B\xA3\xD1\x88\xABW\xAF\xE2\xC8\x91#\x9C6\xF3\xE6\xCD\x83\xDB\xEDFqq1\x14\n\x05\x94J%v\xEF\xDE\xCD\xF6\xD4\xC1\xD4\xD0\xCFi\x8D\xDA\xDAZv\xE9Z&\x93a\xD9\xB2e\0\xBE\xDF8eee\xAC\xDF\x9D;wx\xAE\x8A\xFF\xFCW\xDEC233\xF1\xFA\xF5k\x9C8q\x82s\'Z,\x16L\x9E<y\xC8v\x93\'O\x86\xC5b\x196vll,\xA4R)\xDE\xBD{\x87\xBBw\xEFb\xC1\x82\x05\b\x0F\x0F\xC7\xFC\xF9\xF3q\xFD\xFAu<y\xF2\x04#G\x8Ed{\xC9\x8A\x15+\xA0R\xA9\xE0v\xBB1{\xF6lL\x9B6\r\x16\x8B\x05\x7F\xFD\xF5\x17\x1B\xF3\xF1\xE3\xC7\x18;v,\xB4Z-g_\xF7\xEE\xDD\xC3\xC3\x87\x0F\xD1\xD2\xD2\x02\xA5R\x89/_\xBE\0\0\f\x06\x03\xF6\xEE\xDD\xCB\x96\xCA\xCA\xCA_\xBEF\xC3\x11\xB0A\xFD\xE9\xD3\xA7\xECvTT\x14}\xF8\xF0\x81\xACV+;\xA8/Y\xB2\x84\xECv;m\xDE\xBC\xD9\xAB}JJ\n\xD9l6\xCA\xCC\xCC\x1CvPOOO\xA7\xF6\xF6v\x02@\n\x85\x82>\x7F\xFELF\xA3\x91ZZZ(88\x98d2\x19uwwSjj*\x01\xA0[\xB7n\xD1\xCB\x97/9\xF1\xB6l\xD9B===\xA4V\xAB\t\xF8>%\xAE\xAF\xAF\xA7G\x8F\x1E\xF9<\xB7\x92\x92\x12\xAA\xAB\xAB\xFB\xFF\x1B\xD4\x7F\xA4\xBD\xBD\x1D\xBBv\xED\xE2\xD8\x1E<x\0\x83\xC1\0\x9DN\x87\xB4\xB44\xD6\xBEh\xD1"\x9C?\x7F\x1E\xEF\xDF\xBF\xC7\xA9S\xA7\x86\x8D;c\xC6\f\xF6N\xED\xEB\xEBCee%T*\x15***\xE0r\xB9\xE0p8`\xB1X\xA0\xD1h\xA0P(\x90\x90\x90\x80\xAA\xAA*N\x8C\xFC\xFC|\xB4\xB5\xB5\xB1\xD3U\x8F\xC7\x83s\xE7\xCE!11\x11\xA5\xA5\xA5\x90\xCB\xE5\xAC\xEF\xFE\xFD\xFB\x91\x9A\x9A\x8A\xDB\xB7o\xB3\xB6\x90\x90\x10\x84\x87\x87\xB3\xE5\xE75\xF4\x7FJ@\x94\xCD\xCF\xCF\'\xBD^\xEF\xD3\xFEc\xCF\x89\x88\x88 \xBD^O\x0E\x87\x83\xDE\xBCyC\xAF^\xBD\xA2\xDE\xDE^\xAA\xAB\xAB#\x95J\xE53vvv6577\x13\0*..\xE6\xBCh\xCE\x9A5\x8B\xACV+M\x9D:\x95\xB5\xBDx\xF1\x82\n\x0B\x0B\xE9\xF0\xE1\xC3\xD4\xD5\xD5Ec\xC6\x8C\xF1\x8AY\\\\L\r\r\r$\x91HX\xDB\xE9\xD3\xA7\xC9j\xB5\xD2\xA7O\x9F\xE8\xC9\x93\'d4\x1A\xC9n\xB7\xD3\x8D\x1B7X\xBF7o\xDEPww7uuu\xB1%///`=\x84\x01\xA0\x0B\x84\xAA===\xF8\xF0\xE1\x83\xD7\xF4\xF0\xF6\xED\xDB\xE8\xEC\xECd\xBFXq8\x1C(,,\x84\xCDf\x83B\xA1@WW\x17JJJ\x90\x96\x96\x86\xCE\xCEN\x9F\xB1\x07g3\xD5\xD5\xD5\x18\x18\x18\xC0\xF3\xE7\xCFQWW\x07\xE0{Olhh@uu5\xEB\xDF\xDF\xDF\x8Fg\xCF\x9E\xA1\xB3\xB3\x13\xD5\xD5\xD5>\x9F\xF1\x06\x83\x012\x99\fz\xBD\x9E}q-++\xC3\xBD{\xF7\xA0T*\xE1v\xBB\xD1\xDA\xDA\x8A\xA3G\x8F"++\x8Bm\x17\x14\x14\x04\xA3\xD1\b\x83\xC1\xC0\x96k\xD7\xAE\xA1\xA5\xA5\xE5\x9F]\xC0\xFF \xAE\x87\b\f1\xDB+0DA\x04\x06\xAF \x12\x89\x04\f\xC3\xF8\xFC^U\xC4?\xA4R)\x18\x86\xF1\x99N\xF2\xF2\xE5s`\x18\x06\x91\x91\x91\x181bD@\x0E\xEEOd\xC4\x88\x11\x88\x8C\x8C\x04\xC30\xBC\xBE\xBC\x82(\x14\n\xA4\xA6\xA6B\xADV\x07\xE4\xE0\xFED\xD4j5\x96.]\n\x85B\xC1\xEB\xCB+\x88\\.\xC7\xC2\x85\x0B\xD9$\x9E\xC8\xAF\x13\x17\x17\x07\xADV\xCBy\xE1\x1C\n^A\xA4R)\xE4r\xB9\xCF\xFF\x87\x88\xF8GHH\b\xE4r\xB9_\xE3\xB08R\x0B\fQ\x10\x81\xE1\xD7z\x88B\xA1\xC0\xCA\x95+1q\xE2D\x8E}0\xBDPRR2\xEC:\xC7\xEF\x8ET*EXX\x18\x12\x12\x120s\xE6L\xAFd\xE3\xEC\xD9\xB3\x11\x14\xE4\xDF\xD2\x13\xAF\x97\xDDn\xC7\xB3g\xCF0}\xFAt\xAF\x81\xDD\xE9t\xC2\xE3\xF1\xF85\xBF\xFE]\x91H$\xEC\xF7\xCFJ\xA5\x12S\xA6L\xF1\x1A\xBC{{{a2\x99`\xB7\xDB\xF9\xE3\x81\'\x97%\xFE\xE9sx\x02\xFD\xA7O1\xB9(0\xC4A]`\x88\x82\b\fQ\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\x8C\xBF\x01O\xC5\x98\x01\xABf\xE6Y\0\0\0\0IEND\xAEB`\x82',
-
-      xmlFileNames: [],
-      xmlGroupNames: [],
-      xmlCurrentFileNames: [],
-
-      layerTypePropertyArr: [],
-      layerTypePropertyValueArr: [],
-
-      expPropertyArr: [],
-
-      layerArr: [],
-      layerParentNameArr: [],
-
-      init: function init() {
-        return this;
-      },
-
-      extend: function extend(target, source) {
-        for (var i in source) {
-          target[i] = source[i];
-        }return target;
+  sp.prototype.extend(sp.prototype, {
+    getTimeInfoArr: function getTimeInfoArr(comp) {
+      var layers = [];
+      if (comp.selectedLayers.length === 0) {
+        for (var i = 0; i < comp.numLayers; i++) {
+          if (comp.layer(i + 1).enabled === true) {
+            layers.push(comp.layer(i + 1));
+          }
+        }
+      } else {
+        for (i = 0; i < comp.selectedLayers.length; i++) {
+          if (comp.selectedLayers[i].enabled === true) {
+            layers.push(comp.selectedLayers[i]);
+          }
+        }
       }
 
-    };
+      var inPointArr = [];
+      var outPointArr = [];
 
-    sp.prototype.extend(sp.prototype, {
-
-      scriptFile: new File($.fileName),
-      scriptFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory'),
-      materialFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'tempFile'),
-      settingsFile: new File(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'settings.xml'),
-      imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'image'),
-      roamingFolder: new Folder(Folder.userData.fullName + sp.prototype.slash + 'Aescripts' + sp.prototype.slash + 'Sp_memory'),
-
-      isOutside: true,
-      isLoopPreview: false,
-      previewHelper: {},
-      renderTaskArray: [],
-      preImageArr: [],
-      newItemOrCover: 'newItem',
-
-      haveSetting: function haveSetting(keyName) {
-        return this.setting.haveSetting(this.scriptName, keyName);
-      },
-
-      saveSetting: function saveSetting(keyName, value) {
-        this.setting.saveSetting(this.scriptName, keyName, value);
-      },
-
-      getSetting: function getSetting(keyName) {
-        return this.setting.getSetting(this.scriptName, keyName);
-      },
-
-      getSettingAsBool: function getSettingAsBool(keyName) {
-        return this.getSetting(keyName) === 'true';
-      },
-
-      getFileByName: function getFileByName(name) {
-        var string = this.scriptFolder.toString() + this.slash + name + '.xml';
-        var file = new File(string);
-        return file;
-      },
-
-      isForceEnglish: function isForceEnglish() {
-        var string = this.scriptFolder.toString() + this.slash + 'force_en.txt';
-        var file = new File(string);
-        return file.exists;
-      },
-
-      getImageFolderByName: function getImageFolderByName(name) {
-        var string = this.imageFolder.toString() + this.slash + name + '';
-        var folder = new Folder(string);
-        if (!folder.exists) {
-          folder.create();
-        }
-        return folder;
-      },
-
-      getImage: function getImage(groupName, imageName) {
-        var folder = this.getImageFolderByName(groupName);
-        if (!folder.exists) {
-          folder.create();
-        }
-        var string = folder.toString() + this.slash + imageName + '.png';
-        var file = new File(string);
-        if (file.exists) {
-          return file;
-        } else {
-          return this.noImage;
-        }
-      },
-
-      getImageFile: function getImageFile(groupName, imageName) {
-        var folder = this.getImageFolderByName(groupName);
-        if (!folder.exists) {
-          folder.create();
-        }
-        var string = folder.toString() + this.slash + imageName + '.png';
-        var file = new File(string);
-        return file;
-      },
-
-      getGlobalIndexFromFileName: function getGlobalIndexFromFileName(name) {
-        var content = new XML(this.settingsFile.readd());
-        var thisIndex = -1;
-        this.forEach(content.ListItems, function (item, index) {
-          if (item.toString() === name) {
-            thisIndex = index;
-          }
-        });
-        return thisIndex;
-      },
-
-      openLink: function openLink(url) {
-        var cmd = '';
-        if ($.os.indexOf('Win') !== -1) {
-          cmd += 'explorer ' + url;
-        } else {
-          cmd += 'open "' + url + '"';
-        }
-        try {
-          system.callSystem(cmd);
-        } catch (e) {}
-      },
-
-      getVersion: function getVersion(scriptname) {
-        var url = this.ip + '/script/' + scriptname + '.txt';
-
-        var port = 80;
-        var domain = url.split('/')[0] + ':' + port;
-        var call = 'GET ';
-        if (url.indexOf('/') < 0) {
-          call += '/';
-        } else {
-          call += url.substr(url.indexOf('/'));
-        }
-        call += ' HTTP/1.1\n';
-        call += 'Host: ' + domain + '\n\n';
-        call += 'Connection: close\n\n';
-
-        var reply = '';
-        var file = new File();
-        file.encoding = 'binary';
-        file.open('w');
-        var conn = new Socket();
-        conn.encoding = 'binary';
-        if (conn.open(domain, 'binary')) {
-          conn.write(call);
-          reply = conn.read(300);
-          var contentLengthHeader = String(reply.match(/Content-Length: [0-9]*/));
-          var contentLength = contentLengthHeader.substr(16);
-          var headerLength = reply.indexOf('\n\n') + 2;
-          reply += conn.read(contentLength + headerLength - 300);
-          var recievedVersion = reply.toString().substring(reply.toString().lastIndexOf('BeginVersion') + 12, reply.toString().lastIndexOf('EndVersion'));
-          conn.close();
-        } else {
-          reply = '';
-        }
-
-        return recievedVersion;
+      for (i = 0; i < layers.length; i++) {
+        var layer = layers[i];
+        inPointArr.push(layer.inPoint);
+        outPointArr.push(layer.outPoint);
       }
 
-    });
+      if (layers.length === 0) return null;
+      inPointArr.sort(function (a, b) {
+        return a - b;
+      });
+      outPointArr.sort(function (a, b) {
+        return a - b;
+      });
 
-    sp.prototype.extend(sp.prototype, {
-      getTimeInfoArr: function getTimeInfoArr(comp) {
-        var layers = [];
-        if (comp.selectedLayers.length === 0) {
-          for (var i = 0; i < comp.numLayers; i++) {
-            if (comp.layer(i + 1).enabled === true) {
-              layers.push(comp.layer(i + 1));
-            }
+      return [inPointArr[0], outPointArr[outPointArr.length - 1]];
+    },
+    swap: function swap(a, b) {
+      var tempA = a.text;
+      a.text = b.text;
+      b.text = tempA;
+    },
+    lookUpTextInChildren: function lookUpTextInChildren(text, children) {
+      var len = children.length;
+      for (var i = 0; i < len; i++) {
+        if (children[i].text === text) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    lookUpInArray: function lookUpInArray(text, arr) {
+      var len = arr.length;
+      for (var i = 0; i < len; i++) {
+        if (arr[i] === text) {
+          return true;
+        }
+      }
+      return false;
+    },
+    lookUpInItem: function lookUpInItem(text, items) {
+      var len = items.length;
+      for (var i = 1; i <= len; i++) {
+        if (items[i].name === text) {
+          return [true, items[i]];
+        }
+      }
+      return [false, null];
+    },
+    deleteIndexAndReload: function deleteIndexAndReload(deleteIndex) {
+      var settingxml = new XML(this.settingsFile.readd());
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        for (var j = 0, len = item.children().length(); j < len; j++) {
+          var thisItem = item.child(j);
+          if (parseInt(thisItem.toString()) === deleteIndex) {
+            thisItem.setLocalName('waitToDelete');
+            delete item.waitToDelete;
           }
+        }
+      });
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        for (var j = 0, len = item.children().length(); j < len; j++) {
+          var thisItem = item.child(j);
+          if (parseInt(thisItem.toString()) > deleteIndex) {
+            item.insertChildBefore(thisItem, new XML('<Index>' + (parseInt(thisItem.toString()) - 1).toString() + '</Index>'));
+            thisItem.setLocalName('waitToDelete');
+            delete item.waitToDelete;
+          }
+        }
+      });
+
+      this.settingsFile.writee(settingxml);
+    },
+    reloadParentDroplist: function reloadParentDroplist() {
+      this.parentDroplist.removeAll();
+      var settingxml = new XML(this.settingsFile.readd());
+      this.xmlGroupNames.length = 0;
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        this.push(item['@groupName'].toString());
+      }, this.xmlGroupNames);
+      this.xmlGroupNames.forEach(function (item, index) {
+        this.add('item', item);
+      }, this.parentDroplist);
+      this.reloadDroplist();
+    },
+    reloadDroplist: function reloadDroplist() {
+      this.droplist.removeAll();
+      this.gv.removeAll();
+      var parentSelection = parseInt(this.getSetting('parentSelection'));
+      var groupName = this.xmlGroupNames[parentSelection];
+
+      var settingxml = new XML(this.settingsFile.readd());
+      this.xmlFileNames.length = 0;
+      this.xmlCurrentFileNames.length = 0;
+
+      var indexArr = [];
+
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        if (item['@groupName'].toString() === groupName) {
+          for (var j = 0; j < item.children().length(); j++) {
+            indexArr.push(parseInt(item.child(j).toString()));
+          }
+        }
+      });
+
+      var listArr = [];
+      this.forEach(settingxml.ListItems, function (item, index) {
+        this.push(item.toString());
+      }, this.xmlFileNames);
+      for (var i = 0, len = indexArr.length; i < len; i++) {
+        listArr.push(settingxml.ListItems.child(indexArr[i]).toString());
+      }
+      listArr.forEach(function (item, index) {
+        this.add('item', item);
+      }, this.droplist);
+
+      this.xmlCurrentFileNames = listArr;
+    },
+    cropImage: function cropImage(fi, inImageFileA) {
+      var f = new ImportOptions();
+      f.file = fi;
+      f.forceAlphabetical = false;
+      f.importAs = ImportAsType.FOOTAGE;
+      f.sequence = false;
+      f = app.project.importFile(f);
+      var tempComp3 = app.project.items.addComp('tempComp', 100, 60, 1, 5, 30);
+      var BGtemp3 = tempComp3.layers.addSolid([0, 0, 0], 'BG', tempComp3.width, tempComp3.height, 1, 10800);
+      var ima = tempComp3.layers.add(f);
+      var scaleX = 10000 / ima.source.width;
+      var scaleY = 6000 / ima.source.height;
+      if (scaleX / 60 < scaleY / 100) {
+        ima.transform.scale.setValue([scaleX, scaleX]);
+      } else {
+        ima.transform.scale.setValue([scaleY, scaleY]);
+      }
+      tempComp3.saveFrameToPng(0, inImageFileA);
+      f.remove();
+      try {
+        if (BGtemp3.source.parentFolder.numItems === 1) {
+          var BGparent = BGtemp3.source.parentFolder;
+          BGtemp3.source.remove();
+          BGparent.remove();
         } else {
-          for (i = 0; i < comp.selectedLayers.length; i++) {
-            if (comp.selectedLayers[i].enabled === true) {
-              layers.push(comp.selectedLayers[i]);
-            }
+          BGtemp3.source.remove();
+        }
+      } catch (err) {}
+      tempComp3.remove();
+    },
+
+    savePng2: function savePng2(pngPath) {
+      app.beginSuppressDialogs();
+      var comps = app.project.activeItem;
+      var timeArr = this.getTimeInfoArr(comps);
+      var layers = comps.selectedLayers;
+      var jishushuzu = [];
+      var waitToPre = [];
+      var tempComp2 = app.project.items.addComp('tempComp2', comps.width, comps.height, comps.pixelAspect, comps.duration, comps.frameRate);
+      var BGtemp = tempComp2.layers.addSolid([0, 0, 0], 'BG', 100, 60, 1, 10800);
+      var cunLengthA = layers.length;
+      var iq;
+      for (iq = 0; iq < layers.length; iq++) {
+        jishushuzu.push(layers[iq].index);
+      }
+      for (iq = 0; iq < layers.length; iq++) {
+        var wocaoName = layers[iq].name;
+        waitToPre[waitToPre.length] = layers[iq].duplicate();
+        waitToPre[iq].name = wocaoName;
+      }
+      var wwwww = [];
+      for (iq = 0; iq < cunLengthA; iq++) {
+        wwwww.push(waitToPre[iq].index);
+      }
+      var precomposeComp = comps.layers.precompose(wwwww, 'tempA', true);
+      comps.layer('tempA').copyToComp(tempComp2);
+      comps.layer('tempA').remove();
+      for (iq = 0; iq < cunLengthA; iq++) {
+        comps.layer(jishushuzu[iq]).selected = true;
+      }
+      try {
+        tempComp2.layer(1).solo = false;
+      } catch (err) {}
+      var preVVVV = tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').value;
+      tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').setValue([100 / tempComp2.width * preVVVV[0], 60 / tempComp2.height * preVVVV[1]]);
+      tempComp2.width = 100;
+      tempComp2.height = 60;
+      BGtemp.property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
+      tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
+      var nameStr = '';
+      pngPath = File(pngPath);
+
+      var isNewItem = this.newItemOrCover === 'newItem';
+      var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
+      if (isNewItem || isCover) {
+        if (isNewItem) {
+          while (pngPath.exists) {
+            pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
+            pngPath = File(pngPath);
           }
         }
-
-        var inPointArr = [];
-        var outPointArr = [];
-
-        for (i = 0; i < layers.length; i++) {
-          var layer = layers[i];
-          inPointArr.push(layer.inPoint);
-          outPointArr.push(layer.outPoint);
-        }
-
-        if (layers.length === 0) return null;
-        inPointArr.sort(function (a, b) {
-          return a - b;
-        });
-        outPointArr.sort(function (a, b) {
-          return a - b;
-        });
-
-        return [inPointArr[0], outPointArr[outPointArr.length - 1]];
-      },
-      swap: function swap(a, b) {
-        var tempA = a.text;
-        a.text = b.text;
-        b.text = tempA;
-      },
-      lookUpTextInChildren: function lookUpTextInChildren(text, children) {
-        var len = children.length;
-        for (var i = 0; i < len; i++) {
-          if (children[i].text === text) {
-            return true;
-          }
-        }
-        return false;
-      },
-
-      lookUpInArray: function lookUpInArray(text, arr) {
-        var len = arr.length;
-        for (var i = 0; i < len; i++) {
-          if (arr[i] === text) {
-            return true;
-          }
-        }
-        return false;
-      },
-      lookUpInItem: function lookUpInItem(text, items) {
-        var len = items.length;
-        for (var i = 1; i <= len; i++) {
-          if (items[i].name === text) {
-            return [true, items[i]];
-          }
-        }
-        return [false, null];
-      },
-      deleteIndexAndReload: function deleteIndexAndReload(deleteIndex) {
-        var settingxml = new XML(this.settingsFile.readd());
-        this.forEach(settingxml.ParentGroup, function (item, index) {
-          for (var j = 0, len = item.children().length(); j < len; j++) {
-            var thisItem = item.child(j);
-            if (parseInt(thisItem.toString()) === deleteIndex) {
-              thisItem.setLocalName('waitToDelete');
-              delete item.waitToDelete;
-            }
-          }
-        });
-        this.forEach(settingxml.ParentGroup, function (item, index) {
-          for (var j = 0, len = item.children().length(); j < len; j++) {
-            var thisItem = item.child(j);
-            if (parseInt(thisItem.toString()) > deleteIndex) {
-              item.insertChildBefore(thisItem, new XML('<Index>' + (parseInt(thisItem.toString()) - 1).toString() + '</Index>'));
-              thisItem.setLocalName('waitToDelete');
-              delete item.waitToDelete;
-            }
-          }
-        });
-
-        this.settingsFile.writee(settingxml);
-      },
-      reloadParentDroplist: function reloadParentDroplist() {
-        this.parentDroplist.removeAll();
-        var settingxml = new XML(this.settingsFile.readd());
-        this.xmlGroupNames.length = 0;
-        this.forEach(settingxml.ParentGroup, function (item, index) {
-          this.push(item['@groupName'].toString());
-        }, this.xmlGroupNames);
-        this.xmlGroupNames.forEach(function (item, index) {
-          this.add('item', item);
-        }, this.parentDroplist);
-        this.reloadDroplist();
-      },
-      reloadDroplist: function reloadDroplist() {
-        this.droplist.removeAll();
-        this.gv.removeAll();
-        var parentSelection = parseInt(this.getSetting('parentSelection'));
-        var groupName = this.xmlGroupNames[parentSelection];
-
-        var settingxml = new XML(this.settingsFile.readd());
-        this.xmlFileNames.length = 0;
-        this.xmlCurrentFileNames.length = 0;
-
-        var indexArr = [];
-
-        this.forEach(settingxml.ParentGroup, function (item, index) {
-          if (item['@groupName'].toString() === groupName) {
-            for (var j = 0; j < item.children().length(); j++) {
-              indexArr.push(parseInt(item.child(j).toString()));
-            }
-          }
-        });
-
-        var listArr = [];
-        this.forEach(settingxml.ListItems, function (item, index) {
-          this.push(item.toString());
-        }, this.xmlFileNames);
-        for (var i = 0, len = indexArr.length; i < len; i++) {
-          listArr.push(settingxml.ListItems.child(indexArr[i]).toString());
-        }
-        listArr.forEach(function (item, index) {
-          this.add('item', item);
-        }, this.droplist);
-
-        this.xmlCurrentFileNames = listArr;
-      },
-      cropImage: function cropImage(fi, inImageFileA) {
-        var f = new ImportOptions();
-        f.file = fi;
-        f.forceAlphabetical = false;
-        f.importAs = ImportAsType.FOOTAGE;
-        f.sequence = false;
-        f = app.project.importFile(f);
-        var tempComp3 = app.project.items.addComp('tempComp', 100, 60, 1, 5, 30);
-        var BGtemp3 = tempComp3.layers.addSolid([0, 0, 0], 'BG', tempComp3.width, tempComp3.height, 1, 10800);
-        var ima = tempComp3.layers.add(f);
-        var scaleX = 10000 / ima.source.width;
-        var scaleY = 6000 / ima.source.height;
-        if (scaleX / 60 < scaleY / 100) {
-          ima.transform.scale.setValue([scaleX, scaleX]);
-        } else {
-          ima.transform.scale.setValue([scaleY, scaleY]);
-        }
-        tempComp3.saveFrameToPng(0, inImageFileA);
-        f.remove();
         try {
-          if (BGtemp3.source.parentFolder.numItems === 1) {
-            var BGparent = BGtemp3.source.parentFolder;
-            BGtemp3.source.remove();
-            BGparent.remove();
-          } else {
-            BGtemp3.source.remove();
-          }
+          tempComp2.saveFrameToPng(comps.time, pngPath);
         } catch (err) {}
-        tempComp3.remove();
-      },
+      }
 
-      savePng2: function savePng2(pngPath) {
+      if (this.savePreviewValue === true) {
+        tempComp2.layer(1).inPoint = timeArr[0];
+        tempComp2.layer(1).outPoint = timeArr[1];
+        tempComp2.layer(2).inPoint = timeArr[0];
+        tempComp2.layer(2).outPoint = timeArr[1];
+        timeArr = this.getTimeInfoArr(tempComp2);
+        var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
+        !targetFolder.exists && targetFolder.create();
+        var num = this.frameNum;
+        for (var i = 0; i < num; i++) {
+          try {
+            var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+            var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
+
+            tempComp2.saveFrameToPng(time, seqPath);
+
+            app.purge(PurgeTarget.IMAGE_CACHES);
+          } catch (err) {}
+        }
+      }
+      BGtemp.source.remove();
+      tempComp2.remove();
+      precomposeComp.remove();
+      try {
+        nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
+      } catch (err) {}
+      app.endSuppressDialogs(false);
+      return encodeURIComponent(nameStr);
+    },
+    savePng: function savePng(pngPath) {
+      try {
         app.beginSuppressDialogs();
         var comps = app.project.activeItem;
-        var timeArr = this.getTimeInfoArr(comps);
         var layers = comps.selectedLayers;
-        var jishushuzu = [];
-        var waitToPre = [];
-        var tempComp2 = app.project.items.addComp('tempComp2', comps.width, comps.height, comps.pixelAspect, comps.duration, comps.frameRate);
-        var BGtemp = tempComp2.layers.addSolid([0, 0, 0], 'BG', 100, 60, 1, 10800);
-        var cunLengthA = layers.length;
-        var iq;
-        for (iq = 0; iq < layers.length; iq++) {
-          jishushuzu.push(layers[iq].index);
+        var inArr = [];
+        for (var i = 0; i < layers.length; i++) {
+          inArr.push(layers[i].index);
         }
-        for (iq = 0; iq < layers.length; iq++) {
-          var wocaoName = layers[iq].name;
-          waitToPre[waitToPre.length] = layers[iq].duplicate();
-          waitToPre[iq].name = wocaoName;
+        var otherIndexArr = [];
+        var otherEnabledArr = [];
+        for (i = 0; i < comps.numLayers; i++) {
+          var thisLayer = comps.layer(i + 1);
+          if (inArr.toString().indexOf(thisLayer.index) === -1) {
+            otherEnabledArr.push(thisLayer.enabled);
+            otherIndexArr.push(thisLayer.index);
+            try {
+              thisLayer.enabled = false;
+            } catch (err) {}
+          }
         }
-        var wwwww = [];
-        for (iq = 0; iq < cunLengthA; iq++) {
-          wwwww.push(waitToPre[iq].index);
-        }
-        var precomposeComp = comps.layers.precompose(wwwww, 'tempA', true);
-        comps.layer('tempA').copyToComp(tempComp2);
-        comps.layer('tempA').remove();
-        for (iq = 0; iq < cunLengthA; iq++) {
-          comps.layer(jishushuzu[iq]).selected = true;
-        }
-        try {
-          tempComp2.layer(1).solo = false;
-        } catch (err) {}
-        var preVVVV = tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').value;
-        tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').setValue([100 / tempComp2.width * preVVVV[0], 60 / tempComp2.height * preVVVV[1]]);
-        tempComp2.width = 100;
-        tempComp2.height = 60;
-        BGtemp.property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
-        tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
         var nameStr = '';
         pngPath = File(pngPath);
-
         var isNewItem = this.newItemOrCover === 'newItem';
         var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
         if (isNewItem || isCover) {
@@ -6759,395 +6143,281 @@ try {
               pngPath = File(pngPath);
             }
           }
-          try {
-            tempComp2.saveFrameToPng(comps.time, pngPath);
-          } catch (err) {}
+          if (this.thumbTypeValue === true) {
+            app.activeViewer.views[0].saveBlittedImageToPng(comps.time, pngPath, 1000, "what's this? I don't know");
+          } else {
+            comps.saveFrameToPng(comps.time, pngPath);
+          }
+          this.cropImage(pngPath, pngPath);
         }
 
         if (this.savePreviewValue === true) {
-          tempComp2.layer(1).inPoint = timeArr[0];
-          tempComp2.layer(1).outPoint = timeArr[1];
-          tempComp2.layer(2).inPoint = timeArr[0];
-          tempComp2.layer(2).outPoint = timeArr[1];
-          timeArr = this.getTimeInfoArr(tempComp2);
           var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
           !targetFolder.exists && targetFolder.create();
           var num = this.frameNum;
-          for (var i = 0; i < num; i++) {
-            try {
-              var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
-              var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
+          var timeArr = this.getTimeInfoArr(comps);
+          for (i = 0; i < num; i++) {
+            var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+            var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
 
-              tempComp2.saveFrameToPng(time, seqPath);
-
-              app.purge(PurgeTarget.IMAGE_CACHES);
-            } catch (err) {}
-          }
-        }
-        BGtemp.source.remove();
-        tempComp2.remove();
-        precomposeComp.remove();
-        try {
-          nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
-        } catch (err) {}
-        app.endSuppressDialogs(false);
-        return encodeURIComponent(nameStr);
-      },
-      savePng: function savePng(pngPath) {
-        try {
-          app.beginSuppressDialogs();
-          var comps = app.project.activeItem;
-          var layers = comps.selectedLayers;
-          var inArr = [];
-          for (var i = 0; i < layers.length; i++) {
-            inArr.push(layers[i].index);
-          }
-          var otherIndexArr = [];
-          var otherEnabledArr = [];
-          for (i = 0; i < comps.numLayers; i++) {
-            var thisLayer = comps.layer(i + 1);
-            if (inArr.toString().indexOf(thisLayer.index) === -1) {
-              otherEnabledArr.push(thisLayer.enabled);
-              otherIndexArr.push(thisLayer.index);
-              try {
-                thisLayer.enabled = false;
-              } catch (err) {}
-            }
-          }
-          var nameStr = '';
-          pngPath = File(pngPath);
-          var isNewItem = this.newItemOrCover === 'newItem';
-          var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
-          if (isNewItem || isCover) {
-            if (isNewItem) {
-              while (pngPath.exists) {
-                pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
-                pngPath = File(pngPath);
-              }
-            }
-            if (this.thumbTypeValue === true) {
-              app.activeViewer.views[0].saveBlittedImageToPng(comps.time, pngPath, 1000, "what's this? I don't know");
+            if (this.thumbTypeValue) {
+              app.activeViewer.views[0].saveBlittedImageToPng(time, seqPath, 1000, "what's this? I don't know");
             } else {
-              comps.saveFrameToPng(comps.time, pngPath);
+              comps.saveFrameToPng(time, seqPath);
             }
-            this.cropImage(pngPath, pngPath);
+            this.cropImage(seqPath, seqPath);
+            app.purge(PurgeTarget.IMAGE_CACHES);
           }
-
-          if (this.savePreviewValue === true) {
-            var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
-            !targetFolder.exists && targetFolder.create();
-            var num = this.frameNum;
-            var timeArr = this.getTimeInfoArr(comps);
-            for (i = 0; i < num; i++) {
-              var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
-              var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
-
-              if (this.thumbTypeValue) {
-                app.activeViewer.views[0].saveBlittedImageToPng(time, seqPath, 1000, "what's this? I don't know");
-              } else {
-                comps.saveFrameToPng(time, seqPath);
-              }
-              this.cropImage(seqPath, seqPath);
-              app.purge(PurgeTarget.IMAGE_CACHES);
-            }
-          }
-
-          for (i = 0; i < otherIndexArr.length; i++) {
-            try {
-              thisLayer = comps.layer(otherIndexArr[i]);
-              thisLayer.enabled = otherEnabledArr[i];
-            } catch (err) {}
-          }
-          app.endSuppressDialogs(false);
-          nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
-          return encodeURIComponent(nameStr);
-        } catch (err) {
-          alert(err.line.toString() + err.toString());
         }
+
+        for (i = 0; i < otherIndexArr.length; i++) {
+          try {
+            thisLayer = comps.layer(otherIndexArr[i]);
+            thisLayer.enabled = otherEnabledArr[i];
+          } catch (err) {}
+        }
+        app.endSuppressDialogs(false);
+        nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
+        return encodeURIComponent(nameStr);
+      } catch (err) {
+        alert(err.line.toString() + err.toString());
       }
+    }
 
-    });
+  });
 
-    sp.prototype.extend(sp.prototype, {
+  sp.prototype.extend(sp.prototype, {
 
-      newLayers: function newLayers(elementXml, comp, options) {
-        var layerArr = $.layer(elementXml, options).toLayer(comp);
+    newLayers: function newLayers(elementXml, comp, options) {
+      var layerArr = $.layer(elementXml, options).toLayer(comp);
+      return layerArr;
+    },
 
-        return layerArr;
-      },
+    getXmlFromLayers: function getXmlFromLayers(layers, itemName, sp) {
+      var options = {
+        isSaveMaterial: sp.saveMaterialValue
+      };
+      return $.layer(layers, options).toXML(itemName);
+    },
 
-      getXmlFromLayers: function getXmlFromLayers(layers, itemName, sp) {
-        var options = {
-          isSaveMaterial: sp.saveMaterialValue
-        };
-        return $.layer(layers, options).toXML(itemName);
-      },
+    newProperties: function newProperties(xml, selectedLayers, isCleanGroup, isKeyframeOffset) {
+      isCleanGroup = isCleanGroup || false;
+      isKeyframeOffset = isKeyframeOffset || false;
 
-      newProperties: function newProperties(xml, selectedLayers, isCleanGroup, isKeyframeOffset) {
-        isCleanGroup = isCleanGroup || false;
-        isKeyframeOffset = isKeyframeOffset || false;
+      var layerXml = new XML(xml);
 
-        var layerXml = new XML(xml);
+      var options = {};
+      options.newPropertiesSettingArr = [];
+      options.cleanPropertiesSettingArr = [];
 
-        var options = {};
-        options.newPropertiesSettingArr = [];
-        options.cleanPropertiesSettingArr = [];
+      options.isCleanGroup = isCleanGroup;
+      options.isKeyframeOffset = isKeyframeOffset;
 
-        options.isCleanGroup = isCleanGroup;
-        options.isKeyframeOffset = isKeyframeOffset;
-
-        for (var i = 1; i <= 9; i++) {
-          if (sp.prototype.getSetting('_1_' + i) === '1') {
-            options.newPropertiesSettingArr.push(1);
-          } else {
-            options.newPropertiesSettingArr.push(0);
-          }
-
-          if (sp.prototype.getSetting('_2_' + i) === '1') {
-            options.cleanPropertiesSettingArr.push(1);
-          } else {
-            options.cleanPropertiesSettingArr.push(0);
-          }
-        }
-
-        $.layer.newProperties(layerXml.child(0).Properties, selectedLayers, options);
-      },
-
-      saveItemToFile: function saveItemToFile(file, xml, position) {
-        var newXml = new XML(file.readd());
-        if (typeof position === 'undefined') {
-          newXml.appendChild(xml);
+      for (var i = 1; i <= 9; i++) {
+        if (sp.prototype.getSetting('_1_' + i) === '1') {
+          options.newPropertiesSettingArr.push(1);
         } else {
-          newXml.appendChild(xml);
-          var newInsertxml = new XML(newXml.child(newXml.children().length() - 1));
-          newXml.insertChildAfter(newXml.child(position), newInsertxml);
-          newXml.child(position).setLocalName('waitToDelete');
-          newXml.child(newXml.children().length() - 1).setLocalName('waitToDelete');
-          delete newXml.waitToDelete;
+          options.newPropertiesSettingArr.push(0);
         }
-        file.writee(newXml);
-      }
 
-    });
-
-    sp.prototype.init.prototype = sp.prototype;
-    $.global.sp = sp();
-    return $.global.sp;
-  }(), function (sp) {
-    __webpack_require__(4);
-
-    sp.extend(sp, {
-      forEach: function forEach(xml, callback, context) {
-        if (!(xml instanceof XML)) return;
-        var i, len;
-        for (i = 0, len = xml.children().length(); i < len; i++) {
-          if (callback.call(context, xml.child(i), i, xml) === false) {
-            break;
-          }
+        if (sp.prototype.getSetting('_2_' + i) === '1') {
+          options.cleanPropertiesSettingArr.push(1);
+        } else {
+          options.cleanPropertiesSettingArr.push(0);
         }
       }
-    });
 
-    String.prototype.trim = String.prototype.trim || function () {
-      return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-    };
+      $.layer.newProperties(layerXml.child(0).Properties, selectedLayers, options);
+    },
 
-    Array.prototype.includes = function (value) {
-      for (var i = 0, len = this.length; i < len; i++) {
-        if (this[i] === value) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    Array.prototype.forEach = function (callback, context) {
-      if (Object.prototype.toString.call(this) === '[object Array]') {
-        var i, len;
-        for (i = 0, len = this.length; i < len; i++) {
-          if (typeof callback === 'function' && Object.prototype.hasOwnProperty.call(this, i)) {
-            if (callback.call(context, this[i], i, this) === false) {
-              break;
-            }
-          }
-        }
-      }
-    };
-
-    Error.prototype.print = Error.prototype.print || function () {
-      return 'Line #' + this.line.toString() + '\r\n' + this.toString();
-    };
-
-    Error.prototype.printc = Error.prototype.printc || function () {
-      cout << '\n---------';
-      cout << this.print();
-      cout << '---------\n';
-    };
-
-    Error.prototype.printa = Error.prototype.printa || function () {
-      this.print() << cout;
-    };
-
-    File.prototype.writee = function (str) {
-      this.open('w');
-      this.write(str);
-      this.close();
-    };
-
-    File.prototype.readd = function () {
-      this.open('r');
-      var temp = this.read();
-      this.close();
-      return temp;
-    };
-
-    Array.prototype.pushh = function (str) {
-      this.push(str);
-      return this;
-    };
-  }(sp), function (sp) {
-    var keyNameArr = [];
-    var valueArr = [];
-
-    for (var i = 1; i <= 9; i++) {
-      keyNameArr.push('_1_' + i);
-      if (i === 1 || i === 2 || i === 5) {
-        valueArr.push('1');
+    saveItemToFile: function saveItemToFile(file, xml, position) {
+      var newXml = new XML(file.readd());
+      if (typeof position === 'undefined') {
+        newXml.appendChild(xml);
       } else {
-        valueArr.push('0');
+        newXml.appendChild(xml);
+        var newInsertxml = new XML(newXml.child(newXml.children().length() - 1));
+        newXml.insertChildAfter(newXml.child(position), newInsertxml);
+        newXml.child(position).setLocalName('waitToDelete');
+        newXml.child(newXml.children().length() - 1).setLocalName('waitToDelete');
+        delete newXml.waitToDelete;
       }
+      file.writee(newXml);
     }
 
-    for (i = 1; i <= 9; i++) {
-      keyNameArr.push('_2_' + i);
-      valueArr.push('0');
-    }
+  });
 
-    keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview');
+  sp.prototype.init.prototype = sp.prototype;
+  $.global.sp = sp();
+  return $.global.sp;
+}();
 
-    valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true');
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
 
-    keyNameArr.forEach(function (item, index) {
-      var value = valueArr[index];
-      if (sp.haveSetting(item) === false) sp.saveSetting(item, value);
-    });
+"use strict";
 
-    sp.showThumbValue = sp.getSettingAsBool('showThumb');
-    sp.deleteAlertValue = sp.getSettingAsBool('deleteAlert');
-    sp.preComposeValue = sp.getSettingAsBool('preCompose');
-    sp.saveMaterialValue = sp.getSettingAsBool('saveMaterial');
-    sp.autoNameValue = sp.getSettingAsBool('autoName');
-    sp.onlyEffectValue = sp.getSettingAsBool('onlyEffect');
-    sp.cleanGroupValue = sp.getSettingAsBool('cleanGroup');
-    sp.offsetKeyframeValue = sp.getSettingAsBool('offsetKeyframe');
-    sp.savePreviewValue = sp.getSettingAsBool('savePreview');
 
-    sp.thumbTypeValue = sp.getSettingAsBool('thumbType');
-    sp.coverChangeValue = sp.getSettingAsBool('coverChange');
-
-    sp.frameSecond = parseInt(sp.getSetting('frameSecond'));
-    sp.frameNum = parseInt(sp.getSetting('frameNum'));
-
-    !sp.scriptFolder.exists && sp.scriptFolder.create();
-    !sp.roamingFolder.exists && sp.roamingFolder.create();
-    !sp.materialFolder.exists && sp.materialFolder.create();
-
-    var loc = function loc(string) {
-      if (sp.lang === 0) {
-        sp.lang = sp.getSetting('language');
-
-        if (sp.isForceEnglish()) {
-          sp.lang = 'en';
-        }
-      }
-      return string[sp.lang];
-    };
-
-    $.global.loc = loc;
-
-    sp.extend(sp, {
-      beyondCS6: true,
-      versionUpdateInfo: {
-        ch: '\u5C42\u5B58\u50A8\u811A\u672CSp_Memory 3.0 @\u79CB\u98CE_\u5C0F\u5F84\n\n\u529F\u80FD\u6DFB\u52A0:\n1.\u9ED8\u8BA4\u5F00\u542F\u9884\u89C8\u52A8\u753B\u529F\u80FD\n2.\u5B58\u50A8\u5C42\u65F6\u9ED8\u8BA4\u5B58\u50A8\u9884\u89C8\u52A8\u753B,\u53EF\u8BBE\u5B9A\u9884\u89C8\u7684\u5E27\u7387\u548C\u5E27\u6570\n3.\u5BFC\u5165\u5BFC\u51FA\u529F\u80FD\u652F\u6301\u9884\u89C8\u52A8\u753B\n3.\u6DFB\u52A0\u7EC4\u7684\u5206\u7C7B-\u6A21\u5757\n\n\u53F3\u952E\u83DC\u5355\u65B0\u589E:\n1.\u9884\u89C8\u5168\u90E8/\u9884\u89C8\u9009\u4E2D\n2.\u65B0\u5EFA\u6A21\u5757\n3.\u5220\u9664\u6A21\u5757\n\n\n\u5C0F\u63D0\u793A:\n1.\u57283.x\u7248\u672C\u524D\u4FDD\u5B58\u7684\u7EC4,\u53EF\u4EE5\u7528"\u53F3\u952E->\u8F85\u52A9\u811A\u672C->\u91CD\u8F7D\u7EC4\u5185\u9884\u89C8\u52A8\u753B"\u6765\u4E3A\u7EC4\u6240\u6709\u5143\u7D20\u8FDB\u884C\u6279\u91CF\u751F\u6210\u9884\u89C8\u52A8\u753B\n2.\u53EF\u4F7F\u7528ctrl\u4E0Eshift\u5BF9\u5143\u7D20\u8FDB\u884C\u81EA\u7531\u9009\u62E9,\u4E4B\u540E\u53F3\u952E->\u9884\u89C8\u9009\u4E2D,\u5373\u53EF\u540C\u65F6\u9884\u89C8\u6240\u6709\u88AB\u9009\u4E2D\u5143\u7D20\u7684\u52A8\u753B\n3.\u5728\u672A\u9009\u4E2D\u4EFB\u4F55\u5143\u7D20\u65F6,\u53F3\u952E->\u9884\u89C8\u5168\u90E8,\u5373\u53EF\u9884\u89C8\u7EC4\u5185\u7684\u5168\u90E8\u5143\u7D20\u7684\u52A8\u753B\n4.\u5728\u8BBE\u7F6E\u7A97\u53E3\u4E2D,\u9009\u4E2D\u4E00\u4E2A\u7EC4,\u4E4B\u540E\u70B9\u51FB"\u526A\u5207\u9009\u4E2D\u7EC4\u5230\u5176\u4ED6\u6A21\u5757",\u53EF\u5C06\u7EC4\u79FB\u52A8\u5230\u5176\u4ED6\u6A21\u5757\u4E2D\n\n\n',
-        en: 'Sp_memory 3.0 @smallpath\n                        \nNew Feature:\n1.Enable preview element\n2.Create preview animation while saving layers,you can set the frame rate and frame number\n3.Export/Import group support preview animation\n4.Add module - the group of group\n\nTips:\n1.When your group is saved  before v3.0,you can use "RightClick->Helper scripts->Reload previews of group" to create all the preview animation\n2.Use ctrl key and shift key to select element,then use "RightClick->Preview selected" to preview the animations of selected element at the same time.\n3.When there isn\'t any element being selected, us "RightClick->Preview all" to preview all the animations of group.\n4.To cut the group from its module into another module,use "Cut selected group to other module" in the settings window\n                        \n'
-      }
-    });
-
-    if (sp.haveSetting('version') === false || sp.getSetting('version') < sp.version) {
-      alert(loc(sp.versionUpdateInfo));
-      sp.saveSetting('version', sp.version);
-    }
-  }(sp), function () {
-    if (!sp.settingsFile.exists || sp.settingsFile.length === 0) {
-      if (sp.settingsFile.exists) sp.settingsFile.remove();
-      var settingsText = '<settings>\
-    <Show>1</Show>\
-    <Alert>1</Alert>\
-    <Precomp>0</Precomp>\
-    <Fix>0</Fix>\
-    <AutoName>1</AutoName>\
-    <OnlyEffect>0</OnlyEffect>\
-    <Selection>0</Selection>\
-    <SubItems>0</SubItems>\
-    <ListItems/>\
-    <ParentGroup/>\
+module.exports = function () {
+  if (!sp.settingsFile.exists || sp.settingsFile.length === 0) {
+    if (sp.settingsFile.exists) sp.settingsFile.remove();
+    var settingsText = '<settings>\
+  <Show>1</Show>\
+  <Alert>1</Alert>\
+  <Precomp>0</Precomp>\
+  <Fix>0</Fix>\
+  <AutoName>1</AutoName>\
+  <OnlyEffect>0</OnlyEffect>\
+  <Selection>0</Selection>\
+  <SubItems>0</SubItems>\
+  <ListItems/>\
+  <ParentGroup/>\
 </settings>';
-      var newsettingsxml = new XML(settingsText);
-      var allFiles = sp.scriptFolder.getFiles();
-      newsettingsxml.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
-      var i = 0;
-      allFiles.forEach(function (item, index) {
-        if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
-          newsettingsxml.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
-          newsettingsxml.ParentGroup.child(0).appendChild(new XML('<Index>' + i + '</Index>'));
-          i++;
-        }
-      });
-      sp.settingsFile.writee(newsettingsxml);
-    }
+    var newsettingsxml = new XML(settingsText);
+    var allFiles = sp.scriptFolder.getFiles();
+    newsettingsxml.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
+    var i = 0;
+    allFiles.forEach(function (item, index) {
+      if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
+        newsettingsxml.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
+        newsettingsxml.ParentGroup.child(0).appendChild(new XML('<Index>' + i + '</Index>'));
+        i++;
+      }
+    });
+    sp.settingsFile.writee(newsettingsxml);
+  }
 
-    var content = new XML(sp.settingsFile.readd());
-    if (!content.hasOwnProperty('ParentGroup')) {
-      content.appendChild(new XML('<ParentGroup/>'));
-    }
-    if (content.ParentGroup.children().length() === 0) {
-      content.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
-      sp.forEach(content.ListItems, function (item, index) {
-        content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
-      });
-      sp.settingsFile.writee(content);
-    }
-
-    content = new XML(sp.settingsFile.readd());
-    if (!content.hasOwnProperty('ListItems')) {
-      content.appendChild(new XML('<ListItems/>'));
-    }
-    if (content.ListItems.children().length() === 0) {
-      allFiles = sp.scriptFolder.getFiles();
-      allFiles.forEach(function (item, index) {
-        if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
-          content.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
-          content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
-        }
-      });
-    }
-    if (content.ListItems.children().length() === 0) {
-      content.ListItems.appendChild(new XML('<Name>Default</Name>'));
-      content.ParentGroup.child(0).appendChild(new XML('<Index>' + 0 + '</Index>'));
-      var file = sp.getFileByName('Default');
-      sp.getImageFolderByName('Default');
-      var str = '<tree></tree>';
-      file.writee(str);
-    }
-
+  var content = new XML(sp.settingsFile.readd());
+  if (!content.hasOwnProperty('ParentGroup')) {
+    content.appendChild(new XML('<ParentGroup/>'));
+  }
+  if (content.ParentGroup.children().length() === 0) {
+    content.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
+    sp.forEach(content.ListItems, function (item, index) {
+      content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
+    });
     sp.settingsFile.writee(content);
-  }(sp));
+  }
+
+  content = new XML(sp.settingsFile.readd());
+  if (!content.hasOwnProperty('ListItems')) {
+    content.appendChild(new XML('<ListItems/>'));
+  }
+  if (content.ListItems.children().length() === 0) {
+    allFiles = sp.scriptFolder.getFiles();
+    allFiles.forEach(function (item, index) {
+      if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
+        content.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
+        content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
+      }
+    });
+  }
+  if (content.ListItems.children().length() === 0) {
+    content.ListItems.appendChild(new XML('<Name>Default</Name>'));
+    content.ParentGroup.child(0).appendChild(new XML('<Index>' + 0 + '</Index>'));
+    var file = sp.getFileByName('Default');
+    sp.getImageFolderByName('Default');
+    var str = '<tree></tree>';
+    file.writee(str);
+  }
+
+  sp.settingsFile.writee(content);
+}();
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+try {
+    (function (global) {
+        __webpack_require__(11);
+
+        __webpack_require__(9);
+
+        __webpack_require__(10);
+
+        __webpack_require__(12);
+
+        __webpack_require__(0);
+
+        __webpack_require__(5);
+
+        __webpack_require__(1);
+        __webpack_require__(3);
+        __webpack_require__(6);
+        __webpack_require__(4);
+        __webpack_require__(2);
+        __webpack_require__(7);
+        var helpers = __webpack_require__(8);
+
+        $.layer.slash = sp.slash;
+        $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
+        $.layer.translate = $.global.translate;
+
+        sp.fns = new helpers.fns();
+
+        $.global.callbackBeforeWebpackBuild && $.global.callbackBeforeWebpackBuild();
+        if (!(global instanceof Panel)) {
+            $.global.callbackBeforeWebpackBuild = function () {
+                win.close();
+            };
+        }
+        var win = sp.win = global instanceof Panel ? global : new Window('window', sp.scriptName, undefined, { resizeable: true });
+        var outterGroup = sp.win.outterGroup = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}");
+        var innerGroup = sp.win.innerGroup = outterGroup.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}");
+        var parentDroplist = sp.parentDroplist = innerGroup.add('Dropdownlist{}');
+        var droplist = sp.droplist = innerGroup.add('Dropdownlist{}');
+        var gv = sp.gv = new GridView(outterGroup);
+
+        gv.limitText = sp.getSettingAsBool('limitText');
+        gv.showText = sp.showThumbValue;
+        gv.version = parseInt(app.version.split('.')[0]) === 12 || parseInt(app.version.split('.')[0]) === 14 ? 'CC' : 'CC2014';
+
+        gv.leftClick = sp.fns.leftClick;
+        gv.rightClick = sp.fns.rightClick;
+        gv.leftDoubleClick = sp.fns.newLayer;
+        gv.mouseMove = sp.fns.moveOver;
+        parentDroplist.onChange = sp.fns.parentDroplistChange;
+        droplist.onChange = sp.fns.droplistChange;
+
+        sp.reloadParentDroplist();
+        var selection = parseInt(sp.getSetting('parentSelection'));
+        parentDroplist.selection = selection <= parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
+        selection = parseInt(sp.getSetting('thisSelection'));
+        droplist.selection = selection <= droplist.items.length - 1 && selection >= 0 ? selection : 0;
+
+        sp.renderTaskArray.forEach(function (item, index) {
+            app.cancelTask(item);
+        });
+        sp.renderTaskArray.length = 0;
+        sp.previewHelper = {};
+
+        win.onResize = win.onResizing = sp.fns.winResize;
+
+        if (win instanceof Panel) {
+            win.layout.layout(1);
+        } else {
+            win.location = sp.getSetting('winLocation').split(',');
+            if (win.location[0] <= 0 || win.location[1] <= 0) {
+                win.location = [100, 200];
+            }
+            win.show();
+            win.size = sp.getSetting('winSize').split(',');
+            win.onClose = sp.fns.winClose;
+        }
+
+        win.onResize();
+    })(undefined);
 } catch (err) {
-  alert('Line #' + err.line.toString() + '\r\n' + err.toString());
+    alert('Line #' + err.line.toString() + '\r\n' + err.toString());
 }
 
 /***/ }),
-/* 10 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7182,7 +6452,7 @@ function autoSave() {
 }
 
 /***/ }),
-/* 11 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7309,7 +6579,7 @@ function cutLength() {
 }
 
 /***/ }),
-/* 12 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7390,7 +6660,7 @@ function reloadPic() {
 }
 
 /***/ }),
-/* 13 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8086,7 +7356,880 @@ function translate(thisObj, expProps) {
 }
 
 /***/ }),
-/* 14 */
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function OperatorOverload(call, operator) {
+  var meta = ['+', '-', '~', '*', '/', '%', '^', '<', '<=', '==', '<<', '>>', '>>>', '&', '|', '==='];
+  var toObject = function toObject() {
+    for (var i = 0; i < arguments.length; i++) {
+      this[arguments[i]] = true;
+    }
+    return this;
+  };
+  var metaObj = toObject.apply({}, meta);
+  if (!metaObj.hasOwnProperty(operator)) {
+    return alert('Operator not supported.');
+  }
+
+  this.call = call;
+  this[operator] = function (operand, rev) {
+    this.call(operand, rev);
+    return this;
+  };
+  return this;
+}
+
+var cout = $.global.cout = new OperatorOverload(function (operand, rev) {
+  if (!rev) {
+    $.writeln(operand);
+  } else {
+    alert(operand);
+  }
+}, '<<');
+$.global.cout = cout;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var global = $.global;
+
+var progressFactory = global.progressFactory = {
+  createWindow: function createWindow(len, title, prefixString, suffixString) {
+    global.progressWin = new Window('palette', title);
+    var group = global.progressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      progressText: StaticText {text:"", justify:\'center\'},\n      progressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n    }');
+    global.progressText = group.progressText;
+    global.progressBar = group.progressBar;
+    var replaced = '';
+    len.toString().split('').forEach(function (item) {
+      replaced += '  ';
+    });
+    var divide = replaced + '0' + '/' + global.progressBar.maxvalue;
+    global.progressText.text = prefixString + divide + suffixString;
+    global.progressWin.show();
+    global.progressWin.center();
+  },
+  update: function update(len, prefixString, suffixString) {
+    global.progressBar.value = global.progressBar.value + len;
+    var divide = global.progressBar.value + '/' + global.progressBar.maxvalue;
+    global.progressText.text = prefixString + divide + suffixString;
+    global.progressWin.update && global.progressWin.update();
+    global.sp.win.update && global.sp.win.update();
+  },
+  complete: function complete() {
+    global.progressWin.close();
+  }
+};
+
+var SavingPrefixString = loc(sp.savingProcessingPrefix);
+var SavingSuffixString = loc(sp.savingProcessAfter);
+var SavingTitle = loc(sp.savingProcessTitle);
+$.layer.willSaveLayers = function (layers) {
+  var len = $.layer.countLayers(layers, true);
+  $.global.progressFactory.createWindow(len, SavingTitle, SavingPrefixString, SavingSuffixString);
+};
+$.layer.didSaveLayer = function (count) {
+  $.global.progressFactory.update(count, SavingPrefixString, SavingSuffixString);
+};
+$.layer.didSaveLayers = function () {
+  $.global.progressFactory.complete();
+};
+
+var CreatingPrefixString = loc(sp.creatingProcessingPrefix);
+var CreatingSuffixString = loc(sp.creatingProcessAfter);
+var CreatingTitle = loc(sp.creatingProcessTitle);
+
+$.layer.willCreateLayers = function (len) {
+  $.global.progressFactory.createWindow(len, CreatingTitle, CreatingPrefixString, CreatingSuffixString);
+};
+$.layer.didCreateLayer = function (count) {
+  $.global.progressFactory.update(count, CreatingPrefixString, CreatingSuffixString);
+};
+$.layer.didCreateLayers = function () {
+  $.global.progressFactory.complete();
+};
+
+module.exports = progressFactory;
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function () {
+  var keepRef = this;
+  this.previewAll = function () {
+    if (sp.gv.children.length === 0) return;
+
+    keepRef.moveOut();
+
+    var lenArr = [];
+    var oneFrame = sp.frameSecond;
+    sp.previewHelper = {};
+    var items = sp.gv.selection.length === 0 ? sp.gv.children : sp.gv.selection;
+
+    for (var iter = 0, thisLen = items.length; iter < thisLen; iter++) {
+      var item = items[iter];
+      var img = item.image;
+      var index = item.index;
+
+      if (!img.parent) return;
+      var folder = new Folder(img.parent);
+
+      if (!(folder instanceof Folder)) return;
+      var targetFolder = new Folder(folder.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
+
+      try {
+        if (!targetFolder.exists) {
+          if (targetFolder.parent.toString().indexOf('_seq') === -1) {
+            targetFolder = new Folder(folder.parent.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
+            img = new File(folder.parent.toString() + sp.slash + item.text + '.png');
+          }
+        }
+      } catch (err) {}
+
+      if (!targetFolder.exists) {
+        continue;
+      }
+      if (!img.exists) {
+        continue;
+      }
+
+      sp.previewHelper['item' + index] = {};
+      sp.previewHelper['item' + index]['tempItem'] = item;
+      sp.previewHelper['item' + index]['tempImg'] = img;
+      sp.previewHelper['item' + index]['currentIndex'] = 0;
+      sp.previewHelper['item' + index]['tempFiles'] = function (f) {
+        var len = f.getFiles().length;
+        var arr = [];
+        for (var i = 0; i < len; i++) {
+          var newFile = new File(f.toString() + sp.slash + i.toString() + '.png');
+          if (newFile.exists) {
+            arr.push(newFile);
+          }
+        }
+        return arr;
+      }(targetFolder);
+
+      lenArr.push(sp.previewHelper['item' + index]['tempFiles']);
+    }
+
+    lenArr.sort(function (a, b) {
+      return a.length - b.length;
+    });
+
+    if (lenArr.length === 0) return;
+
+    var maxLen = lenArr[lenArr.length - 1].length;
+
+    for (var i = 0, len = maxLen; i <= len; i++) {
+      var stringToCall = '\n      if (sp) {\n        if (sp.gv) {\n          if (sp.gv.children) {\n\n            var len = sp.gv.children.length;\n            for (var itemIndex = 0; itemIndex < len; itemIndex++) {\n              var currentItem = sp.previewHelper["item" + itemIndex];\n              if (currentItem) {\n\n                var currentIndex = currentItem["currentIndex"];\n                currentItem["currentIndex"]++;\n                var currentIndexTemp = currentItem["tempFiles"];\n                if (currentIndexTemp) {\n                  var currentFile = currentIndexTemp[currentIndex];\n                  if (currentFile) {\n\n                    if (currentItem["tempItem"])\n                      currentItem["tempItem"].image = currentFile;\n\n                  } else {\n                    currentItem["currentIndex"] = 0;\n                  }\n                }\n              }\n            }\n            if (isValid(sp.gv.list))\n              sp.gv.refresh();\n\n          }\n        }\n      }';
+      sp.renderTaskArray.push(app.scheduleTask(stringToCall, 0 + oneFrame * i, true));
+    }
+
+    sp.isLoopPreview = true;
+  };
+  this.moveOver = function (event, item, isClick) {
+    if (sp.isLoopPreview === true) return;
+
+    if (!item) {
+      sp.isOutside = true;
+      return;
+    }
+
+    if (typeof isClick !== 'undefined') {
+      if (sp.isOutside === true) {
+        return;
+      }
+    } else {
+      if (sp.isOutside === false) {
+        return;
+      }
+    }
+
+    var img = item.image;
+    var index = item.index;
+    var oneFrame = sp.frameSecond;
+
+    if (!img.parent) return;
+    var folder = new Folder(img.parent);
+
+    if (!(folder instanceof Folder)) return;
+    var targetFolder = new Folder(folder.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
+
+    if (!targetFolder.exists) {
+      if (targetFolder.parent.toString().indexOf('_seq') === -1) {
+        targetFolder = new Folder(folder.parent.toString() + sp.slash + img.displayName.replace(/.png/i, '') + '_seq');
+        img = new File(folder.parent.toString() + sp.slash + item.text + '.png');
+      }
+    }
+
+    if (!targetFolder.exists) {
+      return;
+    }
+    if (!img.exists) {
+      return;
+    }
+
+    sp.previewHelper['item' + index] = {};
+    sp.previewHelper['item' + index]['tempItem'] = item;
+    sp.previewHelper['item' + index]['tempImg'] = img;
+    sp.previewHelper['item' + index]['currentIndex'] = 0;
+    sp.previewHelper['item' + index]['tempFiles'] = function (f) {
+      var len = f.getFiles().length;
+      var arr = [];
+      for (var i = 0; i < len; i++) {
+        var newFile = new File(f.toString() + sp.slash + i.toString() + '.png');
+        if (newFile.exists) {
+          arr.push(newFile);
+        }
+      }
+      return arr;
+    }(targetFolder);
+
+    if (sp.previewHelper['item' + index]['tempFiles'].length === 0) return;
+
+    for (var i = 0, len = sp.previewHelper['item' + index]['tempFiles'].length; i <= len; i++) {
+      var stringToCall = '\n      if (sp) {\n        if (sp.gv) {\n          if (sp.gv.children) {\n\n            var len = sp.gv.children.length;\n            for (var itemIndex = 0; itemIndex < len; itemIndex++) {\n              var currentItem = sp.previewHelper["item" + itemIndex];\n              if (currentItem) {\n                var currentIndex = currentItem["currentIndex"];\n                currentItem["currentIndex"]++;\n\n                var currentIndexTemp = currentItem["tempFiles"];\n                if (currentIndexTemp) {\n                  var currentFile = currentIndexTemp[currentIndex];\n                  if (currentFile) {\n                    if (currentItem["tempItem"])\n                      currentItem["tempItem"].image = currentFile;\n                  } else {\n                    var currentImg = currentItem["tempImg"];\n                    if (currentImg) {\n                      currentItem["tempItem"].image = currentImg;\n                    }\n                    sp.previewHelper["item" + itemIndex] = {};\n                  }\n                }\n              }\n            }\n            if (isValid(sp.gv.list))\n              sp.gv.refresh();\n\n          }\n        }\n      }';
+      sp.renderTaskArray.push(app.scheduleTask(stringToCall, 0 + oneFrame * i, false));
+    }
+
+    sp.isOutside = false;
+    sp.isLoopPreview = false;
+  };
+  this.leftClick = function () {
+    if (sp.isLoopPreview === false) return;
+
+    keepRef.moveOut();
+
+    sp.isLoopPreview = false;
+  };
+  this.moveOut = function () {
+    sp.renderTaskArray.forEach(function (item, index) {
+      app.cancelTask(item);
+    });
+    sp.renderTaskArray.length = 0;
+
+    if (sp.gv.children.length !== 0) {
+      sp.preImageArr.forEach(function (item, index) {
+        sp.gv.children[index].image = item;
+      });
+    }
+
+    sp.previewHelper = {};
+  };
+  this.addModule = function () {
+    var newEleName = prompt(loc(sp.setName), 'Default');
+    if (!newEleName) {
+      return;
+    }
+    newEleName.trim();
+    if (sp.lookUpTextInChildren(newEleName, sp.parentDroplist.items)) {
+      alert(loc(sp.existName));return;
+    }
+
+    var content = new XML(sp.settingsFile.readd());
+    content.ParentGroup.appendChild(new XML("<item groupName = '" + newEleName + "'></item>"));
+    sp.settingsFile.writee(content);
+    sp.reloadParentDroplist();
+    sp.parentDroplist.selection = sp.parentDroplist.items.length - 1;
+    sp.preImageArr = [];
+    var selection = parseInt(sp.getSetting('thisSelection'));
+    sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
+    sp.gv.refresh();
+  };
+  this.deleteModule = function () {
+    if (!sp.parentDroplist.selection) return;
+    var isSureDelete = confirm(loc(sp.deleteModuleAlert));
+    if (isSureDelete === true) isSureDelete = confirm(loc(sp.addAlert) + loc(sp.deleteModuleAlert));
+    if (isSureDelete === false) return;
+
+    var groupName = sp.parentDroplist.selection.text;
+
+    sp.xmlCurrentFileNames.forEach(function (item, index) {
+      var xml = new XML(sp.settingsFile.readd());
+      var selectionText = item;
+
+      var preIndex = sp.getGlobalIndexFromFileName(item);
+      xml.ListItems.child(preIndex).setLocalName('waitToDelete');
+      delete xml.ListItems.waitToDelete;
+      sp.settingsFile.writee(xml);
+      sp.deleteIndexAndReload(preIndex);
+
+      var imageFolder = sp.getImageFolderByName(selectionText);
+      $.global.deleteThisFolder(imageFolder);
+      imageFolder.remove();
+
+      var file = sp.getFileByName(selectionText);
+      file.remove();
+    });
+
+    var xml = new XML(sp.settingsFile.readd());
+    sp.forEach(xml.ParentGroup, function (item, index) {
+      if (item['@groupName'].toString() === groupName) {
+        item.setLocalName('waitToDelete');
+      }
+    });
+    delete xml.ParentGroup.waitToDelete;
+    sp.settingsFile.writee(xml);
+
+    sp.reloadParentDroplist();
+    sp.preImageArr = [];
+    var selection = parseInt(sp.getSetting('parentSelection'));
+    sp.parentDroplist.selection = selection - 1 <= sp.parentDroplist.items.length - 1 && selection - 1 >= 0 ? selection - 1 : 0;
+    selection = parseInt(sp.getSetting('thisSelection'));
+    sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
+    sp.gv.refresh();
+  };
+  this.newLayer = function () {
+    if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElements));
+    if (!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
+    if (sp.onlyEffectValue === true && app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
+
+    var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd());
+    xml = xml.child(sp.gv.lastSelectedItem.index);
+
+    var precomposeName = decodeURIComponent(xml['@name'].toString());
+
+    app.beginUndoGroup('Undo new');
+
+    if (sp.onlyEffectValue === false) {
+      var folderName = sp.getSetting('folderName');
+      var text = sp.gv.lastSelectedItem.text;
+      var compFolder = app.project.items.addFolder(text + '.sp');
+      var sourceFolder = app.project.items.addFolder('Sources');
+
+      var resultArr = sp.lookUpInItem(folderName, app.project.items);
+      if (resultArr[0] === true) {
+        var parentFolder = resultArr[1];
+        compFolder.parentFolder = parentFolder;
+      } else {
+        parentFolder = app.project.items.addFolder(folderName);
+        compFolder.parentFolder = parentFolder;
+      }
+      sourceFolder.parentFolder = compFolder;
+      sp.compFolder = compFolder;
+      sp.sourceFolder = sourceFolder;
+
+      var currentTime = app.project.activeItem.time;
+      var options = {
+        compFolder: sp.compFolder,
+        sourceFolder: sp.sourceFolder
+      };
+
+      var activeCompLayersArr = sp.newLayers(xml, app.project.activeItem, options);
+
+      app.project.activeItem.time = currentTime;
+
+      sourceFolder.numItems === 0 && sourceFolder.remove();
+      compFolder.numItems === 0 && compFolder.remove();
+    } else {
+      activeCompLayersArr = app.project.activeItem.selectedLayers;
+      sp.newProperties(xml, app.project.activeItem.selectedLayers, sp.cleanGroupValue, sp.offsetKeyframeValue);
+    }
+
+    app.endUndoGroup();
+
+    if (sp.preComposeValue === true) {
+      var indexArr = [];
+      var inPointArr = [];
+      var outPointArr = [];
+
+      activeCompLayersArr.forEach(function (item, index) {
+        indexArr.push(item.index);
+        inPointArr.push(item.inPoint);
+        outPointArr.push(item.outPoint);
+      });
+
+      inPointArr.sort(function (a, b) {
+        return a - b;
+      });
+      outPointArr.sort(function (a, b) {
+        return b - a;
+      });
+
+      app.beginUndoGroup('Undo precomp');
+      app.project.activeItem.layers.precompose(indexArr, precomposeName, true);
+      app.project.activeItem.selectedLayers[0].inPoint = inPointArr[0];
+      app.project.activeItem.selectedLayers[0].outPoint = outPointArr[0];
+      app.endUndoGroup();
+    }
+
+    if (sp.onlyEffectValue === false) {
+      return activeCompLayersArr;
+    } else {
+      return null;
+    }
+  };
+  this.cover = function () {
+    if (!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
+    var thisComp = app.project.activeItem;
+    if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
+    var itemName = sp.gv.lastSelectedItem.text;
+
+    app.beginSuppressDialogs();
+    app.beginUndoGroup('Undo save');
+
+    var imageFile = sp.getImageFile(sp.droplist.selection.text, itemName);
+
+    var seqFolder = new Folder(imageFile.toString().replace(/.png/i, '') + '_seq');
+    if (seqFolder.exists) {
+      $.global.deleteThisFolder(seqFolder);
+      seqFolder.remove();
+    }
+
+    sp.newItemOrCover = 'cover';
+
+    if (sp.isCC2015 === true) {
+      itemName = sp.savePng2(imageFile);
+    } else {
+      itemName = sp.savePng(imageFile);
+    }
+
+    var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp);
+
+    sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text), xml, sp.gv.lastSelectedItem.index);
+
+    sp.gv.lastSelectedItem.image = null;
+    sp.gv.lastSelectedItem.image = sp.getImage(sp.droplist.selection.text, itemName);
+    sp.gv.refresh();
+
+    app.endUndoGroup();
+    app.endSuppressDialogs(false);
+  };
+  this.newItem = function () {
+    try {
+      if (!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers));
+      var thisComp = app.project.activeItem;
+      if (sp.autoNameValue === false) {
+        var itemName = prompt(loc(sp.setName), 'Name');
+      } else {
+        itemName = thisComp.selectedLayers[0].name.replace('/', '_').replace('.', '_');
+      }
+
+      if (sp.autoNameValue === false && itemName === '' || itemName === null) return;
+
+      itemName.trim();
+
+      app.beginSuppressDialogs();
+      app.beginUndoGroup('Undo save');
+
+      sp.newItemOrCover = 'newItem';
+
+      if (sp.isCC2015 === true) {
+        itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text, itemName));
+      } else {
+        itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text, itemName));
+      }
+
+      var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp);
+
+      sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text), xml);
+
+      var item = sp.gv.add(decodeURIComponent(itemName), sp.getImage(sp.droplist.selection.text, itemName));
+      sp.preImageArr.push(item.image);
+      sp.gv.refresh();
+
+      app.endUndoGroup();
+      app.endSuppressDialogs(false);
+    } catch (err) {
+      err.printc();err.printa();
+    }
+  };
+  this.deleteItem = function () {
+    if (sp.gv.selection.length === 0) return alert(loc(sp.needElements));
+    if (sp.deleteAlertValue === true) {
+      var sure = confirm(loc(sp.sureDelete));
+    }
+    if (sp.deleteAlertValue === true && sure === false) return;
+
+    var file = sp.getFileByName(sp.droplist.selection.text);
+    var xml = new XML(file.readd());
+    sp.gv.selection.forEach(function (item, index) {
+      xml.child(item.index).setLocalName('waitToDelete');
+      var preText = item.text;
+      var image = sp.getImageFile(sp.droplist.selection.text, preText);
+      if (image.exists) {
+        image.remove();
+      }
+      var seqFolder = new Folder(image.toString().replace(/.png/i, '') + '_seq');
+      if (seqFolder.exists) {
+        $.global.deleteThisFolder(seqFolder);
+        seqFolder.remove();
+      }
+    });
+    delete xml.waitToDelete;
+    if (xml.children().length() !== 0) {
+      file.writee(xml);
+    } else {
+      file.writee('<tree></tree>');
+    }
+
+    sp.gv.removeAll();
+    sp.droplist.notify('onChange');
+    sp.gv.refresh();
+  };
+  this.importImage = function () {
+    if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
+    var file = File.openDialog('Please select pictures', false);
+    if (!file) return;
+    if (file.name.split('.').pop() !== 'jpg' && file.name.split('.').pop() !== 'png') return;
+    var imageFile = sp.getImageFile(sp.droplist.selection.text, sp.gv.lastSelectedItem.text);
+
+    sp.cropImage(file, imageFile);
+    sp.gv.lastSelectedItem.image = imageFile;
+    sp.gv.refresh();
+  };
+  this.deleteGroup = function () {
+    if (!sp.parentDroplist.selection) return;
+    if (!sp.droplist.selection) return;
+    var isSureDelete = confirm(loc(sp.isSureGroup));
+    if (isSureDelete === true) isSureDelete = confirm(loc(sp.isSureGroup2));
+    if (isSureDelete === false) return;
+
+    var xml = new XML(sp.settingsFile.readd());
+    var selectionText = sp.droplist.selection.text;
+
+    var preIndex = sp.getGlobalIndexFromFileName(selectionText);
+
+    xml.ListItems.child(preIndex).setLocalName('waitToDelete');
+    delete xml.ListItems.waitToDelete;
+    sp.settingsFile.writee(xml);
+    sp.deleteIndexAndReload(preIndex);
+
+    var imageFolder = sp.getImageFolderByName(selectionText);
+    $.global.deleteThisFolder(imageFolder);
+    imageFolder.remove();
+
+    var file = sp.getFileByName(selectionText);
+    file.remove();
+
+    sp.reloadParentDroplist();
+    sp.parentDroplist.selection = parseInt(sp.getSetting('parentSelection'));
+
+    sp.preImageArr = [];
+    var selection = parseInt(sp.getSetting('thisSelection'));
+    sp.droplist.selection = selection - 1;
+    sp.gv.refresh();
+  };
+  this.addGroup = function () {
+    var newEleName = prompt(loc(sp.setName), 'Default');
+    if (!newEleName) {
+      return;
+    }
+    if (!sp.parentDroplist.selection) return alert(loc(sp.needModule));
+    newEleName.trim();
+    if (sp.xmlFileNames.includes(newEleName)) {
+      alert(loc(sp.existName));return;
+    }
+
+    var file = sp.getFileByName(newEleName);
+    sp.getImageFolderByName(newEleName);
+    var str = '<tree></tree>';
+    file.writee(str);
+    var xml = new XML(sp.settingsFile.readd());
+    xml.ListItems.appendChild(new XML('<Name>' + newEleName + '</Name>'));
+
+    var groupName = sp.parentDroplist.selection.text;
+    sp.forEach(xml.ParentGroup, function (item, index) {
+      if (item['@groupName'].toString() === groupName) {
+        item.appendChild(new XML('<Index>' + (xml.ListItems.children().length() - 1).toString() + '</Index>'));
+      }
+    });
+
+    sp.settingsFile.writee(xml);
+    sp.reloadParentDroplist();
+    sp.preImageArr = [];
+    sp.parentDroplist.selection = parseInt(sp.getSetting('parentSelection'));
+    sp.droplist.selection = sp.droplist.items.length - 1;
+    sp.gv.refresh();
+  };
+  this.exportFile = function () {
+    var exportFolder = Folder.selectDialog('Please select folder');
+    if (!exportFolder) return;
+    if (!(exportFolder instanceof Folder)) return;
+    var sourceFile = sp.getFileByName(sp.droplist.selection.text);
+    var targetFile = File(exportFolder.toString() + sp.slash + sp.droplist.selection.text + '.xml');
+    if (targetFile.exists) {
+      alert(loc(sp.overWritten));return;
+    }
+    if (!sp.droplist.selection) return;
+
+    var images = sp.getImageFolderByName(sp.droplist.selection.text).getFiles();
+    var picXml = new XML('<pic></pic>');
+    var seqXml = new XML('<seq></seq>');
+    images.forEach(function (item, index) {
+      if (item.name.indexOf('.png') !== -1) {
+        item.open('r');
+        item.encoding = 'binary';
+        var str = encodeURIComponent(item.read());
+        item.close();
+        var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(item.name) + '</imgName>');
+        var tempXmlHeres = new XML('<img>' + str + '</img>');
+        var guluTempA = new XML('<imgInfo></imgInfo>');
+        guluTempA.appendChild(tempXmlBigHere);
+        guluTempA.appendChild(tempXmlHeres);
+        picXml.appendChild(guluTempA);
+      } else if (item instanceof Folder && item.name.indexOf('_seq') !== -1) {
+        var thisFolder = item;
+        var folderXml = new XML("<folder name='" + encodeURIComponent(item.name) + "'></folder>");
+        var seqFiles = thisFolder.getFiles();
+        seqFiles.forEach(function (imageFile, imageIndex) {
+          imageFile.open('r');
+          imageFile.encoding = 'binary';
+          var str = encodeURIComponent(imageFile.read());
+          imageFile.close();
+          var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(imageFile.name) + '</imgName>');
+          var tempXmlHeres = new XML('<img>' + str + '</img>');
+          var guluTempA = new XML('<imgInfo></imgInfo>');
+          guluTempA.appendChild(tempXmlBigHere);
+          guluTempA.appendChild(tempXmlHeres);
+          folderXml.appendChild(guluTempA);
+        });
+        seqXml.appendChild(folderXml);
+      }
+    });
+    var xml = new XML(sourceFile.readd());
+    if (picXml.children().length() > 0) {
+      xml.appendChild(picXml);
+    }
+    if (seqXml.children().length() > 0) {
+      xml.appendChild(seqXml);
+    }
+    if (xml.children().length() === 0) {
+      xml = '<tree></tree>';
+    }
+    targetFile.writee(xml);
+    clearOutput();
+    writeLn('Complete!');
+  };
+  this.importFiles = function () {
+    var files = File.openDialog('Please select xmls', '*.xml', true);
+    if (!files) return;
+    if (!sp.parentDroplist.selection) return alert(loc(sp.needModule));
+
+    var selectionIndex = sp.parentDroplist.selection.index;
+    files.forEach(function (item, index) {
+      var file = sp.getFileByName(item.name.replace('.xml', ''));
+      if (file.exists) return;
+      item.copy(file.toString());
+      var xml = new XML(file.readd());
+      sp.forEach(xml.pic, function (item, index) {
+        var image = sp.getImageFile(this.name.replace('.xml', ''), decodeURIComponent(item.imgName.toString()).replace('.png', ''));
+        image.open('w');
+        image.encoding = 'binary';
+        image.write(decodeURIComponent(item.img.toString()));
+        image.close();
+      }, item);
+      sp.forEach(xml.seq, function (folder, folderIndex) {
+        var name = decodeURIComponent(folder['@name'].toString());
+        var parentFolder = sp.getImageFolderByName(this.name.replace('.xml', ''));
+        var targetFolder = new Folder(parentFolder.toString() + sp.slash + name);
+        if (!targetFolder.exists) {
+          targetFolder.create();
+        }
+
+        sp.forEach(folder, function (imageXml, imageIndex) {
+          var imageFile = new File(this.toString() + sp.slash + decodeURIComponent(imageXml.imgName.toString()));
+          imageFile.open('w');
+          imageFile.encoding = 'binary';
+          imageFile.write(decodeURIComponent(imageXml.img.toString()));
+          imageFile.close();
+        }, targetFolder);
+      }, item);
+      delete xml.pic;
+      delete xml.seq;
+      file.writee(xml);
+      xml = new XML(sp.settingsFile.readd());
+      xml.ListItems.appendChild(new XML('<Name>' + decodeURIComponent(item.name.replace('.xml', '')) + '</Name>'));
+      xml.ParentGroup.child(selectionIndex).appendChild(new XML('<Index>' + (xml.ListItems.children().length() - 1).toString() + '</Index>'));
+
+      sp.settingsFile.writee(xml.toString());
+    });
+    sp.reloadParentDroplist();
+    sp.parentDroplist.selection = parseInt(sp.getSetting('parentSelection'));
+    sp.preImageArr = [];
+    sp.droplist.selection = sp.droplist.items.length - 1;
+    sp.gv.refresh();
+  };
+  this.changeName = function () {
+    if (!sp.gv.children) return alert(loc(sp.needElement));
+    if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement));
+    var newEleName = prompt(loc(sp.setName), sp.gv.lastSelectedItem.text);
+    if (!newEleName) {
+      alert(loc(sp.blankName));return;
+    }
+    newEleName.trim();
+    if (sp.lookUpTextInChildren(newEleName, sp.gv.children)) {
+      alert(loc(sp.existName));return;
+    }
+
+    var file = sp.getFileByName(sp.droplist.selection.text);
+    var xml = new XML(file.readd());
+    var image = sp.getImage(sp.droplist.selection.text, sp.gv.lastSelectedItem.text);
+
+    if (sp.gv.lastSelectedItem.text === decodeURIComponent(xml.child(sp.gv.lastSelectedItem.index)['@name'].toString())) {
+      xml.child(sp.gv.lastSelectedItem.index)['@name'] = encodeURIComponent(newEleName.toString());
+      file.writee(xml);
+    }
+
+    var targetImage = sp.noImage;
+    if (image.exists) {
+      var seqFolder = new Folder(image.toString().replace(/.png/i, '') + '_seq');
+      if (seqFolder.exists) {
+        seqFolder.rename(newEleName.toString() + '_seq');
+      }
+      image.rename(newEleName.toString() + '.png');
+      targetImage = sp.getImage(sp.droplist.selection.text, newEleName.toString());
+      if (image.toString() !== targetImage.toString()) {
+        image.remove();
+      }
+    }
+
+    sp.gv.lastSelectedItem.text = newEleName.toString();
+    sp.gv.lastSelectedItem.image = targetImage;
+    sp.gv.refresh();
+  };
+  this.parentDroplistChange = function () {
+    if (!this.selection) return;
+
+    sp.saveSetting('parentSelection', this.selection.index.toString());
+    sp.reloadDroplist();
+    sp.preImageArr = [];
+    var selection = parseInt(sp.getSetting('thisSelection'));
+    sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
+  };
+  this.droplistChange = function () {
+    if (!this.selection) return;
+    var text = this.selection.text;
+    var file = sp.getFileByName(text);
+    if (file === -1) return;
+    var content = file.readd();
+
+    var indexArr = [];
+    var j = -1;
+    try {
+      var thisStr = '<Element name="';
+      j = content.indexOf(thisStr);
+    } catch (err) {
+      alert(err);
+    }
+    while (j !== -1) {
+      var inputStr = '';
+      var k = 0;
+      while (content[j + thisStr.length + k] !== '"') {
+        inputStr += content[j + thisStr.length + k];
+        k++;
+      }
+      indexArr.push(inputStr);
+      j = content.indexOf(thisStr, j + thisStr.length);
+    }
+    sp.gv.removeAll();
+    sp.preImageArr = [];
+    for (var i = 0; i < indexArr.length; i++) {
+      var item = sp.gv.add(decodeURIComponent(indexArr[i]), sp.getImage(this.selection.text, indexArr[i]));
+      sp.preImageArr.push(item.image);
+    }
+    sp.saveSetting('thisSelection', this.selection.index.toString());
+    var arr = sp.getSetting('effectName').split(',');
+    if (sp.lookUpInArray(this.selection.text, arr)) {
+      sp.onlyEffectValue = true;
+    } else {
+      sp.onlyEffectValue = false;
+    }
+    sp.saveSetting('onlyEffect', sp.onlyEffectValue.toString());
+    sp.droplist.itemSize.height = 20;
+    sp.gv.scrollBarValue = 0;
+    sp.gv.refresh();
+  };
+  this.winResize = function () {
+    var spacing = 2;
+    var parentDroplistWidth = 100;
+    sp.win.outterGroup.location = [spacing, 0];
+    sp.win.outterGroup.size = [sp.win.size[0], sp.win.size[1]];
+    sp.gv.size([sp.win.outterGroup.size[0], sp.win.outterGroup.size[1] - 20]);
+    sp.win.innerGroup.location = [1, 1];
+    sp.win.innerGroup.size.width = sp.win.size[0] + 12;
+    sp.droplist.size = [sp.win.size[0] - parentDroplistWidth - spacing * 2, sp.win.innerGroup.size[1] - 3];
+    sp.droplist.location.x = parentDroplistWidth;
+    sp.droplist.itemSize.width = sp.droplist.size.width - 27;
+    sp.parentDroplist.size.width = parentDroplistWidth;
+    sp.parentDroplist.size.height = sp.droplist.size.height;
+    sp.parentDroplist.itemSize.width = parentDroplistWidth - 27;
+    sp.gv.refresh();
+  };
+  this.winClose = function () {
+    var thisStr = sp.win.size[0].toString() + ',' + sp.win.size[1].toString();
+    sp.saveSetting('winSize', thisStr);
+    thisStr = sp.win.location[0].toString() + ',' + sp.win.location[1].toString();
+    sp.saveSetting('winLocation', thisStr);
+
+    sp.renderTaskArray.forEach(function (item, index) {
+      app.cancelTask(item);
+    });
+    sp.renderTaskArray.length = 0;
+    sp.previewHelper = {};
+  };
+  this.rightClick = function (event) {
+    keepRef.leftClick();
+
+    var alt = event.altKey;
+    var key = ScriptUI.environment.keyboardState;
+    if (key.ctrlKey === false && key.shiftKey === false && alt === false) {
+      keepRef.shortMenu(event);
+    } else if (key.ctrlKey === true && key.shiftKey === false && alt === false) {
+      keepRef.newItem(event);
+    } else if (key.ctrlKey === false && key.shiftKey === true && alt === false) {
+      var currentPosition = [event.screenX - 152, event.screenY];
+      $.global.upAndDownWindow(currentPosition);
+    } else if (key.ctrlKey === false && key.shiftKey === false && alt === true) {
+      keepRef.newItem(event);
+    } else if (key.ctrlKey === true && key.shiftKey === true && alt === true) {
+      $.global.searchWindow && $.global.searchWindow();
+    }
+  };
+  this.shortMenu = function (event) {
+    if (!event) return;
+    if (event.button === 2 && event.detail === 1 && event.altKey === false) {
+      var currentPosition = [event.screenX, event.screenY];
+      var screenString = $.screens[0].toString();
+      var finalPositionXString = '';
+      for (var i = 0; i < screenString.length; i++) {
+        if (screenString[i + 4] !== '-' && screenString[i + 4] !== ':') {
+          finalPositionXString += screenString[i + 4];
+        } else {
+          break;
+        }
+      }
+      if (currentPosition[0] + 180 > parseInt(finalPositionXString)) {
+        currentPosition = [event.screenX - 180, event.screenY];
+      }
+
+      try {
+        if (!sp.menu) {
+          sp.menu = $.global.createMenu();
+        }
+        sp.menu['preview'].text = sp.gv.selection.length === 0 ? loc(sp.previewAll) : loc(sp.previewSelected);
+        sp.menu.frameLocation = currentPosition;
+        sp.menu.show();
+      } catch (err) {
+        err.printa();
+      }
+    }
+  };
+};
+
+/***/ }),
+/* 21 */
 /***/ (function(module, exports) {
 
 var g;

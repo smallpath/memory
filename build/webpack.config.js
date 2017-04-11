@@ -27,6 +27,7 @@ module.exports = {
   resolve: {
     extensions: ['.js'],
     alias: {
+      'src': path.resolve('__dirname', '../src'),
       'lib': path.resolve(__dirname, '../lib'),
       'helper': path.resolve(__dirname, '../lib/HelperScripts')
     }
