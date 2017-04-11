@@ -77,7 +77,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 (function () {
   var encode = encodeURIComponent;
-  var decode = decodeURIComponent;
+  var decode = decode;
 
   $.layer = function (item, options) {
     return new $.layer.prototype.Init(item, options);
@@ -270,27 +270,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var file = layerInfo.file = thisLayer.source.mainSource.file;
       if (this.isSaveMaterial === false) return layerInfo;
 
-      var materialType = [$.layer.pictureType, $.layer.musicType];
-      for (var i = 0; i < materialType.length; i++) {
-        var targetType = materialType[i];
-        if ($.layer.lookUpInArray(file.name.split('.').slice(-1), targetType)) {
-          if (file.length <= $.layer.pictureMaxLength) {
-            var hasProperty = helperObj.hasOwnProperty('_' + thisLayer.source.id);
-            if (!hasProperty) {
-              try {
-                helperObj['_' + thisLayer.source.id] = {};
-                try {
-                  var thisFile = new File(file);
-                  thisFile.open('r');
-                  thisFile.encoding = 'BINARY';
-                  var fileCon = thisFile.read();
-                  thisFile.close();
-                  layerInfo.fileBin = encode(fileCon);
-                } catch (err) {}
-              } catch (err) {}
-            }
-          }
-        }
+      var hasProperty = helperObj.hasOwnProperty('_' + thisLayer.source.id);
+      if (!hasProperty) {
+        try {
+          helperObj['_' + thisLayer.source.id] = {};
+          try {
+            var thisFile = new File(file);
+            thisFile.open('r');
+            thisFile.encoding = 'BINARY';
+            var fileContent = thisFile.read();
+            thisFile.close();
+            layerInfo.fileBin = encode(fileContent);
+          } catch (err) {}
+        } catch (err) {}
       }
 
       return layerInfo;
@@ -728,7 +720,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (type === 'Solid' || type === 'VideoWithSound' || type === 'VideoWithoutSound' || type === 'Comp') {
         var solidcolor = xml.solidColor.toString().split(',').slice(0, 3);
         if (xml.solidColor.toString() !== '') {
-          layer = thisComp.layers.addSolid(solidcolor, decodeURIComponent(name), parseInt(xml.width), parseInt(xml.height), 1);
+          layer = thisComp.layers.addSolid(solidcolor, decode(name), parseInt(xml.width), parseInt(xml.height), 1);
         } else if (type === 'Comp') {
           layer = this.newComp(xml, thisComp);
         } else if (type === 'VideoWithSound' || type === 'VideoWithoutSound') {
@@ -741,13 +733,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       } else if (type === 'null' || type === 'Null') {
         layer = thisComp.layers.addNull();
       } else if (type === 'Light') {
-        layer = thisComp.layers.addLight(decodeURIComponent(name), [0, 0]);
+        layer = thisComp.layers.addLight(decode(name), [0, 0]);
         layer.lightType = $.layer.getDistance(layer.lightType, parseInt(xml.light));
       } else if (type === 'Camera') {
-        layer = thisComp.layers.addCamera(decodeURIComponent(name), [0, 0]);
+        layer = thisComp.layers.addCamera(decode(name), [0, 0]);
       }
       try {
-        layer.name = decodeURIComponent(name);
+        layer.name = decode(name);
 
         if (layer.index !== parseInt(xml.index)) {
           layer.moveAfter(thisComp.layer(parseInt(xml.index)));
@@ -852,21 +844,25 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         var isComp = false;
 
         if (xml['@type'].toString() === 'Comp') {
-          for (var isA = 0; isA < app.project.numItems; isA++) {
-            if (app.project.item(isA + 1) instanceof CompItem && app.project.item(isA + 1).name === decodeURIComponent(xml.compname.toString())) {
-              if (app.project.item(isA + 1).numLayers === xml.Properties.Comptent.children().length()) {
-                thisItem = app.project.item(isA + 1);
-                isComp = true;
-                var zhuan = false;
-                for (var isB = 0; isB < app.project.item(isA + 1).numLayers; isB++) {
-                  zhuan = true;
-                  if (app.project.item(isA + 1).layer(isB + 1).name !== decodeURIComponent(xml.Properties.Comptent.child(isB)['@name'])) {
-                    isComp = false;
-                  }
+          for (var i = 0; i < app.project.numItems; i++) {
+            var item = app.project.item(i + 1);
+
+            var isCompItem = item instanceof CompItem;
+            var isNameEqual = item.name === decode(xml.compname.toString());
+            var compXml = xml.Properties.Comptent;
+            var numLayersInXml = compXml.children().length();
+            var isNumberEqual = item.numLayers === numLayersInXml;
+
+            if (isCompItem && isNameEqual && isNumberEqual) {
+              thisItem = item;
+              isComp = true;
+              for (var j = 0; j < item.numLayers; j++) {
+                if (item.layer(j + 1).name !== decode(compXml.child(j)['@name'])) {
+                  isComp = false;
                 }
-                if (isComp === true && zhuan === true) {
-                  break;
-                }
+              }
+              if (isComp === true) {
+                break;
               }
             }
           }
@@ -876,7 +872,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           layer = thisComp.layers.add(thisItem);
           layer.countForImport = xml.descendants('Layer').length() + 1;
         } else {
-          var comp = app.project.items.addComp(decodeURIComponent(xml.compname.toString()), parseInt(xml.compwidth), parseInt(xml.compheight), parseFloat(xml.comppixelAspect), parseFloat(xml.compduration), parseFloat(xml.compframeRate));
+          var comp = app.project.items.addComp(decode(xml.compname.toString()), parseInt(xml.compwidth), parseInt(xml.compheight), parseFloat(xml.comppixelAspect), parseFloat(xml.compduration), parseFloat(xml.compframeRate));
 
           try {
             if (comp.id !== app.project.activeItem.id) {
@@ -915,10 +911,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               comp.preserveNestedResolution = true;
             }
 
-            var arr = xml.bgColor.toString().split(',');
-            comp.bgColor = [parseFloat(arr[0]), parseFloat(arr[1]), parseFloat(arr[2])];
+            var bgArr = xml.bgColor.toString().split(',');
+            comp.bgColor = [parseFloat(bgArr[0]), parseFloat(bgArr[1]), parseFloat(bgArr[2])];
 
-            comp.resolutionFactor = [parseInt(xml.resolutionFactor.toString().split(',')[0]), parseInt(xml.resolutionFactor.toString().split(',')[1])];
+            var resolutionArr = xml.resolutionFactor.toString().split(',');
+            comp.resolutionFactor = [parseInt(resolutionArr[0]), parseInt(resolutionArr[1])];
 
             comp.shutterAngle = parseFloat(xml.shutterAngle);
 
@@ -965,16 +962,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     newMaterial: function newMaterial(xml, thisComp) {
       var isExist = false;
-      var waitIm;
+      var waitImportedItem;
       var thisItem;
       var layer;
       if (xml['@type'].toString() === 'VideoWithSound' || xml['@type'].toString() === 'VideoWithoutSound') {
-        for (var isA = 0; isA < app.project.numItems; isA++) {
-          var type = _typeof(app.project.item(isA + 1).file);
-          if (type !== 'undefiend' && app.project.item(isA + 1).file !== null) {
-            if (File(app.project.item(isA + 1).file).toString() === File(xml.file.toString()).toString() || File(app.project.item(isA + 1).file.toString()).toString() === File($.layer.tempFolder.toString() + decodeURIComponent(File(xml.file.toString()).toString())).toString()) {
+        for (var i = 0; i < app.project.numItems; i++) {
+          var item = app.project.item(i + 1);
+          var type = _typeof(item.file);
+          if (type !== 'undefiend' && item.file !== null) {
+            var footageFile = new File(item.file);
+            var xmlFile = new File(xml.file.toString());
+            var tempFile = new File($.layer.tempFolder.toString() + decode(xmlFile.toString()));
+            if (footageFile.toString() === xmlFile.toString() || footageFile.toString() === tempFile.toString()) {
               isExist = true;
-              thisItem = app.project.item(isA + 1);
+              thisItem = item;
               break;
             }
           }
@@ -989,150 +990,105 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         if (typeof xml.startTime !== 'undefined') {
           layer.startTime = parseFloat(xml.startTime);
         }
+        return layer;
       }
 
-      try {
-        if (isVideo && !isExist) {
+      if (isVideo && !isExist) {
+        try {
           try {
-            try {
-              var genFileFolder;
-              var genFilePath;
-              var file = File(xml.file.toString());
-              if (file.exists) {
-                waitIm = file;
-              } else if (File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(file.toString())).exists) {
-                if (decodeURIComponent(file.toString())[0] === '~') {
-                  genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(file.toString()));
-                } else {
-                  genFilePath = File(genFileFolder.toString() + decodeURIComponent(file.toString()));
-                }
-                waitIm = genFilePath;
-              } else if (xml.fileBin.toString() !== '') {
-                try {
-                  if ($.layer.arrayIndexOf($.layer.pictureType, xml.file.toString().split('.').slice(-1)) !== -1) {
-                    genFileFolder = Folder($.layer.tempFolder);
-                    if (!genFileFolder.exists) {
-                      genFileFolder.create();
-                    }
-                    if (decodeURIComponent(file.toString())[0] === '~') {
-                      genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(file.toString()));
-                    } else {
-                      genFilePath = File(genFileFolder.toString() + $.layer.slash + decodeURIComponent(file.toString()));
-                    }
-                    if (!genFilePath.parent.exists) {
-                      genFilePath.parent.create();
-                    }
+            var genFileFolder = new Folder($.layer.tempFolder);
+            !genFileFolder.exists && genFileFolder.create();
 
-                    var waitToWrite = decodeURIComponent(xml.fileBin.toString());
-                    var notExists = !genFilePath.exists;
-                    var genFileLengthNotEqual = genFilePath.exists && genFilePath.length !== waitToWrite.length;
-                    if (notExists || genFileLengthNotEqual) {
-                      if (!genFilePath.parent.exists) {
-                        genFilePath.create();
-                      }
-                      if (!genFilePath.parent.exists) {
-                        genFilePath = File($.layer.tempFolder.toString() + $.layer.slash + decodeURIComponent(file.name.toString()));
-                      }
-
-                      genFilePath.open('w');
-                      genFilePath.encoding = 'BINARY';
-                      genFilePath.write(waitToWrite);
-                      genFilePath.close();
-                    }
-                  } else if ($.layer.arrayIndexOf($.layer.musicType, xml.file.toString().split('.').slice(-1)) !== -1) {
-                    genFileFolder = Folder($.layer.tempFolder);
-                    if (!genFileFolder.exists) {
-                      genFileFolder.create();
-                    }
-                    if (decodeURIComponent(file.toString())[0] === '~') {
-                      genFilePath = File(genFileFolder.toString() + $.layer.slash + 'D' + decodeURIComponent(file.toString()));
-                    } else {
-                      genFilePath = File(genFileFolder.toString() + +$.layer.slash + decodeURIComponent(file.toString()));
-                    }
-                    if (!genFilePath.parent.exists) {
-                      genFilePath.parent.create();
-                    }
-                    waitToWrite = decodeURIComponent(xml.fileBin.toString());
-                    notExists = !genFilePath.exists;
-                    genFileLengthNotEqual = genFilePath.exists && genFilePath.length !== waitToWrite.length;
-                    if (notExists || genFileLengthNotEqual) {
-                      if (!genFilePath.parent.exists) {
-                        genFilePath.create();
-                      }
-                      if (!genFilePath.parent.exists) {
-                        genFilePath = File($.layer.tempFolder + $.layer.slash + decodeURIComponent(file.name.toString()));
-                      }
-                      genFilePath.open('w');
-                      genFilePath.encoding = 'BINARY';
-                      genFilePath.write(waitToWrite);
-                      genFilePath.close();
-                    }
-                  }
-                  waitIm = genFilePath;
-                } catch (err) {
-                  $.layer.errorInfoArr.push({ line: $.line, error: err });
-                }
-              }
-            } catch (err) {
-              $.layer.errorInfoArr.push({ line: $.line, error: err });
-            }
-            try {
-              var im = new ImportOptions();
-              im.file = waitIm;
-              try {
-                im.sequence = false;
-                im.forceAlphabetical = false;
-              } catch (err) {
-                $.layer.errorInfoArr.push({ line: $.line, error: err });
-              }
-            } catch (err) {
-              $.layer.errorInfoArr.push({ line: $.line, error: err });
-              layer = thisComp.layers.addSolid([0, 0, 0], 'fail to import', 100, 100, 1);
-              return layer;
-            }
-            if (im.canImportAs(ImportAsType.FOOTAGE)) {
-              im.importAs = ImportAsType.FOOTAGE;
-              var f = app.project.importFile(im);
-              layer = thisComp.layers.add(f);
-              layer.name = decodeURIComponent(xml['@name']);
-              try {
-                layer.moveAfter(thisComp.layer(parseInt(xml.index)));
-              } catch (err) {
-                $.layer.errorInfoArr.push({ line: $.line, error: err });
-              };
-              try {
-                layer.strectch = parseFloat(xml.stretch);
-              } catch (err) {
-                $.layer.errorInfoArr.push({ line: $.line, error: err });
-              }
-              try {
-                if (xml.startTime !== 'undefined') {
-                  layer.startTime = parseFloat(xml.startTime);
-                }
-              } catch (err) {
-                $.layer.errorInfoArr.push({ line: $.line, error: err });
-              }
-              layer.source.parentFolder = $.layer.sourceFolder;
+            var file = new File(xml.file.toString());
+            var fileIntempFolder = new File($.layer.tempFolder.toString() + $.layer.slash + decode(file.toString()));
+            var generatedFile;
+            if (decode(file.toString())[0] === '~') {
+              generatedFile = new File(genFileFolder.toString() + $.layer.slash + 'D' + decode(file.toString()));
             } else {
-              layer = thisComp.layers.addSolid([0, 0, 0], 'fail to import', 100, 100, 1);
+              generatedFile = new File(genFileFolder.toString() + $.layer.slash + decode(file.toString()));
+            }
+            if (file.exists) {
+              waitImportedItem = file;
+            } else if (fileIntempFolder.exists) {
+              waitImportedItem = generatedFile;
+            } else if (xml.fileBin.toString() !== '') {
+              try {
+                if (!generatedFile.parent.exists) {
+                  generatedFile.parent.create();
+                }
+
+                var waitToWrite = decode(xml.fileBin.toString());
+                var notExists = !generatedFile.exists;
+                var genFileLengthNotEqual = generatedFile.exists && generatedFile.length !== waitToWrite.length;
+                if (notExists || genFileLengthNotEqual) {
+                  if (!generatedFile.parent.exists) {
+                    generatedFile.create();
+
+                    generatedFile = new File($.layer.tempFolder.toString() + $.layer.slash + decode(file.name.toString()));
+                  }
+
+                  generatedFile.open('w');
+                  generatedFile.encoding = 'BINARY';
+                  generatedFile.write(waitToWrite);
+                  generatedFile.close();
+                }
+                waitImportedItem = generatedFile;
+              } catch (err) {
+                $.layer.errorInfoArr.push({ line: $.line, error: err });
+              }
             }
           } catch (err) {
             $.layer.errorInfoArr.push({ line: $.line, error: err });
           }
+
+          try {
+            var im = new ImportOptions();
+            im.file = waitImportedItem;
+            try {
+              im.sequence = false;
+              im.forceAlphabetical = false;
+            } catch (err) {
+              $.layer.errorInfoArr.push({ line: $.line, error: err });
+            }
+          } catch (err) {
+            $.layer.errorInfoArr.push({ line: $.line, error: err });
+            layer = thisComp.layers.addSolid([0, 0, 0], 'fail due to cc2015', 100, 100, 1);
+            return layer;
+          }
+          if (im.canImportAs(ImportAsType.FOOTAGE)) {
+            im.importAs = ImportAsType.FOOTAGE;
+            var footage = app.project.importFile(im);
+            layer = thisComp.layers.add(footage);
+            layer.name = decode(xml['@name']);
+            try {
+              layer.moveAfter(thisComp.layer(parseInt(xml.index)));
+            } catch (err) {
+              $.layer.errorInfoArr.push({ line: $.line, error: err });
+            };
+            try {
+              layer.strectch = parseFloat(xml.stretch);
+            } catch (err) {
+              $.layer.errorInfoArr.push({ line: $.line, error: err });
+            }
+            try {
+              if (typeof xml.startTime !== 'undefined') {
+                layer.startTime = parseFloat(xml.startTime);
+              }
+            } catch (err) {
+              $.layer.errorInfoArr.push({ line: $.line, error: err });
+            }
+            layer.source.parentFolder = $.layer.sourceFolder;
+          } else {
+            layer = thisComp.layers.addSolid([0, 0, 0], 'fail due to canImportAs equals to false', 100, 100, 1);
+          }
+        } catch (err) {
+          $.layer.errorInfoArr.push({ line: $.line, error: err });
         }
-      } catch (err) {
-        $.layer.errorInfoArr.push({ line: $.line, error: err });
       }
-      try {
-        if (layer instanceof AVLayer) {
-          return layer;
-        } else {
-          layer = thisComp.layers.addSolid([0, 0, 0], 'fail to import', 100, 100, 1);
-          return layer;
-        }
-      } catch (err) {
-        $.layer.errorInfoArr.push({ line: $.line, error: err });
-        layer = thisComp.layers.addSolid([0, 0, 0], 'fail to import', 100, 100, 1);
+      if (layer instanceof AVLayer) {
+        return layer;
+      } else {
+        layer = thisComp.layers.addSolid([0, 0, 0], 'fail due to not instanceof AVLayer', 100, 100, 1);
         return layer;
       }
     },
@@ -1143,6 +1099,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         var matchName = currentXML['@matchName'].toString();
         var propName = currentXML['@name'].toString();
         var propIndex = parseInt(currentXML['@propertyIndex']);
+        var tagName = currentXML.name().toString();
+
         if (currentXML['@isEncoded'].toString() !== '') {
           var obj = {
             matchName: matchName,
@@ -1152,42 +1110,42 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           matchName = obj.matchName;
         }
         var prop;
-        if (currentXML.name().toString() === 'Group') {
+        var indexProp = layers.property(propIndex);
+        if (tagName === 'Group') {
           prop = 0;
           try {
             if (layers.canAddProperty(matchName)) {
               try {
                 prop = layers.addProperty(matchName);
 
-                if (layers.property(propIndex).matchName === 'ADBE Mask Atom') {
-                  layers.property(propIndex).maskMode = $.layer.getDistance(layers.property(propIndex).maskMode, parseInt(currentXML['@maskmode']));
-                  layers.property(propIndex).inverted = currentXML['@inverted'].toString() !== 'false';
-                  layers.property(propIndex).rotoBezier = currentXML['@rotoBezier'].toString() !== 'false';
-                  layers.property(propIndex).color = currentXML['@color'].toString().split(',').slice(0, 3);
-                  layers.property(propIndex).maskMotionBlur = $.layer.getDistance(layers.property(propIndex).maskMotionBlur, parseInt(currentXML['@maskMotionBlur']));
-                  layers.property(propIndex).maskFeatherFalloff = $.layer.getDistance(layers.property(propIndex).maskFeatherFalloff, parseInt(currentXML['@maskFeatherFalloff']));
+                if (indexProp.matchName === 'ADBE Mask Atom') {
+                  indexProp.maskMode = $.layer.getDistance(indexProp.maskMode, parseInt(currentXML['@maskmode']));
+                  indexProp.inverted = currentXML['@inverted'].toString() !== 'false';
+                  indexProp.rotoBezier = currentXML['@rotoBezier'].toString() !== 'false';
+                  indexProp.color = currentXML['@color'].toString().split(',').slice(0, 3);
+                  indexProp.maskMotionBlur = $.layer.getDistance(indexProp.maskMotionBlur, parseInt(currentXML['@maskMotionBlur']));
+                  indexProp.maskFeatherFalloff = $.layer.getDistance(indexProp.maskFeatherFalloff, parseInt(currentXML['@maskFeatherFalloff']));
                 }
               } catch (err) {
                 $.layer.errorInfoArr.push({ line: $.line, error: err });
               }
-            } else if (currentXML['@matchName'].toString() === 'ADBE Layer Styles') {
+            } else if (matchName === 'ADBE Layer Styles') {
               try {
                 var group = currentXML.children();
                 var layerStyleArr = [];
-                var cunName = [];
-                var shenqi;
-                for (shenqi = 0; shenqi < group.length(); shenqi++) {
-                  layerStyleArr.push(currentXML.child(shenqi)['@matchName']);
-                  cunName.push(currentXML.child(shenqi)['@name']);
+                var commandNameArr = [];
+                var i;
+                for (i = 0; i < group.length(); i++) {
+                  layerStyleArr.push(currentXML.child(i)['@matchName']);
+                  commandNameArr.push(currentXML.child(i)['@name']);
                 }
-                for (shenqi = 0; shenqi < layerStyleArr.length; shenqi++) {
-                  if (layerStyleArr[shenqi].indexOf('/') !== -1) {
-                    if (layers.propertyDepth === 0) {
-                      if (layers.containingComp.id === app.project.activeItem.id) {
-                        app.executeCommand(app.findMenuCommandId(cunName[shenqi]));
-                      }
+
+                for (i = 0; i < layerStyleArr.length; i++) {
+                  if (layerStyleArr[i].indexOf('/') !== -1) {
+                    if (layers.propertyDepth === 0 && layers.containingComp.id === app.project.activeItem.id) {
+                      app.executeCommand(app.findMenuCommandId(commandNameArr[i]));
                     } else if (layers.propertyGroup(layers.propertyDepth).containingComp.id === app.project.activeItem.id) {
-                      app.executeCommand(app.findMenuCommandId(cunName[shenqi]));
+                      app.executeCommand(app.findMenuCommandId(commandNameArr[i]));
                     }
                   }
                 }
@@ -1198,18 +1156,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           } catch (err) {
             $.layer.errorInfoArr.push({ line: $.line, error: err });
           }
+
           try {
             var enabled = currentXML['@enabled'].toString();
             if (enabled !== 'None') {
-              if (layers.property(propIndex).canSetEnabled === true) {
-                if (prop === 0) {
-                  if (enabled === 'false') {
-                    layers.property(propIndex).enabled = false;
-                  }
-                } else {
-                  if (enabled === 'false') {
-                    layers.property(parseInt(prop.propertyIndex)).enabled = false;
-                  }
+              if (indexProp.canSetEnabled === true) {
+                if (prop === 0 && enabled === 'false') {
+                  indexProp.enabled = false;
+                } else if (enabled === 'false') {
+                  prop.enabled = false;
                 }
               }
             }
@@ -1217,15 +1172,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             $.layer.errorInfoArr.push({ line: $.line, error: err });
           }
 
+          var isIndexedGroup = layers.propertyType === PropertyType.INDEXED_GROUP;
           try {
-            if (prop === 0) {
-              if (layers.propertyType === PropertyType.INDEXED_GROUP) {
-                layers.property(propIndex).name = propName;
-              }
-            } else {
-              if (layers.propertyType === PropertyType.INDEXED_GROUP) {
-                layers.property(prop.propertyIndex).name = propName;
-              }
+            if (prop === 0 && isIndexedGroup) {
+              indexProp.name = propName;
+            } else if (isIndexedGroup) {
+              layers.property(prop.propertyIndex).name = propName;
             }
           } catch (err) {
             $.layer.errorInfoArr.push({ line: $.line, error: err });
@@ -1233,12 +1185,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
           try {
             if (currentXML.children().length() > 0) {
-              var matchNameHere = currentXML['@matchName'].toString();
-              if (prop === 0 && matchNameHere !== 'ADBE Mask Parade' && matchNameHere !== 'ADBE Effect Parade' && matchNameHere !== 'ADBE Layer Styles') {
-                $.layer.prototype.newPropertyGroup(currentXML, layers.property(propIndex), inTime);
+              var isNotMask = matchName !== 'ADBE Mask Parade';
+              var isNotEffect = matchName !== 'ADBE Effect Parade';
+              var isNotLayerStyles = matchName !== 'ADBE Layer Styles';
+              if (prop === 0 && isNotMask && isNotEffect && isNotLayerStyles) {
+                $.layer.prototype.newPropertyGroup(currentXML, indexProp, inTime);
               } else {
-                if (matchNameHere !== 'ADBE Mask Parade' && matchNameHere !== 'ADBE Effect Parade' && matchNameHere !== 'ADBE Layer Styles') {
-                  $.layer.prototype.newPropertyGroup(currentXML, layers.property(prop.propertyIndex), inTime);
+                if (isNotMask && isNotEffect && isNotLayerStyles) {
+                  $.layer.prototype.newPropertyGroup(currentXML, prop, inTime);
                 } else {
                   $.layer.prototype.newPropertyGroup(currentXML, layers.property(matchName), inTime);
                 }
@@ -1247,15 +1201,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           } catch (err) {
             $.layer.errorInfoArr.push({ line: $.line, error: err });
           }
-        } else if (currentXML.name().toString() === 'prop') {
+        } else if (tagName === 'prop') {
           try {
             $.layer.prototype.newProperty(currentXML, layers, inTime);
           } catch (err) {
             $.layer.errorInfoArr.push({ line: $.line, error: err });
           }
-        }
 
-        if (currentXML.name().toString() === 'prop') {
           if (currentXML.exp.toString() !== '') {
             try {
               var expArr = [];
@@ -1263,14 +1215,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               var expProperty = layers.property(matchName);
 
               expArr.push(expProperty.propertyIndex);
-              for (var i = 1, len = expProperty.propertyDepth; i < len; i++) {
+              var len = expProperty.propertyDepth;
+              for (i = 1; i < len; i++) {
                 expArr.push(expProperty.propertyGroup(i).propertyIndex);
               }
               expArr.push(expProperty.propertyGroup(i));
 
               $.layer.expPropertyArr.push(expArr);
 
-              expProperty.expression = decodeURIComponent(currentXML.exp.toString());
+              expProperty.expression = decode(currentXML.exp.toString());
             } catch (err) {};
           }
         }
@@ -1759,14 +1712,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     for (i = effectxml.children().length(); i >= 0; i--) {
       var xml = effectxml.child(i);
       if (xml.name().toString() === 'Group') {
-        if (xml['@matchName'].toString() === 'ADBE Text Properties') {
+        var matchName = xml['@matchName'].toString();
+        if (matchName === 'ADBE Text Properties') {
           xml.child(0).setLocalName('textignore');
           if (effectxml.children().length() >= 4) {
-            $.layer.lookUpInArray(xml.child(3)['@matchName'], idGen) === false && xml.child(3).setLocalName('ignore');
+            $.layer.lookUpInArray(xml.child(3)['@matchName'].toString(), idGen) === false && xml.child(3).setLocalName('ignore');
           }
         }
-        if ($.layer.lookUpInArray(xml['@matchName'], idGen) === false) {
-          xml['@matchName'].toString() !== 'ADBE Text Properties' && xml.setLocalName('ignore');
+        if ($.layer.lookUpInArray(matchName, idGen) === false) {
+          matchName !== 'ADBE Text Properties' && xml.setLocalName('ignore');
         }
       } else {
         xml.name().toString() === 'Comptent' && xml.setLocalName('compignore');
@@ -1985,11 +1939,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     writeLn('Find ' + $.layer.errorInfoArr.length + ' errors');
     file.writee(str);
   };
-
-  $.layer.musicType = ['ape', 'flac', 'mp3', 'wav'];
-  $.layer.musicMaxLength = 52428800;
-  $.layer.pictureType = ['ai', 'bmp', 'jpg', 'png', 'psd', 'tiff'];
-  $.layer.pictureMaxLength = 10485760;
 
   $.layer.translate = function () {};
   $.layer.didCreateLayer = function () {};
