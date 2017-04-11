@@ -3542,9 +3542,7 @@ function createMenu() {
 
   var length = itemList.length;
 
-  var Space = 102 / 5;
-  var buttonWidth = 40;
-  var checkBoxWidth = 41;
+  var space = 102 / 5;
   var buttonHeight = 20;
   var checkBoxHeight = 21;
 
@@ -3554,27 +3552,28 @@ function createMenu() {
     maxWidth = 190;
   }
 
-  var ShortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, length * Space / 2 + 2], {
+  var ShortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, length * space / 2 + 2], {
     borderless: true
   });
 
   for (var i = 0; i < length; i++) {
-    var itemWidth, itemHeight;
-    if (itemList[i].type === 'button') {
-      itemWidth = buttonWidth;
+    var item = itemList[i];
+    var itemWidth = void 0,
+        itemHeight = void 0;
+    itemWidth = maxWidth / 2 + (item.widthOffset || 0);
+    if (item.type === 'button') {
       itemHeight = buttonHeight;
-    } else if (itemList[i].type === 'checkbox') {
-      itemWidth = checkBoxWidth;
+    } else if (item.type === 'checkbox') {
       itemHeight = checkBoxHeight;
-    } else if (itemList[i].type === 'dropdownlist') {
-      itemWidth = buttonWidth;
+    } else if (item.type === 'dropdownlist') {
+      itemHeight = buttonHeight;
+    } else if (item.type === 'edittext') {
       itemHeight = buttonHeight;
     }
-    if (itemWidth) {}
     if (i % 2 === 0) {
-      ShortMenu[itemList[i].name] = ShortMenu.add(itemList[i].type, [0, parseInt(i / 2) * itemHeight, maxWidth / 2, 22 + parseInt(i / 2) * itemHeight], itemList[i].name);
+      ShortMenu[item.name] = ShortMenu.add(item.type, [0, parseInt(i / 2) * itemHeight, itemWidth, 22 + parseInt(i / 2) * itemHeight], item.name);
     } else {
-      ShortMenu[itemList[i].name] = ShortMenu.add(itemList[i].type, [maxWidth / 2, parseInt((i - 1) / 2) * itemHeight, maxWidth, 22 + parseInt((i - 1) / 2) * itemHeight], itemList[i].name);
+      ShortMenu[item.name] = ShortMenu.add(item.type, [itemWidth, parseInt((i - 1) / 2) * itemHeight, maxWidth, 22 + parseInt((i - 1) / 2) * itemHeight], item.name);
     }
   }
 
@@ -3906,7 +3905,9 @@ sp.extend(sp, {
   second: { en: ' second', ch: ' 秒' },
   previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
   previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
-  previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' }
+  previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' },
+  searchButton: { en: 'search', ch: '搜索' },
+  searchText: { en: 'input name', ch: '输入元素名称' }
 });
 
 /***/ }),
