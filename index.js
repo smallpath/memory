@@ -14,8 +14,27 @@ try {
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile')
     $.layer.translate = $.global.translate
 
-    $.layer.countLayers = function(layers) {
-
+    $.layer.countLayers = function(layers, isFirstStage, count) {
+      isFirstStage = isFirstStage || false
+      count = count || 0
+      if (isFirstStage) {
+        for (var i = 0, len = layers.length; i < len; i++) {
+          count++
+          var layer = layers[i]
+          if (layer.source instanceof CompItem) {
+            $.layer.countLayers(layer.source.layers, false, count)
+          }
+        }
+      } else {
+        for (var i = 1, len = layers.length; i <= len; i++) {
+          count++
+          var layer = layers[i]
+          if (layer.source instanceof CompItem) {
+            $.layer.countLayers(layer.source.layers, false, count)
+          }
+        }
+      }
+      return count
     }
 
     var ProgressObj = {
@@ -53,7 +72,7 @@ try {
     var SavingSuffixString = loc(sp.savingProcessAfter)
     var SavingTitle = loc(sp.savingProcessTitle)
     $.layer.willSaveLayers = function(layers) {
-      var len = $.layer.countLayers(layers)
+      var len = $.layer.countLayers(layers, true)
       ProgressObj.createWindow(
         len,
         CreatingTitle,
