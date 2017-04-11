@@ -1945,10 +1945,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var str = '';
     $.layer.forEach.call($.layer.errorInfoArr, function (item, index) {
       if (!item.error) {
-        str += new Date().toLocaleString() + 'Catched-Line# ' + item.line + '\t without error detail';
+        str += new Date().toLocaleString() + '\tCatched-Line# ' + item.line + '\t without error detail';
         return;
       }
-      str += new Date().toLocaleString() + 'Catched-Line# ' + item.line + '\tHappened-Line# ' + item.error.line.toString() + '\t' + item.error.toString() + '\r\n';
+      str += new Date().toLocaleString() + '\tCatched-Line# ' + item.line + '\tHappened-Line# ' + item.error.line.toString() + '\t' + item.error.toString() + '\r\n';
     });
     var file = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'error.txt');
     writeLn('Log ' + $.layer.errorInfoArr.length + ' errors in error.txt');
@@ -7417,6 +7417,9 @@ var progressFactory = global.progressFactory = {
   createWindow: function createWindow(len, title, prefixString, suffixString) {
     global.progressWin = new Window('palette', title);
     var group = global.progressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      progressText: StaticText {text:"", justify:\'center\',properties:{multiline:1}},\n      progressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n    }');
+    global.progressWin.addEventListener('keydown', function () {
+      global.progressWin.close();
+    });
     global.progressText = group.progressText;
     global.progressBar = group.progressBar;
     var replaced = '';
@@ -7462,6 +7465,7 @@ $.layer.didSaveLayer = function (count) {
   $.global.progressFactory.update(count, savingPrefixString, savingSuffixString, savingReport, timeSuffix);
 };
 $.layer.didSaveLayers = function () {
+  $.layer.didSaveLayer(0);
   $.global.progressFactory.complete(savingReport, timeSuffix);
 };
 
@@ -7477,6 +7481,7 @@ $.layer.didCreateLayer = function (count) {
   $.global.progressFactory.update(count, creatingPrefixString, creatingSuffixString, creatingReport, timeSuffix);
 };
 $.layer.didCreateLayers = function () {
+  $.layer.didCreateLayer(0);
   $.global.progressFactory.complete(creatingReport, timeSuffix);
 };
 

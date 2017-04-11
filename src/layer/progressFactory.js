@@ -7,6 +7,9 @@ var progressFactory = global.progressFactory = {
       progressText: StaticText {text:"", justify:'center',properties:{multiline:1}},
       progressBar: Progressbar{alignment: ['fill','fill'],value:0, minvalue:0, maxvalue:${len}}
     }`)
+    global.progressWin.addEventListener('keydown', function() {
+      global.progressWin.close()
+    })
     global.progressText = group.progressText
     global.progressBar = group.progressBar
     var replaced = ''
@@ -63,6 +66,7 @@ $.layer.didSaveLayer = function(count) {
   )
 }
 $.layer.didSaveLayers = function() {
+  $.layer.didSaveLayer(0)
   $.global.progressFactory.complete(savingReport, timeSuffix)
 }
 
@@ -90,6 +94,7 @@ $.layer.didCreateLayer = function(count) {
   )
 }
 $.layer.didCreateLayers = function() {
+  $.layer.didCreateLayer(0)
   $.global.progressFactory.complete(creatingReport, timeSuffix)
 }
 
