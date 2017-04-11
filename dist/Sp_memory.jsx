@@ -3298,22 +3298,24 @@ function GridView(parent, attrs) {
         g.fillPath(selectedBrush);
 
         var fontPen = g.newPen(g.PenType.SOLID_COLOR, e.itemFontColor, e.itemFontSize * e.scale);
+        var font = ScriptUI.newFont('Microsoft YaHei', ScriptUI.FontStyle.REGULAR, e.itemFontSize * e.scale * 0.6);
 
+        var trickWidthForCC2014 = 20;
+        var itemWidth = e.itemSize[0];
         for (i = 0; i < items.length; i++) {
           item = items[i];
           if (!shouldDrawArr[i]) continue;
-          var font = ScriptUI.newFont('Microsoft YaHei', ScriptUI.FontStyle.REGULAR, e.itemFontSize * e.scale * 0.6);
-          var textRect = g.measureString(item.text, font);
+          var textRect = g.measureString(item.text, font, itemWidth);
           var thisText = item.text;
           var totalText = item.text;
           var base = textRect.width - item.imageRect[2] - e.spacing[0] * 2;
           if (e.limitText === true && e.version === 'CC2014') {
-            if (base >= -5) {
+            if (base >= -trickWidthForCC2014) {
               for (var j = 0; j < item.text.length; j++) {
                 thisText = item.text.slice(0, totalText.length - 2 - j);
-                textRect = g.measureString(thisText, font);
+                textRect = g.measureString(thisText, font, itemWidth);
                 var newBase = textRect.width - item.imageRect[2] - e.spacing[0] * 2;
-                if (newBase < -5) {
+                if (newBase < -trickWidthForCC2014) {
                   break;
                 }
               }
@@ -3322,7 +3324,7 @@ function GridView(parent, attrs) {
             if (base >= 5) {
               for (j = 0; j < item.text.length; j++) {
                 thisText = item.text.slice(0, totalText.length - 2 - j);
-                textRect = g.measureString(thisText, font);
+                textRect = g.measureString(thisText, font, itemWidth);
                 newBase = textRect.width - item.imageRect[2] - e.spacing[0] * 2;
                 if (newBase < 5) {
                   break;
@@ -3330,6 +3332,7 @@ function GridView(parent, attrs) {
               }
             }
           }
+
           if (e.version === 'CC2014') {
             g.drawString(thisText, fontPen, item.rect[0] + item.fontRect[0], item.rect[1] + item.fontRect[1] - e.scrollBarValue - 10, font);
           } else {
@@ -4314,6 +4317,8 @@ var settingsButtonFunc = $.global.settingsButtonFunc = function () {
         e.value = sp.getSettingAsBool('limitText');
         e.onClick = function () {
           sp.saveSetting('limitText', this.value.toString());
+          sp.gv.limitText = sp.getSettingAsBool('limitText');
+          sp.gv.refresh();
         };
         break;
       case 'coverChange':
