@@ -14,35 +14,86 @@ try {
     $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile')
     $.layer.translate = $.global.translate
 
-    var prefixString = loc(sp.processingPrefix)
-    var suffixString = loc(sp.processAfter)
+    $.layer.countLayers = function(layers) {
+
+    }
+
+    var ProgressObj = {
+      createWindow: function(len, title, prefixString, suffixString) {
+        ProgressWin = new Window('palette', title)
+        var group = ProgressWin.add(`Group{orientation:'column',alignment: ['fill','fill'],
+          ProgressText: StaticText {text:"", justify:'center'},
+          ProgressBar: Progressbar{alignment: ['fill','fill'],value:0, minvalue:0, maxvalue:${len}}
+        }`)
+        ProgressText = group.ProgressText
+        ProgressBar = group.ProgressBar
+        var replaced = ''
+        len.toString().split('').forEach(function(item) {
+          replaced += '  '
+        })
+        var divide = replaced + '0' + '/' + ProgressBar.maxvalue
+        ProgressText.text = prefixString + divide + suffixString
+        ProgressWin.show()
+        ProgressWin.center()
+      },
+      update: function(len, prefixString, suffixString) {
+        ProgressBar.value = ProgressBar.value + len
+        var divide = ProgressBar.value + '/' + ProgressBar.maxvalue
+        ProgressText.text = prefixString + divide + suffixString
+        ProgressWin.update && ProgressWin.update()
+        win.update && win.update()
+      },
+      complete: function() {
+        ProgressWin.close()
+      }
+    }
     var ProgressWin, ProgressText, ProgressBar
+    // saving process window
+    var SavingPrefixString = loc(sp.savingProcessingPrefix)
+    var SavingSuffixString = loc(sp.savingProcessAfter)
+    var SavingTitle = loc(sp.savingProcessTitle)
+    $.layer.willSaveLayers = function(layers) {
+      var len = $.layer.countLayers(layers)
+      ProgressObj.createWindow(
+        len,
+        CreatingTitle,
+        CreatingPrefixString,
+        CreatingSuffixString
+      )
+    }
+    $.layer.didSaveLayer = function(count) {
+      ProgressObj.update(
+        count,
+        CreatingPrefixString,
+        CreatingSuffixString
+      )
+    }
+    $.layer.didSaveLayers = function() {
+      ProgressObj.close()
+    }
+
+    // generating process window
+    var CreatingPrefixString = loc(sp.creatingProcessingPrefix)
+    var CreatingSuffixString = loc(sp.creatingProcessAfter)
+    var CreatingTitle = loc(sp.creatingProcessTitle)
+
     $.layer.willCreateLayers = function(len) {
-      ProgressWin = new Window('palette', loc(sp.processTitle))
-      var group = ProgressWin.add(`Group{orientation:'column',alignment: ['fill','fill'],
-        ProgressText: StaticText {text:"", justify:'center'},
-        ProgressBar: Progressbar{alignment: ['fill','fill'],value:0, minvalue:0, maxvalue:${len}}
-      }`)
-      ProgressText = group.ProgressText
-      ProgressBar = group.ProgressBar
-      var replaced = ''
-      len.toString().split('').forEach(function(item) {
-        replaced += '  '
-      })
-      var divide = replaced + '0' + '/' + ProgressBar.maxvalue
-      ProgressText.text = prefixString + divide + suffixString
-      ProgressWin.show()
-      ProgressWin.center()
+      ProgressObj.createWindow(
+        len,
+        CreatingTitle,
+        CreatingPrefixString,
+        CreatingSuffixString
+      )
     }
     $.layer.didCreateLayer = function(count) {
-      ProgressBar.value = ProgressBar.value + count
-      var divide = ProgressBar.value + '/' + ProgressBar.maxvalue
-      ProgressText.text = prefixString + divide + suffixString
-      ProgressWin.update && ProgressWin.update()
-      win.update && win.update()
+      ProgressObj.update(
+        count,
+        CreatingPrefixString,
+        CreatingSuffixString
+      )
     }
     $.layer.didCreateLayers = function() {
-      ProgressWin.close()
+      ProgressObj.close()
     }
 
     sp.fns = new Fns()
@@ -854,7 +905,7 @@ try {
         } else if (key.ctrlKey === false && key.shiftKey === false && alt === true) {
           keepRef.newItem(event)
         } else if (key.ctrlKey === true && key.shiftKey === true && alt === true) {
-          // alert(sp.gv.lastSelectedItem.index);
+          $.global.searchWindow && $.global.searchWindow()
         }
       }
       this.shortMenu = function(event) {
