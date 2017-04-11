@@ -279,8 +279,9 @@ module.exports = function() {
   }
   this.newLayer = function() {
     if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElements))
-    if (!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp))
-    if (sp.onlyEffectValue === true && app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers))
+    var comp = app.project.activeItem
+    if (!(comp instanceof CompItem)) return alert(loc(sp.needComp))
+    if (sp.onlyEffectValue === true && comp.selectedLayers.length === 0) return alert(loc(sp.needLayers))
 
     var xml = new XML(sp.getFileByName(sp.droplist.selection.text).readd())
     xml = xml.child(sp.gv.lastSelectedItem.index)
@@ -307,7 +308,7 @@ module.exports = function() {
       sp.compFolder = compFolder
       sp.sourceFolder = sourceFolder
 
-      var currentTime = app.project.activeItem.time
+      var currentTime = comp.time
       var options = {
         compFolder: sp.compFolder,
         sourceFolder: sp.sourceFolder
@@ -315,17 +316,17 @@ module.exports = function() {
 
       // $.hiresTimer/1000000;
 
-      var activeCompLayersArr = sp.newLayers(xml, app.project.activeItem, options)
+      var activeCompLayersArr = sp.newLayers(xml, comp, options)
 
       // $.writeln($.hiresTimer/1000000);
 
-      app.project.activeItem.time = currentTime
+      comp.time = currentTime
 
       sourceFolder.numItems === 0 && sourceFolder.remove()
       compFolder.numItems === 0 && compFolder.remove()
     } else {
-      activeCompLayersArr = app.project.activeItem.selectedLayers
-      sp.newProperties(xml, app.project.activeItem.selectedLayers, sp.cleanGroupValue, sp.offsetKeyframeValue)
+      activeCompLayersArr = comp.selectedLayers
+      sp.newProperties(xml, comp.selectedLayers, sp.cleanGroupValue, sp.offsetKeyframeValue)
     }
 
     app.endUndoGroup()
@@ -354,6 +355,13 @@ module.exports = function() {
 
     //  Return the layer array
     if (sp.onlyEffectValue === false) {
+      try {
+        if (sp.preComposeValue === false && activeCompLayersArr.length === 1 && activeCompLayersArr[0].source instanceof CompItem) {
+          activeCompLayersArr[0].selected = true
+          app.executeCommand(app.findMenuCommandId('Fit to Comp'))
+          activeCompLayersArr[0].selected = false
+        }
+      } catch (err) { writeLn(err.line.toString()) }
       return activeCompLayersArr
     } else {
       return null
