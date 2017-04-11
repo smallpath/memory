@@ -4,7 +4,7 @@ var progressFactory = global.progressFactory = {
   createWindow: function(len, title, prefixString, suffixString) {
     global.progressWin = new Window('palette', title)
     var group = global.progressWin.add(`Group{orientation:'column',alignment: ['fill','fill'],
-      progressText: StaticText {text:"", justify:'center'},
+      progressText: StaticText {text:"", justify:'center',properties:{multiline:1}},
       progressBar: Progressbar{alignment: ['fill','fill'],value:0, minvalue:0, maxvalue:${len}}
     }`)
     global.progressText = group.progressText
@@ -17,65 +17,80 @@ var progressFactory = global.progressFactory = {
     global.progressText.text = prefixString + divide + suffixString
     global.progressWin.show()
     global.progressWin.center()
+    global.progressWin.startTime = Date.now()
   },
-  update: function(len, prefixString, suffixString) {
+  update: function(len, prefixString, suffixString, timePrefix, timeSuffix) {
     global.progressBar.value = global.progressBar.value + len
     var divide = global.progressBar.value + '/' + global.progressBar.maxvalue
-    global.progressText.text = prefixString + divide + suffixString
+    var fisrtLine = prefixString + divide + suffixString
+    var time = (Date.now() - global.progressWin.startTime) / 1000
+    var secondLine = timePrefix + time.toString() + timeSuffix
+    global.progressText.text = fisrtLine + '\r\n' + secondLine
     global.progressWin.update && global.progressWin.update()
     global.sp.win.update && global.sp.win.update()
   },
-  complete: function() {
+  complete: function(timePrefix, timeSuffix) {
     global.progressWin.close()
+    var time = (Date.now() - global.progressWin.startTime) / 1000
+    var report = timePrefix + time.toString() + timeSuffix
+    writeLn(report)
+    return time
   }
 }
 
+var timeSuffix = loc(sp.second)
 // saving process window
-var SavingPrefixString = loc(sp.savingProcessingPrefix)
-var SavingSuffixString = loc(sp.savingProcessAfter)
-var SavingTitle = loc(sp.savingProcessTitle)
+var savingReport = loc(sp.savingReport)
+var savingPrefixString = loc(sp.savingProcessingPrefix)
+var savingSuffixString = loc(sp.savingProcessAfter)
+var savingTitle = loc(sp.savingProcessTitle)
 $.layer.willSaveLayers = function(layers) {
   var len = $.layer.countLayers(layers, true)
   $.global.progressFactory.createWindow(
     len,
-    SavingTitle,
-    SavingPrefixString,
-    SavingSuffixString
+    savingTitle,
+    savingPrefixString,
+    savingSuffixString
   )
 }
 $.layer.didSaveLayer = function(count) {
   $.global.progressFactory.update(
     count,
-    SavingPrefixString,
-    SavingSuffixString
+    savingPrefixString,
+    savingSuffixString,
+    savingReport,
+    timeSuffix
   )
 }
 $.layer.didSaveLayers = function() {
-  $.global.progressFactory.complete()
+  $.global.progressFactory.complete(savingReport, timeSuffix)
 }
 
 // generating process window
-var CreatingPrefixString = loc(sp.creatingProcessingPrefix)
-var CreatingSuffixString = loc(sp.creatingProcessAfter)
-var CreatingTitle = loc(sp.creatingProcessTitle)
+var creatingReport = loc(sp.creatingReport)
+var creatingPrefixString = loc(sp.creatingProcessingPrefix)
+var creatingSuffixString = loc(sp.creatingProcessAfter)
+var creatingTitle = loc(sp.creatingProcessTitle)
 
 $.layer.willCreateLayers = function(len) {
   $.global.progressFactory.createWindow(
     len,
-    CreatingTitle,
-    CreatingPrefixString,
-    CreatingSuffixString
+    creatingTitle,
+    creatingPrefixString,
+    creatingSuffixString
   )
 }
 $.layer.didCreateLayer = function(count) {
   $.global.progressFactory.update(
     count,
-    CreatingPrefixString,
-    CreatingSuffixString
+    creatingPrefixString,
+    creatingSuffixString,
+    creatingReport,
+    timeSuffix
   )
 }
 $.layer.didCreateLayers = function() {
-  $.global.progressFactory.complete()
+  $.global.progressFactory.complete(creatingReport, timeSuffix)
 }
 
 module.exports = progressFactory

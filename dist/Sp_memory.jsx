@@ -879,9 +879,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           layer = thisComp.layers.add(thisItem);
           layer.countForImport = xml.descendants('Layer').length() + 1;
         } else {
-          var comp = app.project.items.addComp(decode(xml.compname.toString()), parseInt(xml.compwidth), parseInt(xml.compheight), parseFloat(xml.comppixelAspect), parseFloat(xml.compduration), parseFloat(xml.compframeRate));
-
           try {
+            var comp = app.project.items.addComp(decode(xml.compname.toString()), parseInt(xml.compwidth), parseInt(xml.compheight), parseFloat(xml.comppixelAspect), parseFloat(xml.compduration), parseFloat(xml.compframeRate));
+
             if (comp.id !== app.project.activeItem.id) {
               comp.parentFolder = $.layer.compFolder;
             }
@@ -1941,12 +1941,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   };
 
   $.layer.writeErrorFile = function () {
+    if ($.layer.errorInfoArr.length === 0) return;
     var str = '';
     $.layer.forEach.call($.layer.errorInfoArr, function (item, index) {
-      str += 'Catched-Line# ' + item.line + '\tHappened-Line# ' + item.error.line.toString() + '\t' + item.error.toString() + '\r\n';
+      if (!item.error) {
+        str += new Date().toLocaleString() + 'Catched-Line# ' + item.line + '\t without error detail';
+        return;
+      }
+      str += new Date().toLocaleString() + 'Catched-Line# ' + item.line + '\tHappened-Line# ' + item.error.line.toString() + '\t' + item.error.toString() + '\r\n';
     });
     var file = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'error.txt');
-    writeLn('Find ' + $.layer.errorInfoArr.length + ' errors');
+    writeLn('Log ' + $.layer.errorInfoArr.length + ' errors in error.txt');
     file.writee(str);
   };
 
@@ -3882,12 +3887,15 @@ sp.extend(sp, {
   isSavePreview: { en: 'Save preview', ch: '存储预览' },
   searchWindow: { en: 'Search', ch: '搜索' },
   getReport: { en: 'Get report', ch: '生成报告' },
+  creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
   creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
   creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第' },
   creatingProcessAfter: { en: ' th layer', ch: ' 层' },
+  savingReport: { en: 'Saving cost: ', ch: '存储层耗时: ' },
   savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
   savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第' },
-  savingProcessAfter: { en: ' th layer', ch: ' 层' }
+  savingProcessAfter: { en: ' th layer', ch: ' 层' },
+  second: { en: 'second', ch: '秒' }
 });
 
 /***/ }),
@@ -6189,7 +6197,11 @@ module.exports = function () {
   sp.prototype.extend(sp.prototype, {
 
     newLayers: function newLayers(elementXml, comp, options) {
-      var layerArr = $.layer(elementXml, options).toLayer(comp);
+      try {
+        var layerArr = $.layer(elementXml, options).toLayer(comp);
+      } catch (err) {
+        writeLn(err.print());
+      }
       return layerArr;
     },
 
@@ -7404,7 +7416,7 @@ var global = $.global;
 var progressFactory = global.progressFactory = {
   createWindow: function createWindow(len, title, prefixString, suffixString) {
     global.progressWin = new Window('palette', title);
-    var group = global.progressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      progressText: StaticText {text:"", justify:\'center\'},\n      progressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n    }');
+    var group = global.progressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      progressText: StaticText {text:"", justify:\'center\',properties:{multiline:1}},\n      progressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n    }');
     global.progressText = group.progressText;
     global.progressBar = group.progressBar;
     var replaced = '';
@@ -7415,45 +7427,57 @@ var progressFactory = global.progressFactory = {
     global.progressText.text = prefixString + divide + suffixString;
     global.progressWin.show();
     global.progressWin.center();
+    global.progressWin.startTime = Date.now();
   },
-  update: function update(len, prefixString, suffixString) {
+  update: function update(len, prefixString, suffixString, timePrefix, timeSuffix) {
     global.progressBar.value = global.progressBar.value + len;
     var divide = global.progressBar.value + '/' + global.progressBar.maxvalue;
-    global.progressText.text = prefixString + divide + suffixString;
+    var fisrtLine = prefixString + divide + suffixString;
+    var time = (Date.now() - global.progressWin.startTime) / 1000;
+    var secondLine = timePrefix + time.toString() + timeSuffix;
+    global.progressText.text = fisrtLine + '\r\n' + secondLine;
     global.progressWin.update && global.progressWin.update();
     global.sp.win.update && global.sp.win.update();
   },
-  complete: function complete() {
+  complete: function complete(timePrefix, timeSuffix) {
     global.progressWin.close();
+    var time = (Date.now() - global.progressWin.startTime) / 1000;
+    var report = timePrefix + time.toString() + timeSuffix;
+    writeLn(report);
+    return time;
   }
 };
 
-var SavingPrefixString = loc(sp.savingProcessingPrefix);
-var SavingSuffixString = loc(sp.savingProcessAfter);
-var SavingTitle = loc(sp.savingProcessTitle);
+var timeSuffix = loc(sp.second);
+
+var savingReport = loc(sp.savingReport);
+var savingPrefixString = loc(sp.savingProcessingPrefix);
+var savingSuffixString = loc(sp.savingProcessAfter);
+var savingTitle = loc(sp.savingProcessTitle);
 $.layer.willSaveLayers = function (layers) {
   var len = $.layer.countLayers(layers, true);
-  $.global.progressFactory.createWindow(len, SavingTitle, SavingPrefixString, SavingSuffixString);
+  $.global.progressFactory.createWindow(len, savingTitle, savingPrefixString, savingSuffixString);
 };
 $.layer.didSaveLayer = function (count) {
-  $.global.progressFactory.update(count, SavingPrefixString, SavingSuffixString);
+  $.global.progressFactory.update(count, savingPrefixString, savingSuffixString, savingReport, timeSuffix);
 };
 $.layer.didSaveLayers = function () {
-  $.global.progressFactory.complete();
+  $.global.progressFactory.complete(savingReport, timeSuffix);
 };
 
-var CreatingPrefixString = loc(sp.creatingProcessingPrefix);
-var CreatingSuffixString = loc(sp.creatingProcessAfter);
-var CreatingTitle = loc(sp.creatingProcessTitle);
+var creatingReport = loc(sp.creatingReport);
+var creatingPrefixString = loc(sp.creatingProcessingPrefix);
+var creatingSuffixString = loc(sp.creatingProcessAfter);
+var creatingTitle = loc(sp.creatingProcessTitle);
 
 $.layer.willCreateLayers = function (len) {
-  $.global.progressFactory.createWindow(len, CreatingTitle, CreatingPrefixString, CreatingSuffixString);
+  $.global.progressFactory.createWindow(len, creatingTitle, creatingPrefixString, creatingSuffixString);
 };
 $.layer.didCreateLayer = function (count) {
-  $.global.progressFactory.update(count, CreatingPrefixString, CreatingSuffixString);
+  $.global.progressFactory.update(count, creatingPrefixString, creatingSuffixString, creatingReport, timeSuffix);
 };
 $.layer.didCreateLayers = function () {
-  $.global.progressFactory.complete();
+  $.global.progressFactory.complete(creatingReport, timeSuffix);
 };
 
 module.exports = progressFactory;
@@ -8202,14 +8226,8 @@ module.exports = function () {
     if (event.button === 2 && event.detail === 1 && event.altKey === false) {
       var currentPosition = [event.screenX, event.screenY];
       var screenString = $.screens[0].toString();
-      var finalPositionXString = '';
-      for (var i = 0; i < screenString.length; i++) {
-        if (screenString[i + 4] !== '-' && screenString[i + 4] !== ':') {
-          finalPositionXString += screenString[i + 4];
-        } else {
-          break;
-        }
-      }
+      var finalPositionXString = (screenString.toString().match(/-(\w*?)\:/) || [])[1];
+
       if (currentPosition[0] + 180 > parseInt(finalPositionXString)) {
         currentPosition = [event.screenX - 180, event.screenY];
       }

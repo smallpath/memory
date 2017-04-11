@@ -485,7 +485,9 @@ module.exports = (function() {
   sp.prototype.extend(sp.prototype, {
 
     newLayers: function(elementXml, comp, options) {
-      var layerArr = $.layer(elementXml, options).toLayer(comp)
+      try {
+        var layerArr = $.layer(elementXml, options).toLayer(comp)
+      } catch (err) { writeLn(err.print()) }
       return layerArr
     },
 
