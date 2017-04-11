@@ -31,7 +31,6 @@ var progressFactory = {
     var secondLine = timePrefix + time.toString() + timeSuffix
     global.progressText.text = fisrtLine + '\r\n' + secondLine + '\r\n' + previewTip
     global.progressWin.update && global.progressWin.update()
-    global.sp.win.update && global.sp.win.update()
   },
   complete: function(timePrefix, timeSuffix) {
     var time = (Date.now() - global.progressWin.startTime) / 1000
