@@ -55,7 +55,7 @@ sp.extend(sp, {
   setName: { en: 'Please input the name.', ch: '请输入名字' },
   checkVersion: { en: 'Check version', ch: '检查更新' },
   newVersionFind: { en: 'New version found,please download the new version ', ch: '存在新版本,请下载最新版v' },
-  newVersionNotFind: { en: 'No new version!', ch: '已是最新版!' },
+  newVersionNotFind: { en: 'No new version! v', ch: '已是最新版 v' },
   link: { en: 'Weibo', ch: '作者微博' },
   about: {
     en:
@@ -193,5 +193,9 @@ F键:覆盖选中元素.
   saveWorkarea: {
     en: 'Preview workarea',
     ch: '预览工作区'
+  },
+  tryVersionFind: {
+    en: 'It seems that you are using the beta version which is not released yet. v',
+    ch: '未发现新版本, 你正在使用尚未发布的试用版 v'
   }
 })

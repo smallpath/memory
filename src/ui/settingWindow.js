@@ -495,15 +495,18 @@ module.exports = function() {
       case 'checkVersion':
         if (sp.lang === 'en') { e.size = _('#openLink')[0].size = [211, 27] }
         e.onClick = function() {
-          var latest = parseFloat(sp.getVersion('Sp_memory'))
+          var latestVersion = sp.getVersion()
           var nowVersion = sp.version
-          if (latest > nowVersion) {
-            alert(loc(sp.newVersionFind) + latest.toString())
+          var compare = sp.compareSemver(latestVersion, nowVersion)
+          if (compare > 0) {
+            alert(loc(sp.newVersionFind) + latestVersion.toString())
             if (confirm(loc(sp.isDown))) {
-              sp.openLink(sp.downloadLink + ' v' + latest.toString() + '.jsxbin')
+              sp.openLink(sp.downloadLink + ' v' + latestVersion.toString() + '.jsxbin')
             }
-          } else {
-            alert(loc(sp.newVersionNotFind))
+          } else if (compare === 0) {
+            alert(loc(sp.newVersionNotFind) + nowVersion.toString())
+          } else if (compare < 0) {
+            alert(loc(sp.tryVersionFind) + nowVersion.toString())
           }
         }
         break

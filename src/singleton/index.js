@@ -1,3 +1,5 @@
+var request = require('src/https')
+
 module.exports = (function() {
   var sp = function() {
     return new sp.prototype.init()
@@ -130,6 +132,8 @@ module.exports = (function() {
       return thisIndex
     },
 
+    os: $.os.indexOf('Win') !== -1 ? 'win' : 'mac',
+
     openLink: function(url) {
       var cmd = ''
       if ($.os.indexOf('Win') !== -1) {
@@ -142,41 +146,38 @@ module.exports = (function() {
       } catch (e) { }
     },
 
-    getVersion: function(scriptname) {
-      var url = this.ip + '/script/' + scriptname + '.txt'
+    getVersion: function() {
+      try {
+        var response = request('GET', 'https://api.github.com/repos/smallpath/memory/git/refs/tags', '')
+        /* eslint-disable no-eval */
+        var data = eval('(' + response + ')')
+        var latestTag = 0
 
-      var port = 80
-      var domain = url.split('/')[0] + ':' + port
-      var call = 'GET '
-      if (url.indexOf('/') < 0) {
-        call += '/'
-      } else {
-        call += url.substr(url.indexOf('/'))
+        data.forEach(function(item, index) {
+          var tagArr = item.ref.match(/v(.*?)$/i)
+          if (tagArr.length >= 1) {
+            var tag = tagArr[1]
+            if (latestTag <= tag) latestTag = tag
+          }
+        })
+        return latestTag
+      } catch (err) {
+        return -1
       }
-      call += ' HTTP/1.1\n'
-      call += 'Host: ' + domain + '\n\n'
-      call += 'Connection: close\n\n'
+    },
 
-      var reply = ''
-      var file = new File()
-      file.encoding = 'binary'
-      file.open('w')
-      var conn = new Socket()
-      conn.encoding = 'binary'
-      if (conn.open(domain, 'binary')) {
-        conn.write(call)
-        reply = conn.read(300)
-        var contentLengthHeader = String(reply.match(/Content-Length: [0-9]*/))
-        var contentLength = contentLengthHeader.substr(16)
-        var headerLength = reply.indexOf('\n\n') + 2
-        reply += conn.read(contentLength + headerLength - 300)
-        var recievedVersion = reply.toString().substring(reply.toString().lastIndexOf('BeginVersion') + 12, reply.toString().lastIndexOf('EndVersion'))
-        conn.close()
-      } else {
-        reply = ''
+    compareSemver: function(a, b) {
+      var pa = a.split('.')
+      var pb = b.split('.')
+      for (var i = 0; i < 3; i++) {
+        var na = Number(pa[i])
+        var nb = Number(pb[i])
+        if (na > nb) return 1
+        if (nb > na) return -1
+        if (!isNaN(na) && isNaN(nb)) return 1
+        if (isNaN(na) && !isNaN(nb)) return -1
       }
-
-      return recievedVersion
+      return 0
     }
 
   })

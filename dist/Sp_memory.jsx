@@ -73,9 +73,9 @@
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var moduleWindow = __webpack_require__(20);
-var moveGroupWindow = __webpack_require__(21);
-var outputGroupWindow = __webpack_require__(23);
+var moduleWindow = __webpack_require__(21);
+var moveGroupWindow = __webpack_require__(22);
+var outputGroupWindow = __webpack_require__(24);
 
 module.exports = function () {
   var _ = $.global.UIParser(global);
@@ -570,15 +570,18 @@ module.exports = function () {
           e.size = _('#openLink')[0].size = [211, 27];
         }
         e.onClick = function () {
-          var latest = parseFloat(sp.getVersion('Sp_memory'));
+          var latestVersion = sp.getVersion();
           var nowVersion = sp.version;
-          if (latest > nowVersion) {
-            alert(loc(sp.newVersionFind) + latest.toString());
+          var compare = sp.compareSemver(latestVersion, nowVersion);
+          if (compare > 0) {
+            alert(loc(sp.newVersionFind) + latestVersion.toString());
             if (confirm(loc(sp.isDown))) {
-              sp.openLink(sp.downloadLink + ' v' + latest.toString() + '.jsxbin');
+              sp.openLink(sp.downloadLink + ' v' + latestVersion.toString() + '.jsxbin');
             }
-          } else {
-            alert(loc(sp.newVersionNotFind));
+          } else if (compare === 0) {
+            alert(loc(sp.newVersionNotFind) + nowVersion.toString());
+          } else if (compare < 0) {
+            alert(loc(sp.tryVersionFind) + nowVersion.toString());
           }
         };
         break;
@@ -654,7 +657,7 @@ module.exports = function () {
   win.center();
   win.show();
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(28)))
 
 /***/ }),
 /* 1 */
@@ -4859,7 +4862,7 @@ sp.extend(sp, {
   setName: { en: 'Please input the name.', ch: '请输入名字' },
   checkVersion: { en: 'Check version', ch: '检查更新' },
   newVersionFind: { en: 'New version found,please download the new version ', ch: '存在新版本,请下载最新版v' },
-  newVersionNotFind: { en: 'No new version!', ch: '已是最新版!' },
+  newVersionNotFind: { en: 'No new version! v', ch: '已是最新版 v' },
   link: { en: 'Weibo', ch: '作者微博' },
   about: {
     en: 'Made by:Smallpath\nE-mail:smallpath2013@gmail.com\nSource Code:\ngithub.com/Smallpath/Memory\n\nDoubleClick:generate new layers or properties on selected layers from selected element.\nRightClick:call the shortcut menu.\nCtrl/Alt+RightClick:save selected layers as a new element.\nShift+Rightclick:call the up and down window\n\nShortcutkey when script runs as Window:\nKey \'D\' or \'Delete\':delete selected element.\nKey \'F\': overlap selected element.\nKey \'Up\':drop up selected element.\nKey \'Down\':drop down selected element.',
@@ -4953,6 +4956,10 @@ sp.extend(sp, {
   saveWorkarea: {
     en: 'Preview workarea',
     ch: '预览工作区'
+  },
+  tryVersionFind: {
+    en: 'It seems that you are using the beta version which is not released yet. v',
+    ch: '未发现新版本, 你正在使用尚未发布的试用版 v'
   }
 });
 
@@ -4964,10 +4971,10 @@ sp.extend(sp, {
 
 
 module.exports = {
-  progressFactory: __webpack_require__(18),
-  previewProgress: __webpack_require__(25),
+  progressFactory: __webpack_require__(19),
+  previewProgress: __webpack_require__(26),
   settingWindow: __webpack_require__(0),
-  fns: __webpack_require__(19)
+  fns: __webpack_require__(20)
 };
 
 /***/ }),
@@ -5153,6 +5160,8 @@ module.exports = function () {
 "use strict";
 
 
+var request = __webpack_require__(18);
+
 module.exports = function () {
   var sp = function sp() {
     return new sp.prototype.init();
@@ -5291,6 +5300,8 @@ module.exports = function () {
       return thisIndex;
     },
 
+    os: $.os.indexOf('Win') !== -1 ? 'win' : 'mac',
+
     openLink: function openLink(url) {
       var cmd = '';
       if ($.os.indexOf('Win') !== -1) {
@@ -5303,41 +5314,38 @@ module.exports = function () {
       } catch (e) {}
     },
 
-    getVersion: function getVersion(scriptname) {
-      var url = this.ip + '/script/' + scriptname + '.txt';
+    getVersion: function getVersion() {
+      try {
+        var response = request('GET', 'https://api.github.com/repos/smallpath/memory/git/refs/tags', '');
 
-      var port = 80;
-      var domain = url.split('/')[0] + ':' + port;
-      var call = 'GET ';
-      if (url.indexOf('/') < 0) {
-        call += '/';
-      } else {
-        call += url.substr(url.indexOf('/'));
+        var data = eval('(' + response + ')');
+        var latestTag = 0;
+
+        data.forEach(function (item, index) {
+          var tagArr = item.ref.match(/v(.*?)$/i);
+          if (tagArr.length >= 1) {
+            var tag = tagArr[1];
+            if (latestTag <= tag) latestTag = tag;
+          }
+        });
+        return latestTag;
+      } catch (err) {
+        return -1;
       }
-      call += ' HTTP/1.1\n';
-      call += 'Host: ' + domain + '\n\n';
-      call += 'Connection: close\n\n';
+    },
 
-      var reply = '';
-      var file = new File();
-      file.encoding = 'binary';
-      file.open('w');
-      var conn = new Socket();
-      conn.encoding = 'binary';
-      if (conn.open(domain, 'binary')) {
-        conn.write(call);
-        reply = conn.read(300);
-        var contentLengthHeader = String(reply.match(/Content-Length: [0-9]*/));
-        var contentLength = contentLengthHeader.substr(16);
-        var headerLength = reply.indexOf('\n\n') + 2;
-        reply += conn.read(contentLength + headerLength - 300);
-        var recievedVersion = reply.toString().substring(reply.toString().lastIndexOf('BeginVersion') + 12, reply.toString().lastIndexOf('EndVersion'));
-        conn.close();
-      } else {
-        reply = '';
+    compareSemver: function compareSemver(a, b) {
+      var pa = a.split('.');
+      var pb = b.split('.');
+      for (var i = 0; i < 3; i++) {
+        var na = Number(pa[i]);
+        var nb = Number(pb[i]);
+        if (na > nb) return 1;
+        if (nb > na) return -1;
+        if (!isNaN(na) && isNaN(nb)) return 1;
+        if (isNaN(na) && !isNaN(nb)) return -1;
       }
-
-      return recievedVersion;
+      return 0;
     }
 
   });
@@ -5919,6 +5927,9 @@ try {
             win.show();
             var size = sp.getSetting('winSize').split(',');
             win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio];
+            if (win.size[0] <= 0 || win.size[1] <= 0) {
+                win.size = [240, 500];
+            }
             win.onClose = sp.fns.winClose;
         }
 
@@ -6911,6 +6922,37 @@ $.global.cout = cout;
 "use strict";
 
 
+var vbsString = 'set namedArgs = WScript.Arguments.Named  \n  \nsMethod = namedArgs.Item("Method")  \nsUrl = namedArgs.Item("URL")  \nsRequest = namedArgs.Item("Query")  \n  \nHTTPPost sMethod, sUrl, sRequest  \n  \nFunction HTTPPost(sMethod, sUrl, sRequest)  \n    \n          set oHTTP = CreateObject("Microsoft.XMLHTTP")    \n    \n    If sMethod = "POST" Then  \n        oHTTP.open "POST", sUrl,false  \n    ElseIf sMethod = "GET" Then  \n        oHTTP.open "GET", sUrl,false  \n    End If  \n  \n          oHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"  \n          oHTTP.setRequestHeader "Content-Length", Len(sRequest)  \n          oHTTP.send sRequest  \n    \n          HTTPPost = oHTTP.responseText  \n    \n          WScript.Echo HTTPPost  \n  \nEnd Function  \n';
+
+var tempVbsFilePath = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs');
+if (!tempVbsFilePath.exists) {
+  tempVbsFilePath.writee(vbsString);
+}
+
+module.exports = function (method, endpoint, query) {
+  var response = null;
+  var wincurl = tempVbsFilePath.fsName;
+  var curlCmd = '';
+
+  try {
+    if (sp.os === 'win') {
+      curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' //nologo';
+    } else {
+      curlCmd = 'curl -s -G -d "' + query + '" ' + endpoint;
+    }
+    response = system.callSystem(curlCmd);
+  } catch (err) {}
+
+  return response;
+};
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var global = $.global;
 
 var progressFactory = {
@@ -6991,14 +7033,14 @@ $.layer.didCreateLayers = function () {
 module.exports = progressFactory;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var creatRightClickMenu = __webpack_require__(26);
-var moveItemWindow = __webpack_require__(22);
+var creatRightClickMenu = __webpack_require__(27);
+var moveItemWindow = __webpack_require__(23);
 
 module.exports = function () {
   var keepRef = this;
@@ -7772,7 +7814,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7881,7 +7923,7 @@ module.exports = function (groupItem, win, callback) {
 };
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7942,7 +7984,7 @@ module.exports = function (xmlItem, groupItem, win) {
 };
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8011,7 +8053,7 @@ module.exports = function (cu) {
 };
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8103,7 +8145,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8160,7 +8202,7 @@ module.exports = $.global.presetWindow = function () {
 };
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8221,14 +8263,14 @@ sp.didSavePreviews = function () {
 module.exports = progressFactory;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var settingWindow = __webpack_require__(0);
-var presetWindow = __webpack_require__(24);
+var presetWindow = __webpack_require__(25);
 
 module.exports = function () {
   var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }, { name: loc(sp.saveWorkarea), type: 'checkbox' }];
@@ -8465,7 +8507,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 var g;
