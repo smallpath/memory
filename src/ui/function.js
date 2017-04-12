@@ -502,7 +502,6 @@ module.exports = function() {
     sp.deleteIndexAndReload(preIndex)
 
     //  delete the imagesFolder
-
     var imageFolder = sp.getImageFolderByName(selectionText)
     sp.deleteThisFolder(imageFolder)
     imageFolder.remove()

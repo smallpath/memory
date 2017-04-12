@@ -1705,6 +1705,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           };
           $.layer.decode(obj);
           matchName = obj.matchName;
+          propName = obj.propName;
         }
         var prop;
 
