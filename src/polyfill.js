@@ -71,4 +71,16 @@ module.exports = (function() {
     this.push(str)
     return this
   }
+
+  sp.deleteThisFolder = function(folder) {
+    var waitClFile = folder.getFiles()
+    for (var i = 0; i < waitClFile.length; i++) {
+      if (waitClFile[i] instanceof Folder) {
+        sp.deleteThisFolder(waitClFile[i])
+        waitClFile[i].remove()
+      } else {
+        waitClFile[i].remove()
+      }
+    }
+  }
 })()

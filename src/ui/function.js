@@ -1,3 +1,6 @@
+var creatRightClickMenu = require('./rightClickMenu')
+var moveItemWindow = require('./moveItemWindow')
+
 module.exports = function() {
   var keepRef = this
   this.previewAll = function() {
@@ -253,7 +256,7 @@ module.exports = function() {
       sp.deleteIndexAndReload(preIndex)
 
       var imageFolder = sp.getImageFolderByName(selectionText)
-      $.global.deleteThisFolder(imageFolder)
+      sp.deleteThisFolder(imageFolder)
       imageFolder.remove()
 
       var file = sp.getFileByName(selectionText)
@@ -380,7 +383,7 @@ module.exports = function() {
 
     var seqFolder = new Folder(imageFile.toString().replace(/.png/i, '') + '_seq')
     if (seqFolder.exists) {
-      $.global.deleteThisFolder(seqFolder)
+      sp.deleteThisFolder(seqFolder)
       seqFolder.remove()
     }
 
@@ -442,7 +445,7 @@ module.exports = function() {
       if (image.exists) { image.remove() }
       var seqFolder = new Folder(image.toString().replace(/.png/i, '') + '_seq')
       if (seqFolder.exists) {
-        $.global.deleteThisFolder(seqFolder)
+        sp.deleteThisFolder(seqFolder)
         seqFolder.remove()
       }
     })
@@ -489,7 +492,7 @@ module.exports = function() {
     //  delete the imagesFolder
 
     var imageFolder = sp.getImageFolderByName(selectionText)
-    $.global.deleteThisFolder(imageFolder)
+    sp.deleteThisFolder(imageFolder)
     imageFolder.remove()
 
     // delete the files
@@ -750,7 +753,7 @@ module.exports = function() {
   }
   this.rightClick = function(event) {
     keepRef.leftClick()
-
+    var scale = sp.gv.scale
     var alt = event.altKey
     var key = ScriptUI.environment.keyboardState
     if (key.ctrlKey === false && key.shiftKey === false && alt === false) {
@@ -758,8 +761,8 @@ module.exports = function() {
     } else if (key.ctrlKey === true && key.shiftKey === false && alt === false) {
       keepRef.newItem(event)
     } else if (key.ctrlKey === false && key.shiftKey === true && alt === false) {
-      var currentPosition = [event.screenX - 152, event.screenY]
-      $.global.upAndDownWindow(currentPosition)
+      var currentPosition = [(event.screenX - 152) * scale, event.screenY * scale]
+      moveItemWindow(currentPosition)
     } else if (key.ctrlKey === false && key.shiftKey === false && alt === true) {
       keepRef.newItem(event)
     } else if (key.ctrlKey === true && key.shiftKey === true && alt === true) {
@@ -779,7 +782,7 @@ module.exports = function() {
 
       try {
         if (!sp.menu) {
-          sp.menu = $.global.createMenu()
+          sp.menu = creatRightClickMenu()
         }
         sp.menu['preview'].text = (sp.gv.selection.length === 0) ? loc(sp.previewAll) : loc(sp.previewSelected)
         sp.menu.frameLocation = currentPosition

@@ -3516,1346 +3516,9 @@ __webpack_require__(16);
 __webpack_require__(14);
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-$.global.createMenu = createMenu;
-function createMenu() {
-  var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }];
-
-  var length = itemList.length;
-
-  var space = 102 / 5;
-  var buttonHeight = 20;
-  var checkBoxHeight = 21;
-
-  if (sp.lang === 'ch') {
-    var maxWidth = 180;
-  } else {
-    maxWidth = 190;
-  }
-
-  var ShortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, length * space / 2 + 2], {
-    borderless: true
-  });
-
-  for (var i = 0; i < length; i++) {
-    var item = itemList[i];
-    var itemWidth = void 0,
-        itemHeight = void 0;
-    itemWidth = maxWidth / 2 + (item.widthOffset || 0);
-    if (item.type === 'button') {
-      itemHeight = buttonHeight;
-    } else if (item.type === 'checkbox') {
-      itemHeight = checkBoxHeight;
-    } else if (item.type === 'dropdownlist') {
-      itemHeight = buttonHeight;
-    } else if (item.type === 'edittext') {
-      itemHeight = buttonHeight;
-    }
-    if (i % 2 === 0) {
-      ShortMenu[item.name] = ShortMenu.add(item.type, [0, parseInt(i / 2) * itemHeight, itemWidth, 22 + parseInt(i / 2) * itemHeight], item.name);
-    } else {
-      ShortMenu[item.name] = ShortMenu.add(item.type, [itemWidth, parseInt((i - 1) / 2) * itemHeight, maxWidth, 22 + parseInt((i - 1) / 2) * itemHeight], item.name);
-    }
-  }
-
-  var isCheckBoxClicked = false;
-
-  ShortMenu[loc(sp.settings)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    $.global.settingsButtonFunc();
-  };
-
-  ShortMenu['helperScripts'].add('item', loc(sp.helperScripts));
-  ShortMenu['helperScripts'].add('item', loc(sp.expressionTranslate));
-  ShortMenu['helperScripts'].add('item', loc(sp.reloadGroup));
-  ShortMenu['helperScripts'].add('item', loc(sp.saveEachLayer));
-  ShortMenu['helperScripts'].add('item', loc(sp.cutLength));
-  ShortMenu['helperScripts'].selection = 0;
-
-  ShortMenu['helperScripts'].onChange = ShortMenu['helperScripts'].onChanging = function () {
-    try {
-      this.selection.index === 1 && $.global.translate() || this.selection.index === 2 && $.global.reloadPic() || this.selection.index === 3 && $.global.autoSave() || this.selection.index === 4 && $.global.cutLength();
-    } catch (err) {
-      err.printa();
-    }
-
-    this.selection = 0;
-  };
-
-  ShortMenu['preview'].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.previewAll();
-  };
-
-  ShortMenu[loc(sp.yushe)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    $.global.presetWindow();
-  };
-
-  ShortMenu[loc(sp.changeName)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.changeName();
-  };
-
-  ShortMenu[loc(sp.importPicture)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.importImage();
-  };
-
-  ShortMenu[loc(sp.addModule)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.addModule();
-  };
-
-  ShortMenu[loc(sp.deleteModule)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.deleteModule();
-  };
-
-  ShortMenu[loc(sp.importFile)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.importFiles();
-  };
-
-  ShortMenu[loc(sp.exportFile)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.exportFile();
-  };
-
-  ShortMenu[loc(sp.addGroup)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.addGroup();
-  };
-
-  ShortMenu[loc(sp.deleteGroup)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.deleteGroup();
-  };
-
-  ShortMenu[loc(sp.addElement)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.newItem();
-  };
-
-  ShortMenu[loc(sp.cover)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.cover();
-  };
-
-  ShortMenu[loc(sp.create)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.newLayer();
-  };
-
-  ShortMenu[loc(sp.deleteElement)].onClick = function () {
-    isCheckBoxClicked = false;
-    ShortMenu.hide();
-    sp.fns.deleteItem();
-  };
-
-  ShortMenu[loc(sp.isShow)].value = sp.showThumbValue;
-  ShortMenu[loc(sp.isName)].value = sp.autoNameValue;
-  ShortMenu[loc(sp.isSavePreview)].value = sp.savePreviewValue;
-  ShortMenu[loc(sp.isOffset)].value = sp.saveMaterialValue;
-  ShortMenu[loc(sp.isPrecomp)].value = sp.preComposeValue;
-  ShortMenu[loc(sp.isEffect)].value = sp.onlyEffectValue;
-  ShortMenu[loc(sp.cleanProperty)].value = sp.cleanGroupValue;
-  ShortMenu[loc(sp.offsetKey)].value = sp.offsetKeyframeValue;
-
-  ShortMenu[loc(sp.isShow)].onClick = function () {
-    sp.showThumbValue = this.value;
-    $.global.sp.gv.showText = this.value;
-    sp.saveSetting('showThumb', this.value.toString());
-    isCheckBoxClicked = true;
-    sp.gv.refresh();
-  };
-
-  ShortMenu[loc(sp.isName)].onClick = function () {
-    sp.autoNameValue = this.value;
-    sp.saveSetting('autoName', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  ShortMenu[loc(sp.isSavePreview)].onClick = function () {
-    sp.savePreviewValue = this.value;
-    sp.saveSetting('savePreview', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  ShortMenu[loc(sp.isOffset)].onClick = function () {
-    sp.saveMaterialValue = this.value;
-    sp.saveSetting('saveMaterial', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  ShortMenu[loc(sp.isPrecomp)].onClick = function () {
-    sp.preComposeValue = this.value;
-    sp.saveSetting('preCompose', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  ShortMenu[loc(sp.isEffect)].onClick = function () {
-    sp.onlyEffectValue = this.value;
-    sp.saveSetting('onlyEffect', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  ShortMenu[loc(sp.cleanProperty)].onClick = function () {
-    sp.cleanGroupValue = this.value;
-    sp.saveSetting('cleanGroup', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  ShortMenu[loc(sp.offsetKey)].onClick = function () {
-    sp.offsetKeyframeValue = this.value;
-    sp.saveSetting('offsetKeyframe', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  ShortMenu.addEventListener('blur', function () {
-    if (isCheckBoxClicked === false) {
-      ShortMenu.hide();
-    } else {
-      isCheckBoxClicked = true;
-    }
-  });
-
-  ShortMenu.onDeactivate = function () {
-    ShortMenu.hide();
-  };
-
-  ShortMenu.addEventListener('keydown', function (event) {
-    ShortMenu.hide();
-  });
-
-  return ShortMenu;
-}
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-sp.extend(sp, {
-  isDown: { en: 'Would you like to download new version now?', ch: '现在开始下载新版本吗?' },
-  settings: { en: 'Setting', ch: '设置' },
-  groupName: { en: 'Group name :', ch: '组名 :' },
-  elementName: { en: 'Element Name :', ch: '元素名 :' },
-  changeName: { en: 'Rename item', ch: '重命名元素' },
-  importPicture: { en: 'Import picture', ch: '导入图片' },
-  importFile: { en: 'Import file', ch: '导入组' },
-  exportFile: { en: 'Export file', ch: '导出组' },
-  addGroup: { en: 'New group', ch: '新建组' },
-  deleteGroup: { en: 'Remove group', ch: '删除组' },
-  addElement: { en: 'New item', ch: '新建元素' },
-  deleteElement: { en: 'Remove item', ch: '删除元素' },
-  create: { en: 'New layer', ch: '生成层' },
-  cover: { en: 'Cover item', ch: '覆盖元素' },
-  isShow: { en: 'Show text', ch: '显示文字' },
-  isAlert: { en: 'Deleting Alert', ch: '删除时警告' },
-  isPrecomp: { en: 'Pre-compose', ch: '预合成' },
-  isOffset: { en: 'Save material', ch: '存储素材' },
-  isName: { en: 'Auto rename', ch: '自动取名' },
-  isEffect: { en: 'Only property', ch: '仅生成效果' },
-  cleanProperty: { en: 'Empty prop', ch: '清空属性组' },
-  offsetKey: { en: 'Shift keyframe', ch: '关键帧偏移' },
-  sureDelete: { en: 'Are you sure to delete it?', ch: '确认删除?' },
-  helperScripts: { en: 'Help scripts', ch: '辅助脚本' },
-  expressionTranslate: { en: 'Fix expression errors', ch: '表达式翻译' },
-  script: { en: 'Sp_palette v1.0', ch: '形状层画板' },
-  reloadGroup: { en: 'Reload previews of group', ch: '重载组内预览动画' },
-  saveEachLayer: { en: 'Save every layer in active comp', ch: '自动存储每一层' },
-  cutLength: { en: 'Cut layer length', ch: '裁剪层长度' },
-  blankName: { en: 'Name should not be empty!', ch: '名字不应为空!' },
-  existName: { en: 'Element with the same name exists already!', ch: '相同名字的元素已存在!' },
-  overWritten: { en: 'File with the same name exists already!', ch: '相同名字的文件已存在!' },
-  inputName: { en: 'Please input your name!', ch: '请输入名字!' },
-  alertSpe: { en: 'There are special symbols in selectedLayers,please rename them first!', ch: '选中层名字有特殊符号,请首先重命名选中层!' },
-  deleteFolder: { en: 'Empty temp folder', ch: '清空素材文件夹' },
-  changeGroupName: { en: 'Change name of group', ch: '重命名选中组' },
-  deleteOk: { en: 'Clean folder successfully!', ch: '清空文件夹完毕!' },
-  yushe: { en: 'Preset Setting', ch: '预设设置' },
-  jinOne: { en: 'Please select groups that will be created on selectedLayers', ch: '请选择在仅生成效果时要在选中层上生成的属性组' },
-  jinTwo: { en: 'Please select groups that will be empty on selectedLayers before creating Properties', ch: '请选择在仅生成效果之前要清空的选中层的属性组' },
-  isSureGroup: { en: 'What you are deleting is a Group.\rAre you sure?', ch: '你正在删除的是一个组.\r确定删除吗?' },
-  isSureGroup2: { en: 'Repeat!\rWhat you are deleting is a Group.\rAre you sure?\r', ch: '重复!\r你正在删除的是一个组.\r确定删除吗?' },
-  _1: { en: 'Mask', ch: '遮罩' },
-  _2: { en: 'Effect', ch: '效果' },
-  _3: { en: 'Transform', ch: '变换' },
-  _4: { en: 'Material options', ch: '3D材质选项' },
-  _5: { en: 'Layer styles', ch: '图层样式' },
-  _6: { en: 'Shape content', ch: '形状层形状组' },
-  _7: { en: 'Text animators', ch: '文字层动画器' },
-  _8: { en: 'Light options', ch: '灯光选项' },
-  _9: { en: 'Camera options', ch: '摄像机选项' },
-  setName: { en: 'Please input the name.', ch: '请输入名字' },
-  checkVersion: { en: 'Check version', ch: '检查更新' },
-  newVersionFind: { en: 'New version found,please download the new version ', ch: '存在新版本,请下载最新版v' },
-  newVersionNotFind: { en: 'No new version!', ch: '已是最新版!' },
-  link: { en: 'Weibo', ch: '作者微博' },
-  about: {
-    en: 'Made by:Smallpath\nE-mail:smallpath2013@gmail.com\nSource Code:\ngithub.com/Smallpath/Memory\n\nDoubleClick:generate new layers or properties on selected layers from selected element.\nRightClick:call the shortcut menu.\nCtrl/Alt+RightClick:save selected layers as a new element.\nShift+Rightclick:call the up and down window\n\nShortcutkey when script runs as Window:\nKey \'D\' or \'Delete\':delete selected element.\nKey \'F\': overlap selected element.\nKey \'Up\':drop up selected element.\nKey \'Down\':drop down selected element.',
-    ch: '\u4F5C\u8005:\n    Smallpath\n\u90AE\u7BB1:\n    smallpath2013@gmail.com\n\u6E90\u7801\u6258\u7BA1\u5730\u5740:\ngithub.com/Smallpath/Memory\n\n\u53F3\u952E\u70B9\u51FB:\u547C\u51FA\u53F3\u952E\u83DC\u5355.\n\u53CC\u51FB:\u4ECE\u9009\u4E2D\u5143\u7D20\u521B\u5EFA\u5C42\u6216\u521B\u5EFA\u6548\u679C.\nCtrl/Alt+\u53F3\u952E\u70B9\u51FB:\u4ECE\u9009\u4E2D\u7684\u5C42\u8BFB\u53D6\u5C42\u4FE1\u606F\u4EE5\u521B\u5EFA\u65B0\u5143\u7D20.\nShift+\u53F3\u952E:\u5524\u51FA\u79FB\u52A8\u5143\u7D20\u7684\u7A97\u53E3\n\n\u7A97\u53E3\u6A21\u5F0F\u8FD0\u884C\u811A\u672C\u65F6:\nD\u952E:\u5220\u9664\u9009\u4E2D\u5143\u7D20.\nF\u952E:\u8986\u76D6\u9009\u4E2D\u5143\u7D20.\n\u4E0A\u952E:\u4E0A\u79FB\u9009\u4E2D\u5143\u7D20.\n\u4E0B\u952E:\u4E0B\u79FB\u9009\u4E2D\u5143\u7D20.'
-  },
-  refresh: {
-    en: 'Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp\'s time first.',
-    ch: '\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u9884\u89C8\u52A8\u753B:\n##\u8BF7\u7528\u672C\u529F\u80FD\u5BF9\u975E3.x\u7248\u672C\u4FDD\u5B58\u7684\u7EC4\u8FDB\u884C\u751F\u6210\u9884\u89C8\u52A8\u753B\u7684\u64CD\u4F5C:\n\n\u6B64\u529F\u80FD\u5C06\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u4E3B\u7F29\u7565\u56FE\u548C\u9884\u89C8\u52A8\u753B,\u5176\u4E2D\u4E3B\u7F29\u7565\u56FE\u4E3A\u5F53\u524D\u5408\u6210\u7684\u5F53\u524D\u65F6\u95F4\u70B9\u7684\u753B\u9762\n\n\u6CE8\u610F:\u6B64\u529F\u80FD\u5C06\u8017\u8D39\u5927\u91CF\u65F6\u95F4,\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n'
-  },
-  auto: {
-    en: 'This script helps you simplify you saving proccess\rIt will save every layer in active comp as a new element.',
-    ch: '\u6279\u91CF\u5B58\u50A8\u529F\u80FD:\n\n\u8FD9\u4F1A\u5C06\u5F53\u524D\u5408\u6210\u4E2D\u6BCF\u4E00\u5C42\u90FD\u5206\u522B\u5B58\u50A8\u4E3A\u4E00\u4E2A\u65B0\u5143\u7D20.\n\n\u6B64\u529F\u80FD\u53EF\u4EE5\u5E2E\u52A9\u4F60\u5FEB\u901F\u5B58\u50A8\u65B0\u5143\u7D20,\u5341\u5206\u9002\u5408\u5B58\u50A8\u5927\u91CF\u7684MG\u5408\u6210\u5C42\n\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u6765\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n' },
-  cutLengthTwo: {
-    en: 'This script will cut every layer in current comp, related to opacity for common layer and content length for comp layer.',
-    ch: '此功能将会裁剪当前合成中每一层的长度,根据普通层的透明度与合成层内容的长度.'
-  },
-  output: { en: 'Export groups', ch: '批量导出组' },
-  ok: { en: 'Ok', ch: '确定' },
-  cancel: { en: 'Cancel', ch: '取消' },
-  complete: { en: 'Complete!', ch: '导出完成!' },
-  showText: { en: 'Show text', ch: '显示文字' },
-  ui1: { en: 'The newer UI', ch: '新界面' },
-  ui2: { en: 'The older UI', ch: '旧界面' },
-  sys: { en: 'Script find that Sp_memory v1.4 has been used the first time.\rPlease select the UI type,Yes for new UI and No for previous UI.', ch: '脚本检测到Sp_memory v1.4首次被使用.\r请选择脚本界面,Yes为新界面,No为旧界面.' },
-  uiC: { en: 'Please restart script,ui will be changed.', ch: '界面已更新,请重启脚本' },
-  from: { en: 'Range is 0.', ch: '元素下标范围为:0' },
-  ud: { en: 'Up and down', ch: '上下移动选中元素' },
-  up: { en: 'Up', ch: '上移' },
-  down: { en: 'Down', ch: '下移' },
-  jmp: { en: 'Jump', ch: '跳转' },
-  coverChange: { en: 'Update thumb when cover', ch: '覆盖时更新缩略图' },
-  folderName: { en: 'The folder name of collect feature:', ch: '收集生成层时的工程栏文件夹名:' },
-  effectName: { en: "The group name that can enable 'Only property' :", ch: '默认开启仅生成效果的组名:' },
-  limitText: { en: 'Limit the text for UI', ch: '限制主窗口界面的文字长度' },
-  scriptSetting: { en: 'Setting', ch: '设置' },
-  settingPre: { en: 'Preference', ch: '预设' },
-  thumbType: { en: 'Enable new type of thumb', ch: '启用另一种缩略图' },
-  addModule: { en: 'New module', ch: '新建模块' },
-  deleteModule: { en: 'Remove module', ch: '删除模块' },
-  deleteModuleAlert: {
-    en: 'Dangerous!\r\nYou are deleting a module!\r\nAll groups in this module will be removed!\r\nDo you really want to remove this module?',
-    ch: '警告!\r\n你正在删除一个模块!\r\n所有包含在此模块中的组都将被删除!\r\n你想要继续删除吗?'
-  },
-  addAlert: { en: 'Repeart:\r\n', ch: '重复:\r\n' },
-  move: { en: 'Cut selected group to other module', ch: '剪切选中组到其他模块' },
-  editModule: { en: 'Move module or rename module', ch: '改变模块顺序或重命名模块' },
-  changeModuleName: { en: 'Change module name', ch: '重命名选中模块' },
-  moduleHelpTip: { en: "press key 'Up' and 'Down can move the selected module' ", ch: '方向上下键可移动选中模块' },
-  quit: { en: 'Quit', ch: '退出' },
-  selectGroupFirst: { en: 'Please select a group first!', ch: '请先选中一个组!' },
-  selectModuleFirst: { en: 'Please select a module first!', ch: '请先选中一个模块!' },
-  frameSecondText: { en: 'The milliseconds length of frame continues when preview:', ch: '预览时一张图片持续的毫秒数:' },
-  frameNumText: { en: 'The number of picture sequence generated for preview', ch: '生成供预览的图片序列时图片的数量:' },
-  reloadNeedFrames: {
-    en: "Please input the max frames which will be used to correct the duration of Preview.Keep blank if you don't what this feature",
-    ch: '请输入最大帧数,这将被用来使预览动画的时间范围更加准确\r\n不输入则将不进行校准'
-  },
-  needComp: { en: 'Please select a comp first', ch: '脚本需要一个合成,当前合成不存在!' },
-  previewAll: { en: 'Preview all', ch: '预览全部' },
-  previewSelected: { en: 'Preview selected', ch: '预览选中' },
-  needElement: { en: 'Please select a element in the group', ch: '组内元素未被选中,请首先选中一个元素' },
-  needElements: { en: 'Please select at least one element in the group', ch: '组内元素未被选中,请至少选中一个元素' },
-  needLayers: { en: 'Please select at least one layer in the current comp', ch: '请选中至少一个层' },
-  needModule: { en: 'Please create a module first', ch: '请先新建一个模块' },
-  isSavePreview: { en: 'Save preview', ch: '存储预览' },
-  searchWindow: { en: 'Search', ch: '搜索' },
-  getReport: { en: 'Get report', ch: '生成报告' },
-  creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
-  creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
-  creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第 ' },
-  creatingProcessAfter: { en: ' th layer', ch: ' 层' },
-  savingReport: { en: 'Saving cost: ', ch: '总存储耗时: ' },
-  savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
-  savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第 ' },
-  savingProcessAfter: { en: ' th layer', ch: ' 层' },
-  second: { en: ' second', ch: ' 秒' },
-  previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
-  previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
-  previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' },
-  searchButton: { en: 'search', ch: '搜索' },
-  searchText: { en: 'input name', ch: '输入元素名称' },
-  setRatioText: { en: 'notify the scale of UI for high-DPI windows', ch: '设置主界面windows放大比例' },
-  setRatioHelptip: {
-    en: 'AE scriptUI may be scaled wrong in high-DPI windows from CC2013 to CC2015.0',
-    ch: 'windows文字缩放比例大于1时, AE脚本界面会自动放大, 导致本脚本界面越界'
-  },
-  setRatioWarning: {
-    en: 'Please only change it when your text ratio does not equal to 1. Restart script to make sense',
-    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启及哦啊本后生效'
-  }
-});
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-var settingsButtonFunc = $.global.settingsButtonFunc = function () {
-  var _ = $.global.UIParser(global);
-
-  var UIJson = {
-    newWin: {
-      type: 'palette',
-      text: sp.scriptName + ' v' + sp.scriptVersion,
-      margins: 10,
-      children: {
-
-        group1: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            helpText: {
-              type: 'edittext',
-              properties: {
-                multiline: true,
-                scrolling: false
-              },
-              preferredSize: [150, 280],
-              text: '',
-              enabled: 1
-            },
-            gr: {
-              type: 'group',
-              orientation: 'column',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              margins: 0,
-              spacing: 0,
-              children: {
-                drop: {
-                  type: 'dropdownlist',
-                  preferredSize: [150, 20]
-                },
-                wlist: {
-                  type: 'listbox',
-                  preferredSize: [150, 260]
-                }
-              }
-            }
-          }
-        },
-        group2: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            deleteFolder: {
-              type: 'Button',
-              preferredSize: [165, 27],
-              text: loc(sp.deleteFolder),
-              enabled: 1
-            },
-            changeGroupName: {
-              type: 'Button',
-              preferredSize: [165, 27],
-              text: loc(sp.changeGroupName),
-              enabled: 1
-            }
-          }
-        },
-        group3: {
-          type: 'group',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            output: {
-              type: 'Button',
-              text: loc(sp.output),
-              enabled: 1
-            },
-            move: {
-              type: 'Button',
-              text: loc(sp.move),
-              enabled: 1
-            }
-          }
-        },
-        group35: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            editModule: {
-              type: 'Button',
-              preferredSize: [330, 27],
-              text: loc(sp.editModule),
-              enabled: 1
-            }
-          }
-        },
-        group4: {
-          type: 'group',
-          orientation: 'column',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            g0: {
-              type: 'group',
-              orientation: 'row',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                gr1: {
-                  type: 'group',
-                  children: {
-                    limitText: {
-                      type: 'checkbox',
-                      text: loc(sp.limitText)
-                    }
-                  }
-                },
-                gr2: {
-                  type: 'group',
-                  children: {
-                    coverChange: {
-                      type: 'checkbox',
-                      text: loc(sp.coverChange)
-                    }
-                  }
-                }
-              }
-            },
-            gr1: {
-              type: 'group',
-              orientation: 'row',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                gr1: {
-                  type: 'group',
-                  children: {
-                    thumbType: {
-                      type: 'checkbox',
-                      text: loc(sp.thumbType)
-                    }
-                  }
-                },
-                gr2: {
-                  type: 'group',
-                  children: {
-                    deleteAlert: {
-                      type: 'checkbox',
-                      text: loc(sp.isAlert)
-                    }
-                  }
-                }
-              }
-            },
-            grRatio: {
-              type: 'group',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                setRatio: {
-                  type: 'statictext',
-                  text: loc(sp.setRatioText)
-                },
-                ratioText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
-                }
-              }
-            },
-            gr4: {
-              type: 'group',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                frameSecond: {
-                  type: 'statictext',
-                  text: loc(sp.frameSecondText)
-                },
-                frameSecondText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
-                }
-              }
-            },
-            gr5: {
-              type: 'group',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                frameNum: {
-                  type: 'statictext',
-                  text: loc(sp.frameNumText)
-                },
-                frameNumText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
-                }
-              }
-            },
-            gr0: {
-              type: 'group',
-              orientation: 'row',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                gr2: {
-                  type: 'group',
-                  alignment: ['fill', 'fill'],
-                  alignChildren: ['fill', 'fill'],
-                  children: {
-                    folderName: {
-                      type: 'statictext',
-                      text: loc(sp.folderName)
-                    },
-                    folderNameText: {
-                      type: 'edittext',
-                      text: '',
-                      justify: 'center',
-                      characters: 17
-                    }
-                  }
-                }
-              }
-            },
-            gr3: {
-              type: 'group',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                effectName: {
-                  type: 'statictext',
-                  text: loc(sp.effectName)
-                },
-                effectNameText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
-                }
-              }
-            }
-
-          }
-        },
-        group5: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            ch: {
-              type: 'Button',
-              text: '中文',
-              enabled: 0
-            },
-            en: {
-              type: 'Button',
-              text: 'English',
-              enabled: 0
-            }
-          }
-        },
-
-        group7: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            checkVersion: {
-              type: 'Button',
-              text: loc(sp.checkVersion),
-              enabled: 1
-            },
-            openLink: {
-              type: 'Button',
-              text: loc(sp.link),
-              enabled: 1
-            }
-          }
-        }
-
-      }
-    } };
-
-  var win = _.newWindow(UIJson)[0];
-
-  _('*').each(function (e) {
-    switch (e.id) {
-      case 'ratioText':
-        e.text = (1 / sp.gridViewScale).toString();
-        e.onChange = function () {
-          alert(loc(sp.setRatioHelptip) + '\r\n' + loc(sp.setRatioWarning));
-          var value = parseFloat(this.text);
-          if (isNaN(value) || value < 1) {
-            this.text = (1 / sp.gridViewScale).toString();
-            return;
-          }
-
-          sp.gridViewScale = 1 / value;
-          sp.saveSetting('gridViewScale', sp.gridViewScale.toString());
-          sp.gv.refresh();
-        };
-        break;
-      case 'deleteAlert':
-        e.value = sp.getSettingAsBool('deleteAlert');
-        e.onClick = function () {
-          sp.deleteAlertValue = this.value;
-          sp.saveSetting('deleteAlert', this.value.toString());
-        };
-        break;
-      case 'frameSecondText':
-        e.text = sp.frameSecond.toString();
-        e.onChange = function () {
-          if (isNaN(this.text)) {
-            this.text = sp.frameSecond;
-            return;
-          }
-
-          var value = parseInt(this.text);
-          if (value >= 200) value = 200;
-          if (value <= 33) value = 33;
-          sp.frameSecond = value;
-          sp.saveSetting('frameSecond', value);
-          this.text = value.toString();
-        };
-        break;
-      case 'frameNumText':
-        e.text = sp.frameNum.toString();
-        e.onChange = function () {
-          if (isNaN(this.text)) {
-            this.text = sp.frameNum;
-            return;
-          }
-
-          var value = parseInt(this.text);
-          if (sp.isCC2015) {
-            if (value >= 300) value = 300;
-          } else {
-            if (value >= 50) value = 50;
-          }
-          if (value <= 0) value = 0;
-          sp.frameNum = value;
-          sp.saveSetting('frameNum', value);
-          this.text = value.toString();
-        };
-        break;
-      case 'move':
-        e.onClick = function () {
-          if (!_('#wlist')[0].selection || !_('#drop')[0]) return alert(loc(sp.selectGroupFirst));
-          moveWindow(_('#wlist')[0].selection, _('#drop')[0].selection, win);
-        };
-        break;
-      case 'editModule':
-        e.onClick = function () {
-          if (!_('#drop')[0]) return alert(loc(sp.selectModuleFirst));
-          moduleWindow(_('#drop')[0].selection, win);
-        };
-        break;
-      case 'drop':
-        sp.xmlGroupNames.forEach(function (item, index) {
-          this.add('item', item);
-        }, e);
-        var ratio = 1 / sp.gv.scale - 1;
-        var addedSeparatorLength = Math.ceil(ratio * sp.xmlGroupNames.length);
-        for (var i = 0; i < addedSeparatorLength; i++) {
-          e.add('separator');
-        }
-        var wlist = _('#wlist')[0];
-        e.onChange = function () {
-          if (!this.selection) return;
-          if (!sp.parentDroplist.selection) return;
-          wlist.removeAll();
-          sp.parentDroplist.selection = this.selection.index;
-          sp.xmlCurrentFileNames.forEach(function (item, index) {
-            this.add('item', item);
-          }, wlist);
-          sp.gv.refresh();
-        };
-        e.selection = sp.parentDroplist.selection ? sp.parentDroplist.selection.index : 0;
-        break;
-      case 'helpText':
-        e.text = loc(sp.about);
-        e.onChange = e.onChanging = function () {
-          this.text = loc(sp.about);
-        };
-        break;
-      case 'wlist':
-        break;
-      case 'deleteFolder':
-        e.onClick = function () {
-          var folder = sp.materialFolder;
-          deleteThisFolder(folder);
-          alert(loc(sp.deleteOk));
-        };
-        break;
-      case 'changeGroupName':
-        e.onClick = function () {
-          var wlist = _('#wlist')[0];
-          if (!wlist.selection) return alert(loc(sp.selectGroupFirst));
-          var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
-          if (!newGroupName) return;
-          if (sp.xmlFileNames.includes(newGroupName)) {
-            alert(loc(sp.existName));
-            return;
-          }
-
-          var file = sp.getFileByName(wlist.selection.text);
-          file.rename(newGroupName + '.xml');
-          var xml = new XML(sp.settingsFile.readd());
-          var index = sp.getGlobalIndexFromFileName(wlist.selection.text);
-          xml.ListItems.insertChildAfter(xml.ListItems.child(index), new XML('<Name>' + newGroupName.toString() + '</Name>'));
-          xml.ListItems.child(index).setLocalName('waitToDelete');
-          delete xml.ListItems.waitToDelete;
-          sp.settingsFile.writee(xml);
-          var folder = sp.getImageFolderByName(wlist.selection.text);
-          if (folder.exists) {
-            folder.rename(newGroupName);
-          }
-          wlist.items[wlist.selection.index].text = newGroupName;
-          sp.droplist.items[wlist.selection.index].text = newGroupName;
-          sp.xmlFileNames[index] = newGroupName;
-          sp.droplist.notify('onChange');
-        };
-        break;
-      case 'output':
-        e.onClick = function () {
-          outputWindow();
-        };
-        break;
-      case 'limitText':
-        e.value = sp.getSettingAsBool('limitText');
-        e.onClick = function () {
-          sp.saveSetting('limitText', this.value.toString());
-          sp.gv.limitText = sp.getSettingAsBool('limitText');
-          sp.gv.refresh();
-        };
-        break;
-      case 'coverChange':
-        e.value = sp.getSettingAsBool('coverChange');
-        e.onClick = function () {
-          sp.saveSetting('coverChange', this.value.toString());
-          sp.coverChangeValue = this.value;
-        };
-        break;
-      case 'thumbType':
-        e.value = sp.getSettingAsBool('thumbType');
-        e.onClick = function () {
-          sp.saveSetting('thumbType', this.value.toString());
-          sp.thumbTypeValue = this.value;
-        };
-        break;
-      case 'folderNameText':
-        e.text = sp.getSetting('folderName');
-        e.onChange = function () {
-          sp.saveSetting('folderName', this.text);
-        };
-        break;
-      case 'effectNameText':
-        e.text = sp.getSetting('effectName');
-        e.onChange = function () {
-          sp.saveSetting('effectName', this.text);
-        };
-        break;
-      case 'ch':
-        e.enabled = sp.lang === 'en';
-        if (e.enabled === true) {
-          e.enabled = !sp.isForceEnglish();
-        }
-        e.onClick = function () {
-          sp.saveSetting('language', 'ch');
-          alert('请重新打开脚本,语言会将自动变更为中文.');
-          _('#en')[0].enabled = true;
-          _('#ch')[0].enabled = false;
-        };
-        break;
-      case 'en':
-        e.enabled = sp.lang === 'ch';
-        e.onClick = function () {
-          sp.saveSetting('language', 'en');
-          alert('Please restart script,language will be changed into English.');
-          _('#en')[0].enabled = false;
-          _('#ch')[0].enabled = true;
-        };
-        break;
-      case 'checkVersion':
-        if (sp.lang === 'en') {
-          e.size = _('#openLink')[0].size = [211, 27];
-        }
-        e.onClick = function () {
-          var latest = parseFloat(sp.getVersion('Sp_memory'));
-          var nowVersion = sp.version;
-          if (latest > nowVersion) {
-            alert(loc(sp.newVersionFind) + latest.toString());
-            if (confirm(loc(sp.isDown))) {
-              sp.openLink(sp.downloadLink + ' v' + latest.toString() + '.jsxbin');
-            }
-          } else {
-            alert(loc(sp.newVersionNotFind));
-          }
-        };
-        break;
-      case 'openLink':
-        e.onClick = function () {
-          sp.openLink(sp.weiboLink);
-        };
-        break;
-    }
-  });
-
-  var warpDrop = function warpDrop(a, b, index1, index2) {
-    var tempD = a.text;
-    a.text = b.text;
-    b.text = tempD;
-    var tempXML = sp.xmlCurrentFileNames[index1];
-    sp.xmlCurrentFileNames[index1] = sp.xmlCurrentFileNames[index2];
-    sp.xmlCurrentFileNames[index2] = tempXML;
-  };
-
-  var exchange = function exchange(isUp, wXML) {
-    var xmlIndex = _('#wlist')[0].selection.index;
-    var groupIndex = _('#drop')[0].selection.index;
-    var name = sp.droplist.selection.text;
-
-    if (isUp === true) {
-      var wupxml = new XML(wXML.ParentGroup.child(groupIndex).child(xmlIndex));
-      wXML.ParentGroup.child(groupIndex).insertChildBefore(wXML.ParentGroup.child(groupIndex).child(xmlIndex - 1), wupxml);
-
-      wXML.ParentGroup.child(groupIndex).child(xmlIndex + 1).setLocalName('waitToDelete');
-
-      delete wXML.ParentGroup.child(groupIndex).waitToDelete;
-
-      sp.settingsFile.writee(wXML);
-      sp.swap(_('#wlist')[0].items[xmlIndex - 1], _('#wlist')[0].items[xmlIndex]);
-      warpDrop(sp.droplist.items[xmlIndex - 1], sp.droplist.items[xmlIndex], xmlIndex - 1, xmlIndex);
-    } else {
-      var wdownxml = new XML(wXML.ParentGroup.child(groupIndex).child(xmlIndex));
-
-      wXML.ParentGroup.child(groupIndex).insertChildAfter(wXML.ParentGroup.child(groupIndex).child(xmlIndex + 1), wdownxml);
-      wXML.ParentGroup.child(groupIndex).child(xmlIndex).setLocalName('waitToDelete');
-      delete wXML.ParentGroup.child(groupIndex).waitToDelete;
-
-      sp.settingsFile.writee(wXML);
-      sp.swap(_('#wlist')[0].items[xmlIndex + 1], _('#wlist')[0].items[xmlIndex]);
-      warpDrop(sp.droplist.items[xmlIndex + 1], sp.droplist.items[xmlIndex], xmlIndex + 1, xmlIndex);
-    }
-    sp.droplist.selection = sp.droplist.find(name);
-    sp.droplist.notify('onChange');
-    sp.gv.refresh();
-  };
-
-  var handleKey = function handleKey(key, control) {
-    var wXML = new XML(sp.settingsFile.readd());
-    switch (key.keyName) {
-      case 'Up':
-        if (_('#wlist')[0].selection !== null && _('#wlist')[0].selection.index > 0 && _('#drop')[0].selection) {
-          exchange(true, wXML);
-        };
-        break;
-      case 'Down':
-        if (_('#wlist')[0].selection !== null && _('#wlist')[0].selection.index < _('#wlist')[0].items.length - 1 && _('#drop')[0].selection) {
-          exchange(false, wXML);
-        };
-        break;
-    }
-  };
-
-  _('#wlist')[0].addEventListener('keydown', function (k) {
-    handleKey(k, this);
-  });
-
-  win.center();
-  win.show();
-};
-
-function moduleWindow(groupItem, win) {
-  var moveWin = new Window('dialog', 'Module', undefined, {
-    resizeable: 0,
-    maximizeButton: 0
-  });
-  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    helpTip:StaticText{text:\'' + loc(sp.moduleHelpTip) + '\'},\n    wlist:ListBox{properties:{multiselect:0}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.changeModuleName) + '\'},\n        cancel:Button{text:\'' + loc(sp.quit) + '\'}\n    }\n  }';
-  try {
-    outRes = moveWin.add(outRes);
-  } catch (err) {
-    alert(err);
-  }
-  sp.xmlGroupNames.forEach(function (item, index) {
-    this.add('item', item);
-  }, outRes.wlist);
-
-  outRes.wlist.addEventListener('keydown', function (k) {
-    switch (k.keyName) {
-      case 'Up':
-
-        if (this.selection !== null && this.selection.index > 0) {
-          var xml = new XML(sp.settingsFile.readd());
-          var groupIndex = this.selection.index;
-          var targetXml = xml.ParentGroup.child(groupIndex);
-
-          xml.ParentGroup.insertChildBefore(xml.ParentGroup.child(groupIndex - 1), new XML(targetXml));
-          xml.ParentGroup.child(groupIndex + 1).setLocalName('waitToDelete');
-          delete xml.ParentGroup.waitToDelete;
-
-          sp.settingsFile.writee(xml);
-
-          sp.reloadParentDroplist();
-          var selection = parseInt(sp.getSetting('parentSelection'));
-          sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
-          selection = parseInt(sp.getSetting('thisSelection'));
-          sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
-
-          sp.swap(outRes.wlist.items[this.selection.index - 1], outRes.wlist.items[this.selection.index]);
-        };
-        break;
-      case 'Down':
-        if (this.selection !== null && this.selection.index < this.items.length - 1) {
-          xml = new XML(sp.settingsFile.readd());
-          groupIndex = this.selection.index;
-          targetXml = xml.ParentGroup.child(groupIndex);
-
-          xml.ParentGroup.insertChildAfter(xml.ParentGroup.child(groupIndex + 1), new XML(targetXml));
-          xml.ParentGroup.child(groupIndex).setLocalName('waitToDelete');
-          delete xml.ParentGroup.waitToDelete;
-
-          sp.settingsFile.writee(xml);
-
-          sp.reloadParentDroplist();
-          selection = parseInt(sp.getSetting('parentSelection'));
-          sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
-          selection = parseInt(sp.getSetting('thisSelection'));
-          sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
-
-          sp.swap(outRes.wlist.items[this.selection.index], outRes.wlist.items[this.selection.index + 1]);
-        };
-        break;
-    }
-  });
-
-  outRes.oc.cancel.onClick = function () {
-    moveWin.close();
-    win.close();
-    settingsButtonFunc();
-  };
-
-  outRes.oc.ok.onClick = function () {
-    var wlist = outRes.wlist;
-    if (!wlist.selection) return;
-    var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
-    if (!newGroupName) return;
-    if (sp.xmlGroupNames.includes(newGroupName)) {
-      alert(loc(sp.existName));
-      return;
-    }
-
-    var xml = new XML(sp.settingsFile.readd());
-    var parentGroup = xml.ParentGroup;
-    var groupIndex = wlist.selection.index;
-
-    var editXml = parentGroup.child(groupIndex);
-    editXml['@groupName'] = newGroupName;
-
-    sp.settingsFile.writee(xml);
-
-    sp.reloadParentDroplist();
-    var selection = parseInt(sp.getSetting('parentSelection'));
-    sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
-    selection = parseInt(sp.getSetting('thisSelection'));
-    sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
-
-    moveWin.close();
-    win.close();
-  };
-
-  outRes.wlist.size = [200, 300];
-  moveWin.show();
-}
-
-function moveWindow(xmlItem, groupItem, win) {
-  var moveWin = new Window('dialog', 'Move', undefined, {
-    resizeable: 0,
-    maximizeButton: 0
-  });
-  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    wlist:ListBox{properties:{multiselect:0}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.ok) + '\'},\n        cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n    }\n  }';
-  try {
-    outRes = moveWin.add(outRes);
-  } catch (err) {
-    alert(err);
-  }
-  sp.xmlGroupNames.forEach(function (item, index) {
-    this.add('item', item);
-  }, outRes.wlist);
-
-  outRes.oc.cancel.onClick = function () {
-    moveWin.close();
-    win.close();
-    settingsButtonFunc();
-  };
-
-  outRes.oc.ok.onClick = function () {
-    if (!outRes.wlist.selection) return;
-    if (outRes.wlist.selection.text === groupItem.text) return;
-    var xml = new XML(sp.settingsFile.readd());
-    var parentGroup = xml.ParentGroup;
-    var xmlIndex = xmlItem.index;
-    var groupIndex = groupItem.index;
-
-    var editXml = parentGroup.child(groupIndex).child(xmlIndex);
-    var targetXml = parentGroup.child(outRes.wlist.selection.index);
-    targetXml.appendChild(new XML(editXml));
-
-    parentGroup.child(groupIndex).child(xmlIndex).setLocalName('waitToDelete');
-    delete parentGroup.child(groupIndex).waitToDelete;
-    sp.settingsFile.writee(xml);
-
-    sp.reloadParentDroplist();
-    var selection = parseInt(sp.getSetting('parentSelection'));
-    sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
-    selection = parseInt(sp.getSetting('thisSelection'));
-    sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
-
-    moveWin.close();
-    win.close();
-    settingsButtonFunc();
-  };
-
-  outRes.wlist.size = [200, 300];
-  moveWin.show();
-}
-
-function outputWindow() {
-  var outWin = new Window('window', 'Export', undefined, {
-    resizeable: 0,
-    maximizeButton: 0
-  });
-  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    wlist:ListBox{properties:{multiselect:1}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.ok) + '\'},\n        cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n    }\n  }';
-  try {
-    outRes = outWin.add(outRes);
-  } catch (err) {
-    alert(err);
-  }
-  for (var i = 0; i < sp.xmlFileNames.length; i++) {
-    outRes.wlist.add('item', sp.xmlFileNames[i]);
-  }
-  outRes.wlist.size = [200, 400];
-  outWin.show();
-
-  outRes.oc.cancel.onClick = function () {
-    outWin.close();
-  };
-
-  outRes.oc.ok.onClick = function () {
-    if (outRes.wlist.selection !== null) {
-      var exportFolder = Folder.selectDialog('Please select folder');
-      if (exportFolder !== null && exportFolder instanceof Folder) {
-        for (var i = 0; i < outRes.wlist.selection.length; i++) {
-          var sourceFile = sp.getFileByName(outRes.wlist.selection[i].text);
-          var targetFile = File(exportFolder.toString() + sp.slash + outRes.wlist.selection[i].text + '.xml');
-          if (targetFile.exists) {
-            continue;
-          }
-
-          var images = sp.getImageFolderByName(outRes.wlist.selection[i].text).getFiles();
-          var picXml = new XML('<pic></pic>');
-          var seqXml = new XML('<seq></seq>');
-          images.forEach(function (item, index) {
-            if (item.name.indexOf('.png') !== -1) {
-              item.open('r');
-              item.encoding = 'binary';
-              var str = encodeURIComponent(item.read());
-              item.close();
-              var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(item.name) + '</imgName>');
-              var tempXmlHeres = new XML('<img>' + str + '</img>');
-              var guluTempA = new XML('<imgInfo></imgInfo>');
-              guluTempA.appendChild(tempXmlBigHere);
-              guluTempA.appendChild(tempXmlHeres);
-              picXml.appendChild(guluTempA);
-            } else if (item instanceof Folder && item.name.indexOf('_seq') !== -1) {
-              var thisFolder = item;
-              var folderXml = new XML("<folder name='" + encodeURIComponent(item.name) + "'></folder>");
-              var seqFiles = thisFolder.getFiles();
-              seqFiles.forEach(function (imageFile, imageIndex) {
-                imageFile.open('r');
-                imageFile.encoding = 'binary';
-                var str = encodeURIComponent(imageFile.read());
-                imageFile.close();
-                var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(imageFile.name) + '</imgName>');
-                var tempXmlHeres = new XML('<img>' + str + '</img>');
-                var guluTempA = new XML('<imgInfo></imgInfo>');
-                guluTempA.appendChild(tempXmlBigHere);
-                guluTempA.appendChild(tempXmlHeres);
-                folderXml.appendChild(guluTempA);
-              });
-              seqXml.appendChild(folderXml);
-            }
-          });
-          var xml = new XML(sourceFile.readd());
-          if (picXml.children().length() > 0) {
-            xml.appendChild(picXml);
-          }
-          if (seqXml.children().length() > 0) {
-            xml.appendChild(seqXml);
-          }
-          if (xml.children().length() === 0) {
-            xml = '<tree></tree>';
-          }
-          targetFile.writee(xml);
-        }
-        clearOutput();
-        writeLn('Complete!');
-      }
-    }
-  };
-}
-
-var upAndDown = function upAndDown(isUp, isW) {
-  var file = sp.getFileByName(sp.droplist.selection.text);
-  var xml = new XML(file.readd());
-  if (isUp === true && sp.gv.lastSelectedItem !== null && sp.gv.lastSelectedItem.index > 0) {
-    var upxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
-    xml.insertChildBefore(xml.child(sp.gv.lastSelectedItem.index - 1), upxml);
-    xml.child(sp.gv.lastSelectedItem.index + 1).setLocalName('waitToDelete');
-    delete xml.waitToDelete;
-    file.writee(xml);
-    sp.gv.lastSelectedItem.moveUp();
-  } else if (isUp === false && sp.gv.lastSelectedItem !== null && sp.gv.lastSelectedItem.index < xml.children().length() - 1) {
-    var downxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
-    xml.insertChildAfter(xml.child(sp.gv.lastSelectedItem.index + 1), downxml);
-    xml.child(sp.gv.lastSelectedItem.index).setLocalName('waitToDelete');
-    delete xml.waitToDelete;
-    file.writee(xml);
-    sp.gv.lastSelectedItem.moveDown();
-  }
-};
-
-$.global.upAndDownWindow = function (cu) {
-  var udWin = new Window('palette', loc(sp.ud));
-  var udWins = udWin.add('Group{}');
-  var a = udWins.add("Button{text:'" + loc(sp.up) + "'}");
-  var b = udWins.add("Button{text:'" + loc(sp.down) + "'}");
-  var c = udWins.add("Group{et:EditText{text:'0',characters:3,justify:'center'},j:Button{text:'" + loc(sp.jmp) + "'}}");
-  udWin.frameLocation = cu;
-  udWin.show();
-  a.onClick = function () {
-    upAndDown(true, true);
-  };
-  b.onClick = function () {
-    upAndDown(false, true);
-  };
-  c.j.onClick = function () {
-    var d = parseInt(c.et.text);
-    var file = sp.getFileByName(sp.droplist.selection.text);
-    var xml = new XML(file.readd());
-    if (sp.gv.children.length === 0) return;
-    if (sp.gv.lastSelectedItem === null) return;
-    if (d >= 0 && d < sp.gv.children.length - 1 && sp.gv.lastSelectedItem.index !== d) {
-      var upxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
-      xml.insertChildBefore(xml.child(d), upxml);
-      xml.child(sp.gv.lastSelectedItem.index + 1).setLocalName('waitToDelete');
-      delete xml.waitToDelete;
-      file.writee(xml);
-      sp.gv.lastSelectedItem.moveBefore(sp.gv.children[d]);
-    } else if (d === sp.gv.children.length - 1 && sp.gv.lastSelectedItem.index !== d) {
-      upxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
-      xml.insertChildAfter(xml.child(d), upxml);
-      xml.child(sp.gv.lastSelectedItem.index + 1).setLocalName('waitToDelete');
-      delete xml.waitToDelete;
-      file.writee(xml);
-      sp.gv.lastSelectedItem.moveAfter(sp.gv.children[d]);
-    } else {
-      try {
-        alert(loc(sp.from) + '~' + (sp.gv.children.length - 1).toString());
-      } catch (er) {}
-    }
-  };
-};
-
-$.global.deleteThisFolder = deleteThisFolder;
-function deleteThisFolder(folder) {
-  var waitClFile = folder.getFiles();
-  for (var i = 0; i < waitClFile.length; i++) {
-    if (waitClFile[i] instanceof Folder) {
-      deleteThisFolder(waitClFile[i]);
-      waitClFile[i].remove();
-    } else {
-      waitClFile[i].remove();
-    }
-  }
-}
-
-$.global.presetWindow = function () {
-  var jinWin = new Window('dialog', loc(sp.settingPre));
-  var jinRes = 'group{\n    orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n    guluG:Group{\n      orientation:\'row\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n      jinGroup:Group{\n        orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n        isJin:StaticText{text:\'' + loc(sp.isEffect) + '\'}\n        isJinSt:StaticText{text:\'' + loc(sp.jinOne) + '\',properties:{multiline:1}}\n        jin:Panel{\n          orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n          _1:Checkbox{text:\'' + loc(sp._1) + '\'},\n          _2:Checkbox{text:\'' + loc(sp._2) + '\'},\n          _3:Checkbox{text:\'' + loc(sp._3) + '\'},\n          _4:Checkbox{text:\'' + loc(sp._4) + '\'},\n          _5:Checkbox{text:\'' + loc(sp._5) + '\'},\n          _6:Checkbox{text:\'' + loc(sp._6) + '\'},\n          _7:Checkbox{text:\'' + loc(sp._7) + '\'},\n          _8:Checkbox{text:\'' + loc(sp._8) + '\'},\n          _9:Checkbox{text:\'' + loc(sp._9) + '\'},\n        }\n      },\n      delGroup:Group{\n        orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n        isJin:StaticText{text:\'' + loc(sp.cleanProperty) + '\'},\n        isJinSt:StaticText{text:\'' + loc(sp.jinTwo) + '\',properties:{multiline:1}},\n        del:Panel{\n          orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n          _1:Checkbox{text:\'' + loc(sp._1) + '\'},\n          _2:Checkbox{text:\'' + loc(sp._2) + '\'},\n          _3:Checkbox{text:\'' + loc(sp._3) + '\',enabled:0},\n          _4:Checkbox{text:\'' + loc(sp._4) + '\',enabled:0},\n          _5:Checkbox{text:\'' + loc(sp._5) + '\'},\n          _6:Checkbox{text:\'' + loc(sp._6) + '\'},\n          _7:Checkbox{text:\'' + loc(sp._7) + '\'},\n          _8:Checkbox{text:\'' + loc(sp._8) + '\',enabled:0},\n          _9:Checkbox{text:\'' + loc(sp._9) + '\',enabled:0},\n        }\n      },\n    },\n    oc:Group{\n      orientation:\'row\',alignment:[\'fill\',\'center\'],alignChildren:[\'center\',\'fill\'],\n      ok:Button{text:\'Ok\',preferredSize:[160,30]},\n    }\n  }';
-  var jinGulu = jinWin.add(jinRes);
-
-  var _loop = function _loop(i) {
-    if (sp.haveSetting('_1_' + i) === false) {
-      if (i === 1 || i === 2 || i === 5) {
-        sp.saveSetting('_1_' + i, '1');
-      } else {
-        sp.saveSetting('_1_' + i, '0');
-      }
-    }
-    try {
-      jinGulu.guluG.jinGroup.jin['_' + i].value = sp.getSetting('_1_' + i) === '1';
-      jinGulu.guluG.jinGroup.jin['_' + i].onClick = function () {
-        sp.getSetting('_1_' + i);
-        sp.saveSetting('_1_' + i, jinGulu.guluG.jinGroup.jin['_' + i].value === true ? '1' : '0');
-      };
-    } catch (err) {}
-  };
-
-  for (var i = 1; i <= 9; i++) {
-    _loop(i);
-  }
-
-  var _loop2 = function _loop2(i) {
-    if (sp.haveSetting('_2_' + i) === false) {
-      sp.saveSetting('_2_' + i, '0');
-    }
-
-    try {
-      jinGulu.guluG.delGroup.del['_' + i].value = sp.getSetting('_2_' + i) === '1';
-      jinGulu.guluG.delGroup.del['_' + i].onClick = function () {
-        sp.getSetting('_2_' + i);
-        sp.saveSetting('_2_' + i, jinGulu.guluG.delGroup.del['_' + i].value === true ? '1' : '0');
-      };
-    } catch (err) {}
-  };
-
-  for (var i = 1; i <= 9; i++) {
-    _loop2(i);
-  }
-  jinGulu.oc.ok.onClick = function () {
-    jinWin.close();
-  };
-  jinWin.center();
-  jinWin.show();
-};
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22)))
-
-/***/ }),
+/* 4 */,
+/* 5 */,
+/* 6 */,
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5551,6 +4214,7 @@ UIParser.alertHelp = function () {
 module.exports = {
   progressFactory: __webpack_require__(19),
   previewProgress: __webpack_require__(21),
+  settingWindow: __webpack_require__(27),
   fns: __webpack_require__(20)
 };
 
@@ -5632,6 +4296,18 @@ module.exports = function () {
   Array.prototype.pushh = function (str) {
     this.push(str);
     return this;
+  };
+
+  sp.deleteThisFolder = function (folder) {
+    var waitClFile = folder.getFiles();
+    for (var i = 0; i < waitClFile.length; i++) {
+      if (waitClFile[i] instanceof Folder) {
+        sp.deleteThisFolder(waitClFile[i]);
+        waitClFile[i].remove();
+      } else {
+        waitClFile[i].remove();
+      }
+    }
   };
 }();
 
@@ -6408,12 +5084,10 @@ try {
 
         __webpack_require__(0);
 
-        __webpack_require__(5);
+        __webpack_require__(30);
 
         __webpack_require__(1);
         __webpack_require__(3);
-        __webpack_require__(6);
-        __webpack_require__(4);
         __webpack_require__(2);
         __webpack_require__(7);
         var helpers = __webpack_require__(8);
@@ -7553,6 +6227,9 @@ module.exports = progressFactory;
 "use strict";
 
 
+var creatRightClickMenu = __webpack_require__(28);
+var moveItemWindow = __webpack_require__(29);
+
 module.exports = function () {
   var keepRef = this;
   this.previewAll = function () {
@@ -7754,7 +6431,7 @@ module.exports = function () {
       sp.deleteIndexAndReload(preIndex);
 
       var imageFolder = sp.getImageFolderByName(selectionText);
-      $.global.deleteThisFolder(imageFolder);
+      sp.deleteThisFolder(imageFolder);
       imageFolder.remove();
 
       var file = sp.getFileByName(selectionText);
@@ -7881,7 +6558,7 @@ module.exports = function () {
 
     var seqFolder = new Folder(imageFile.toString().replace(/.png/i, '') + '_seq');
     if (seqFolder.exists) {
-      $.global.deleteThisFolder(seqFolder);
+      sp.deleteThisFolder(seqFolder);
       seqFolder.remove();
     }
 
@@ -7961,7 +6638,7 @@ module.exports = function () {
       }
       var seqFolder = new Folder(image.toString().replace(/.png/i, '') + '_seq');
       if (seqFolder.exists) {
-        $.global.deleteThisFolder(seqFolder);
+        sp.deleteThisFolder(seqFolder);
         seqFolder.remove();
       }
     });
@@ -8005,7 +6682,7 @@ module.exports = function () {
     sp.deleteIndexAndReload(preIndex);
 
     var imageFolder = sp.getImageFolderByName(selectionText);
-    $.global.deleteThisFolder(imageFolder);
+    sp.deleteThisFolder(imageFolder);
     imageFolder.remove();
 
     var file = sp.getFileByName(selectionText);
@@ -8283,7 +6960,7 @@ module.exports = function () {
   };
   this.rightClick = function (event) {
     keepRef.leftClick();
-
+    var scale = sp.gv.scale;
     var alt = event.altKey;
     var key = ScriptUI.environment.keyboardState;
     if (key.ctrlKey === false && key.shiftKey === false && alt === false) {
@@ -8291,8 +6968,8 @@ module.exports = function () {
     } else if (key.ctrlKey === true && key.shiftKey === false && alt === false) {
       keepRef.newItem(event);
     } else if (key.ctrlKey === false && key.shiftKey === true && alt === false) {
-      var currentPosition = [event.screenX - 152, event.screenY];
-      $.global.upAndDownWindow(currentPosition);
+      var currentPosition = [(event.screenX - 152) * scale, event.screenY * scale];
+      moveItemWindow(currentPosition);
     } else if (key.ctrlKey === false && key.shiftKey === false && alt === true) {
       keepRef.newItem(event);
     } else if (key.ctrlKey === true && key.shiftKey === true && alt === true) {
@@ -8312,7 +6989,7 @@ module.exports = function () {
 
       try {
         if (!sp.menu) {
-          sp.menu = $.global.createMenu();
+          sp.menu = creatRightClickMenu();
         }
         sp.menu['preview'].text = sp.gv.selection.length === 0 ? loc(sp.previewAll) : loc(sp.previewSelected);
         sp.menu.frameLocation = currentPosition;
@@ -8411,6 +7088,1376 @@ try {
 
 module.exports = g;
 
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = $.global.presetWindow = function () {
+  var jinWin = new Window('dialog', loc(sp.settingPre));
+  var jinRes = 'group{\n    orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n    guluG:Group{\n      orientation:\'row\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n      jinGroup:Group{\n        orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n        isJin:StaticText{text:\'' + loc(sp.isEffect) + '\'}\n        isJinSt:StaticText{text:\'' + loc(sp.jinOne) + '\',properties:{multiline:1}}\n        jin:Panel{\n          orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n          _1:Checkbox{text:\'' + loc(sp._1) + '\'},\n          _2:Checkbox{text:\'' + loc(sp._2) + '\'},\n          _3:Checkbox{text:\'' + loc(sp._3) + '\'},\n          _4:Checkbox{text:\'' + loc(sp._4) + '\'},\n          _5:Checkbox{text:\'' + loc(sp._5) + '\'},\n          _6:Checkbox{text:\'' + loc(sp._6) + '\'},\n          _7:Checkbox{text:\'' + loc(sp._7) + '\'},\n          _8:Checkbox{text:\'' + loc(sp._8) + '\'},\n          _9:Checkbox{text:\'' + loc(sp._9) + '\'},\n        }\n      },\n      delGroup:Group{\n        orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n        isJin:StaticText{text:\'' + loc(sp.cleanProperty) + '\'},\n        isJinSt:StaticText{text:\'' + loc(sp.jinTwo) + '\',properties:{multiline:1}},\n        del:Panel{\n          orientation:\'column\',alignment:[\'fill\',\'fill\'],alignChildren:[\'fill\',\'fill\'],\n          _1:Checkbox{text:\'' + loc(sp._1) + '\'},\n          _2:Checkbox{text:\'' + loc(sp._2) + '\'},\n          _3:Checkbox{text:\'' + loc(sp._3) + '\',enabled:0},\n          _4:Checkbox{text:\'' + loc(sp._4) + '\',enabled:0},\n          _5:Checkbox{text:\'' + loc(sp._5) + '\'},\n          _6:Checkbox{text:\'' + loc(sp._6) + '\'},\n          _7:Checkbox{text:\'' + loc(sp._7) + '\'},\n          _8:Checkbox{text:\'' + loc(sp._8) + '\',enabled:0},\n          _9:Checkbox{text:\'' + loc(sp._9) + '\',enabled:0},\n        }\n      },\n    },\n    oc:Group{\n      orientation:\'row\',alignment:[\'fill\',\'center\'],alignChildren:[\'center\',\'fill\'],\n      ok:Button{text:\'Ok\',preferredSize:[160,30]},\n    }\n  }';
+  var jinGulu = jinWin.add(jinRes);
+
+  var _loop = function _loop(i) {
+    if (sp.haveSetting('_1_' + i) === false) {
+      if (i === 1 || i === 2 || i === 5) {
+        sp.saveSetting('_1_' + i, '1');
+      } else {
+        sp.saveSetting('_1_' + i, '0');
+      }
+    }
+    try {
+      jinGulu.guluG.jinGroup.jin['_' + i].value = sp.getSetting('_1_' + i) === '1';
+      jinGulu.guluG.jinGroup.jin['_' + i].onClick = function () {
+        sp.getSetting('_1_' + i);
+        sp.saveSetting('_1_' + i, jinGulu.guluG.jinGroup.jin['_' + i].value === true ? '1' : '0');
+      };
+    } catch (err) {}
+  };
+
+  for (var i = 1; i <= 9; i++) {
+    _loop(i);
+  }
+
+  var _loop2 = function _loop2(i) {
+    if (sp.haveSetting('_2_' + i) === false) {
+      sp.saveSetting('_2_' + i, '0');
+    }
+
+    try {
+      jinGulu.guluG.delGroup.del['_' + i].value = sp.getSetting('_2_' + i) === '1';
+      jinGulu.guluG.delGroup.del['_' + i].onClick = function () {
+        sp.getSetting('_2_' + i);
+        sp.saveSetting('_2_' + i, jinGulu.guluG.delGroup.del['_' + i].value === true ? '1' : '0');
+      };
+    } catch (err) {}
+  };
+
+  for (var i = 1; i <= 9; i++) {
+    _loop2(i);
+  }
+  jinGulu.oc.ok.onClick = function () {
+    jinWin.close();
+  };
+  jinWin.center();
+  jinWin.show();
+};
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function (groupItem, win, callback) {
+  var moveWin = new Window('dialog', 'Module', undefined, {
+    resizeable: 0,
+    maximizeButton: 0
+  });
+  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    helpTip:StaticText{text:\'' + loc(sp.moduleHelpTip) + '\'},\n    wlist:ListBox{properties:{multiselect:0}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.changeModuleName) + '\'},\n        cancel:Button{text:\'' + loc(sp.quit) + '\'}\n    }\n  }';
+  try {
+    outRes = moveWin.add(outRes);
+  } catch (err) {
+    alert(err);
+  }
+  sp.xmlGroupNames.forEach(function (item, index) {
+    this.add('item', item);
+  }, outRes.wlist);
+
+  outRes.wlist.addEventListener('keydown', function (k) {
+    switch (k.keyName) {
+      case 'Up':
+
+        if (this.selection !== null && this.selection.index > 0) {
+          var xml = new XML(sp.settingsFile.readd());
+          var groupIndex = this.selection.index;
+          var targetXml = xml.ParentGroup.child(groupIndex);
+
+          xml.ParentGroup.insertChildBefore(xml.ParentGroup.child(groupIndex - 1), new XML(targetXml));
+          xml.ParentGroup.child(groupIndex + 1).setLocalName('waitToDelete');
+          delete xml.ParentGroup.waitToDelete;
+
+          sp.settingsFile.writee(xml);
+
+          sp.reloadParentDroplist();
+          var selection = parseInt(sp.getSetting('parentSelection'));
+          sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
+          selection = parseInt(sp.getSetting('thisSelection'));
+          sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
+
+          sp.swap(outRes.wlist.items[this.selection.index - 1], outRes.wlist.items[this.selection.index]);
+        };
+        break;
+      case 'Down':
+        if (this.selection !== null && this.selection.index < this.items.length - 1) {
+          xml = new XML(sp.settingsFile.readd());
+          groupIndex = this.selection.index;
+          targetXml = xml.ParentGroup.child(groupIndex);
+
+          xml.ParentGroup.insertChildAfter(xml.ParentGroup.child(groupIndex + 1), new XML(targetXml));
+          xml.ParentGroup.child(groupIndex).setLocalName('waitToDelete');
+          delete xml.ParentGroup.waitToDelete;
+
+          sp.settingsFile.writee(xml);
+
+          sp.reloadParentDroplist();
+          selection = parseInt(sp.getSetting('parentSelection'));
+          sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
+          selection = parseInt(sp.getSetting('thisSelection'));
+          sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
+
+          sp.swap(outRes.wlist.items[this.selection.index], outRes.wlist.items[this.selection.index + 1]);
+        };
+        break;
+    }
+  });
+
+  outRes.oc.cancel.onClick = function () {
+    moveWin.close();
+    win.close();
+    callback && callback();
+  };
+
+  outRes.oc.ok.onClick = function () {
+    var wlist = outRes.wlist;
+    if (!wlist.selection) return;
+    var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
+    if (!newGroupName) return;
+    if (sp.xmlGroupNames.includes(newGroupName)) {
+      alert(loc(sp.existName));
+      return;
+    }
+
+    var xml = new XML(sp.settingsFile.readd());
+    var parentGroup = xml.ParentGroup;
+    var groupIndex = wlist.selection.index;
+
+    var editXml = parentGroup.child(groupIndex);
+    editXml['@groupName'] = newGroupName;
+
+    sp.settingsFile.writee(xml);
+
+    sp.reloadParentDroplist();
+    var selection = parseInt(sp.getSetting('parentSelection'));
+    sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
+    selection = parseInt(sp.getSetting('thisSelection'));
+    sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
+
+    moveWin.close();
+    win.close();
+  };
+
+  outRes.wlist.size = [200, 300];
+  moveWin.show();
+};
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var settingsButtonFunc = __webpack_require__(27);
+
+module.exports = function (xmlItem, groupItem, win) {
+  var moveWin = new Window('dialog', 'Move', undefined, {
+    resizeable: 0,
+    maximizeButton: 0
+  });
+  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    wlist:ListBox{properties:{multiselect:0}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.ok) + '\'},\n        cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n    }\n  }';
+  try {
+    outRes = moveWin.add(outRes);
+  } catch (err) {
+    alert(err);
+  }
+  sp.xmlGroupNames.forEach(function (item, index) {
+    this.add('item', item);
+  }, outRes.wlist);
+
+  outRes.oc.cancel.onClick = function () {
+    moveWin.close();
+    win.close();
+    settingsButtonFunc();
+  };
+
+  outRes.oc.ok.onClick = function () {
+    if (!outRes.wlist.selection) return;
+    if (outRes.wlist.selection.text === groupItem.text) return;
+    var xml = new XML(sp.settingsFile.readd());
+    var parentGroup = xml.ParentGroup;
+    var xmlIndex = xmlItem.index;
+    var groupIndex = groupItem.index;
+
+    var editXml = parentGroup.child(groupIndex).child(xmlIndex);
+    var targetXml = parentGroup.child(outRes.wlist.selection.index);
+    targetXml.appendChild(new XML(editXml));
+
+    parentGroup.child(groupIndex).child(xmlIndex).setLocalName('waitToDelete');
+    delete parentGroup.child(groupIndex).waitToDelete;
+    sp.settingsFile.writee(xml);
+
+    sp.reloadParentDroplist();
+    var selection = parseInt(sp.getSetting('parentSelection'));
+    sp.parentDroplist.selection = selection <= sp.parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
+    selection = parseInt(sp.getSetting('thisSelection'));
+    sp.droplist.selection = selection <= sp.droplist.items.length - 1 && selection >= 0 ? selection : 0;
+
+    moveWin.close();
+    win.close();
+    settingsButtonFunc();
+  };
+
+  outRes.wlist.size = [200, 300];
+  moveWin.show();
+};
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function () {
+  var outWin = new Window('window', 'Export', undefined, {
+    resizeable: 0,
+    maximizeButton: 0
+  });
+  var outRes = 'Group{\n    orientation: \'column\', alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],    wlist:ListBox{properties:{multiselect:1}},\n    oc:Group{\n        alignment:[\'fill\', \'fill\'], alignChildren:[\'fill\', \'fill\'],\n        ok:Button{text:\'' + loc(sp.ok) + '\'},\n        cancel:Button{text:\'' + loc(sp.cancel) + '\'}\n    }\n  }';
+  try {
+    outRes = outWin.add(outRes);
+  } catch (err) {
+    alert(err);
+  }
+  for (var i = 0; i < sp.xmlFileNames.length; i++) {
+    outRes.wlist.add('item', sp.xmlFileNames[i]);
+  }
+  outRes.wlist.size = [200, 400];
+  outWin.show();
+
+  outRes.oc.cancel.onClick = function () {
+    outWin.close();
+  };
+
+  outRes.oc.ok.onClick = function () {
+    if (outRes.wlist.selection !== null) {
+      var exportFolder = Folder.selectDialog('Please select folder');
+      if (exportFolder !== null && exportFolder instanceof Folder) {
+        for (var i = 0; i < outRes.wlist.selection.length; i++) {
+          var sourceFile = sp.getFileByName(outRes.wlist.selection[i].text);
+          var targetFile = File(exportFolder.toString() + sp.slash + outRes.wlist.selection[i].text + '.xml');
+          if (targetFile.exists) {
+            continue;
+          }
+
+          var images = sp.getImageFolderByName(outRes.wlist.selection[i].text).getFiles();
+          var picXml = new XML('<pic></pic>');
+          var seqXml = new XML('<seq></seq>');
+          images.forEach(function (item, index) {
+            if (item.name.indexOf('.png') !== -1) {
+              item.open('r');
+              item.encoding = 'binary';
+              var str = encodeURIComponent(item.read());
+              item.close();
+              var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(item.name) + '</imgName>');
+              var tempXmlHeres = new XML('<img>' + str + '</img>');
+              var guluTempA = new XML('<imgInfo></imgInfo>');
+              guluTempA.appendChild(tempXmlBigHere);
+              guluTempA.appendChild(tempXmlHeres);
+              picXml.appendChild(guluTempA);
+            } else if (item instanceof Folder && item.name.indexOf('_seq') !== -1) {
+              var thisFolder = item;
+              var folderXml = new XML("<folder name='" + encodeURIComponent(item.name) + "'></folder>");
+              var seqFiles = thisFolder.getFiles();
+              seqFiles.forEach(function (imageFile, imageIndex) {
+                imageFile.open('r');
+                imageFile.encoding = 'binary';
+                var str = encodeURIComponent(imageFile.read());
+                imageFile.close();
+                var tempXmlBigHere = new XML('<imgName>' + encodeURIComponent(imageFile.name) + '</imgName>');
+                var tempXmlHeres = new XML('<img>' + str + '</img>');
+                var guluTempA = new XML('<imgInfo></imgInfo>');
+                guluTempA.appendChild(tempXmlBigHere);
+                guluTempA.appendChild(tempXmlHeres);
+                folderXml.appendChild(guluTempA);
+              });
+              seqXml.appendChild(folderXml);
+            }
+          });
+          var xml = new XML(sourceFile.readd());
+          if (picXml.children().length() > 0) {
+            xml.appendChild(picXml);
+          }
+          if (seqXml.children().length() > 0) {
+            xml.appendChild(seqXml);
+          }
+          if (xml.children().length() === 0) {
+            xml = '<tree></tree>';
+          }
+          targetFile.writee(xml);
+        }
+        clearOutput();
+        writeLn('Complete!');
+      }
+    }
+  };
+};
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var moduleWindow = __webpack_require__(24);
+var moveGroupWindow = __webpack_require__(25);
+var outputGroupWindow = __webpack_require__(26);
+
+module.exports = function () {
+  var _ = $.global.UIParser(global);
+
+  var UIJson = {
+    newWin: {
+      type: 'palette',
+      text: sp.scriptName + ' v' + sp.scriptVersion,
+      margins: 10,
+      children: {
+
+        group1: {
+          type: 'group',
+          orientation: 'row',
+          alignment: ['fill', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            helpText: {
+              type: 'edittext',
+              properties: {
+                multiline: true,
+                scrolling: false
+              },
+              preferredSize: [150, 280],
+              text: '',
+              enabled: 1
+            },
+            gr: {
+              type: 'group',
+              orientation: 'column',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              margins: 0,
+              spacing: 0,
+              children: {
+                drop: {
+                  type: 'dropdownlist',
+                  preferredSize: [150, 20]
+                },
+                wlist: {
+                  type: 'listbox',
+                  preferredSize: [150, 260]
+                }
+              }
+            }
+          }
+        },
+        group2: {
+          type: 'group',
+          orientation: 'row',
+          alignment: ['fill', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            deleteFolder: {
+              type: 'Button',
+              preferredSize: [165, 27],
+              text: loc(sp.deleteFolder),
+              enabled: 1
+            },
+            changeGroupName: {
+              type: 'Button',
+              preferredSize: [165, 27],
+              text: loc(sp.changeGroupName),
+              enabled: 1
+            }
+          }
+        },
+        group3: {
+          type: 'group',
+          alignment: ['fill', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            output: {
+              type: 'Button',
+              text: loc(sp.output),
+              enabled: 1
+            },
+            move: {
+              type: 'Button',
+              text: loc(sp.move),
+              enabled: 1
+            }
+          }
+        },
+        group35: {
+          type: 'group',
+          orientation: 'row',
+          alignment: ['fill', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            editModule: {
+              type: 'Button',
+              preferredSize: [330, 27],
+              text: loc(sp.editModule),
+              enabled: 1
+            }
+          }
+        },
+        group4: {
+          type: 'group',
+          orientation: 'column',
+          alignment: ['fill', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            g0: {
+              type: 'group',
+              orientation: 'row',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                gr1: {
+                  type: 'group',
+                  children: {
+                    limitText: {
+                      type: 'checkbox',
+                      text: loc(sp.limitText)
+                    }
+                  }
+                },
+                gr2: {
+                  type: 'group',
+                  children: {
+                    coverChange: {
+                      type: 'checkbox',
+                      text: loc(sp.coverChange)
+                    }
+                  }
+                }
+              }
+            },
+            gr1: {
+              type: 'group',
+              orientation: 'row',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                gr1: {
+                  type: 'group',
+                  children: {
+                    thumbType: {
+                      type: 'checkbox',
+                      text: loc(sp.thumbType)
+                    }
+                  }
+                },
+                gr2: {
+                  type: 'group',
+                  children: {
+                    deleteAlert: {
+                      type: 'checkbox',
+                      text: loc(sp.isAlert)
+                    }
+                  }
+                }
+              }
+            },
+            grRatio: {
+              type: 'group',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                setRatio: {
+                  type: 'statictext',
+                  text: loc(sp.setRatioText)
+                },
+                ratioText: {
+                  type: 'edittext',
+                  text: '',
+                  characters: 18
+                }
+              }
+            },
+            gr4: {
+              type: 'group',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                frameSecond: {
+                  type: 'statictext',
+                  text: loc(sp.frameSecondText)
+                },
+                frameSecondText: {
+                  type: 'edittext',
+                  text: '',
+                  characters: 18
+                }
+              }
+            },
+            gr5: {
+              type: 'group',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                frameNum: {
+                  type: 'statictext',
+                  text: loc(sp.frameNumText)
+                },
+                frameNumText: {
+                  type: 'edittext',
+                  text: '',
+                  characters: 18
+                }
+              }
+            },
+            gr0: {
+              type: 'group',
+              orientation: 'row',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                gr2: {
+                  type: 'group',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    folderName: {
+                      type: 'statictext',
+                      text: loc(sp.folderName)
+                    },
+                    folderNameText: {
+                      type: 'edittext',
+                      text: '',
+                      justify: 'center',
+                      characters: 17
+                    }
+                  }
+                }
+              }
+            },
+            gr3: {
+              type: 'group',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                effectName: {
+                  type: 'statictext',
+                  text: loc(sp.effectName)
+                },
+                effectNameText: {
+                  type: 'edittext',
+                  text: '',
+                  characters: 18
+                }
+              }
+            }
+
+          }
+        },
+        group5: {
+          type: 'group',
+          orientation: 'row',
+          alignment: ['fill', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            ch: {
+              type: 'Button',
+              text: '中文',
+              enabled: 0
+            },
+            en: {
+              type: 'Button',
+              text: 'English',
+              enabled: 0
+            }
+          }
+        },
+
+        group7: {
+          type: 'group',
+          orientation: 'row',
+          alignment: ['fill', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            checkVersion: {
+              type: 'Button',
+              text: loc(sp.checkVersion),
+              enabled: 1
+            },
+            openLink: {
+              type: 'Button',
+              text: loc(sp.link),
+              enabled: 1
+            }
+          }
+        }
+
+      }
+    } };
+
+  var win = _.newWindow(UIJson)[0];
+
+  _('*').each(function (e) {
+    switch (e.id) {
+      case 'ratioText':
+        e.text = (1 / sp.gridViewScale).toString();
+        e.onChange = function () {
+          alert(loc(sp.setRatioHelptip) + '\r\n' + loc(sp.setRatioWarning));
+          var value = parseFloat(this.text);
+          if (isNaN(value) || value < 1) {
+            this.text = (1 / sp.gridViewScale).toString();
+            return;
+          }
+
+          sp.gridViewScale = 1 / value;
+          sp.saveSetting('gridViewScale', sp.gridViewScale.toString());
+          sp.gv.refresh();
+        };
+        break;
+      case 'deleteAlert':
+        e.value = sp.getSettingAsBool('deleteAlert');
+        e.onClick = function () {
+          sp.deleteAlertValue = this.value;
+          sp.saveSetting('deleteAlert', this.value.toString());
+        };
+        break;
+      case 'frameSecondText':
+        e.text = sp.frameSecond.toString();
+        e.onChange = function () {
+          if (isNaN(this.text)) {
+            this.text = sp.frameSecond;
+            return;
+          }
+
+          var value = parseInt(this.text);
+          if (value >= 200) value = 200;
+          if (value <= 33) value = 33;
+          sp.frameSecond = value;
+          sp.saveSetting('frameSecond', value);
+          this.text = value.toString();
+        };
+        break;
+      case 'frameNumText':
+        e.text = sp.frameNum.toString();
+        e.onChange = function () {
+          if (isNaN(this.text)) {
+            this.text = sp.frameNum;
+            return;
+          }
+
+          var value = parseInt(this.text);
+          if (sp.isCC2015) {
+            if (value >= 300) value = 300;
+          } else {
+            if (value >= 50) value = 50;
+          }
+          if (value <= 0) value = 0;
+          sp.frameNum = value;
+          sp.saveSetting('frameNum', value);
+          this.text = value.toString();
+        };
+        break;
+      case 'move':
+        e.onClick = function () {
+          if (!_('#wlist')[0].selection || !_('#drop')[0]) return alert(loc(sp.selectGroupFirst));
+          moveGroupWindow(_('#wlist')[0].selection, _('#drop')[0].selection, win);
+        };
+        break;
+      case 'editModule':
+        e.onClick = function () {
+          if (!_('#drop')[0]) return alert(loc(sp.selectModuleFirst));
+          moduleWindow(_('#drop')[0].selection, win, module.exports);
+        };
+        break;
+      case 'drop':
+        sp.xmlGroupNames.forEach(function (item, index) {
+          this.add('item', item);
+        }, e);
+        var ratio = 1 / sp.gv.scale - 1;
+        var addedSeparatorLength = Math.ceil(ratio * sp.xmlGroupNames.length);
+        for (var i = 0; i < addedSeparatorLength; i++) {
+          e.add('separator');
+        }
+        var wlist = _('#wlist')[0];
+        e.onChange = function () {
+          if (!this.selection) return;
+          if (!sp.parentDroplist.selection) return;
+          wlist.removeAll();
+          sp.parentDroplist.selection = this.selection.index;
+          sp.xmlCurrentFileNames.forEach(function (item, index) {
+            this.add('item', item);
+          }, wlist);
+          sp.gv.refresh();
+        };
+        e.selection = sp.parentDroplist.selection ? sp.parentDroplist.selection.index : 0;
+        break;
+      case 'helpText':
+        e.text = loc(sp.about);
+        e.onChange = e.onChanging = function () {
+          this.text = loc(sp.about);
+        };
+        break;
+      case 'wlist':
+        break;
+      case 'deleteFolder':
+        e.onClick = function () {
+          var folder = sp.materialFolder;
+          sp.deleteThisFolder(folder);
+          alert(loc(sp.deleteOk));
+        };
+        break;
+      case 'changeGroupName':
+        e.onClick = function () {
+          var wlist = _('#wlist')[0];
+          if (!wlist.selection) return alert(loc(sp.selectGroupFirst));
+          var newGroupName = prompt(loc(sp.setName), wlist.selection.text);
+          if (!newGroupName) return;
+          if (sp.xmlFileNames.includes(newGroupName)) {
+            alert(loc(sp.existName));
+            return;
+          }
+
+          var file = sp.getFileByName(wlist.selection.text);
+          file.rename(newGroupName + '.xml');
+          var xml = new XML(sp.settingsFile.readd());
+          var index = sp.getGlobalIndexFromFileName(wlist.selection.text);
+          xml.ListItems.insertChildAfter(xml.ListItems.child(index), new XML('<Name>' + newGroupName.toString() + '</Name>'));
+          xml.ListItems.child(index).setLocalName('waitToDelete');
+          delete xml.ListItems.waitToDelete;
+          sp.settingsFile.writee(xml);
+          var folder = sp.getImageFolderByName(wlist.selection.text);
+          if (folder.exists) {
+            folder.rename(newGroupName);
+          }
+          wlist.items[wlist.selection.index].text = newGroupName;
+          sp.droplist.items[wlist.selection.index].text = newGroupName;
+          sp.xmlFileNames[index] = newGroupName;
+          sp.droplist.notify('onChange');
+        };
+        break;
+      case 'output':
+        e.onClick = function () {
+          outputGroupWindow();
+        };
+        break;
+      case 'limitText':
+        e.value = sp.getSettingAsBool('limitText');
+        e.onClick = function () {
+          sp.saveSetting('limitText', this.value.toString());
+          sp.gv.limitText = sp.getSettingAsBool('limitText');
+          sp.gv.refresh();
+        };
+        break;
+      case 'coverChange':
+        e.value = sp.getSettingAsBool('coverChange');
+        e.onClick = function () {
+          sp.saveSetting('coverChange', this.value.toString());
+          sp.coverChangeValue = this.value;
+        };
+        break;
+      case 'thumbType':
+        e.value = sp.getSettingAsBool('thumbType');
+        e.onClick = function () {
+          sp.saveSetting('thumbType', this.value.toString());
+          sp.thumbTypeValue = this.value;
+        };
+        break;
+      case 'folderNameText':
+        e.text = sp.getSetting('folderName');
+        e.onChange = function () {
+          sp.saveSetting('folderName', this.text);
+        };
+        break;
+      case 'effectNameText':
+        e.text = sp.getSetting('effectName');
+        e.onChange = function () {
+          sp.saveSetting('effectName', this.text);
+        };
+        break;
+      case 'ch':
+        e.enabled = sp.lang === 'en';
+        if (e.enabled === true) {
+          e.enabled = !sp.isForceEnglish();
+        }
+        e.onClick = function () {
+          sp.saveSetting('language', 'ch');
+          alert('请重新打开脚本,语言会将自动变更为中文.');
+          _('#en')[0].enabled = true;
+          _('#ch')[0].enabled = false;
+        };
+        break;
+      case 'en':
+        e.enabled = sp.lang === 'ch';
+        e.onClick = function () {
+          sp.saveSetting('language', 'en');
+          alert('Please restart script,language will be changed into English.');
+          _('#en')[0].enabled = false;
+          _('#ch')[0].enabled = true;
+        };
+        break;
+      case 'checkVersion':
+        if (sp.lang === 'en') {
+          e.size = _('#openLink')[0].size = [211, 27];
+        }
+        e.onClick = function () {
+          var latest = parseFloat(sp.getVersion('Sp_memory'));
+          var nowVersion = sp.version;
+          if (latest > nowVersion) {
+            alert(loc(sp.newVersionFind) + latest.toString());
+            if (confirm(loc(sp.isDown))) {
+              sp.openLink(sp.downloadLink + ' v' + latest.toString() + '.jsxbin');
+            }
+          } else {
+            alert(loc(sp.newVersionNotFind));
+          }
+        };
+        break;
+      case 'openLink':
+        e.onClick = function () {
+          sp.openLink(sp.weiboLink);
+        };
+        break;
+    }
+  });
+
+  var warpDrop = function warpDrop(a, b, index1, index2) {
+    var tempD = a.text;
+    a.text = b.text;
+    b.text = tempD;
+    var tempXML = sp.xmlCurrentFileNames[index1];
+    sp.xmlCurrentFileNames[index1] = sp.xmlCurrentFileNames[index2];
+    sp.xmlCurrentFileNames[index2] = tempXML;
+  };
+
+  var exchange = function exchange(isUp, wXML) {
+    var xmlIndex = _('#wlist')[0].selection.index;
+    var groupIndex = _('#drop')[0].selection.index;
+    var name = sp.droplist.selection.text;
+
+    if (isUp === true) {
+      var wupxml = new XML(wXML.ParentGroup.child(groupIndex).child(xmlIndex));
+      wXML.ParentGroup.child(groupIndex).insertChildBefore(wXML.ParentGroup.child(groupIndex).child(xmlIndex - 1), wupxml);
+
+      wXML.ParentGroup.child(groupIndex).child(xmlIndex + 1).setLocalName('waitToDelete');
+
+      delete wXML.ParentGroup.child(groupIndex).waitToDelete;
+
+      sp.settingsFile.writee(wXML);
+      sp.swap(_('#wlist')[0].items[xmlIndex - 1], _('#wlist')[0].items[xmlIndex]);
+      warpDrop(sp.droplist.items[xmlIndex - 1], sp.droplist.items[xmlIndex], xmlIndex - 1, xmlIndex);
+    } else {
+      var wdownxml = new XML(wXML.ParentGroup.child(groupIndex).child(xmlIndex));
+
+      wXML.ParentGroup.child(groupIndex).insertChildAfter(wXML.ParentGroup.child(groupIndex).child(xmlIndex + 1), wdownxml);
+      wXML.ParentGroup.child(groupIndex).child(xmlIndex).setLocalName('waitToDelete');
+      delete wXML.ParentGroup.child(groupIndex).waitToDelete;
+
+      sp.settingsFile.writee(wXML);
+      sp.swap(_('#wlist')[0].items[xmlIndex + 1], _('#wlist')[0].items[xmlIndex]);
+      warpDrop(sp.droplist.items[xmlIndex + 1], sp.droplist.items[xmlIndex], xmlIndex + 1, xmlIndex);
+    }
+    sp.droplist.selection = sp.droplist.find(name);
+    sp.droplist.notify('onChange');
+    sp.gv.refresh();
+  };
+
+  var handleKey = function handleKey(key, control) {
+    var wXML = new XML(sp.settingsFile.readd());
+    switch (key.keyName) {
+      case 'Up':
+        if (_('#wlist')[0].selection !== null && _('#wlist')[0].selection.index > 0 && _('#drop')[0].selection) {
+          exchange(true, wXML);
+        };
+        break;
+      case 'Down':
+        if (_('#wlist')[0].selection !== null && _('#wlist')[0].selection.index < _('#wlist')[0].items.length - 1 && _('#drop')[0].selection) {
+          exchange(false, wXML);
+        };
+        break;
+    }
+  };
+
+  _('#wlist')[0].addEventListener('keydown', function (k) {
+    handleKey(k, this);
+  });
+
+  win.center();
+  win.show();
+};
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22)))
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var settingWindow = __webpack_require__(27);
+var presetWindow = __webpack_require__(23);
+
+module.exports = function () {
+  var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }];
+
+  var length = itemList.length;
+
+  var space = 102 / 5;
+  var buttonHeight = 20;
+  var checkBoxHeight = 21;
+
+  if (sp.lang === 'ch') {
+    var maxWidth = 180;
+  } else {
+    maxWidth = 190;
+  }
+
+  var shortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, length * space / 2 + 2], {
+    borderless: true
+  });
+
+  for (var i = 0; i < length; i++) {
+    var item = itemList[i];
+    var itemWidth = void 0,
+        itemHeight = void 0;
+    itemWidth = maxWidth / 2 + (item.widthOffset || 0);
+    if (item.type === 'button') {
+      itemHeight = buttonHeight;
+    } else if (item.type === 'checkbox') {
+      itemHeight = checkBoxHeight;
+    } else if (item.type === 'dropdownlist') {
+      itemHeight = buttonHeight;
+    } else if (item.type === 'edittext') {
+      itemHeight = buttonHeight;
+    }
+    if (i % 2 === 0) {
+      shortMenu[item.name] = shortMenu.add(item.type, [0, parseInt(i / 2) * itemHeight, itemWidth, 22 + parseInt(i / 2) * itemHeight], item.name);
+    } else {
+      shortMenu[item.name] = shortMenu.add(item.type, [itemWidth, parseInt((i - 1) / 2) * itemHeight, maxWidth, 22 + parseInt((i - 1) / 2) * itemHeight], item.name);
+    }
+  }
+
+  var isCheckBoxClicked = false;
+
+  shortMenu[loc(sp.settings)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    settingWindow();
+  };
+
+  shortMenu['helperScripts'].add('item', loc(sp.helperScripts));
+  shortMenu['helperScripts'].add('item', loc(sp.expressionTranslate));
+  shortMenu['helperScripts'].add('item', loc(sp.reloadGroup));
+  shortMenu['helperScripts'].add('item', loc(sp.saveEachLayer));
+  shortMenu['helperScripts'].add('item', loc(sp.cutLength));
+  shortMenu['helperScripts'].selection = 0;
+
+  shortMenu['helperScripts'].onChange = shortMenu['helperScripts'].onChanging = function () {
+    try {
+      this.selection.index === 1 && $.global.translate() || this.selection.index === 2 && $.global.reloadPic() || this.selection.index === 3 && $.global.autoSave() || this.selection.index === 4 && $.global.cutLength();
+    } catch (err) {
+      err.printa();
+    }
+
+    this.selection = 0;
+  };
+
+  shortMenu['preview'].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.previewAll();
+  };
+
+  shortMenu[loc(sp.yushe)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    presetWindow();
+  };
+
+  shortMenu[loc(sp.changeName)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.changeName();
+  };
+
+  shortMenu[loc(sp.importPicture)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.importImage();
+  };
+
+  shortMenu[loc(sp.addModule)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.addModule();
+  };
+
+  shortMenu[loc(sp.deleteModule)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.deleteModule();
+  };
+
+  shortMenu[loc(sp.importFile)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.importFiles();
+  };
+
+  shortMenu[loc(sp.exportFile)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.exportFile();
+  };
+
+  shortMenu[loc(sp.addGroup)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.addGroup();
+  };
+
+  shortMenu[loc(sp.deleteGroup)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.deleteGroup();
+  };
+
+  shortMenu[loc(sp.addElement)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.newItem();
+  };
+
+  shortMenu[loc(sp.cover)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.cover();
+  };
+
+  shortMenu[loc(sp.create)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.newLayer();
+  };
+
+  shortMenu[loc(sp.deleteElement)].onClick = function () {
+    isCheckBoxClicked = false;
+    shortMenu.hide();
+    sp.fns.deleteItem();
+  };
+
+  shortMenu[loc(sp.isShow)].value = sp.showThumbValue;
+  shortMenu[loc(sp.isName)].value = sp.autoNameValue;
+  shortMenu[loc(sp.isSavePreview)].value = sp.savePreviewValue;
+  shortMenu[loc(sp.isOffset)].value = sp.saveMaterialValue;
+  shortMenu[loc(sp.isPrecomp)].value = sp.preComposeValue;
+  shortMenu[loc(sp.isEffect)].value = sp.onlyEffectValue;
+  shortMenu[loc(sp.cleanProperty)].value = sp.cleanGroupValue;
+  shortMenu[loc(sp.offsetKey)].value = sp.offsetKeyframeValue;
+
+  shortMenu[loc(sp.isShow)].onClick = function () {
+    sp.showThumbValue = this.value;
+    $.global.sp.gv.showText = this.value;
+    sp.saveSetting('showThumb', this.value.toString());
+    isCheckBoxClicked = true;
+    sp.gv.refresh();
+  };
+
+  shortMenu[loc(sp.isName)].onClick = function () {
+    sp.autoNameValue = this.value;
+    sp.saveSetting('autoName', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu[loc(sp.isSavePreview)].onClick = function () {
+    sp.savePreviewValue = this.value;
+    sp.saveSetting('savePreview', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu[loc(sp.isOffset)].onClick = function () {
+    sp.saveMaterialValue = this.value;
+    sp.saveSetting('saveMaterial', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu[loc(sp.isPrecomp)].onClick = function () {
+    sp.preComposeValue = this.value;
+    sp.saveSetting('preCompose', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu[loc(sp.isEffect)].onClick = function () {
+    sp.onlyEffectValue = this.value;
+    sp.saveSetting('onlyEffect', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu[loc(sp.cleanProperty)].onClick = function () {
+    sp.cleanGroupValue = this.value;
+    sp.saveSetting('cleanGroup', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu[loc(sp.offsetKey)].onClick = function () {
+    sp.offsetKeyframeValue = this.value;
+    sp.saveSetting('offsetKeyframe', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu.addEventListener('blur', function () {
+    if (isCheckBoxClicked === false) {
+      shortMenu.hide();
+    } else {
+      isCheckBoxClicked = true;
+    }
+  });
+
+  shortMenu.onDeactivate = function () {
+    shortMenu.hide();
+  };
+
+  shortMenu.addEventListener('keydown', function (event) {
+    shortMenu.hide();
+  });
+
+  return shortMenu;
+};
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var upAndDown = function upAndDown(isUp, isW) {
+  var file = sp.getFileByName(sp.droplist.selection.text);
+  var xml = new XML(file.readd());
+  if (isUp === true && sp.gv.lastSelectedItem !== null && sp.gv.lastSelectedItem.index > 0) {
+    var upxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
+    xml.insertChildBefore(xml.child(sp.gv.lastSelectedItem.index - 1), upxml);
+    xml.child(sp.gv.lastSelectedItem.index + 1).setLocalName('waitToDelete');
+    delete xml.waitToDelete;
+    file.writee(xml);
+    sp.gv.lastSelectedItem.moveUp();
+  } else if (isUp === false && sp.gv.lastSelectedItem !== null && sp.gv.lastSelectedItem.index < xml.children().length() - 1) {
+    var downxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
+    xml.insertChildAfter(xml.child(sp.gv.lastSelectedItem.index + 1), downxml);
+    xml.child(sp.gv.lastSelectedItem.index).setLocalName('waitToDelete');
+    delete xml.waitToDelete;
+    file.writee(xml);
+    sp.gv.lastSelectedItem.moveDown();
+  }
+};
+
+module.exports = function (cu) {
+  var udWin = new Window('palette', loc(sp.ud));
+  var udWins = udWin.add('Group{}');
+  var a = udWins.add("Button{text:'" + loc(sp.up) + "'}");
+  var b = udWins.add("Button{text:'" + loc(sp.down) + "'}");
+  var c = udWins.add("Group{et:EditText{text:'0',characters:3,justify:'center'},j:Button{text:'" + loc(sp.jmp) + "'}}");
+  udWin.frameLocation = cu;
+  udWin.show();
+  a.onClick = function () {
+    upAndDown(true, true);
+  };
+  b.onClick = function () {
+    upAndDown(false, true);
+  };
+  c.j.onClick = function () {
+    var d = parseInt(c.et.text);
+    var file = sp.getFileByName(sp.droplist.selection.text);
+    var xml = new XML(file.readd());
+    if (sp.gv.children.length === 0) return;
+    if (sp.gv.lastSelectedItem === null) return;
+    if (d >= 0 && d < sp.gv.children.length - 1 && sp.gv.lastSelectedItem.index !== d) {
+      var upxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
+      xml.insertChildBefore(xml.child(d), upxml);
+      xml.child(sp.gv.lastSelectedItem.index + 1).setLocalName('waitToDelete');
+      delete xml.waitToDelete;
+      file.writee(xml);
+      sp.gv.lastSelectedItem.moveBefore(sp.gv.children[d]);
+    } else if (d === sp.gv.children.length - 1 && sp.gv.lastSelectedItem.index !== d) {
+      upxml = new XML(xml.child(sp.gv.lastSelectedItem.index));
+      xml.insertChildAfter(xml.child(d), upxml);
+      xml.child(sp.gv.lastSelectedItem.index + 1).setLocalName('waitToDelete');
+      delete xml.waitToDelete;
+      file.writee(xml);
+      sp.gv.lastSelectedItem.moveAfter(sp.gv.children[d]);
+    } else {
+      try {
+        alert(loc(sp.from) + '~' + (sp.gv.children.length - 1).toString());
+      } catch (er) {}
+    }
+  };
+};
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+sp.extend(sp, {
+  isDown: { en: 'Would you like to download new version now?', ch: '现在开始下载新版本吗?' },
+  settings: { en: 'Setting', ch: '设置' },
+  groupName: { en: 'Group name :', ch: '组名 :' },
+  elementName: { en: 'Element Name :', ch: '元素名 :' },
+  changeName: { en: 'Rename item', ch: '重命名元素' },
+  importPicture: { en: 'Import picture', ch: '导入图片' },
+  importFile: { en: 'Import file', ch: '导入组' },
+  exportFile: { en: 'Export file', ch: '导出组' },
+  addGroup: { en: 'New group', ch: '新建组' },
+  deleteGroup: { en: 'Remove group', ch: '删除组' },
+  addElement: { en: 'New item', ch: '新建元素' },
+  deleteElement: { en: 'Remove item', ch: '删除元素' },
+  create: { en: 'New layer', ch: '生成层' },
+  cover: { en: 'Cover item', ch: '覆盖元素' },
+  isShow: { en: 'Show text', ch: '显示文字' },
+  isAlert: { en: 'Deleting Alert', ch: '删除时警告' },
+  isPrecomp: { en: 'Pre-compose', ch: '预合成' },
+  isOffset: { en: 'Save material', ch: '存储素材' },
+  isName: { en: 'Auto rename', ch: '自动取名' },
+  isEffect: { en: 'Only property', ch: '仅生成效果' },
+  cleanProperty: { en: 'Empty prop', ch: '清空属性组' },
+  offsetKey: { en: 'Shift keyframe', ch: '关键帧偏移' },
+  sureDelete: { en: 'Are you sure to delete it?', ch: '确认删除?' },
+  helperScripts: { en: 'Help scripts', ch: '辅助脚本' },
+  expressionTranslate: { en: 'Fix expression errors', ch: '表达式翻译' },
+  script: { en: 'Sp_palette v1.0', ch: '形状层画板' },
+  reloadGroup: { en: 'Reload previews of group', ch: '重载组内预览动画' },
+  saveEachLayer: { en: 'Save every layer in active comp', ch: '自动存储每一层' },
+  cutLength: { en: 'Cut layer length', ch: '裁剪层长度' },
+  blankName: { en: 'Name should not be empty!', ch: '名字不应为空!' },
+  existName: { en: 'Element with the same name exists already!', ch: '相同名字的元素已存在!' },
+  overWritten: { en: 'File with the same name exists already!', ch: '相同名字的文件已存在!' },
+  inputName: { en: 'Please input your name!', ch: '请输入名字!' },
+  alertSpe: { en: 'There are special symbols in selectedLayers,please rename them first!', ch: '选中层名字有特殊符号,请首先重命名选中层!' },
+  deleteFolder: { en: 'Empty temp folder', ch: '清空素材文件夹' },
+  changeGroupName: { en: 'Change name of group', ch: '重命名选中组' },
+  deleteOk: { en: 'Clean folder successfully!', ch: '清空文件夹完毕!' },
+  yushe: { en: 'Preset Setting', ch: '预设设置' },
+  jinOne: { en: 'Please select groups that will be created on selectedLayers', ch: '请选择在仅生成效果时要在选中层上生成的属性组' },
+  jinTwo: { en: 'Please select groups that will be empty on selectedLayers before creating Properties', ch: '请选择在仅生成效果之前要清空的选中层的属性组' },
+  isSureGroup: { en: 'What you are deleting is a Group.\rAre you sure?', ch: '你正在删除的是一个组.\r确定删除吗?' },
+  isSureGroup2: { en: 'Repeat!\rWhat you are deleting is a Group.\rAre you sure?\r', ch: '重复!\r你正在删除的是一个组.\r确定删除吗?' },
+  _1: { en: 'Mask', ch: '遮罩' },
+  _2: { en: 'Effect', ch: '效果' },
+  _3: { en: 'Transform', ch: '变换' },
+  _4: { en: 'Material options', ch: '3D材质选项' },
+  _5: { en: 'Layer styles', ch: '图层样式' },
+  _6: { en: 'Shape content', ch: '形状层形状组' },
+  _7: { en: 'Text animators', ch: '文字层动画器' },
+  _8: { en: 'Light options', ch: '灯光选项' },
+  _9: { en: 'Camera options', ch: '摄像机选项' },
+  setName: { en: 'Please input the name.', ch: '请输入名字' },
+  checkVersion: { en: 'Check version', ch: '检查更新' },
+  newVersionFind: { en: 'New version found,please download the new version ', ch: '存在新版本,请下载最新版v' },
+  newVersionNotFind: { en: 'No new version!', ch: '已是最新版!' },
+  link: { en: 'Weibo', ch: '作者微博' },
+  about: {
+    en: 'Made by:Smallpath\nE-mail:smallpath2013@gmail.com\nSource Code:\ngithub.com/Smallpath/Memory\n\nDoubleClick:generate new layers or properties on selected layers from selected element.\nRightClick:call the shortcut menu.\nCtrl/Alt+RightClick:save selected layers as a new element.\nShift+Rightclick:call the up and down window\n\nShortcutkey when script runs as Window:\nKey \'D\' or \'Delete\':delete selected element.\nKey \'F\': overlap selected element.\nKey \'Up\':drop up selected element.\nKey \'Down\':drop down selected element.',
+    ch: '\u4F5C\u8005:\n    Smallpath\n\u90AE\u7BB1:\n    smallpath2013@gmail.com\n\u6E90\u7801\u6258\u7BA1\u5730\u5740:\ngithub.com/Smallpath/Memory\n\n\u53F3\u952E\u70B9\u51FB:\u547C\u51FA\u53F3\u952E\u83DC\u5355.\n\u53CC\u51FB:\u4ECE\u9009\u4E2D\u5143\u7D20\u521B\u5EFA\u5C42\u6216\u521B\u5EFA\u6548\u679C.\nCtrl/Alt+\u53F3\u952E\u70B9\u51FB:\u4ECE\u9009\u4E2D\u7684\u5C42\u8BFB\u53D6\u5C42\u4FE1\u606F\u4EE5\u521B\u5EFA\u65B0\u5143\u7D20.\nShift+\u53F3\u952E:\u5524\u51FA\u79FB\u52A8\u5143\u7D20\u7684\u7A97\u53E3\n\n\u7A97\u53E3\u6A21\u5F0F\u8FD0\u884C\u811A\u672C\u65F6:\nD\u952E:\u5220\u9664\u9009\u4E2D\u5143\u7D20.\nF\u952E:\u8986\u76D6\u9009\u4E2D\u5143\u7D20.\n\u4E0A\u952E:\u4E0A\u79FB\u9009\u4E2D\u5143\u7D20.\n\u4E0B\u952E:\u4E0B\u79FB\u9009\u4E2D\u5143\u7D20.'
+  },
+  refresh: {
+    en: 'Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp\'s time first.',
+    ch: '\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u9884\u89C8\u52A8\u753B:\n##\u8BF7\u7528\u672C\u529F\u80FD\u5BF9\u975E3.x\u7248\u672C\u4FDD\u5B58\u7684\u7EC4\u8FDB\u884C\u751F\u6210\u9884\u89C8\u52A8\u753B\u7684\u64CD\u4F5C:\n\n\u6B64\u529F\u80FD\u5C06\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u4E3B\u7F29\u7565\u56FE\u548C\u9884\u89C8\u52A8\u753B,\u5176\u4E2D\u4E3B\u7F29\u7565\u56FE\u4E3A\u5F53\u524D\u5408\u6210\u7684\u5F53\u524D\u65F6\u95F4\u70B9\u7684\u753B\u9762\n\n\u6CE8\u610F:\u6B64\u529F\u80FD\u5C06\u8017\u8D39\u5927\u91CF\u65F6\u95F4,\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n'
+  },
+  auto: {
+    en: 'This script helps you simplify you saving proccess\rIt will save every layer in active comp as a new element.',
+    ch: '\u6279\u91CF\u5B58\u50A8\u529F\u80FD:\n\n\u8FD9\u4F1A\u5C06\u5F53\u524D\u5408\u6210\u4E2D\u6BCF\u4E00\u5C42\u90FD\u5206\u522B\u5B58\u50A8\u4E3A\u4E00\u4E2A\u65B0\u5143\u7D20.\n\n\u6B64\u529F\u80FD\u53EF\u4EE5\u5E2E\u52A9\u4F60\u5FEB\u901F\u5B58\u50A8\u65B0\u5143\u7D20,\u5341\u5206\u9002\u5408\u5B58\u50A8\u5927\u91CF\u7684MG\u5408\u6210\u5C42\n\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u6765\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n' },
+  cutLengthTwo: {
+    en: 'This script will cut every layer in current comp, related to opacity for common layer and content length for comp layer.',
+    ch: '此功能将会裁剪当前合成中每一层的长度,根据普通层的透明度与合成层内容的长度.'
+  },
+  output: { en: 'Export groups', ch: '批量导出组' },
+  ok: { en: 'Ok', ch: '确定' },
+  cancel: { en: 'Cancel', ch: '取消' },
+  complete: { en: 'Complete!', ch: '导出完成!' },
+  showText: { en: 'Show text', ch: '显示文字' },
+  ui1: { en: 'The newer UI', ch: '新界面' },
+  ui2: { en: 'The older UI', ch: '旧界面' },
+  sys: { en: 'Script find that Sp_memory v1.4 has been used the first time.\rPlease select the UI type,Yes for new UI and No for previous UI.', ch: '脚本检测到Sp_memory v1.4首次被使用.\r请选择脚本界面,Yes为新界面,No为旧界面.' },
+  uiC: { en: 'Please restart script,ui will be changed.', ch: '界面已更新,请重启脚本' },
+  from: { en: 'Range is 0.', ch: '元素下标范围为:0' },
+  ud: { en: 'Up and down', ch: '上下移动选中元素' },
+  up: { en: 'Up', ch: '上移' },
+  down: { en: 'Down', ch: '下移' },
+  jmp: { en: 'Jump', ch: '跳转' },
+  coverChange: { en: 'Update thumb when cover', ch: '覆盖时更新缩略图' },
+  folderName: { en: 'The folder name of collect feature:', ch: '收集生成层时的工程栏文件夹名:' },
+  effectName: { en: "The group name that can enable 'Only property' :", ch: '默认开启仅生成效果的组名:' },
+  limitText: { en: 'Limit the text for UI', ch: '限制主窗口界面的文字长度' },
+  scriptSetting: { en: 'Setting', ch: '设置' },
+  settingPre: { en: 'Preference', ch: '预设' },
+  thumbType: { en: 'Enable new type of thumb', ch: '启用另一种缩略图' },
+  addModule: { en: 'New module', ch: '新建模块' },
+  deleteModule: { en: 'Remove module', ch: '删除模块' },
+  deleteModuleAlert: {
+    en: 'Dangerous!\r\nYou are deleting a module!\r\nAll groups in this module will be removed!\r\nDo you really want to remove this module?',
+    ch: '警告!\r\n你正在删除一个模块!\r\n所有包含在此模块中的组都将被删除!\r\n你想要继续删除吗?'
+  },
+  addAlert: { en: 'Repeart:\r\n', ch: '重复:\r\n' },
+  move: { en: 'Cut selected group to other module', ch: '剪切选中组到其他模块' },
+  editModule: { en: 'Move module or rename module', ch: '改变模块顺序或重命名模块' },
+  changeModuleName: { en: 'Change module name', ch: '重命名选中模块' },
+  moduleHelpTip: { en: "press key 'Up' and 'Down can move the selected module' ", ch: '方向上下键可移动选中模块' },
+  quit: { en: 'Quit', ch: '退出' },
+  selectGroupFirst: { en: 'Please select a group first!', ch: '请先选中一个组!' },
+  selectModuleFirst: { en: 'Please select a module first!', ch: '请先选中一个模块!' },
+  frameSecondText: { en: 'The milliseconds length of frame continues when preview:', ch: '预览时一张图片持续的毫秒数:' },
+  frameNumText: { en: 'The number of picture sequence generated for preview', ch: '生成供预览的图片序列时图片的数量:' },
+  reloadNeedFrames: {
+    en: "Please input the max frames which will be used to correct the duration of Preview.Keep blank if you don't what this feature",
+    ch: '请输入最大帧数,这将被用来使预览动画的时间范围更加准确\r\n不输入则将不进行校准'
+  },
+  needComp: { en: 'Please select a comp first', ch: '脚本需要一个合成,当前合成不存在!' },
+  previewAll: { en: 'Preview all', ch: '预览全部' },
+  previewSelected: { en: 'Preview selected', ch: '预览选中' },
+  needElement: { en: 'Please select a element in the group', ch: '组内元素未被选中,请首先选中一个元素' },
+  needElements: { en: 'Please select at least one element in the group', ch: '组内元素未被选中,请至少选中一个元素' },
+  needLayers: { en: 'Please select at least one layer in the current comp', ch: '请选中至少一个层' },
+  needModule: { en: 'Please create a module first', ch: '请先新建一个模块' },
+  isSavePreview: { en: 'Save preview', ch: '存储预览' },
+  searchWindow: { en: 'Search', ch: '搜索' },
+  getReport: { en: 'Get report', ch: '生成报告' },
+  creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
+  creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
+  creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第 ' },
+  creatingProcessAfter: { en: ' th layer', ch: ' 层' },
+  savingReport: { en: 'Saving cost: ', ch: '总存储耗时: ' },
+  savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
+  savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第 ' },
+  savingProcessAfter: { en: ' th layer', ch: ' 层' },
+  second: { en: ' second', ch: ' 秒' },
+  previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
+  previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
+  previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' },
+  searchButton: { en: 'search', ch: '搜索' },
+  searchText: { en: 'input name', ch: '输入元素名称' },
+  setRatioText: { en: 'notify the scale of UI for high-DPI windows', ch: '设置主界面windows放大比例' },
+  setRatioHelptip: {
+    en: 'AE scriptUI may be scaled wrong in high-DPI windows from CC2013 to CC2015.0',
+    ch: 'windows文字缩放比例大于1时, AE脚本界面会自动放大, 导致本脚本界面越界'
+  },
+  setRatioWarning: {
+    en: 'Please only change it when your text ratio does not equal to 1. Restart script to make sense',
+    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启及哦啊本后生效'
+  }
+});
 
 /***/ })
 /******/ ]);
