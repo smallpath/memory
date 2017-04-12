@@ -38,6 +38,7 @@ module.exports = (function() {
             .pushh('frameNum')
             .pushh('savePreview')
             .pushh('gridViewScale')
+            .pushh('saveWorkarea')
 
   valueArr.pushh('1')
           .pushh('true')
@@ -61,6 +62,7 @@ module.exports = (function() {
           .pushh('30')
           .pushh('true')
           .pushh('1')
+          .pushh('false')
 
   keyNameArr.forEach(function(item, index) {
     var value = valueArr[index]
@@ -76,6 +78,7 @@ module.exports = (function() {
   sp.cleanGroupValue = sp.getSettingAsBool('cleanGroup')
   sp.offsetKeyframeValue = sp.getSettingAsBool('offsetKeyframe')
   sp.savePreviewValue = sp.getSettingAsBool('savePreview')
+  sp.saveWorkareaValue = sp.getSettingAsBool('saveWorkarea')
 
   sp.thumbTypeValue = sp.getSettingAsBool('thumbType')
   sp.coverChangeValue = sp.getSettingAsBool('coverChange')
@@ -83,6 +86,7 @@ module.exports = (function() {
   sp.frameSecond = parseInt(sp.getSetting('frameSecond'))
   sp.frameNum = parseInt(sp.getSetting('frameNum'))
   sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'))
+
 
   !sp.scriptFolder.exists && sp.scriptFolder.create()
   !sp.roamingFolder.exists && sp.roamingFolder.create()

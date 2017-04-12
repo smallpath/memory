@@ -188,6 +188,10 @@ F键:覆盖选中元素.
   },
   setRatioWarning: {
     en: 'Please only change it when your text ratio does not equal to 1. Restart script to make sense',
-    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启及哦啊本后生效'
+    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启脚本后生效'
+  },
+  saveWorkarea: {
+    en: 'Preview workarea',
+    ch: '预览工作区'
   }
 })

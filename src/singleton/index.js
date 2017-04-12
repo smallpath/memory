@@ -402,10 +402,17 @@ module.exports = (function() {
         var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq')
         !targetFolder.exists && targetFolder.create()
         var num = this.frameNum
-        this.willSavePreviews(num)
-        for (var i = 0; i < num; i++) {
+        this.willSavePreviews(num + 1)
+        var workAreaStart = comps.workAreaStart
+        var workAreaDuration = comps.workAreaDuration
+        for (var i = 0; i < num + 1; i++) {
           try {
-            var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num
+            var time
+            if (this.saveWorkareaValue === true) {
+              time = workAreaStart + i * workAreaDuration / num
+            } else {
+              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num
+            }
             var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png')
             tempComp2.saveFrameToPng(time, seqPath)
             this.didSavePreview()
@@ -464,10 +471,17 @@ module.exports = (function() {
           var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq')
           !targetFolder.exists && targetFolder.create()
           var num = this.frameNum
-          this.willSavePreviews(num)
+          this.willSavePreviews(num + 1)
+          var workAreaStart = comps.workAreaStart
+          var workAreaDuration = comps.workAreaDuration
           var timeArr = this.getTimeInfoArr(comps)
-          for (i = 0; i < num; i++) {
-            var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num
+          for (i = 0; i < num + 1; i++) {
+            var time
+            if (this.saveWorkareaValue === true) {
+              time = workAreaStart + i * workAreaDuration / num
+            } else {
+              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num
+            }
             var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png')
 
             if (this.thumbTypeValue) {

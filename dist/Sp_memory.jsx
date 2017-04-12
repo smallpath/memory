@@ -3908,6 +3908,11 @@ function GridView(parent, attrs) {
             }
           }
 
+          var value = parseInt(thisText);
+          if (!isNaN(value) && value.toString() === thisText) {
+            thisText += ' ';
+          }
+
           if (e.version === 'CC2014') {
             g.drawString(thisText, fontPen, item.rect[0] + item.fontRect[0], item.rect[1] + item.fontRect[1] - e.scrollBarValue - 10, font);
           } else {
@@ -4942,7 +4947,11 @@ sp.extend(sp, {
   },
   setRatioWarning: {
     en: 'Please only change it when your text ratio does not equal to 1. Restart script to make sense',
-    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启及哦啊本后生效'
+    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启脚本后生效'
+  },
+  saveWorkarea: {
+    en: 'Preview workarea',
+    ch: '预览工作区'
   }
 });
 
@@ -5078,9 +5087,9 @@ module.exports = function () {
     valueArr.push('0');
   }
 
-  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview').pushh('gridViewScale');
+  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview').pushh('gridViewScale').pushh('saveWorkarea');
 
-  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true').pushh('1');
+  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true').pushh('1').pushh('false');
 
   keyNameArr.forEach(function (item, index) {
     var value = valueArr[index];
@@ -5096,6 +5105,7 @@ module.exports = function () {
   sp.cleanGroupValue = sp.getSettingAsBool('cleanGroup');
   sp.offsetKeyframeValue = sp.getSettingAsBool('offsetKeyframe');
   sp.savePreviewValue = sp.getSettingAsBool('savePreview');
+  sp.saveWorkareaValue = sp.getSettingAsBool('saveWorkarea');
 
   sp.thumbTypeValue = sp.getSettingAsBool('thumbType');
   sp.coverChangeValue = sp.getSettingAsBool('coverChange');
@@ -5575,10 +5585,17 @@ module.exports = function () {
         var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
         !targetFolder.exists && targetFolder.create();
         var num = this.frameNum;
-        this.willSavePreviews(num);
-        for (var i = 0; i < num; i++) {
+        this.willSavePreviews(num + 1);
+        var workAreaStart = comps.workAreaStart;
+        var workAreaDuration = comps.workAreaDuration;
+        for (var i = 0; i < num + 1; i++) {
           try {
-            var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+            var time;
+            if (this.saveWorkareaValue === true) {
+              time = workAreaStart + i * workAreaDuration / num;
+            } else {
+              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+            }
             var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
             tempComp2.saveFrameToPng(time, seqPath);
             this.didSavePreview();
@@ -5639,10 +5656,17 @@ module.exports = function () {
           var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
           !targetFolder.exists && targetFolder.create();
           var num = this.frameNum;
-          this.willSavePreviews(num);
+          this.willSavePreviews(num + 1);
+          var workAreaStart = comps.workAreaStart;
+          var workAreaDuration = comps.workAreaDuration;
           var timeArr = this.getTimeInfoArr(comps);
-          for (i = 0; i < num; i++) {
-            var time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+          for (i = 0; i < num + 1; i++) {
+            var time;
+            if (this.saveWorkareaValue === true) {
+              time = workAreaStart + i * workAreaDuration / num;
+            } else {
+              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+            }
             var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
 
             if (this.thumbTypeValue) {
@@ -8203,7 +8227,7 @@ var settingWindow = __webpack_require__(0);
 var presetWindow = __webpack_require__(24);
 
 module.exports = function () {
-  var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }];
+  var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }, { name: loc(sp.saveWorkarea), type: 'checkbox' }];
 
   var length = itemList.length;
 
@@ -8217,7 +8241,7 @@ module.exports = function () {
     maxWidth = 190;
   }
 
-  var shortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, length * space / 2 + 2], {
+  var shortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, Math.ceil(length / 2) * space + 2], {
     borderless: true
   });
 
@@ -8359,6 +8383,7 @@ module.exports = function () {
   shortMenu[loc(sp.isEffect)].value = sp.onlyEffectValue;
   shortMenu[loc(sp.cleanProperty)].value = sp.cleanGroupValue;
   shortMenu[loc(sp.offsetKey)].value = sp.offsetKeyframeValue;
+  shortMenu[loc(sp.saveWorkarea)].value = sp.saveWorkareaValue;
 
   shortMenu[loc(sp.isShow)].onClick = function () {
     sp.showThumbValue = this.value;
@@ -8407,6 +8432,12 @@ module.exports = function () {
   shortMenu[loc(sp.offsetKey)].onClick = function () {
     sp.offsetKeyframeValue = this.value;
     sp.saveSetting('offsetKeyframe', this.value.toString());
+    isCheckBoxClicked = true;
+  };
+
+  shortMenu[loc(sp.saveWorkarea)].onClick = function () {
+    sp.saveWorkareaValue = this.value;
+    sp.saveSetting('saveWorkarea', this.value.toString());
     isCheckBoxClicked = true;
   };
 

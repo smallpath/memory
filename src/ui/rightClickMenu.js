@@ -19,7 +19,8 @@ module.exports = function() {
     { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' },
     { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' },
     { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' },
-    { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }
+    { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' },
+    { name: loc(sp.saveWorkarea), type: 'checkbox' }
 
   ]
 
@@ -31,7 +32,7 @@ module.exports = function() {
 
   if (sp.lang === 'ch') { var maxWidth = 180 } else { maxWidth = 190 }
 
-  var shortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, length * space / 2 + 2], {
+  var shortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, Math.ceil(length / 2) * space + 2], {
     borderless: true
   })
 
@@ -205,6 +206,7 @@ module.exports = function() {
   shortMenu[loc(sp.isEffect)].value = sp.onlyEffectValue
   shortMenu[loc(sp.cleanProperty)].value = sp.cleanGroupValue
   shortMenu[loc(sp.offsetKey)].value = sp.offsetKeyframeValue
+  shortMenu[loc(sp.saveWorkarea)].value = sp.saveWorkareaValue
 
   shortMenu[loc(sp.isShow)].onClick = function() {
     sp.showThumbValue = this.value
@@ -253,6 +255,12 @@ module.exports = function() {
   shortMenu[loc(sp.offsetKey)].onClick = function() {
     sp.offsetKeyframeValue = this.value
     sp.saveSetting('offsetKeyframe', this.value.toString())
+    isCheckBoxClicked = true
+  }
+
+  shortMenu[loc(sp.saveWorkarea)].onClick = function() {
+    sp.saveWorkareaValue = this.value
+    sp.saveSetting('saveWorkarea', this.value.toString())
     isCheckBoxClicked = true
   }
 
