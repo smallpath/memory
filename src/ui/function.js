@@ -389,7 +389,11 @@ module.exports = function() {
 
     sp.newItemOrCover = 'cover'
 
-    if (sp.isCC2015 === true) { itemName = sp.savePng2(imageFile) } else { itemName = sp.savePng(imageFile) }
+    if (sp.isCC2015 === true) {
+      itemName = sp.savePng2(imageFile)
+    } else {
+      itemName = sp.savePng(imageFile)
+    }
 
     var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp)
 
@@ -406,18 +410,26 @@ module.exports = function() {
     try {
       if (!(app.project.activeItem instanceof CompItem) || app.project.activeItem.selectedLayers.length === 0) return alert(loc(sp.needLayers))
       var thisComp = app.project.activeItem
-      if (sp.autoNameValue === false) { var itemName = prompt(loc(sp.setName), 'Name') } else { itemName = thisComp.selectedLayers[0].name.replace('/', '_').replace('.', '_') }
+      if (sp.autoNameValue === false) {
+        var itemName = prompt(loc(sp.setName), 'Name')
+      } else {
+        itemName = thisComp.selectedLayers[0].name
+      }
 
       if (sp.autoNameValue === false && itemName === '' || itemName === null) return
 
-      itemName.trim()
+      itemName = sp.filterName(itemName)
 
       app.beginSuppressDialogs()
       app.beginUndoGroup('Undo save')
 
       sp.newItemOrCover = 'newItem'
 
-      if (sp.isCC2015 === true) { itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text, itemName)) } else { itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text, itemName)) }
+      if (sp.isCC2015 === true) {
+        itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text, itemName))
+      } else {
+        itemName = sp.savePng(sp.getImageFile(sp.droplist.selection.text, itemName))
+      }
 
       var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp)
 

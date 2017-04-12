@@ -181,6 +181,9 @@ module.exports = (function() {
   })
 
   sp.prototype.extend(sp.prototype, {
+    filterName: function(str) {
+      return str.trim().replace(/[<>:"\/\\|?*]+/g, '_')
+    },
     getTimeInfoArr: function(comp) {
       var layers = []
       if (comp.selectedLayers.length === 0) {

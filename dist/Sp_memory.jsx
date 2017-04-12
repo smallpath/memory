@@ -5342,6 +5342,9 @@ module.exports = function () {
   });
 
   sp.prototype.extend(sp.prototype, {
+    filterName: function filterName(str) {
+      return str.trim().replace(/[<>:"\/\\|?*]+/g, '_');
+    },
     getTimeInfoArr: function getTimeInfoArr(comp) {
       var layers = [];
       if (comp.selectedLayers.length === 0) {
@@ -7354,12 +7357,12 @@ module.exports = function () {
       if (sp.autoNameValue === false) {
         var itemName = prompt(loc(sp.setName), 'Name');
       } else {
-        itemName = thisComp.selectedLayers[0].name.replace('/', '_').replace('.', '_');
+        itemName = thisComp.selectedLayers[0].name;
       }
 
       if (sp.autoNameValue === false && itemName === '' || itemName === null) return;
 
-      itemName.trim();
+      itemName = sp.filterName(itemName);
 
       app.beginSuppressDialogs();
       app.beginUndoGroup('Undo save');
