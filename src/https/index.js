@@ -27,14 +27,17 @@ Function HTTPPost(sMethod, sUrl, sRequest)
 End Function  
 `
 
-var tempVbsFilePath = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs')
-if (!tempVbsFilePath.exists) {
-  tempVbsFilePath.writee(vbsString)
+var tempVbsFile = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs')
+if (!tempVbsFile.exists) {
+  tempVbsFile.writee(vbsString)
 }
 
 module.exports = function(method, endpoint, query) {
   var response = null
-  var wincurl = tempVbsFilePath.fsName
+  if (!tempVbsFile.exists) {
+    tempVbsFile.writee(vbsString)
+  }
+  var wincurl = tempVbsFile.fsName
   var curlCmd = ''
 
   try {

@@ -5437,9 +5437,17 @@ function translate(thisObj, expProps) {
   this.supportedLanguages = $.global.translate.supportedLanguages = 4;
   this.hotWords = [];
 
-  var thisFolder = Folder(Folder.userData.fullName + '/Aescripts/Sp_memory');
-  if (!thisFolder.exists) thisFolder.create();
-  var thisFile = File(thisFolder.fullName + '/WhiteList.xml');
+  var thisFolder, thisFile;
+  if ($.layer) {
+    thisFolder = new Folder($.layer.tempFolder.toString());
+    if (!thisFolder.exists) thisFolder.create();
+    thisFile = new File(thisFolder.fullName + $.layer.slash.toString() + 'whiteList.xml');
+  } else {
+    thisFolder = new Folder(Folder.userData.fullName + '/Aescripts/Sp_memory');
+    if (!thisFolder.exists) thisFolder.create();
+    thisFile = File(thisFolder.fullName + '/whiteList.xml');
+  }
+
   var allWords = [['"Angle Control"', '"角度控制"', '"角度制御"', '"ADBE Angle Control"'], ['"Checkbox Control"', '"复选框控制"', '"チェックボックス制御"', '"ADBE Checkbox Control"'], ['"Color Control"', '"色彩控制"', '"カラー制御"', '"ADBE Color Control"'], ['"Layer Control"', '"图层控制"', '"レイヤー制御"', '"ADBE Layer Control"'], ['"Point Control"', '"点控制"', '"ポイント制御"', '"ADBE Point Control"'], ['"Slider Control"', '"滑杆控制"', '"スライダー制御"', '"ADBE Slider Control"'], ['"Angle"', '"角度"', '"角度"', '"ADBE Angle Control-0001"'], ['"Checkbox"', '"检测框"', '"チェックボックス"', '"ADBE Checkbox Control-0001"'], ['"Color"', '"颜色"', '"カラー"', '"ADBE Color Control-0001"'], ['"Layer"', '"图层"', '"レイヤー"', '"ADBE Layer Control-0001"'], ['"Point"', '"点"', '"ポイント"', '"ADBE Point Control-0001"'], ['"Slider"', '"滑块"', '"スライダー"', '"ADBE Slider Control-0001"'], ['"Motion Tile"', '"动态平铺"', '"モーションタイル"', '"ADBE Tile"'], ['"Tile Width"', '"平铺宽度"', '"タイルの幅"', '"ADBE Tile-0003"']];
   if (thisFile.exists) {
     var content = thisFile.readd();
@@ -6114,14 +6122,17 @@ $.global.cout = cout;
 
 var vbsString = 'set namedArgs = WScript.Arguments.Named  \n  \nsMethod = namedArgs.Item("Method")  \nsUrl = namedArgs.Item("URL")  \nsRequest = namedArgs.Item("Query")  \n  \nHTTPPost sMethod, sUrl, sRequest  \n  \nFunction HTTPPost(sMethod, sUrl, sRequest)  \n    \n          set oHTTP = CreateObject("Microsoft.XMLHTTP")    \n    \n    If sMethod = "POST" Then  \n        oHTTP.open "POST", sUrl,false  \n    ElseIf sMethod = "GET" Then  \n        oHTTP.open "GET", sUrl,false  \n    End If  \n  \n          oHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"  \n          oHTTP.setRequestHeader "Content-Length", Len(sRequest)  \n          oHTTP.send sRequest  \n    \n          HTTPPost = oHTTP.responseText  \n    \n          WScript.Echo HTTPPost  \n  \nEnd Function  \n';
 
-var tempVbsFilePath = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs');
-if (!tempVbsFilePath.exists) {
-  tempVbsFilePath.writee(vbsString);
+var tempVbsFile = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs');
+if (!tempVbsFile.exists) {
+  tempVbsFile.writee(vbsString);
 }
 
 module.exports = function (method, endpoint, query) {
   var response = null;
-  var wincurl = tempVbsFilePath.fsName;
+  if (!tempVbsFile.exists) {
+    tempVbsFile.writee(vbsString);
+  }
+  var wincurl = tempVbsFile.fsName;
   var curlCmd = '';
 
   try {
