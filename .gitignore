@@ -1,3 +1,5 @@
 node_modules
 
 Sp_memory
+
+*.log

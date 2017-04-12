@@ -87,7 +87,6 @@ module.exports = (function() {
   sp.frameNum = parseInt(sp.getSetting('frameNum'))
   sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'))
 
-
   !sp.scriptFolder.exists && sp.scriptFolder.create()
   !sp.roamingFolder.exists && sp.roamingFolder.create()
   !sp.materialFolder.exists && sp.materialFolder.create()

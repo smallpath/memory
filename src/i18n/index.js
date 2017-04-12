@@ -1,7 +1,6 @@
 
 /** **********************************界面的字符串资源***************************************/
 sp.extend(sp, {
-  isDown: { en: 'Would you like to download new version now?', ch: '现在开始下载新版本吗?' },
   settings: { en: 'Setting', ch: '设置' },
   groupName: { en: 'Group name :', ch: '组名 :' },
   elementName: { en: 'Element Name :', ch: '元素名 :' },
@@ -197,5 +196,17 @@ F键:覆盖选中元素.
   tryVersionFind: {
     en: 'It seems that you are using the beta version which is not released yet. v',
     ch: '未发现新版本, 你正在使用尚未发布的试用版 v'
+  },
+  shouldUpdateScript: {
+    en: 'Would you like to upgrade to new version now?\r\n it will cost some time while ae will not response\r\n',
+    ch: '现在开始更新新版本吗?\r\n\r\n脚本大小为0.5M, 下载时AE会停止响应数十秒时间.\r\n选否则可以选择通过浏览器下载'
+  },
+  shouldDownloadScript: {
+    en: 'Would you like to download new version now?',
+    ch: '是否通过浏览器自行下载最新版本?\r\n打开网页后右键另存为脚本文件即可'
+  },
+  downloaded: {
+    en: 'Update success! To make it work, just restart script',
+    ch: '升级成功, 请重启脚本'
   }
 })

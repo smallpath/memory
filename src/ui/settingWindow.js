@@ -500,8 +500,24 @@ module.exports = function() {
           var compare = sp.compareSemver(latestVersion, nowVersion)
           if (compare > 0) {
             alert(loc(sp.newVersionFind) + latestVersion.toString())
-            if (confirm(loc(sp.isDown))) {
-              sp.openLink(sp.downloadLink + ' v' + latestVersion.toString() + '.jsxbin')
+            var scriptLink = sp.downloadLinkPrefix + latestVersion + sp.downloadLinkSuffix
+            if (confirm(loc(sp.shouldUpdateScript))) {
+              try {
+                var scriptString = sp.request(
+                  'GET',
+                  scriptLink,
+                  ''
+                )
+                var file = new File($.fileName)
+                file.writee(scriptString)
+                alert(loc(sp.downloaded))
+                win.close()
+                sp.win.close()
+              } catch (err) { err.printa() }
+            } else if (confirm(loc(sp.shouldDownloadScript))) {
+              try {
+                sp.openLink(scriptLink)
+              } catch (err) { err.printa() }
             }
           } else if (compare === 0) {
             alert(loc(sp.newVersionNotFind) + nowVersion.toString())
