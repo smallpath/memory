@@ -3,14 +3,6 @@ module.exports = (function() {
     if (sp.settingsFile.exists) sp.settingsFile.remove()
     var settingsText =
       '<settings>\
-  <Show>1</Show>\
-  <Alert>1</Alert>\
-  <Precomp>0</Precomp>\
-  <Fix>0</Fix>\
-  <AutoName>1</AutoName>\
-  <OnlyEffect>0</OnlyEffect>\
-  <Selection>0</Selection>\
-  <SubItems>0</SubItems>\
   <ListItems/>\
   <ParentGroup/>\
 </settings>'

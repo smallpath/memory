@@ -42,6 +42,7 @@ try {
     var gv = sp.gv = new GridView(outterGroup)
 
     // Set GridView's attributes
+    gv.scale = sp.gridViewScale
     gv.limitText = sp.getSettingAsBool('limitText')
     gv.showText = sp.showThumbValue
     gv.version = (parseInt(app.version.split('.')[0]) === 12 || parseInt(app.version.split('.')[0]) === 14) ? 'CC' : 'CC2014'
@@ -71,10 +72,11 @@ try {
     if (win instanceof Panel) {
       win.layout.layout(1)
     } else {
-      win.location = sp.getSetting('winLocation').split(',')
+      var ratio = sp.gv.scale
+      var location = sp.getSetting('winLocation').split(',')
+      win.location = [parseInt(location[0]), parseInt(location[1])]
       if (win.location[0] <= 0 || win.location[1] <= 0) { win.location = [100, 200] }
       win.show()
-      var ratio = sp.gv.scale
       var size = sp.getSetting('winSize').split(',')
       win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio]
       win.onClose = sp.fns.winClose

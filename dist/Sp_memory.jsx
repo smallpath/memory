@@ -3007,7 +3007,7 @@ function GridView(parent, attrs) {
     type: 'GridView',
 
     listHeight: 400,
-    scale: 1 / 1.25,
+    scale: 1,
     backgroundColor: [0.15, 0.15, 0.15],
     scrollBlockColor: [0.16, 0.16, 0.16],
     scrollBarColor: [0.08, 0.08, 0.08],
@@ -3844,9 +3844,9 @@ sp.extend(sp, {
   down: { en: 'Down', ch: '下移' },
   jmp: { en: 'Jump', ch: '跳转' },
   coverChange: { en: 'Update thumb when cover', ch: '覆盖时更新缩略图' },
-  folderName: { en: 'The folder name of collect feature:', ch: '收集生成层时的文件夹名:' },
+  folderName: { en: 'The folder name of collect feature:', ch: '收集生成层时的工程栏文件夹名:' },
   effectName: { en: "The group name that can enable 'Only property' :", ch: '默认开启仅生成效果的组名:' },
-  limitText: { en: 'Limit the text for UI', ch: '限制新界面的文字' },
+  limitText: { en: 'Limit the text for UI', ch: '限制主窗口界面的文字长度' },
   scriptSetting: { en: 'Setting', ch: '设置' },
   settingPre: { en: 'Preference', ch: '预设' },
   thumbType: { en: 'Enable new type of thumb', ch: '启用另一种缩略图' },
@@ -3893,7 +3893,16 @@ sp.extend(sp, {
   previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
   previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' },
   searchButton: { en: 'search', ch: '搜索' },
-  searchText: { en: 'input name', ch: '输入元素名称' }
+  searchText: { en: 'input name', ch: '输入元素名称' },
+  setRatioText: { en: 'notify the scale of UI for high-DPI windows', ch: '设置主界面windows放大比例' },
+  setRatioHelptip: {
+    en: 'AE scriptUI may be scaled wrong in high-DPI windows from CC2013 to CC2015.0',
+    ch: 'windows文字缩放比例大于1时, AE脚本界面会自动放大, 导致本脚本界面越界'
+  },
+  setRatioWarning: {
+    en: 'Please only change it when your text ratio does not equal to 1. Restart script to make sense',
+    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启及哦啊本后生效'
+  }
 });
 
 /***/ }),
@@ -4058,6 +4067,22 @@ var settingsButtonFunc = $.global.settingsButtonFunc = function () {
                 }
               }
             },
+            grRatio: {
+              type: 'group',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                setRatio: {
+                  type: 'statictext',
+                  text: loc(sp.setRatioText)
+                },
+                ratioText: {
+                  type: 'edittext',
+                  text: '',
+                  characters: 18
+                }
+              }
+            },
             gr4: {
               type: 'group',
               alignment: ['fill', 'fill'],
@@ -4179,6 +4204,21 @@ var settingsButtonFunc = $.global.settingsButtonFunc = function () {
 
   _('*').each(function (e) {
     switch (e.id) {
+      case 'ratioText':
+        e.text = (1 / sp.gridViewScale).toString();
+        e.onChange = function () {
+          alert(loc(sp.setRatioHelptip) + '\r\n' + loc(sp.setRatioWarning));
+          var value = parseFloat(this.text);
+          if (isNaN(value) || value < 1) {
+            this.text = (1 / sp.gridViewScale).toString();
+            return;
+          }
+
+          sp.gridViewScale = 1 / value;
+          sp.saveSetting('gridViewScale', sp.gridViewScale.toString());
+          sp.gv.refresh();
+        };
+        break;
       case 'deleteAlert':
         e.value = sp.getSettingAsBool('deleteAlert');
         e.onClick = function () {
@@ -4238,6 +4278,11 @@ var settingsButtonFunc = $.global.settingsButtonFunc = function () {
         sp.xmlGroupNames.forEach(function (item, index) {
           this.add('item', item);
         }, e);
+        var ratio = 1 / sp.gv.scale - 1;
+        var addedSeparatorLength = Math.ceil(ratio * sp.xmlGroupNames.length);
+        for (var i = 0; i < addedSeparatorLength; i++) {
+          e.add('separator');
+        }
         var wlist = _('#wlist')[0];
         e.onChange = function () {
           if (!this.selection) return;
@@ -5615,9 +5660,9 @@ module.exports = function () {
     valueArr.push('0');
   }
 
-  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview');
+  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview').pushh('gridViewScale');
 
-  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true');
+  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true').pushh('1');
 
   keyNameArr.forEach(function (item, index) {
     var value = valueArr[index];
@@ -5639,6 +5684,7 @@ module.exports = function () {
 
   sp.frameSecond = parseInt(sp.getSetting('frameSecond'));
   sp.frameNum = parseInt(sp.getSetting('frameNum'));
+  sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'));
 
   !sp.scriptFolder.exists && sp.scriptFolder.create();
   !sp.roamingFolder.exists && sp.roamingFolder.create();
@@ -5970,6 +6016,12 @@ module.exports = function () {
       this.xmlGroupNames.forEach(function (item, index) {
         this.add('item', item);
       }, this.parentDroplist);
+      var ratio = 1 / this.gv.scale - 1;
+      var addedSeparatorLength = Math.ceil(ratio * this.xmlGroupNames.length);
+      for (var i = 0; i < addedSeparatorLength; i++) {
+        this.parentDroplist.add('separator');
+      }
+
       this.reloadDroplist();
     },
     reloadDroplist: function reloadDroplist() {
@@ -6002,6 +6054,11 @@ module.exports = function () {
       listArr.forEach(function (item, index) {
         this.add('item', item);
       }, this.droplist);
+      var ratio = 1 / this.gv.scale - 1;
+      var addedSeparatorLength = Math.ceil(ratio * listArr.length);
+      for (i = 0; i < addedSeparatorLength; i++) {
+        this.droplist.add('separator');
+      }
 
       this.xmlCurrentFileNames = listArr;
     },
@@ -6278,14 +6335,6 @@ module.exports = function () {
   if (!sp.settingsFile.exists || sp.settingsFile.length === 0) {
     if (sp.settingsFile.exists) sp.settingsFile.remove();
     var settingsText = '<settings>\
-  <Show>1</Show>\
-  <Alert>1</Alert>\
-  <Precomp>0</Precomp>\
-  <Fix>0</Fix>\
-  <AutoName>1</AutoName>\
-  <OnlyEffect>0</OnlyEffect>\
-  <Selection>0</Selection>\
-  <SubItems>0</SubItems>\
   <ListItems/>\
   <ParentGroup/>\
 </settings>';
@@ -6388,6 +6437,7 @@ try {
         var droplist = sp.droplist = innerGroup.add('Dropdownlist{}');
         var gv = sp.gv = new GridView(outterGroup);
 
+        gv.scale = sp.gridViewScale;
         gv.limitText = sp.getSettingAsBool('limitText');
         gv.showText = sp.showThumbValue;
         gv.version = parseInt(app.version.split('.')[0]) === 12 || parseInt(app.version.split('.')[0]) === 14 ? 'CC' : 'CC2014';
@@ -6416,12 +6466,13 @@ try {
         if (win instanceof Panel) {
             win.layout.layout(1);
         } else {
-            win.location = sp.getSetting('winLocation').split(',');
+            var ratio = sp.gv.scale;
+            var location = sp.getSetting('winLocation').split(',');
+            win.location = [parseInt(location[0]), parseInt(location[1])];
             if (win.location[0] <= 0 || win.location[1] <= 0) {
                 win.location = [100, 200];
             }
             win.show();
-            var ratio = sp.gv.scale;
             var size = sp.getSetting('winSize').split(',');
             win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio];
             win.onClose = sp.fns.winClose;

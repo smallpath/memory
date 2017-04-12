@@ -269,6 +269,12 @@ module.exports = (function() {
       this.xmlGroupNames.forEach(function(item, index) {
         this.add('item', item)
       }, this.parentDroplist)
+      var ratio = 1 / this.gv.scale - 1
+      var addedSeparatorLength = Math.ceil(ratio * this.xmlGroupNames.length)
+      for (var i = 0; i < addedSeparatorLength; i++) {
+        this.parentDroplist.add('separator')
+      }
+
       this.reloadDroplist()
     },
     reloadDroplist: function() {
@@ -301,6 +307,11 @@ module.exports = (function() {
       listArr.forEach(function(item, index) {
         this.add('item', item)
       }, this.droplist)
+      var ratio = 1 / this.gv.scale - 1
+      var addedSeparatorLength = Math.ceil(ratio * listArr.length)
+      for (i = 0; i < addedSeparatorLength; i++) {
+        this.droplist.add('separator')
+      }
 
       this.xmlCurrentFileNames = listArr
     },

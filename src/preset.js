@@ -37,6 +37,7 @@ module.exports = (function() {
             .pushh('frameSecond')
             .pushh('frameNum')
             .pushh('savePreview')
+            .pushh('gridViewScale')
 
   valueArr.pushh('1')
           .pushh('true')
@@ -59,6 +60,7 @@ module.exports = (function() {
           .pushh('33')
           .pushh('30')
           .pushh('true')
+          .pushh('1')
 
   keyNameArr.forEach(function(item, index) {
     var value = valueArr[index]
@@ -80,6 +82,7 @@ module.exports = (function() {
 
   sp.frameSecond = parseInt(sp.getSetting('frameSecond'))
   sp.frameNum = parseInt(sp.getSetting('frameNum'))
+  sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'))
 
   !sp.scriptFolder.exists && sp.scriptFolder.create()
   !sp.roamingFolder.exists && sp.roamingFolder.create()
