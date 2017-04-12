@@ -199,7 +199,7 @@ F键:覆盖选中元素.
   },
   shouldUpdateScript: {
     en: 'Would you like to upgrade to new version now?\r\n it will cost some time while ae will not response\r\n',
-    ch: '现在开始更新新版本吗?\r\n\r\n脚本大小为0.5M, 下载时AE会停止响应数十秒时间.\r\n选否则可以选择通过浏览器下载'
+    ch: '现在开始更新新版本吗?\r\n\r\n脚本大小为300KB, 下载时AE会停止响应数十秒时间.\r\n选否则可以选择通过浏览器下载'
   },
   shouldDownloadScript: {
     en: 'Would you like to download new version now?',

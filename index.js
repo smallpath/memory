@@ -13,7 +13,6 @@ try {
     // i18n
     require('src/i18n')
     // color picker library for selecting colr
-    require('lib/ColorPicker')
     require('lib/HelperScripts')
     require('lib/GridView')
     require('lib/UIParser')
