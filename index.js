@@ -74,7 +74,9 @@ try {
       win.location = sp.getSetting('winLocation').split(',')
       if (win.location[0] <= 0 || win.location[1] <= 0) { win.location = [100, 200] }
       win.show()
-      win.size = sp.getSetting('winSize').split(',')
+      var ratio = sp.gv.scale
+      var size = sp.getSetting('winSize').split(',')
+      win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio]
       win.onClose = sp.fns.winClose
     }
 

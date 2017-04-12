@@ -3007,7 +3007,7 @@ function GridView(parent, attrs) {
     type: 'GridView',
 
     listHeight: 400,
-    scale: 1,
+    scale: 1 / 1.25,
     backgroundColor: [0.15, 0.15, 0.15],
     scrollBlockColor: [0.16, 0.16, 0.16],
     scrollBarColor: [0.08, 0.08, 0.08],
@@ -3185,7 +3185,6 @@ function GridView(parent, attrs) {
       var itemBgBrush = g.newBrush(g.PenType.SOLID_COLOR, e.itemBackgroundColor);
       var strokePen = g.newPen(g.PenType.SOLID_COLOR, e.itemStrokeColor, e.itemStrokeSize);
       var selectedPen = g.newPen(g.PenType.SOLID_COLOR, e.itemSelectedRecColor, e.itemStrokeSize);
-      var fontBrush = g.newBrush(g.PenType.SOLID_COLOR, e.itemStrokeColor);
       var selectedBrush = g.newBrush(g.PenType.SOLID_COLOR, e.itemSelectedColor);
       var scrollBarBrush = g.newBrush(g.PenType.SOLID_COLOR, e.scrollBarColor);
       var scrollBlockBrush = g.newBrush(g.PenType.SOLID_COLOR, e.scrollBlockColor);
@@ -3196,12 +3195,13 @@ function GridView(parent, attrs) {
       e.resizeScrollBar();
 
       g.newPath();
-      g.rectPath(0, 0, e.list.size[0] - e.scrollBarWidth * e.scrollScale, e.list.size[1]);
+      g.rectPath(0, 0, e.list.size[0] - e.scrollBarWidth * e.scale * e.scrollScale, e.list.size[1]);
       g.fillPath(bgBrush);
 
       var shouldDrawArr = [];
       var pointArr = [];
       var limit = e.GV.size[1];
+
       for (var i = 0; i < items.length; i++) {
         var target = items[i];
         var height = target.rect[1] + target.imageRect[1] - e.scrollBarValue + target.imageRect[3];
@@ -3260,6 +3260,17 @@ function GridView(parent, attrs) {
         }
       }
 
+      if (e.showText) {
+        g.newPath();
+        for (i = 0; i < items.length; i++) {
+          item = items[i];
+          if (item.selected && shouldDrawArr[i]) {
+            g.rectPath(item.rect[0] + item.fontRect[0] + 1, item.rect[1] + item.fontRect[1] - e.scrollBarValue, item.fontRect[2], item.fontRect[3]);
+          }
+        }
+        g.fillPath(selectedBrush);
+      }
+
       g.newPath();
       for (i = 0; i < items.length; i++) {
         item = items[i];
@@ -3271,32 +3282,6 @@ function GridView(parent, attrs) {
       g.strokePath(selectedPen);
 
       if (e.showText) {
-        g.newPath();
-        for (i = 0; i < items.length; i++) {
-          item = items[i];
-          if (!item.selected) {
-            if (item.strokeColor) continue;
-            g.rectPath(item.rect[0] + item.fontRect[0], item.rect[1] + item.fontRect[1] - e.scrollBarValue, item.fontRect[2], item.fontRect[3]);
-          }
-
-          if (item.strokeColor && shouldDrawArr[i]) {
-            brush = g.newBrush(g.PenType.SOLID_COLOR, item.strokeColor);
-            g.newPath();
-            g.rectPath(item.rect[0] + item.fontRect[0], item.rect[1] + item.fontRect[1] - e.scrollBarValue, item.fontRect[2], item.fontRect[3]);
-            g.strokePath(brush);
-          }
-        }
-        g.fillPath(fontBrush);
-
-        g.newPath();
-        for (i = 0; i < items.length; i++) {
-          item = items[i];
-          if (item.selected && shouldDrawArr[i]) {
-            g.rectPath(item.rect[0] + item.fontRect[0] + 1, item.rect[1] + item.fontRect[1] - e.scrollBarValue, item.fontRect[2] - 2, item.fontRect[3]);
-          }
-        }
-        g.fillPath(selectedBrush);
-
         var fontPen = g.newPen(g.PenType.SOLID_COLOR, e.itemFontColor, e.itemFontSize * e.scale);
         var font = ScriptUI.newFont('Microsoft YaHei', ScriptUI.FontStyle.REGULAR, e.itemFontSize * e.scale * 0.6);
 
@@ -3342,7 +3327,7 @@ function GridView(parent, attrs) {
       }
       if (e.scrollScale) {
         g.newPath();
-        g.rectPath(e.list.size[0] - e.scrollBarWidth, 0, e.scrollBarWidth, e.list.size[1]);
+        g.rectPath(e.list.size[0] * e.scale - e.scrollBarWidth * e.scale, 0, e.scrollBarWidth * e.scale, e.list.size[1] * e.scale);
         g.fillPath(scrollBarBrush);
 
         g.newPath();
@@ -3356,6 +3341,8 @@ function GridView(parent, attrs) {
       for (var i = 0; i < items.length; i++) {
         items[i].rect[2] = e.itemSize[0] * e.scale;
         items[i].rect[3] = e.itemSize[1] * e.scale;
+        items[i].imageRect[2] = e.itemSize[0] * e.scale;
+        items[i].imageRect[3] = e.itemSize[1] * e.scale;
 
         items[i].fontRect[0] = 0;
         items[i].fontRect[1] = (e.itemSize[1] - e.itemFontHeight) * e.scale + 5;
@@ -3369,7 +3356,7 @@ function GridView(parent, attrs) {
       var items = e.children;
       e.scrollScale = 0;
 
-      var numWidth = Math.floor((list.size[0] - e.scrollBarWidth * e.scrollScale) / (e.itemSize[0] * e.scale + e.spacing[0]));
+      var numWidth = Math.floor((list.size[0] * e.scale - e.scrollBarWidth * e.scale * e.scrollScale) / (e.itemSize[0] * e.scale + e.spacing[0]));
       if (numWidth === 0) numWidth = 1;
       e.listHeight = Math.ceil(items.length / numWidth) * (e.itemSize[1] * e.scale + e.spacing[1]);
 
@@ -3394,19 +3381,19 @@ function GridView(parent, attrs) {
     resizeScrollBar: function resizeScrollBar() {
       var e = this;
       var list = e.list;
-      e.scrollBarMaxValue = e.listHeight - list.size[1] + 7;
+      e.scrollBarMaxValue = e.listHeight - list.size[1] * e.scale + 7 / e.scale;
       if (e.scrollBarMaxValue < 0) e.scrollBarValue = 0;
 
-      e.scrollBlockRect[0] = list.size[0] - e.scrollBarWidth + 1;
-      e.scrollBlockRect[2] = e.scrollBarWidth - 2;
-      if (e.listHeight < list.size[1]) {
+      e.scrollBlockRect[0] = list.size[0] * e.scale - e.scrollBarWidth * e.scale + 1;
+      e.scrollBlockRect[2] = e.scrollBarWidth * e.scale - 2;
+      if (e.listHeight < list.size[1] * e.scale) {
         e.scrollScale = 0;
-        e.scrollBlockRect[3] = list.size[1];
+        e.scrollBlockRect[3] = list.size[1] * e.scale;
       } else {
         e.scrollScale = 1;
-        e.scrollBlockRect[3] = list.size[1] * list.size[1] / e.listHeight;
+        e.scrollBlockRect[3] = list.size[1] * e.scale * list.size[1] * e.scale / e.listHeight * e.scale;
       }
-      e.scrollBlockRect[1] = (e.list.size[1] - e.scrollBlockRect[3]) * e.scrollBarValue / e.scrollBarMaxValue;
+      e.scrollBlockRect[1] = (e.list.size[1] * e.scale - e.scrollBlockRect[3]) * e.scrollBarValue / e.scrollBarMaxValue;
     },
     defaultLeftClick: function defaultLeftClick(event) {
       var e = this;
@@ -3453,9 +3440,8 @@ function GridView(parent, attrs) {
     },
     defaultLeftMouseMove: function defaultLeftMouseMove(event) {
       var e = this;
-
       if (e.event.targetScrollBar === 2) {
-        e.scrollBarValue = e.event.leftButtonPressedScrollBarValue + (event.clientY - e.event.leftButtonPressedLocation[1]) * e.scrollBarMaxValue / (e.list.size[1] - e.scrollBlockRect[3]);
+        e.scrollBarValue = e.event.leftButtonPressedScrollBarValue + (event.clientY - e.event.leftButtonPressedLocation[1]) * e.scrollBarMaxValue / (e.list.size[1] * e.scale - e.scrollBlockRect[3]);
       } else {
         e.scrollBarValue = e.event.leftButtonPressedScrollBarValue - event.clientY + e.event.leftButtonPressedLocation[1];
       }
@@ -3488,7 +3474,7 @@ function GridView(parent, attrs) {
     getScrollBarFromLocation: function getScrollBarFromLocation(x, y) {
       var e = this;
 
-      if (x > e.list.size[0] - e.scrollBarWidth) {
+      if (x > e.list.size[0] * e.scale - e.scrollBarWidth) {
         if (y > e.scrollBlockRect[1] && y < e.scrollBlockRect[1] + e.scrollBlockRect[3]) {
           return 2;
         }
@@ -4822,7 +4808,7 @@ $.global.presetWindow = function () {
   jinWin.center();
   jinWin.show();
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22)))
 
 /***/ }),
 /* 7 */
@@ -5519,7 +5505,7 @@ UIParser.alertHelp = function () {
 
 module.exports = {
   progressFactory: __webpack_require__(19),
-  previewProgress: __webpack_require__(22),
+  previewProgress: __webpack_require__(21),
   fns: __webpack_require__(20)
 };
 
@@ -6435,7 +6421,9 @@ try {
                 win.location = [100, 200];
             }
             win.show();
-            win.size = sp.getSetting('winSize').split(',');
+            var ratio = sp.gv.scale;
+            var size = sp.getSetting('winSize').split(',');
+            win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio];
             win.onClose = sp.fns.winClose;
         }
 
@@ -8211,19 +8199,23 @@ module.exports = function () {
     sp.gv.refresh();
   };
   this.winResize = function () {
-    var spacing = 2;
-    var parentDroplistWidth = 100;
+    var scale = sp.gv.scale;
+    var spacing = 2 * scale;
+    var parentDroplistWidth = 100 * scale;
+
     sp.win.outterGroup.location = [spacing, 0];
     sp.win.outterGroup.size = [sp.win.size[0], sp.win.size[1]];
     sp.gv.size([sp.win.outterGroup.size[0], sp.win.outterGroup.size[1] - 20]);
     sp.win.innerGroup.location = [1, 1];
     sp.win.innerGroup.size.width = sp.win.size[0] + 12;
-    sp.droplist.size = [sp.win.size[0] - parentDroplistWidth - spacing * 2, sp.win.innerGroup.size[1] - 3];
+    sp.droplist.size = [sp.win.size[0] * scale - parentDroplistWidth - spacing * 2, sp.win.innerGroup.size[1] - 3];
     sp.droplist.location.x = parentDroplistWidth;
-    sp.droplist.itemSize.width = sp.droplist.size.width - 27;
+    sp.droplist.itemSize.width = (sp.droplist.size.width - 27 * scale) / scale;
+
     sp.parentDroplist.size.width = parentDroplistWidth;
     sp.parentDroplist.size.height = sp.droplist.size.height;
-    sp.parentDroplist.itemSize.width = parentDroplistWidth - 27;
+    sp.parentDroplist.itemSize.width = (parentDroplistWidth - 27 * scale) / scale;
+
     sp.gv.refresh();
   };
   this.winClose = function () {
@@ -8283,33 +8275,6 @@ module.exports = function () {
 
 /***/ }),
 /* 21 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8368,6 +8333,33 @@ sp.didSavePreviews = function () {
 };
 
 module.exports = progressFactory;
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
 
 /***/ })
 /******/ ]);

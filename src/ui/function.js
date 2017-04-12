@@ -717,19 +717,23 @@ module.exports = function() {
     sp.gv.refresh()
   }
   this.winResize = function() {
-    var spacing = 2
-    var parentDroplistWidth = 100
+    var scale = sp.gv.scale
+    var spacing = 2 * scale
+    var parentDroplistWidth = 100 * scale
+
     sp.win.outterGroup.location = [spacing, 0]
     sp.win.outterGroup.size = [sp.win.size[0], sp.win.size[1]]
     sp.gv.size([sp.win.outterGroup.size[0], sp.win.outterGroup.size[1] - 20])
     sp.win.innerGroup.location = [1, 1]
     sp.win.innerGroup.size.width = sp.win.size[0] + 12
-    sp.droplist.size = [sp.win.size[0] - parentDroplistWidth - spacing * 2, sp.win.innerGroup.size[1] - 3]
+    sp.droplist.size = [(sp.win.size[0] * scale - parentDroplistWidth - spacing * 2), sp.win.innerGroup.size[1] - 3]
     sp.droplist.location.x = parentDroplistWidth
-    sp.droplist.itemSize.width = sp.droplist.size.width - 27
+    sp.droplist.itemSize.width = (sp.droplist.size.width - 27 * scale) / scale
+    // sp.droplist.itemSize.height = 20
     sp.parentDroplist.size.width = parentDroplistWidth
     sp.parentDroplist.size.height = sp.droplist.size.height
-    sp.parentDroplist.itemSize.width = parentDroplistWidth - 27
+    sp.parentDroplist.itemSize.width = (parentDroplistWidth - 27 * scale) / scale
+    // sp.parentDroplist.itemSize.height = 20
     sp.gv.refresh()
   }
   this.winClose = function() {
