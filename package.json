@@ -1,6 +1,6 @@
 {
   "name": "memory",
-  "version": "3.0.0",
+  "version": "3.0.10",
   "description": "a script for adobe after effects to save any layers",
   "main": "index.js",
   "scripts": {

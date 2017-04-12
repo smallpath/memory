@@ -151,6 +151,6 @@ Tips:
 
   if (sp.haveSetting('version') === false || sp.getSetting('version') < sp.version) {
     alert(loc(sp.versionUpdateInfo))
-    sp.saveSetting('version', sp.version)
   }
+  sp.saveSetting('version', sp.version)
 })()

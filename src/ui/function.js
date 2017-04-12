@@ -224,7 +224,7 @@ module.exports = function() {
   this.addModule = function() {
     var newEleName = prompt(loc(sp.setName), 'Default')
     if (!newEleName) { return }
-    newEleName.trim()
+    newEleName = sp.filterName(newEleName)
     if (sp.lookUpTextInChildren(newEleName, sp.parentDroplist.items)) { alert(loc(sp.existName)); return }
 
     var content = new XML(sp.settingsFile.readd())
@@ -522,7 +522,7 @@ module.exports = function() {
     var newEleName = prompt(loc(sp.setName), 'Default')
     if (!newEleName) { return }
     if (!sp.parentDroplist.selection) return alert(loc(sp.needModule))
-    newEleName.trim()
+    newEleName = sp.filterName(newEleName)
     if (sp.xmlFileNames.includes(newEleName)) { alert(loc(sp.existName)); return }
 
     var file = sp.getFileByName(newEleName)
@@ -655,7 +655,7 @@ module.exports = function() {
     if (!sp.gv.lastSelectedItem) return alert(loc(sp.needElement))
     var newEleName = prompt(loc(sp.setName), sp.gv.lastSelectedItem.text)
     if (!newEleName) { alert(loc(sp.blankName)); return }
-    newEleName.trim()
+    newEleName = sp.filterName(newEleName)
     if (sp.lookUpTextInChildren(newEleName, sp.gv.children)) { alert(loc(sp.existName)); return }
 
     var file = sp.getFileByName(sp.droplist.selection.text)

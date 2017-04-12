@@ -6,14 +6,15 @@ module.exports = (function() {
   sp.prototype = {
 
     scriptName: 'Sp_memory',
-    scriptVersion: '3.0',
-    version: 3.0,
+    scriptVersion: process.env.VERSION,
+    version: process.env.VERSION,
     slash: '/',
 
     setting: app.settings,
     inXml: null,
 
     isCC2015: !!((
+      // each version cost me more than 5 hours to test
       app.version.indexOf('13.5') !== -1 ||
       app.version.indexOf('13.6') !== -1 ||
       app.version.indexOf('13.7') !== -1 ||

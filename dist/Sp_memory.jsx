@@ -5142,8 +5142,8 @@ module.exports = function () {
 
   if (sp.haveSetting('version') === false || sp.getSetting('version') < sp.version) {
     alert(loc(sp.versionUpdateInfo));
-    sp.saveSetting('version', sp.version);
   }
+  sp.saveSetting('version', sp.version);
 }();
 
 /***/ }),
@@ -5161,8 +5161,8 @@ module.exports = function () {
   sp.prototype = {
 
     scriptName: 'Sp_memory',
-    scriptVersion: '3.0',
-    version: 3.0,
+    scriptVersion: "3.0.10",
+    version: "3.0.10",
     slash: '/',
 
     setting: app.settings,
@@ -7167,7 +7167,7 @@ module.exports = function () {
     if (!newEleName) {
       return;
     }
-    newEleName.trim();
+    newEleName = sp.filterName(newEleName);
     if (sp.lookUpTextInChildren(newEleName, sp.parentDroplist.items)) {
       alert(loc(sp.existName));return;
     }
@@ -7472,7 +7472,7 @@ module.exports = function () {
       return;
     }
     if (!sp.parentDroplist.selection) return alert(loc(sp.needModule));
-    newEleName.trim();
+    newEleName = sp.filterName(newEleName);
     if (sp.xmlFileNames.includes(newEleName)) {
       alert(loc(sp.existName));return;
     }
@@ -7613,7 +7613,7 @@ module.exports = function () {
     if (!newEleName) {
       alert(loc(sp.blankName));return;
     }
-    newEleName.trim();
+    newEleName = sp.filterName(newEleName);
     if (sp.lookUpTextInChildren(newEleName, sp.gv.children)) {
       alert(loc(sp.existName));return;
     }

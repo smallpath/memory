@@ -1,5 +1,11 @@
+var webpack = require('webpack')
 var path = require('path')
-var plugins = []
+var packages = require('../package.json')
+var plugins = [
+  new webpack.DefinePlugin({
+    'process.env.VERSION': JSON.stringify(packages.version)
+  })
+]
 
 var isDev = process.env.NODE_ENV !== 'production'
 if (isDev) {
@@ -9,11 +15,11 @@ if (isDev) {
 
   var shell = `"${afterfx}" -r ${path.join(__dirname, '../dist/Sp_memory.jsx')}`
 
-  plugins = [
+  plugins.push(
     new WebpackShellPlugin({
       onBuildEnd: [shell]
     })
-  ]
+  )
 }
 
 module.exports = {
