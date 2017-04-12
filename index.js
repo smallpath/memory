@@ -77,6 +77,7 @@ try {
       win.show()
       var size = sp.getSetting('winSize').split(',')
       win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio]
+      if (win.size[0] <= 0 || win.size[1] <= 0) { win.size = [240, 500] }
       win.onClose = sp.fns.winClose
     }
 
