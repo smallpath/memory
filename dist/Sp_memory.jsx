@@ -979,7 +979,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           }
           var isNotHiddenProp = true;
           try {
-            if (isNotHiddenProp.matchName !== 'ADBE Marker') {
+            if (prop.matchName !== 'ADBE Marker') {
               prop.setValue(prop.valueAtTime(0, true));
             }
           } catch (r) {
