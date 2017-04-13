@@ -16,11 +16,11 @@ module.exports = function() {
 
     // { name: loc(sp.searchText), type: 'button' }, { name: loc(sp.searchButton), type: 'button' },
 
-    { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' },
-    { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' },
-    { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' },
-    { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' },
-    { name: loc(sp.saveWorkarea), type: 'checkbox' }
+    { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox', id: 'autoName' },
+    { name: loc(sp.isSavePreview), type: 'checkbox', id: 'savePreview' }, { name: loc(sp.isOffset), type: 'checkbox', id: 'saveMaterial' },
+    { name: loc(sp.isPrecomp), type: 'checkbox', id: 'preCompose' }, { name: loc(sp.isEffect), type: 'checkbox', id: 'onlyEffect' },
+    { name: loc(sp.cleanProperty), type: 'checkbox', id: 'cleanGroup' }, { name: loc(sp.offsetKey), type: 'checkbox', id: 'offsetKeyframe' },
+    { name: loc(sp.saveWorkarea), type: 'checkbox', id: 'saveWorkarea' }
 
   ]
 
@@ -49,8 +49,9 @@ module.exports = function() {
     } else if (item.type === 'edittext') {
       itemHeight = buttonHeight
     }
+    var control
     if (i % 2 === 0) {
-      shortMenu[item.name] = shortMenu.add(
+      control = shortMenu[item.name] = shortMenu.add(
         item.type,
         [
           0,
@@ -61,7 +62,7 @@ module.exports = function() {
         item.name
       )
     } else {
-      shortMenu[item.name] = shortMenu.add(
+      control = shortMenu[item.name] = shortMenu.add(
         item.type,
         [
           itemWidth,
@@ -72,6 +73,7 @@ module.exports = function() {
         item.name
       )
     }
+    if (control && item.id) control.id = item.id
   }
 
   var isCheckBoxClicked = false
@@ -216,51 +218,16 @@ module.exports = function() {
     sp.gv.refresh()
   }
 
-  shortMenu[loc(sp.isName)].onClick = function() {
-    sp.autoNameValue = this.value
-    sp.saveSetting('autoName', this.value.toString())
-    isCheckBoxClicked = true
-  }
-
-  shortMenu[loc(sp.isSavePreview)].onClick = function() {
-    sp.savePreviewValue = this.value
-    sp.saveSetting('savePreview', this.value.toString())
-    isCheckBoxClicked = true
-  }
-
-  shortMenu[loc(sp.isOffset)].onClick = function() {
-    sp.saveMaterialValue = this.value
-    sp.saveSetting('saveMaterial', this.value.toString())
-    isCheckBoxClicked = true
-  }
-
-  shortMenu[loc(sp.isPrecomp)].onClick = function() {
-    sp.preComposeValue = this.value
-    sp.saveSetting('preCompose', this.value.toString())
-    isCheckBoxClicked = true
-  }
-
-  shortMenu[loc(sp.isEffect)].onClick = function() {
-    sp.onlyEffectValue = this.value
-    sp.saveSetting('onlyEffect', this.value.toString())
-    isCheckBoxClicked = true
-  }
-
-  shortMenu[loc(sp.cleanProperty)].onClick = function() {
-    sp.cleanGroupValue = this.value
-    sp.saveSetting('cleanGroup', this.value.toString())
-    isCheckBoxClicked = true
-  }
-
-  shortMenu[loc(sp.offsetKey)].onClick = function() {
-    sp.offsetKeyframeValue = this.value
-    sp.saveSetting('offsetKeyframe', this.value.toString())
-    isCheckBoxClicked = true
-  }
-
+  shortMenu[loc(sp.isName)].onClick =
+  shortMenu[loc(sp.isSavePreview)].onClick =
+  shortMenu[loc(sp.isOffset)].onClick =
+  shortMenu[loc(sp.isPrecomp)].onClick =
+  shortMenu[loc(sp.isEffect)].onClick =
+  shortMenu[loc(sp.cleanProperty)].onClick =
+  shortMenu[loc(sp.offsetKey)].onClick =
   shortMenu[loc(sp.saveWorkarea)].onClick = function() {
-    sp.saveWorkareaValue = this.value
-    sp.saveSetting('saveWorkarea', this.value.toString())
+    var name = this.id + 'Value'
+    sp[name] = this.value
     isCheckBoxClicked = true
   }
 

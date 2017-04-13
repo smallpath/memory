@@ -90,5 +90,8 @@ try {
       )
       checkVersionFunc()
     }
+
+    var observeSingleton = require('src/mvvm/index')
+    observeSingleton(sp)
   })(this)
 } catch (err) { alert('Line #' + err.line.toString() + '\r\n' + err.toString()) }

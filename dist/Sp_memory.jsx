@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 13);
+/******/ 	return __webpack_require__(__webpack_require__.s = 14);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,9 +73,9 @@
 "use strict";
 
 
-var moduleWindow = __webpack_require__(22);
-var moveGroupWindow = __webpack_require__(23);
-var outputGroupWindow = __webpack_require__(25);
+var moduleWindow = __webpack_require__(24);
+var moveGroupWindow = __webpack_require__(25);
+var outputGroupWindow = __webpack_require__(27);
 var checkVersion = __webpack_require__(1);
 
 module.exports = function () {
@@ -404,6 +404,14 @@ module.exports = function () {
 
   _('*').each(function (e) {
     switch (e.id) {
+      default:
+        if (e.type !== 'checkbox') break;
+        e.value = sp.getSettingAsBool(e.id);
+        var name = e.id + 'Value';
+        e.onClick = function () {
+          sp[name] = this.value;
+        };
+        break;
       case 'addIssue':
         e.onClick = function () {
           if (sp.lang === 'ch') {
@@ -439,13 +447,7 @@ module.exports = function () {
           sp.gv.refresh();
         };
         break;
-      case 'checkVersionOnStartup':
-        e.value = sp.getSettingAsBool('checkVersionOnStartup');
-        e.onClick = function () {
-          sp.checkVersionOnStartupValue = this.value;
-          sp.saveSetting('checkVersionOnStartup', this.value.toString());
-        };
-        break;
+
       case 'frameSecondText':
         e.text = sp.frameSecond.toString();
         e.onChange = function () {
@@ -573,20 +575,7 @@ module.exports = function () {
           sp.gv.refresh();
         };
         break;
-      case 'coverChange':
-        e.value = sp.getSettingAsBool('coverChange');
-        e.onClick = function () {
-          sp.saveSetting('coverChange', this.value.toString());
-          sp.coverChangeValue = this.value;
-        };
-        break;
-      case 'thumbType':
-        e.value = sp.getSettingAsBool('thumbType');
-        e.onClick = function () {
-          sp.saveSetting('thumbType', this.value.toString());
-          sp.thumbTypeValue = this.value;
-        };
-        break;
+
       case 'folderNameText':
         e.text = sp.getSetting('folderName');
         e.onChange = function () {
@@ -3464,10 +3453,10 @@ function GridView(parent, attrs) {
 "use strict";
 
 
+__webpack_require__(18);
+__webpack_require__(16);
 __webpack_require__(17);
 __webpack_require__(15);
-__webpack_require__(16);
-__webpack_require__(14);
 
 /***/ }),
 /* 6 */
@@ -4361,10 +4350,10 @@ sp.extend(sp, {
 
 
 module.exports = {
-  progressFactory: __webpack_require__(20),
+  progressFactory: __webpack_require__(21),
   previewProgress: __webpack_require__(2),
   settingWindow: __webpack_require__(0),
-  fns: __webpack_require__(21)
+  fns: __webpack_require__(23)
 };
 
 /***/ }),
@@ -4374,8 +4363,40 @@ module.exports = {
 "use strict";
 
 
+var mvvm = __webpack_require__(22);
+
+var nameBlackList = ['win', 'gv', 'isOutside', 'previewHelper', 'isLoopPreview', 'droplist', 'parentDroplist', 'menu'];
+
+function watch(name, oldValue, newValue) {
+  if (typeof oldValue === 'function') {
+    return oldValue;
+  } else if (typeof newValue === 'boolean') {
+    var settingName = name.replace('Value', '');
+
+    if ($.global.sp.haveSetting(settingName)) {
+      $.global.sp.saveSetting(settingName, newValue);
+      return newValue;
+    } else {
+      return oldValue;
+    }
+  } else {
+    return newValue;
+  }
+}
+
+module.exports = function (obj) {
+  return mvvm.observer(obj, watch, nameBlackList);
+};
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = function () {
-  __webpack_require__(18);
+  __webpack_require__(19);
 
   sp.extend(sp, {
     forEach: function forEach(xml, callback, context) {
@@ -4461,7 +4482,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4546,13 +4567,13 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var request = __webpack_require__(19);
+var request = __webpack_require__(20);
 
 module.exports = function () {
   var sp = function sp() {
@@ -5179,7 +5200,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5244,7 +5265,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5252,15 +5273,15 @@ module.exports = function () {
 
 try {
     (function (global) {
-        __webpack_require__(11);
+        __webpack_require__(12);
 
         __webpack_require__(7);
 
-        __webpack_require__(9);
-
         __webpack_require__(10);
 
-        __webpack_require__(12);
+        __webpack_require__(11);
+
+        __webpack_require__(13);
 
         __webpack_require__(3);
 
@@ -5338,13 +5359,16 @@ try {
             var checkVersionFunc = __webpack_require__(1)(win, true);
             checkVersionFunc();
         }
+
+        var observeSingleton = __webpack_require__(9);
+        observeSingleton(sp);
     })(undefined);
 } catch (err) {
     alert('Line #' + err.line.toString() + '\r\n' + err.toString());
 }
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5379,7 +5403,7 @@ function autoSave() {
 }
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5506,7 +5530,7 @@ function cutLength() {
 }
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5587,7 +5611,7 @@ function reloadPic() {
 }
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6294,7 +6318,7 @@ function translate(thisObj, expProps) {
 }
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6331,7 +6355,7 @@ var cout = $.global.cout = new OperatorOverload(function (operand, rev) {
 $.global.cout = cout;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6363,7 +6387,7 @@ module.exports = function (method, endpoint, query) {
 };
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6430,14 +6454,46 @@ $.layer.didCreateLayers = function () {
 module.exports = progressFactory;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var creatRightClickMenu = __webpack_require__(27);
-var moveItemWindow = __webpack_require__(24);
+exports.observer = observer;
+exports.isObj = isObj;
+
+function isObj(obj) {
+  return Object.prototype.toString.call(obj).slice(8, -1) === 'Object';
+}
+
+function isInBlackList(name, list) {
+  for (var i = 0; i < list.length; i++) {
+    if (list[i] === name) return true;
+  }
+  return false;
+}
+
+function observer(obj, callback, nameBlackList, index) {
+  index = index || 0;
+  if (!isObj(obj)) return;
+  for (var i in obj) {
+    if (index === 0 && isInBlackList(i, nameBlackList)) continue;
+    obj.watch(i, callback);
+    if (isObj(obj[i])) observer(obj[i], callback, nameBlackList, index + 1);
+  }
+  return obj;
+}
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var creatRightClickMenu = __webpack_require__(29);
+var moveItemWindow = __webpack_require__(26);
 
 module.exports = function () {
   var keepRef = this;
@@ -7134,7 +7190,6 @@ module.exports = function () {
     } else {
       sp.onlyEffectValue = false;
     }
-    sp.saveSetting('onlyEffect', sp.onlyEffectValue.toString());
     sp.droplist.itemSize.height = 20;
     sp.gv.scrollBarValue = 0;
     sp.gv.refresh();
@@ -7215,7 +7270,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7324,7 +7379,7 @@ module.exports = function (groupItem, win, callback) {
 };
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7385,7 +7440,7 @@ module.exports = function (xmlItem, groupItem, win) {
 };
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7454,7 +7509,7 @@ module.exports = function (cu) {
 };
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7546,7 +7601,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7603,17 +7658,17 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var settingWindow = __webpack_require__(0);
-var presetWindow = __webpack_require__(26);
+var presetWindow = __webpack_require__(28);
 
 module.exports = function () {
-  var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }, { name: loc(sp.saveWorkarea), type: 'checkbox' }];
+  var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox', id: 'autoName' }, { name: loc(sp.isSavePreview), type: 'checkbox', id: 'savePreview' }, { name: loc(sp.isOffset), type: 'checkbox', id: 'saveMaterial' }, { name: loc(sp.isPrecomp), type: 'checkbox', id: 'preCompose' }, { name: loc(sp.isEffect), type: 'checkbox', id: 'onlyEffect' }, { name: loc(sp.cleanProperty), type: 'checkbox', id: 'cleanGroup' }, { name: loc(sp.offsetKey), type: 'checkbox', id: 'offsetKeyframe' }, { name: loc(sp.saveWorkarea), type: 'checkbox', id: 'saveWorkarea' }];
 
   var length = itemList.length;
 
@@ -7645,11 +7700,13 @@ module.exports = function () {
     } else if (item.type === 'edittext') {
       itemHeight = buttonHeight;
     }
+    var control;
     if (i % 2 === 0) {
-      shortMenu[item.name] = shortMenu.add(item.type, [0, parseInt(i / 2) * itemHeight, itemWidth, 22 + parseInt(i / 2) * itemHeight], item.name);
+      control = shortMenu[item.name] = shortMenu.add(item.type, [0, parseInt(i / 2) * itemHeight, itemWidth, 22 + parseInt(i / 2) * itemHeight], item.name);
     } else {
-      shortMenu[item.name] = shortMenu.add(item.type, [itemWidth, parseInt((i - 1) / 2) * itemHeight, maxWidth, 22 + parseInt((i - 1) / 2) * itemHeight], item.name);
+      control = shortMenu[item.name] = shortMenu.add(item.type, [itemWidth, parseInt((i - 1) / 2) * itemHeight, maxWidth, 22 + parseInt((i - 1) / 2) * itemHeight], item.name);
     }
+    if (control && item.id) control.id = item.id;
   }
 
   var isCheckBoxClicked = false;
@@ -7779,51 +7836,9 @@ module.exports = function () {
     sp.gv.refresh();
   };
 
-  shortMenu[loc(sp.isName)].onClick = function () {
-    sp.autoNameValue = this.value;
-    sp.saveSetting('autoName', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  shortMenu[loc(sp.isSavePreview)].onClick = function () {
-    sp.savePreviewValue = this.value;
-    sp.saveSetting('savePreview', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  shortMenu[loc(sp.isOffset)].onClick = function () {
-    sp.saveMaterialValue = this.value;
-    sp.saveSetting('saveMaterial', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  shortMenu[loc(sp.isPrecomp)].onClick = function () {
-    sp.preComposeValue = this.value;
-    sp.saveSetting('preCompose', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  shortMenu[loc(sp.isEffect)].onClick = function () {
-    sp.onlyEffectValue = this.value;
-    sp.saveSetting('onlyEffect', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  shortMenu[loc(sp.cleanProperty)].onClick = function () {
-    sp.cleanGroupValue = this.value;
-    sp.saveSetting('cleanGroup', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  shortMenu[loc(sp.offsetKey)].onClick = function () {
-    sp.offsetKeyframeValue = this.value;
-    sp.saveSetting('offsetKeyframe', this.value.toString());
-    isCheckBoxClicked = true;
-  };
-
-  shortMenu[loc(sp.saveWorkarea)].onClick = function () {
-    sp.saveWorkareaValue = this.value;
-    sp.saveSetting('saveWorkarea', this.value.toString());
+  shortMenu[loc(sp.isName)].onClick = shortMenu[loc(sp.isSavePreview)].onClick = shortMenu[loc(sp.isOffset)].onClick = shortMenu[loc(sp.isPrecomp)].onClick = shortMenu[loc(sp.isEffect)].onClick = shortMenu[loc(sp.cleanProperty)].onClick = shortMenu[loc(sp.offsetKey)].onClick = shortMenu[loc(sp.saveWorkarea)].onClick = function () {
+    var name = this.id + 'Value';
+    sp[name] = this.value;
     isCheckBoxClicked = true;
   };
 

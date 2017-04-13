@@ -725,7 +725,6 @@ module.exports = function() {
     sp.saveSetting('thisSelection', this.selection.index.toString())
     var arr = sp.getSetting('effectName').split(',')
     if (sp.lookUpInArray(this.selection.text, arr)) { sp.onlyEffectValue = true } else { sp.onlyEffectValue = false }
-    sp.saveSetting('onlyEffect', sp.onlyEffectValue.toString())
     sp.droplist.itemSize.height = 20
     sp.gv.scrollBarValue = 0
     sp.gv.refresh()

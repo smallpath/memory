@@ -331,6 +331,14 @@ module.exports = function() {
 
   _('*').each(function(e) {
     switch (e.id) {
+      default:
+        if (e.type !== 'checkbox') break
+        e.value = sp.getSettingAsBool(e.id)
+        var name = e.id + 'Value'
+        e.onClick = function() {
+          sp[name] = this.value
+        }
+        break
       case 'addIssue':
         e.onClick = function() {
           if (sp.lang === 'ch') {
@@ -366,13 +374,7 @@ module.exports = function() {
           sp.gv.refresh()
         }
         break
-      case 'checkVersionOnStartup':
-        e.value = sp.getSettingAsBool('checkVersionOnStartup')
-        e.onClick = function() {
-          sp.checkVersionOnStartupValue = this.value
-          sp.saveSetting('checkVersionOnStartup', this.value.toString())
-        }
-        break
+
       case 'frameSecondText':
         e.text = sp.frameSecond.toString()
         e.onChange = function() {
@@ -499,20 +501,7 @@ module.exports = function() {
           sp.gv.refresh()
         }
         break
-      case 'coverChange':
-        e.value = sp.getSettingAsBool('coverChange')
-        e.onClick = function() {
-          sp.saveSetting('coverChange', this.value.toString())
-          sp.coverChangeValue = this.value
-        }
-        break
-      case 'thumbType':
-        e.value = sp.getSettingAsBool('thumbType')
-        e.onClick = function() {
-          sp.saveSetting('thumbType', this.value.toString())
-          sp.thumbTypeValue = this.value
-        }
-        break
+
       case 'folderNameText':
         e.text = sp.getSetting('folderName')
         e.onChange = function() {
