@@ -6752,6 +6752,8 @@ module.exports = function () {
 
       sp.newItemOrCover = 'newItem';
 
+      var time = thisComp.time;
+
       if (sp.isCC2015 === true) {
         itemName = sp.savePng2(sp.getImageFile(sp.droplist.selection.text, itemName));
       } else {
@@ -6765,6 +6767,8 @@ module.exports = function () {
       var item = sp.gv.add(decodeURIComponent(itemName), sp.getImage(sp.droplist.selection.text, itemName));
       sp.preImageArr.push(item.image);
       sp.gv.refresh();
+
+      thisComp.time = time;
 
       app.endUndoGroup();
       app.endSuppressDialogs(false);
