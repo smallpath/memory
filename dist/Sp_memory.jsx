@@ -1471,7 +1471,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           layer.audioEnabled = false;
         }
 
-        if (typeof xml.trackMatteType !== 'undefined') {
+        if (xml.trackMatteType.toString() !== 'undefined') {
           layer.trackMatteType = $.layer.getDistance(layer.trackMatteType, parseInt(xml.trackMatteType));
         }
 
@@ -1495,11 +1495,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           layer.adjustmentLayer = true;
         }
 
-        if (typeof xml.blendingMode.toString() !== 'undefined') {
+        if (xml.blendingMode.toString() !== 'undefined') {
           layer.blendingMode = $.layer.getDistance(layer.blendingMode, parseInt(xml.blendingMode));
         }
 
-        if (typeof xml.autoOrient.toString() !== 'undefined') {
+        if (xml.autoOrient.toString() !== 'undefined') {
           layer.autoOrient = $.layer.getDistance(layer.autoOrient, parseInt(xml.autoOrient));
         }
 
