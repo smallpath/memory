@@ -169,11 +169,11 @@ F键:覆盖选中元素.
   creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
   creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
   creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第 ' },
-  creatingProcessAfter: { en: ' th layer', ch: ' 层' },
+  creatingProcessAfter: { en: ' layer', ch: ' 层' },
   savingReport: { en: 'Saving cost: ', ch: '总存储耗时: ' },
   savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
   savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第 ' },
-  savingProcessAfter: { en: ' th layer', ch: ' 层' },
+  savingProcessAfter: { en: ' layer', ch: ' 层' },
   second: { en: ' second', ch: ' 秒' },
   previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
   previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
@@ -190,7 +190,7 @@ F键:覆盖选中元素.
     ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启脚本后生效'
   },
   saveWorkarea: {
-    en: 'Preview workarea',
+    en: 'Workarea',
     ch: '预览工作区'
   },
   tryVersionFind: {

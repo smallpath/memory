@@ -2293,20 +2293,21 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
             myScaleProperty = layers.property(matchName);
             try {
-              if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(',')[0]) !== PropertyValueType.TwoD && $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(',')[0]) !== PropertyValueType.ThreeD) {
+              var tempInType = xml.inType.toString().split(',')[0];
+              if ($.layer.getDistance(PropertyValueType.TwoD.toString(), tempInType) !== PropertyValueType.TwoD && $.layer.getDistance(PropertyValueType.ThreeD.toString(), tempInType) !== PropertyValueType.ThreeD) {
                 try {
                   myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn], [easeOut]);
                 } catch (err) {
                   $.layer.errorInfoArr.push({ line: $.line, error: err });
                 }
-              } else if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(',')[0]) === PropertyValueType.TwoD) {
+              } else if ($.layer.getDistance(PropertyValueType.TwoD.toString(), tempInType) === PropertyValueType.TwoD) {
                 myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn], [easeOut, easeOut]);
-              } else if ($.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(',')[0]) === PropertyValueType.ThreeD) {
+              } else if ($.layer.getDistance(PropertyValueType.ThreeD.toString(), tempInType) === PropertyValueType.ThreeD) {
                 myScaleProperty.setTemporalEaseAtKey(ia + 1, [easeIn, easeIn, easeIn], [easeOut, easeOut, easeOut]);
               }
               try {
-                inIn = $.layer.getDistance(myScaleProperty.keyInInterpolationType(ia + 1), parseInt(xml.inInterType));
-                outIn = $.layer.getDistance(myScaleProperty.keyOutInterpolationType(ia + 1), parseInt(xml.outInterType));
+                inIn = $.layer.getDistance(myScaleProperty.keyInInterpolationType(ia + 1), parseInt(thisChild.inInterType));
+                outIn = $.layer.getDistance(myScaleProperty.keyOutInterpolationType(ia + 1), parseInt(thisChild.outInterType));
                 myScaleProperty.setInterpolationTypeAtKey(ia + 1, inIn, outIn);
               } catch (err) {
                 $.layer.errorInfoArr.push({ line: $.line, error: err });
@@ -4176,11 +4177,11 @@ sp.extend(sp, {
   creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
   creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
   creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第 ' },
-  creatingProcessAfter: { en: ' th layer', ch: ' 层' },
+  creatingProcessAfter: { en: ' layer', ch: ' 层' },
   savingReport: { en: 'Saving cost: ', ch: '总存储耗时: ' },
   savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
   savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第 ' },
-  savingProcessAfter: { en: ' th layer', ch: ' 层' },
+  savingProcessAfter: { en: ' layer', ch: ' 层' },
   second: { en: ' second', ch: ' 秒' },
   previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
   previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
@@ -4197,7 +4198,7 @@ sp.extend(sp, {
     ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启脚本后生效'
   },
   saveWorkarea: {
-    en: 'Preview workarea',
+    en: 'Workarea',
     ch: '预览工作区'
   },
   tryVersionFind: {
