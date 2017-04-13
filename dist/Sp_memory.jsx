@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 12);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,9 +73,9 @@
 "use strict";
 
 
-var moduleWindow = __webpack_require__(21);
-var moveGroupWindow = __webpack_require__(22);
-var outputGroupWindow = __webpack_require__(24);
+var moduleWindow = __webpack_require__(22);
+var moveGroupWindow = __webpack_require__(23);
+var outputGroupWindow = __webpack_require__(25);
 var checkVersion = __webpack_require__(1);
 
 module.exports = function () {
@@ -744,6 +744,80 @@ module.exports = function (win, isStarting) {
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var global = $.global;
+
+var width = 300;
+var height = 80;
+var progressHeight = 20;
+
+var progressFactory = {
+  createWindow: function createWindow(len, title, prefixString, suffixString) {
+    global.progressWin = new Window('palette', title);
+
+    var group = global.progressWin.add('Group{\n      orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      preferredSize: [-1, ' + height + '],\n      progressBar: Progressbar{\n        value:0, minvalue:0, maxvalue:' + len + ',\n        preferredSize: [' + width + ', ' + progressHeight + ']\n      },\n      progressText: StaticText {\n        alignment:[\'fill\',\'fill\'],text:"", justify:\'center\',properties:{multiline:0}\n      },\n      progressTimeText: StaticText {\n        alignment:[\'fill\',\'fill\'],text:"", justify:\'center\',properties:{multiline:0}\n      }\n    }');
+    global.progressWin.addEventListener('keydown', function () {
+      global.progressWin.close();
+    });
+    global.progressTimeText = group.progressTimeText;
+    global.progressText = group.progressText;
+    global.progressBar = group.progressBar;
+    var divide = '0' + '/' + global.progressBar.maxvalue;
+    global.progressText.text = prefixString + divide + suffixString;
+    global.progressTimeText;
+    global.progressWin.show();
+    global.progressWin.center();
+    var preY = global.progressText.location[1] + 10;
+    global.progressText.originY = preY;
+    global.progressText.location[1] = preY + (global.progressText.location[1] >> 1);
+    global.progressWin.startTime = Date.now();
+    global.progressWin.update && global.progressWin.update();
+  },
+  update: function update(len, prefixString, suffixString, timePrefix, timeSuffix) {
+    global.progressBar.value = global.progressBar.value + len;
+    var divide = global.progressBar.value + '/' + global.progressBar.maxvalue;
+    var time = (Date.now() - global.progressWin.startTime) / 1000;
+    global.progressText.text = prefixString + divide + suffixString;
+    global.progressTimeText.text = timePrefix + time.toString() + timeSuffix;
+    var preY = global.progressText.location[1];
+    var shouldRelocation = global.progressTimeText.text.length === 0;
+    if (shouldRelocation) {
+      global.progressText.location[1] = preY + (global.progressText.location[1] >> 1);
+    } else {
+      global.progressText.location[1] = global.progressText.originY;
+    }
+    global.progressWin.update && global.progressWin.update();
+  },
+  complete: function complete(timePrefix, timeSuffix) {
+    var time = (Date.now() - global.progressWin.startTime) / 1000;
+    var report = timePrefix + time.toString() + timeSuffix;
+    writeLn(report);
+    return time;
+  }
+};
+
+var title = loc(sp.previewTitle);
+var previewPrefix = loc(sp.previewPrefix);
+var timePrefix = loc(sp.previewTime);
+var timeSuffix = loc(sp.second);
+sp.willSavePreviews = function (len) {
+  progressFactory.createWindow(len, title, previewPrefix, timeSuffix);
+};
+sp.didSavePreview = function () {
+  progressFactory.update(1, previewPrefix, '', timePrefix, timeSuffix);
+};
+sp.didSavePreviews = function () {
+  progressFactory.complete(timePrefix, timeSuffix);
+};
+
+module.exports = progressFactory;
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2730,7 +2804,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3384,19 +3458,19 @@ function GridView(parent, attrs) {
 }
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+__webpack_require__(17);
+__webpack_require__(15);
 __webpack_require__(16);
 __webpack_require__(14);
-__webpack_require__(15);
-__webpack_require__(13);
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4082,7 +4156,7 @@ UIParser.alertHelp = function () {
 };
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4280,28 +4354,28 @@ sp.extend(sp, {
 });
 
 /***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  progressFactory: __webpack_require__(19),
-  previewProgress: __webpack_require__(26),
-  settingWindow: __webpack_require__(0),
-  fns: __webpack_require__(20)
-};
-
-/***/ }),
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+module.exports = {
+  progressFactory: __webpack_require__(20),
+  previewProgress: __webpack_require__(2),
+  settingWindow: __webpack_require__(0),
+  fns: __webpack_require__(21)
+};
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = function () {
-  __webpack_require__(17);
+  __webpack_require__(18);
 
   sp.extend(sp, {
     forEach: function forEach(xml, callback, context) {
@@ -4387,7 +4461,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4472,13 +4546,13 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var request = __webpack_require__(18);
+var request = __webpack_require__(19);
 
 module.exports = function () {
   var sp = function sp() {
@@ -5105,7 +5179,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5170,7 +5244,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5178,22 +5252,22 @@ module.exports = function () {
 
 try {
     (function (global) {
-        __webpack_require__(10);
+        __webpack_require__(11);
 
-        __webpack_require__(6);
-
-        __webpack_require__(8);
+        __webpack_require__(7);
 
         __webpack_require__(9);
 
-        __webpack_require__(11);
+        __webpack_require__(10);
 
-        __webpack_require__(2);
+        __webpack_require__(12);
 
-        __webpack_require__(4);
         __webpack_require__(3);
+
         __webpack_require__(5);
-        var helpers = __webpack_require__(7);
+        __webpack_require__(4);
+        __webpack_require__(6);
+        var helpers = __webpack_require__(8);
 
         $.layer.slash = sp.slash;
         $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
@@ -5270,7 +5344,7 @@ try {
 }
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5305,7 +5379,7 @@ function autoSave() {
 }
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5432,7 +5506,7 @@ function cutLength() {
 }
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5513,7 +5587,7 @@ function reloadPic() {
 }
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6220,7 +6294,7 @@ function translate(thisObj, expProps) {
 }
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6257,7 +6331,7 @@ var cout = $.global.cout = new OperatorOverload(function (operand, rev) {
 $.global.cout = cout;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6289,7 +6363,7 @@ module.exports = function (method, endpoint, query) {
 };
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6297,7 +6371,7 @@ module.exports = function (method, endpoint, query) {
 
 var global = $.global;
 
-var parentProgress = __webpack_require__(26);
+var parentProgress = __webpack_require__(2);
 
 var progressFactory = {
   createWindow: function createWindow(len, title, prefixString, suffixString) {
@@ -6356,14 +6430,14 @@ $.layer.didCreateLayers = function () {
 module.exports = progressFactory;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var creatRightClickMenu = __webpack_require__(27);
-var moveItemWindow = __webpack_require__(23);
+var moveItemWindow = __webpack_require__(24);
 
 module.exports = function () {
   var keepRef = this;
@@ -7141,7 +7215,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7250,7 +7324,7 @@ module.exports = function (groupItem, win, callback) {
 };
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7311,7 +7385,7 @@ module.exports = function (xmlItem, groupItem, win) {
 };
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7380,7 +7454,7 @@ module.exports = function (cu) {
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7472,7 +7546,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7529,80 +7603,6 @@ module.exports = $.global.presetWindow = function () {
 };
 
 /***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var global = $.global;
-
-var width = 300;
-var height = 80;
-var progressHeight = 20;
-
-var progressFactory = {
-  createWindow: function createWindow(len, title, prefixString, suffixString) {
-    global.progressWin = new Window('palette', title);
-
-    var group = global.progressWin.add('Group{\n      orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      preferredSize: [-1, ' + height + '],\n      progressBar: Progressbar{\n        value:0, minvalue:0, maxvalue:' + len + ',\n        preferredSize: [' + width + ', ' + progressHeight + ']\n      },\n      progressText: StaticText {\n        alignment:[\'fill\',\'fill\'],text:"", justify:\'center\',properties:{multiline:0}\n      },\n      progressTimeText: StaticText {\n        alignment:[\'fill\',\'fill\'],text:"", justify:\'center\',properties:{multiline:0}\n      }\n    }');
-    global.progressWin.addEventListener('keydown', function () {
-      global.progressWin.close();
-    });
-    global.progressTimeText = group.progressTimeText;
-    global.progressText = group.progressText;
-    global.progressBar = group.progressBar;
-    var divide = '0' + '/' + global.progressBar.maxvalue;
-    global.progressText.text = prefixString + divide + suffixString;
-    global.progressTimeText;
-    global.progressWin.show();
-    global.progressWin.center();
-    var preY = global.progressText.location[1] + 10;
-    global.progressText.originY = preY;
-    global.progressText.location[1] = preY + (global.progressText.location[1] >> 1);
-    global.progressWin.startTime = Date.now();
-    global.progressWin.update && global.progressWin.update();
-  },
-  update: function update(len, prefixString, suffixString, timePrefix, timeSuffix) {
-    global.progressBar.value = global.progressBar.value + len;
-    var divide = global.progressBar.value + '/' + global.progressBar.maxvalue;
-    var time = (Date.now() - global.progressWin.startTime) / 1000;
-    global.progressText.text = prefixString + divide + suffixString;
-    global.progressTimeText.text = timePrefix + time.toString() + timeSuffix;
-    var preY = global.progressText.location[1];
-    var shouldRelocation = global.progressTimeText.text.length === 0;
-    if (shouldRelocation) {
-      global.progressText.location[1] = preY + (global.progressText.location[1] >> 1);
-    } else {
-      global.progressText.location[1] = global.progressText.originY;
-    }
-    global.progressWin.update && global.progressWin.update();
-  },
-  complete: function complete(timePrefix, timeSuffix) {
-    var time = (Date.now() - global.progressWin.startTime) / 1000;
-    var report = timePrefix + time.toString() + timeSuffix;
-    writeLn(report);
-    return time;
-  }
-};
-
-var title = loc(sp.previewTitle);
-var previewPrefix = loc(sp.previewPrefix);
-var timePrefix = loc(sp.previewTime);
-var timeSuffix = loc(sp.second);
-sp.willSavePreviews = function (len) {
-  progressFactory.createWindow(len, title, previewPrefix, timeSuffix);
-};
-sp.didSavePreview = function () {
-  progressFactory.update(1, previewPrefix, '', timePrefix, timeSuffix);
-};
-sp.didSavePreviews = function () {
-  progressFactory.complete(timePrefix, timeSuffix);
-};
-
-module.exports = progressFactory;
-
-/***/ }),
 /* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -7610,7 +7610,7 @@ module.exports = progressFactory;
 
 
 var settingWindow = __webpack_require__(0);
-var presetWindow = __webpack_require__(25);
+var presetWindow = __webpack_require__(26);
 
 module.exports = function () {
   var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }, { name: loc(sp.saveWorkarea), type: 'checkbox' }];
