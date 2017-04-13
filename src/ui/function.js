@@ -317,11 +317,7 @@ module.exports = function() {
         sourceFolder: sp.sourceFolder
       }
 
-      // $.hiresTimer/1000000;
-
       var activeCompLayersArr = sp.newLayers(xml, comp, options)
-
-      // $.writeln($.hiresTimer/1000000);
 
       comp.time = currentTime
 
