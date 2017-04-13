@@ -5081,7 +5081,9 @@ module.exports = function () {
     },
 
     saveItemToFile: function saveItemToFile(file, xml, position) {
-      var newXml = new XML(file.readd());
+      var content = file.readd();
+      var newXml = new XML(content);
+      if (content.length === 0) newXml = new XML('<tree></tree>');
       if (typeof position === 'undefined') {
         newXml.appendChild(xml);
       } else {
@@ -6297,7 +6299,10 @@ var global = $.global;
 
 var progressFactory = {
   createWindow: function createWindow(len, title, prefixString, suffixString) {
-    if (global.progressWin) return;
+    if (global.progressWin) {
+      global.progressBar.maxvalue = len;
+      return;
+    }
     global.progressWin = new Window('palette', title);
     var group = global.progressWin.add('Group{orientation:\'column\',alignment: [\'fill\',\'fill\'],\n      progressText: StaticText {text:"", justify:\'center\',properties:{multiline:1}},\n      progressBar: Progressbar{alignment: [\'fill\',\'fill\'],value:0, minvalue:0, maxvalue:' + len + '}\n    }');
     global.progressWin.addEventListener('keydown', function () {

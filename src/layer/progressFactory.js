@@ -2,7 +2,10 @@ var global = $.global
 
 var progressFactory = {
   createWindow: function(len, title, prefixString, suffixString) {
-    if (global.progressWin) return
+    if (global.progressWin) {
+      global.progressBar.maxvalue = len
+      return
+    }
     global.progressWin = new Window('palette', title)
     var group = global.progressWin.add(`Group{orientation:'column',alignment: ['fill','fill'],
       progressText: StaticText {text:"", justify:'center',properties:{multiline:1}},

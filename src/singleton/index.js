@@ -568,7 +568,9 @@ module.exports = (function() {
     },
 
     saveItemToFile: function(file, xml, position) {
-      var newXml = new XML(file.readd())
+      var content = file.readd()
+      var newXml = new XML(content)
+      if (content.length === 0) newXml = new XML('<tree></tree>')
       if (typeof position === 'undefined') {
         newXml.appendChild(xml)
       } else {
