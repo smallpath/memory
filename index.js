@@ -83,7 +83,11 @@ try {
     win.onResize()
 
     if (sp.checkVersionOnStartupValue) {
-      var checkVersionFunc = require('src/https/checkVersion')()
+      var checkVersionFunc = require('src/https/checkVersion')(
+        win,
+        /* true for starting */
+        true
+      )
       checkVersionFunc()
     }
   })(this)

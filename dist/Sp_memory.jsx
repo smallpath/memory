@@ -706,9 +706,9 @@ module.exports = function () {
 "use strict";
 
 
-module.exports = function (win) {
+module.exports = function (win, isStarting) {
   clearOutput && clearOutput();
-  var targetAlert = win ? alert : writeLn;
+  var targetAlert = isStarting ? writeLn : alert;
   return function () {
     var latestVersion = sp.getVersion();
     var nowVersion = sp.version;
@@ -5222,7 +5222,7 @@ try {
         win.onResize();
 
         if (sp.checkVersionOnStartupValue) {
-            var checkVersionFunc = __webpack_require__(1)();
+            var checkVersionFunc = __webpack_require__(1)(win, true);
             checkVersionFunc();
         }
     })(undefined);
