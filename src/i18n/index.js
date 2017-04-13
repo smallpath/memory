@@ -227,7 +227,7 @@ F键:覆盖选中元素.
   },
   issueDesc: {
     en: 'Notice that error log is in Sp_memory/tempFile/error.txt',
-    ch: '核心错误日志在Sp_memory/tempFile/error.txt当中, 这可以帮助作者定位错误\r\n\r\n你可以在Github或贴吧中报告错误, 在Github上报的错误将会被优先解决\r\n\r\n选择"Yes"前往Gtihub, 选择"No"前往贴吧'
+    ch: '核心错误日志在Sp_memory/tempFile/error.txt当中, 这可以帮助作者定位错误\r\n\r\n你可以在Github或贴吧中报告错误, 在Github上报的错误将会被优先解决\r\n\r\n选择"Yes"前往Github, 选择"No"前往贴吧'
   },
   checkVersionOnStartupText: {
     en: 'Check version on startup',
