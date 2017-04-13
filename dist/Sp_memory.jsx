@@ -1225,8 +1225,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             var ease = '<Ease></Ease>';
             var easexml = new XML(ease);
             try {
-              easexml.keyInSpatialTangent = thisProperty.keyInSpatialTangent(propi);
-              easexml.keyOutSpatialTangent = thisProperty.keyOutSpatialTangent(propi);
+              if (thisProperty.propertyValueType === PropertyValueType.ThreeD_SPATIAL || thisProperty.propertyValueType === PropertyValueType.TwoD_SPATIAL) {
+                easexml.keyInSpatialTangent = thisProperty.keyInSpatialTangent(propi);
+                easexml.keyOutSpatialTangent = thisProperty.keyOutSpatialTangent(propi);
+              }
             } catch (err) {
               $.layer.errorInfoArr.push({ line: $.line, error: err });
             }
@@ -1253,7 +1255,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               $.layer.errorInfoArr.push({ line: $.line, error: err });
             }
             try {
-              easexml.isRoving = thisProperty.keyRoving(propi);
+              if (thisProperty.propertyValueType === PropertyValueType.ThreeD_SPATIAL || thisProperty.propertyValueType === PropertyValueType.TwoD_SPATIAL) {
+                easexml.isRoving = thisProperty.keyRoving(propi);
+              }
             } catch (err) {
               $.layer.errorInfoArr.push({ line: $.line, error: err });
             }
@@ -1375,6 +1379,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       };
       if (isFirstStage) {
         $.layer.forEach.call(layers, loopFunc);
+        $.layer.writeErrorFile();
         $.layer.didSaveLayers();
       } else {
         $.layer.forEachLayer.call(layers, loopFunc);
@@ -1683,7 +1688,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             !genFileFolder.exists && genFileFolder.create();
 
             var file = new File(xml.file.toString());
-            var fileIntempFolder = new File($.layer.tempFolder.toString() + $.layer.slash + decode(file.toString()));
+            var fileInTempFolder = new File($.layer.tempFolder.toString() + $.layer.slash + decode(file.toString()));
             var generatedFile;
             if (decode(file.toString())[0] === '~') {
               generatedFile = new File(genFileFolder.toString() + $.layer.slash + 'D' + decode(file.toString()));
@@ -1692,9 +1697,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             }
             if (file.exists) {
               waitImportedItem = file;
-            } else if (fileIntempFolder.exists) {
+            } else if (fileInTempFolder.exists) {
               waitImportedItem = generatedFile;
-            } else if (xml.fileBin.toString() !== '') {
+            } else if (xml.fileBin.toString().length !== 0) {
               try {
                 if (!generatedFile.parent.exists) {
                   generatedFile.parent.create();
@@ -1844,14 +1849,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             $.layer.errorInfoArr.push({ line: $.line, error: err });
           }
 
+          var target;
+          try {
+            target = layers.property(propIndex);
+          } catch (err) {
+            target = prop;
+          }
+
           try {
             var enabled = currentXML['@enabled'].toString();
             if (enabled !== 'None') {
-              if (layers.property(propIndex).canSetEnabled === true) {
-                if (prop === 0 && enabled === 'false') {
-                  layers.property(propIndex).enabled = false;
-                } else if (enabled === 'false') {
-                  prop.enabled = false;
+              if (target.canSetEnabled === true) {
+                if (enabled === 'false') {
+                  target.enabled = false;
                 }
               }
             }
@@ -1861,10 +1871,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
           var isIndexedGroup = layers.propertyType === PropertyType.INDEXED_GROUP;
           try {
-            if (prop === 0 && isIndexedGroup) {
-              indexProp.name = propName;
-            } else if (isIndexedGroup) {
-              layers.property(prop.propertyIndex).name = propName;
+            if (isIndexedGroup) {
+              target.name = propName;
             }
           } catch (err) {
             $.layer.errorInfoArr.push({ line: $.line, error: err });
@@ -1876,12 +1884,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               var isNotEffect = matchName !== 'ADBE Effect Parade';
               var isNotLayerStyles = matchName !== 'ADBE Layer Styles';
               if (prop === 0 && isNotMask && isNotEffect && isNotLayerStyles) {
-                $.layer.prototype.newPropertyGroup(currentXML, layers.property(propIndex), inTime);
+                $.layer.prototype.newPropertyGroup(currentXML, target, inTime);
               } else {
                 if (isNotMask && isNotEffect && isNotLayerStyles) {
-                  $.layer.prototype.newPropertyGroup(currentXML, prop, inTime);
+                  $.layer.prototype.newPropertyGroup(currentXML, target, inTime);
                 } else {
-                  $.layer.prototype.newPropertyGroup(currentXML, layers.property(matchName), inTime);
+                  $.layer.prototype.newPropertyGroup(currentXML, target, inTime);
                 }
               }
             }
@@ -1892,7 +1900,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           try {
             $.layer.prototype.newProperty(currentXML, layers, inTime);
           } catch (err) {
-            $.writeln();
             $.layer.errorInfoArr.push({ line: $.line, error: err });
             try {
               $.layer.errorInfoArr.push({
@@ -2640,7 +2647,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   };
 
   $.layer.writeErrorFile = function () {
-    if ($.layer.errorInfoArr.length === 0) return;
+    var file = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'error.txt');
+    if ($.layer.errorInfoArr.length === 0) {
+      file.writee('');
+      return;
+    }
     var str = '';
     $.layer.forEach.call($.layer.errorInfoArr, function (item, index) {
       if (!item.error) {
@@ -2649,7 +2660,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
       str += new Date().toLocaleString() + '\tCatched-Line# ' + item.line + '\tHappened-Line# ' + item.error.line.toString() + '\t' + item.error.toString() + '\r\n';
     });
-    var file = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'error.txt');
     writeLn('Log ' + $.layer.errorInfoArr.length + ' errors in error.txt');
     file.writee(str);
   };
