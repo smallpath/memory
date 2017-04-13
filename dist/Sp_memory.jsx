@@ -1803,7 +1803,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               try {
                 prop = layers.addProperty(matchName);
 
-                var indexProp = layers.property(propIndex);
+                var indexProp = prop;
 
                 if (indexProp.matchName === 'ADBE Mask Atom') {
                   indexProp.maskMode = $.layer.getDistance(indexProp.maskMode, parseInt(currentXML['@maskmode']));
@@ -1892,7 +1892,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           try {
             $.layer.prototype.newProperty(currentXML, layers, inTime);
           } catch (err) {
+            $.writeln();
             $.layer.errorInfoArr.push({ line: $.line, error: err });
+            try {
+              $.layer.errorInfoArr.push({
+                line: $.line,
+                error: {
+                  line: err.line,
+                  toString: function toString() {
+                    return '[NOTICE] Above error may be ok because of source xml is saved with previous version of AELayer with matchName' + currentXML['@matchName'].toString();
+                  }
+                }
+              });
+            } catch (err) {}
           }
 
           if (currentXML.exp.toString() !== '') {
@@ -2014,6 +2026,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
               }
             } catch (err) {
               $.layer.errorInfoArr.push({ line: $.line, error: err });
+              $.layer.errorInfoArr.push({
+                line: $.line,
+                error: {
+                  line: err.line,
+                  toString: function toString() {
+                    return '[NOTICE] Above error may be ok because of source xml is saved with previous version of AELayer';
+                  }
+                }
+              });
             }
             try {
               if ($.layer.getDistance(PropertyValueType.TwoD.toString(), xml.inType.toString().split(',')[0]) !== PropertyValueType.TwoD && $.layer.getDistance(PropertyValueType.ThreeD.toString(), xml.inType.toString().split(',')[0]) !== PropertyValueType.ThreeD) {
