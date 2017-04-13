@@ -1963,7 +1963,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             layers.property(matchName).setValue(value);
           } catch (err) {
             if (err.toString().indexOf('hidden') === -1) {
-              $.layer.errorInfoArr.push({ line: $.line, error: err });
+              try {
+                var type = layers.property(matchName).propertyValueType.toString();
+                if (type.indexOf('17') === -1 && type.indexOf('21') === -1 && type.indexOf('22') === -1) {
+                  $.layer.errorInfoArr.push({ line: $.line, error: err });
+                }
+              } catch (err) {}
             }
           }
           try {
