@@ -2012,7 +2012,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             var myScaleProperty = layers.property(matchName);
 
             try {
-              var type = $.layer.getDistance(myScaleProperty.propertyValueType, parseInt(xml.inType.split(',')[0]));
+              type = $.layer.getDistance(myScaleProperty.propertyValueType, parseInt(xml.inType.split(',')[0]));
             } catch (err) {
               $.layer.errorInfoArr.push({ line: $.line, error: err });
             }
