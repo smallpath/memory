@@ -1,4 +1,4 @@
-module.exports = $.global.presetWindow = function() {
+module.exports = function() {
   var jinWin = new Window('dialog', loc(sp.settingPre))
   var jinRes = `group{
     orientation:'column',alignment:['fill','fill'],alignChildren:['fill','fill'],
