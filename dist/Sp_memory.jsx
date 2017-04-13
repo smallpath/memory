@@ -7197,11 +7197,11 @@ module.exports = function () {
   this.winResize = function () {
     var scale = sp.gv.scale;
     var spacing = 2 * scale;
-    var parentDroplistWidth = 100 * scale;
+    var parentDroplistWidth = 104 * scale;
 
     sp.win.outterGroup.location = [spacing, 0];
     sp.win.outterGroup.size = [sp.win.size[0], sp.win.size[1]];
-    sp.gv.size([sp.win.outterGroup.size[0], sp.win.outterGroup.size[1] - 20]);
+    sp.gv.size([sp.win.outterGroup.size[0] - spacing * 2, sp.win.outterGroup.size[1] - 20]);
     sp.win.innerGroup.location = [1, 1];
     sp.win.innerGroup.size.width = sp.win.size[0] + 12;
     sp.droplist.size = [sp.win.size[0] * scale - parentDroplistWidth - spacing * 2, sp.win.innerGroup.size[1] - 3];
