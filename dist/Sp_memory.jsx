@@ -5849,7 +5849,7 @@ function translate(thisObj, expProps) {
     resizeable: true
   });
   winW.margins = 10;
-  var thisRes = 'Group{\n        orientation:\'column\',\n        alignChildren:[\'left\',\'fill\'],\n        list:DropDownList{preferredSize:[200,25],properties:{items:[\'' + loc(tsp.allComp) + '\',\'' + loc(tsp.activeComp) + '\',\'' + loc(tsp.selectedComp) + '\']}},\n        start:Button{text:\'' + loc(tsp.trans) + '\',preferredSize:[200,50]},\n        group:Group{\n                alignChildren:[\'left\',\'fill\'],\n                checka:Checkbox{text:\'' + loc(tsp.wrongExp) + '\',value:1},\n                lista:DropDownList{properties:{items:[\'Default\',\'English\',\'\u4E2D\u6587\',\'\u65E5\u672C\u8A9E\',\'Common\']},size:[60,25]}\n        }\n        groupa:Group{\n                alignChildren:[\'left\',\'fill\'],\n                checkb:Checkbox{text:\'' + loc(tsp.rightExp) + '\',value:0},\n                about:Button{text:\'' + loc(tsp.about) + '\',size:[70,25]},\n        }\n        groupb:Group{\n                alignChildren:[\'left\',\'fill\'],\n                checkc:Checkbox{text:\'' + loc(tsp.allExp) + '\',value:0},\n                checkFile:Checkbox{text:\'' + loc(tsp.log) + '\',size:[80,10]}\n                }\n         addbtn:Button{text:\'' + loc(tsp.editBtn) + '\',preferredSize:[200,30]}\n        }';
+  var thisRes = 'Group{\n    orientation:\'column\',\n    alignChildren:[\'left\',\'fill\'],\n    list:DropDownList{preferredSize:[200,25],properties:{items:[\'' + loc(tsp.allComp) + '\',\'' + loc(tsp.activeComp) + '\',\'' + loc(tsp.selectedComp) + '\']}},\n    start:Button{text:\'' + loc(tsp.trans) + '\',preferredSize:[200,50]},\n    group:Group{\n      alignChildren:[\'left\',\'fill\'],\n      checka:Checkbox{text:\'' + loc(tsp.wrongExp) + '\',value:1},\n      lista:DropDownList{properties:{items:[\'Default\',\'English\',\'\u4E2D\u6587\',\'\u65E5\u672C\u8A9E\',\'Common\']},size:[60,25]}\n    }\n    groupa:Group{\n      alignChildren:[\'left\',\'fill\'],\n      checkb:Checkbox{text:\'' + loc(tsp.rightExp) + '\',value:0},\n      about:Button{text:\'' + loc(tsp.about) + '\',size:[70,25]},\n    }\n    groupb:Group{\n      alignChildren:[\'left\',\'fill\'],\n      checkc:Checkbox{text:\'' + loc(tsp.allExp) + '\',value:0},\n      checkFile:Checkbox{text:\'' + loc(tsp.log) + '\',size:[80,10]}\n    }\n    addbtn:Button{text:\'' + loc(tsp.editBtn) + '\',preferredSize:[200,30]}\n  }';
   try {
     var winTempA = winW.add(thisRes);
   } catch (err) {}
@@ -6136,7 +6136,8 @@ function translate(thisObj, expProps) {
     var ib;
     var allId = [];
     var compid = [];
-    if (list.selection === 1) {
+    var excludeByName;
+    if (list.selection.index === 1) {
       var thisCompnames = [];
       for (ib = 0; ib < app.project.items.length; ib++) {
         if (app.project.item(ib + 1) === app.project.activeItem && app.project.item(ib + 1) instanceof CompItem) {
@@ -6144,15 +6145,16 @@ function translate(thisObj, expProps) {
           thisCompnames.push(app.project.item(ib + 1).name);
         }
       }
-      var excludeByName = compid;
+      excludeByName = compid;
     }
 
-    if (list.selection === 0) {
+    if (list.selection.index === 0) {
       for (ib = 0; ib < app.project.items.length; ib++) {
         allId.push(ib + 1);
       }
+      excludeByName = allId;
     }
-    if (list.selection === 2) {
+    if (list.selection.index === 2) {
       var thisCompname = [];
       var tempId = [];
       for (ib = 0; ib < app.project.items.length; ib++) {
@@ -6164,6 +6166,7 @@ function translate(thisObj, expProps) {
           }
         }
       }
+      excludeByName = tempId;
     }
     var expFilters = [];
     var result = searchExpression(excludeByName, expFilters);
