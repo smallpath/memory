@@ -1,6 +1,7 @@
 var moduleWindow = require('./moduleWindow')
 var moveGroupWindow = require('./moveGroupWindow')
 var outputGroupWindow = require('./outputGroupWindow')
+var checkVersion = require('../https/checkVersion')
 
 module.exports = function() {
   var _ = $.global.UIParser($.global)
@@ -138,9 +139,9 @@ module.exports = function() {
                     gr2: {
                       type: 'group',
                       children: {
-                        deleteAlert: {
+                        checkVersionOnStartup: {
                           type: 'checkbox',
-                          text: loc(sp.isAlert)
+                          text: loc(sp.checkVersionOnStartupText)
                         }
                       }
                     }
@@ -365,11 +366,11 @@ module.exports = function() {
           sp.gv.refresh()
         }
         break
-      case 'deleteAlert':
-        e.value = sp.getSettingAsBool('deleteAlert')
+      case 'checkVersionOnStartup':
+        e.value = sp.getSettingAsBool('checkVersionOnStartup')
         e.onClick = function() {
-          sp.deleteAlertValue = this.value
-          sp.saveSetting('deleteAlert', this.value.toString())
+          sp.checkVersionOnStartupValue = this.value
+          sp.saveSetting('checkVersionOnStartup', this.value.toString())
         }
         break
       case 'frameSecondText':
@@ -545,37 +546,7 @@ module.exports = function() {
         break
       case 'checkVersion':
         if (sp.lang === 'en') { e.size = _('#openLink')[0].size = [211, 27] }
-        e.onClick = function() {
-          var latestVersion = sp.getVersion()
-          var nowVersion = sp.version
-          var compare = sp.compareSemver(latestVersion, nowVersion)
-          if (compare > 0) {
-            alert(loc(sp.newVersionFind) + latestVersion.toString())
-            var scriptLink = sp.downloadLinkPrefix + latestVersion + sp.downloadLinkSuffix
-            if (confirm(loc(sp.shouldUpdateScript))) {
-              try {
-                var scriptString = sp.request(
-                  'GET',
-                  scriptLink,
-                  ''
-                )
-                var file = new File($.fileName)
-                file.writee(scriptString)
-                alert(loc(sp.downloaded))
-                win.close()
-                sp.win.close()
-              } catch (err) { err.printa() }
-            } else if (confirm(loc(sp.shouldDownloadScript))) {
-              try {
-                sp.openLink(scriptLink)
-              } catch (err) { err.printa() }
-            }
-          } else if (compare === 0) {
-            alert(loc(sp.newVersionNotFind) + nowVersion.toString())
-          } else if (compare < 0) {
-            alert(loc(sp.tryVersionFind) + nowVersion.toString())
-          }
-        }
+        e.onClick = checkVersion(win)
         break
       case 'openLink':
         e.onClick = function() {

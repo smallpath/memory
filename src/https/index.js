@@ -27,13 +27,11 @@ Function HTTPPost(sMethod, sUrl, sRequest)
 End Function  
 `
 
-var tempVbsFile = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs')
-if (!tempVbsFile.exists) {
-  tempVbsFile.writee(vbsString)
-}
-
 module.exports = function(method, endpoint, query) {
   var response = null
+
+  var tempVbsFile = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs')
+
   if (!tempVbsFile.exists) {
     tempVbsFile.writee(vbsString)
   }

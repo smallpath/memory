@@ -39,6 +39,7 @@ module.exports = (function() {
             .pushh('savePreview')
             .pushh('gridViewScale')
             .pushh('saveWorkarea')
+            .pushh('checkVersionOnStartup')
 
   valueArr.pushh('1')
           .pushh('true')
@@ -63,14 +64,17 @@ module.exports = (function() {
           .pushh('true')
           .pushh('1')
           .pushh('false')
+          .pushh('false')
 
   keyNameArr.forEach(function(item, index) {
     var value = valueArr[index]
     if (sp.haveSetting(item) === false) sp.saveSetting(item, value)
   })
 
+  // ensure delete alert
+  sp.deleteAlertValue = true
+
   sp.showThumbValue = sp.getSettingAsBool('showThumb')
-  sp.deleteAlertValue = sp.getSettingAsBool('deleteAlert')
   sp.preComposeValue = sp.getSettingAsBool('preCompose')
   sp.saveMaterialValue = sp.getSettingAsBool('saveMaterial')
   sp.autoNameValue = sp.getSettingAsBool('autoName')
@@ -86,6 +90,7 @@ module.exports = (function() {
   sp.frameSecond = parseInt(sp.getSetting('frameSecond'))
   sp.frameNum = parseInt(sp.getSetting('frameNum'))
   sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'))
+  sp.checkVersionOnStartupValue = sp.getSettingAsBool('checkVersionOnStartup')
 
   !sp.scriptFolder.exists && sp.scriptFolder.create()
   !sp.roamingFolder.exists && sp.roamingFolder.create()

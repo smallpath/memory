@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,9 +73,10 @@
 "use strict";
 
 
-var moduleWindow = __webpack_require__(20);
-var moveGroupWindow = __webpack_require__(21);
-var outputGroupWindow = __webpack_require__(23);
+var moduleWindow = __webpack_require__(21);
+var moveGroupWindow = __webpack_require__(22);
+var outputGroupWindow = __webpack_require__(24);
+var checkVersion = __webpack_require__(1);
 
 module.exports = function () {
   var _ = $.global.UIParser($.global);
@@ -213,9 +214,9 @@ module.exports = function () {
                     gr2: {
                       type: 'group',
                       children: {
-                        deleteAlert: {
+                        checkVersionOnStartup: {
                           type: 'checkbox',
-                          text: loc(sp.isAlert)
+                          text: loc(sp.checkVersionOnStartupText)
                         }
                       }
                     }
@@ -438,11 +439,11 @@ module.exports = function () {
           sp.gv.refresh();
         };
         break;
-      case 'deleteAlert':
-        e.value = sp.getSettingAsBool('deleteAlert');
+      case 'checkVersionOnStartup':
+        e.value = sp.getSettingAsBool('checkVersionOnStartup');
         e.onClick = function () {
-          sp.deleteAlertValue = this.value;
-          sp.saveSetting('deleteAlert', this.value.toString());
+          sp.checkVersionOnStartupValue = this.value;
+          sp.saveSetting('checkVersionOnStartup', this.value.toString());
         };
         break;
       case 'frameSecondText':
@@ -623,37 +624,7 @@ module.exports = function () {
         if (sp.lang === 'en') {
           e.size = _('#openLink')[0].size = [211, 27];
         }
-        e.onClick = function () {
-          var latestVersion = sp.getVersion();
-          var nowVersion = sp.version;
-          var compare = sp.compareSemver(latestVersion, nowVersion);
-          if (compare > 0) {
-            alert(loc(sp.newVersionFind) + latestVersion.toString());
-            var scriptLink = sp.downloadLinkPrefix + latestVersion + sp.downloadLinkSuffix;
-            if (confirm(loc(sp.shouldUpdateScript))) {
-              try {
-                var scriptString = sp.request('GET', scriptLink, '');
-                var file = new File($.fileName);
-                file.writee(scriptString);
-                alert(loc(sp.downloaded));
-                win.close();
-                sp.win.close();
-              } catch (err) {
-                err.printa();
-              }
-            } else if (confirm(loc(sp.shouldDownloadScript))) {
-              try {
-                sp.openLink(scriptLink);
-              } catch (err) {
-                err.printa();
-              }
-            }
-          } else if (compare === 0) {
-            alert(loc(sp.newVersionNotFind) + nowVersion.toString());
-          } else if (compare < 0) {
-            alert(loc(sp.tryVersionFind) + nowVersion.toString());
-          }
-        };
+        e.onClick = checkVersion(win);
         break;
       case 'openLink':
         e.onClick = function () {
@@ -730,6 +701,49 @@ module.exports = function () {
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function (win) {
+  clearOutput && clearOutput();
+  var targetAlert = win ? alert : writeLn;
+  return function () {
+    var latestVersion = sp.getVersion();
+    var nowVersion = sp.version;
+    var compare = sp.compareSemver(latestVersion, nowVersion);
+    if (compare > 0) {
+      targetAlert(loc(sp.newVersionFind) + latestVersion.toString());
+      var scriptLink = sp.downloadLinkPrefix + latestVersion + sp.downloadLinkSuffix;
+      if (confirm(loc(sp.shouldUpdateScript))) {
+        try {
+          var scriptString = sp.request('GET', scriptLink, '');
+          var file = new File($.fileName);
+          file.writee(scriptString);
+          targetAlert(loc(sp.downloaded));
+          win.close();
+          sp.win.close();
+        } catch (err) {
+          err.printa();
+        }
+      } else if (confirm(loc(sp.shouldDownloadScript))) {
+        try {
+          sp.openLink(scriptLink);
+        } catch (err) {
+          err.printa();
+        }
+      }
+    } else if (compare === 0) {
+      targetAlert(loc(sp.newVersionNotFind) + nowVersion.toString());
+    } else if (compare < 0) {
+      targetAlert(loc(sp.tryVersionFind) + nowVersion.toString());
+    }
+  };
+};
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2679,7 +2693,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3333,19 +3347,19 @@ function GridView(parent, attrs) {
 }
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+__webpack_require__(16);
+__webpack_require__(14);
 __webpack_require__(15);
 __webpack_require__(13);
-__webpack_require__(14);
-__webpack_require__(12);
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4031,7 +4045,7 @@ UIParser.alertHelp = function () {
 };
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4221,22 +4235,12 @@ sp.extend(sp, {
   issueDesc: {
     en: 'Notice that error log is in Sp_memory/tempFile/error.txt',
     ch: '核心错误日志在Sp_memory/tempFile/error.txt当中, 这可以帮助作者定位错误\r\n\r\n你可以在Github或贴吧中报告错误, 在Github上报的错误将会被优先解决\r\n\r\n选择"Yes"前往Gtihub, 选择"No"前往贴吧'
+  },
+  checkVersionOnStartupText: {
+    en: 'Check version on startup',
+    ch: '脚本启动时检查更新'
   }
 });
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  progressFactory: __webpack_require__(18),
-  previewProgress: __webpack_require__(25),
-  settingWindow: __webpack_require__(0),
-  fns: __webpack_require__(19)
-};
 
 /***/ }),
 /* 7 */
@@ -4245,8 +4249,22 @@ module.exports = {
 "use strict";
 
 
+module.exports = {
+  progressFactory: __webpack_require__(19),
+  previewProgress: __webpack_require__(26),
+  settingWindow: __webpack_require__(0),
+  fns: __webpack_require__(20)
+};
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = function () {
-  __webpack_require__(16);
+  __webpack_require__(17);
 
   sp.extend(sp, {
     forEach: function forEach(xml, callback, context) {
@@ -4332,7 +4350,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4356,17 +4374,18 @@ module.exports = function () {
     valueArr.push('0');
   }
 
-  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview').pushh('gridViewScale').pushh('saveWorkarea');
+  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview').pushh('gridViewScale').pushh('saveWorkarea').pushh('checkVersionOnStartup');
 
-  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true').pushh('1').pushh('false');
+  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true').pushh('1').pushh('false').pushh('false');
 
   keyNameArr.forEach(function (item, index) {
     var value = valueArr[index];
     if (sp.haveSetting(item) === false) sp.saveSetting(item, value);
   });
 
+  sp.deleteAlertValue = true;
+
   sp.showThumbValue = sp.getSettingAsBool('showThumb');
-  sp.deleteAlertValue = sp.getSettingAsBool('deleteAlert');
   sp.preComposeValue = sp.getSettingAsBool('preCompose');
   sp.saveMaterialValue = sp.getSettingAsBool('saveMaterial');
   sp.autoNameValue = sp.getSettingAsBool('autoName');
@@ -4382,6 +4401,7 @@ module.exports = function () {
   sp.frameSecond = parseInt(sp.getSetting('frameSecond'));
   sp.frameNum = parseInt(sp.getSetting('frameNum'));
   sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'));
+  sp.checkVersionOnStartupValue = sp.getSettingAsBool('checkVersionOnStartup');
 
   !sp.scriptFolder.exists && sp.scriptFolder.create();
   !sp.roamingFolder.exists && sp.roamingFolder.create();
@@ -4415,13 +4435,13 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var request = __webpack_require__(17);
+var request = __webpack_require__(18);
 
 module.exports = function () {
   var sp = function sp() {
@@ -5046,7 +5066,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5111,7 +5131,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5119,22 +5139,22 @@ module.exports = function () {
 
 try {
     (function (global) {
-        __webpack_require__(9);
+        __webpack_require__(10);
 
-        __webpack_require__(5);
-
-        __webpack_require__(7);
+        __webpack_require__(6);
 
         __webpack_require__(8);
 
-        __webpack_require__(10);
+        __webpack_require__(9);
 
-        __webpack_require__(1);
+        __webpack_require__(11);
 
-        __webpack_require__(3);
         __webpack_require__(2);
+
         __webpack_require__(4);
-        var helpers = __webpack_require__(6);
+        __webpack_require__(3);
+        __webpack_require__(5);
+        var helpers = __webpack_require__(7);
 
         $.layer.slash = sp.slash;
         $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
@@ -5200,13 +5220,18 @@ try {
         }
 
         win.onResize();
+
+        if (sp.checkVersionOnStartupValue) {
+            var checkVersionFunc = __webpack_require__(1)();
+            checkVersionFunc();
+        }
     })(undefined);
 } catch (err) {
     alert('Line #' + err.line.toString() + '\r\n' + err.toString());
 }
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5241,7 +5266,7 @@ function autoSave() {
 }
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5368,7 +5393,7 @@ function cutLength() {
 }
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5449,7 +5474,7 @@ function reloadPic() {
 }
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6153,7 +6178,7 @@ function translate(thisObj, expProps) {
 }
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6190,7 +6215,7 @@ var cout = $.global.cout = new OperatorOverload(function (operand, rev) {
 $.global.cout = cout;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6198,13 +6223,11 @@ $.global.cout = cout;
 
 var vbsString = 'set namedArgs = WScript.Arguments.Named  \n  \nsMethod = namedArgs.Item("Method")  \nsUrl = namedArgs.Item("URL")  \nsRequest = namedArgs.Item("Query")  \n  \nHTTPPost sMethod, sUrl, sRequest  \n  \nFunction HTTPPost(sMethod, sUrl, sRequest)  \n    \n          set oHTTP = CreateObject("Microsoft.XMLHTTP")    \n    \n    If sMethod = "POST" Then  \n        oHTTP.open "POST", sUrl,false  \n    ElseIf sMethod = "GET" Then  \n        oHTTP.open "GET", sUrl,false  \n    End If  \n  \n          oHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"  \n          oHTTP.setRequestHeader "Content-Length", Len(sRequest)  \n          oHTTP.send sRequest  \n    \n          HTTPPost = oHTTP.responseText  \n    \n          WScript.Echo HTTPPost  \n  \nEnd Function  \n';
 
-var tempVbsFile = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs');
-if (!tempVbsFile.exists) {
-  tempVbsFile.writee(vbsString);
-}
-
 module.exports = function (method, endpoint, query) {
   var response = null;
+
+  var tempVbsFile = new File($.layer.tempFolder.toString() + $.layer.slash.toString() + 'curl.vbs');
+
   if (!tempVbsFile.exists) {
     tempVbsFile.writee(vbsString);
   }
@@ -6224,7 +6247,7 @@ module.exports = function (method, endpoint, query) {
 };
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6310,14 +6333,14 @@ $.layer.didCreateLayers = function () {
 module.exports = progressFactory;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var creatRightClickMenu = __webpack_require__(26);
-var moveItemWindow = __webpack_require__(22);
+var creatRightClickMenu = __webpack_require__(27);
+var moveItemWindow = __webpack_require__(23);
 
 module.exports = function () {
   var keepRef = this;
@@ -7091,7 +7114,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7200,7 +7223,7 @@ module.exports = function (groupItem, win, callback) {
 };
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7261,7 +7284,7 @@ module.exports = function (xmlItem, groupItem, win) {
 };
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7330,7 +7353,7 @@ module.exports = function (cu) {
 };
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7422,7 +7445,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7479,7 +7502,7 @@ module.exports = $.global.presetWindow = function () {
 };
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7540,14 +7563,14 @@ sp.didSavePreviews = function () {
 module.exports = progressFactory;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var settingWindow = __webpack_require__(0);
-var presetWindow = __webpack_require__(24);
+var presetWindow = __webpack_require__(25);
 
 module.exports = function () {
   var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox' }, { name: loc(sp.isSavePreview), type: 'checkbox' }, { name: loc(sp.isOffset), type: 'checkbox' }, { name: loc(sp.isPrecomp), type: 'checkbox' }, { name: loc(sp.isEffect), type: 'checkbox' }, { name: loc(sp.cleanProperty), type: 'checkbox' }, { name: loc(sp.offsetKey), type: 'checkbox' }, { name: loc(sp.saveWorkarea), type: 'checkbox' }];
