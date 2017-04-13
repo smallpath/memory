@@ -131,11 +131,11 @@ F键:覆盖选中元素.
   jmp: { en: 'Jump', ch: '跳转' },
   coverChange: { en: 'Update thumb when cover', ch: '覆盖时更新缩略图' },
   folderName: { en: 'The folder name of collect feature:', ch: '收集生成层时的工程栏文件夹名:' },
-  effectName: { en: "The group name that can enable 'Only property' :", ch: '默认开启仅生成效果的组名:' },
+  effectName: { en: 'The group name that enable Only property :', ch: '默认开启仅生成效果的组名:' },
   limitText: { en: 'Limit the text for UI', ch: '限制主窗口界面的文字长度' },
   scriptSetting: { en: 'Setting', ch: '设置' },
   settingPre: { en: 'Preference', ch: '预设' },
-  thumbType: { en: 'Enable new type of thumb', ch: '启用另一种缩略图' },
+  thumbType: { en: 'Enable new type of thumb', ch: '缩略图包含合成栏图层轮廓' },
   addModule: { en: 'New module', ch: '新建模块' },
   deleteModule: { en: 'Remove module', ch: '删除模块' },
   deleteModuleAlert: {
@@ -208,5 +208,25 @@ F键:覆盖选中元素.
   downloaded: {
     en: 'Update success! To make it work, just restart script',
     ch: '升级成功, 请重启脚本'
+  },
+  generalOption: {
+    en: 'General',
+    ch: '一般选项'
+  },
+  otherOption: {
+    en: 'Other',
+    ch: '其他'
+  },
+  sourceCode: {
+    en: 'Source Code',
+    ch: '脚本源码'
+  },
+  addIssue: {
+    en: 'Report bug',
+    ch: '上报错误'
+  },
+  issueDesc: {
+    en: 'Notice that error log is in Sp_memory/tempFile/error.txt',
+    ch: '核心错误日志在Sp_memory/tempFile/error.txt当中, 这可以帮助作者定位错误\r\n\r\n你可以在Github或贴吧中报告错误, 在Github上报的错误将会被优先解决\r\n\r\n选择"Yes"前往Gtihub, 选择"No"前往贴吧'
   }
 })

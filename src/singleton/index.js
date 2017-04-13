@@ -27,6 +27,9 @@ module.exports = (function() {
     ui: 1,
     lang: 0,
 
+    sourceCodeLink: 'https://github.com/smallpath/memory',
+    githubIssue: 'https://github.com/smallpath/memory/issues',
+    issueLink: 'https://tieba.baidu.com/p/4462854806',
     checkVersionLink: 'https://api.github.com/repos/smallpath/memory/git/refs/tags',
     downloadLinkPrefix: 'https://raw.githubusercontent.com/smallpath/memory/v',
     downloadLinkSuffix: '/dist/Sp_memory.jsx',

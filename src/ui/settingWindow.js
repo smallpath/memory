@@ -3,289 +3,320 @@ var moveGroupWindow = require('./moveGroupWindow')
 var outputGroupWindow = require('./outputGroupWindow')
 
 module.exports = function() {
-  var _ = $.global.UIParser(global)
+  var _ = $.global.UIParser($.global)
 
   var UIJson = {
     newWin: {
       type: 'palette',
       text: sp.scriptName + ' v' + sp.scriptVersion,
       margins: 10,
+      orientation: 'row',
       children: {
-
-        group1: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            helpText: {
-              type: 'edittext',
-              properties: {
-                multiline: true,
-                scrolling: false
-              },
-              preferredSize: [150, 280],
-              text: '',
-              enabled: 1
-            },
-            gr: {
-              type: 'group',
-              orientation: 'column',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              margins: 0,
-              spacing: 0,
-              children: {
-                drop: {
-                  type: 'dropdownlist',
-                  preferredSize: [150, 20]
-                },
-                wlist: {
-                  type: 'listbox',
-                  preferredSize: [150, 260]
-                }
-              }
-            }
-          }
-        },
-        group2: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            deleteFolder: {
-              type: 'Button',
-              preferredSize: [165, 27],
-              text: loc(sp.deleteFolder),
-              enabled: 1
-            },
-            changeGroupName: {
-              type: 'Button',
-              preferredSize: [165, 27],
-              text: loc(sp.changeGroupName),
-              enabled: 1
-            }
-          }
-        },
-        group3: {
-          type: 'group',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            output: {
-              type: 'Button',
-              text: loc(sp.output),
-              enabled: 1
-            },
-            move: {
-              type: 'Button',
-              text: loc(sp.move),
-              enabled: 1
-            }
-          }
-        },
-        group35: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            editModule: {
-              type: 'Button',
-              preferredSize: [330, 27],
-              text: loc(sp.editModule),
-              enabled: 1
-            }
-          }
-        },
-        group4: {
+        leftGroup: {
           type: 'group',
           orientation: 'column',
           alignment: ['fill', 'fill'],
           alignChildren: ['fill', 'fill'],
           children: {
-            g0: {
+            group1: {
               type: 'group',
               orientation: 'row',
               alignment: ['fill', 'fill'],
               alignChildren: ['fill', 'fill'],
               children: {
+                helpText: {
+                  type: 'edittext',
+                  properties: {
+                    multiline: true,
+                    scrolling: false
+                  },
+                  preferredSize: [150, 280],
+                  text: '',
+                  enabled: 1
+                },
+                gr: {
+                  type: 'group',
+                  orientation: 'column',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  margins: 0,
+                  spacing: 0,
+                  children: {
+                    drop: {
+                      type: 'dropdownlist',
+                      preferredSize: [150, 20]
+                    },
+                    wlist: {
+                      type: 'listbox',
+                      preferredSize: [150, 260]
+                    }
+                  }
+                }
+              }
+            },
+            group2: {
+              type: 'group',
+              orientation: 'row',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                deleteFolder: {
+                  type: 'Button',
+                  preferredSize: [165, 27],
+                  text: loc(sp.deleteFolder),
+                  enabled: 1
+                },
+                changeGroupName: {
+                  type: 'Button',
+                  preferredSize: [165, 27],
+                  text: loc(sp.changeGroupName),
+                  enabled: 1
+                }
+              }
+            },
+            group3: {
+              type: 'group',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                output: {
+                  type: 'Button',
+                  text: loc(sp.output),
+                  enabled: 1
+                },
+                move: {
+                  type: 'Button',
+                  text: loc(sp.move),
+                  enabled: 1
+                }
+              }
+            },
+            group35: {
+              type: 'group',
+              orientation: 'row',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                editModule: {
+                  type: 'Button',
+                  preferredSize: [330, 27],
+                  text: loc(sp.editModule),
+                  enabled: 1
+                }
+              }
+            }
+          }
+        },
+        rightGroup: {
+          type: 'group',
+          orientation: 'column',
+          alignment: ['top', 'fill'],
+          alignChildren: ['fill', 'fill'],
+          children: {
+            group4: {
+              type: 'panel',
+              text: loc(sp.generalOption),
+              orientation: 'column',
+              alignment: ['fill', 'fill'],
+              alignChildren: ['fill', 'fill'],
+              children: {
+                g0: {
+                  type: 'group',
+                  orientation: 'row',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    gr1: {
+                      type: 'group',
+                      children: {
+                        limitText: {
+                          type: 'checkbox',
+                          text: loc(sp.limitText)
+                        }
+                      }
+                    },
+                    gr2: {
+                      type: 'group',
+                      children: {
+                        deleteAlert: {
+                          type: 'checkbox',
+                          text: loc(sp.isAlert)
+                        }
+                      }
+                    }
+                  }
+                },
                 gr1: {
                   type: 'group',
+                  orientation: 'row',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
                   children: {
-                    limitText: {
-                      type: 'checkbox',
-                      text: loc(sp.limitText)
+                    gr1: {
+                      type: 'group',
+                      children: {
+                        thumbType: {
+                          type: 'checkbox',
+                          text: loc(sp.thumbType)
+                        }
+                      }
+                    },
+                    gr2: {
+                      type: 'group',
+                      children: {
+                        coverChange: {
+                          type: 'checkbox',
+                          text: loc(sp.coverChange)
+                        }
+                      }
                     }
                   }
                 },
-                gr2: {
-                  type: 'group',
-                  children: {
-                    coverChange: {
-                      type: 'checkbox',
-                      text: loc(sp.coverChange)
-                    }
-                  }
-                }
-              }
-            },
-            gr1: {
-              type: 'group',
-              orientation: 'row',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                gr1: {
-                  type: 'group',
-                  children: {
-                    thumbType: {
-                      type: 'checkbox',
-                      text: loc(sp.thumbType)
-                    }
-                  }
-                },
-                gr2: {
-                  type: 'group',
-                  children: {
-                    deleteAlert: {
-                      type: 'checkbox',
-                      text: loc(sp.isAlert)
-                    }
-                  }
-                }
-              }
-            },
-            grRatio: {
-              type: 'group',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                setRatio: {
-                  type: 'statictext',
-                  text: loc(sp.setRatioText)
-                },
-                ratioText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
-                }
-              }
-            },
-            gr4: {
-              type: 'group',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                frameSecond: {
-                  type: 'statictext',
-                  text: loc(sp.frameSecondText)
-                },
-                frameSecondText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
-                }
-              }
-            },
-            gr5: {
-              type: 'group',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                frameNum: {
-                  type: 'statictext',
-                  text: loc(sp.frameNumText)
-                },
-                frameNumText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
-                }
-              }
-            },
-            gr0: {
-              type: 'group',
-              orientation: 'row',
-              alignment: ['fill', 'fill'],
-              alignChildren: ['fill', 'fill'],
-              children: {
-                gr2: {
+                grRatio: {
                   type: 'group',
                   alignment: ['fill', 'fill'],
                   alignChildren: ['fill', 'fill'],
                   children: {
-                    folderName: {
+                    setRatio: {
                       type: 'statictext',
-                      text: loc(sp.folderName)
+                      text: loc(sp.setRatioText)
                     },
-                    folderNameText: {
+                    ratioText: {
                       type: 'edittext',
                       text: '',
-                      justify: 'center',
-                      characters: 17
+                      characters: 10
+                    }
+                  }
+                },
+                gr4: {
+                  type: 'group',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    frameSecond: {
+                      type: 'statictext',
+                      text: loc(sp.frameSecondText)
+                    },
+                    frameSecondText: {
+                      type: 'edittext',
+                      text: '',
+                      characters: 10
+                    }
+                  }
+                },
+                gr5: {
+                  type: 'group',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    frameNum: {
+                      type: 'statictext',
+                      text: loc(sp.frameNumText)
+                    },
+                    frameNumText: {
+                      type: 'edittext',
+                      text: '',
+                      characters: 10
+                    }
+                  }
+                },
+                gr0: {
+                  type: 'group',
+                  orientation: 'row',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    gr2: {
+                      type: 'group',
+                      alignment: ['fill', 'fill'],
+                      alignChildren: ['fill', 'fill'],
+                      children: {
+                        folderName: {
+                          type: 'statictext',
+                          text: loc(sp.folderName)
+                        },
+                        folderNameText: {
+                          type: 'edittext',
+                          text: '',
+                          justify: 'center',
+                          characters: 10
+                        }
+                      }
+                    }
+                  }
+                },
+                gr3: {
+                  type: 'group',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    effectName: {
+                      type: 'statictext',
+                      text: loc(sp.effectName)
+                    },
+                    effectNameText: {
+                      type: 'edittext',
+                      text: '',
+                      characters: 14
                     }
                   }
                 }
               }
-            },
-            gr3: {
-              type: 'group',
+            }, // end of group4
+            group5: {
+              type: 'panel',
+              text: loc(sp.otherOption),
+              orientation: 'column',
               alignment: ['fill', 'fill'],
               alignChildren: ['fill', 'fill'],
               children: {
-                effectName: {
-                  type: 'statictext',
-                  text: loc(sp.effectName)
+                group5: {
+                  type: 'group',
+                  orientation: 'row',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    ch: {
+                      type: 'Button',
+                      text: '中文',
+                      enabled: 0
+                    },
+                    en: {
+                      type: 'Button',
+                      text: 'English',
+                      enabled: 0
+                    }
+                  }
                 },
-                effectNameText: {
-                  type: 'edittext',
-                  text: '',
-                  characters: 18
+                group6: {
+                  type: 'group',
+                  orientation: 'row',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    sourceCode: { type: 'Button', text: loc(sp.sourceCode), enabled: 1 },
+                    openLink: {
+                      type: 'Button',
+                      text: loc(sp.link),
+                      enabled: 1
+                    }
+                  }
+                },
+                group7: {
+                  type: 'group',
+                  orientation: 'row',
+                  alignment: ['fill', 'fill'],
+                  alignChildren: ['fill', 'fill'],
+                  children: {
+                    checkVersion: {
+                      type: 'Button',
+                      text: loc(sp.checkVersion),
+                      enabled: 1
+                    },
+                    addIssue: { type: 'Button', text: loc(sp.addIssue), enabled: 1 }
+                  }
                 }
               }
-            }
-
-          }
-        }, // end of group4
-        group5: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            ch: {
-              type: 'Button',
-              text: '中文',
-              enabled: 0
-            },
-            en: {
-              type: 'Button',
-              text: 'English',
-              enabled: 0
-            }
-          }
-        },
-        // group6:{type:'group',orientation:'row',alignment:['fill','fill'],alignChildren:['fill','fill'],children:{
-        //   ui1:{type:'Button',text:loc(sp.ui1),enabled:0},
-        //   ui2:{type:'Button',text:loc(sp.ui2),enabled:0}
-        // }},
-        group7: {
-          type: 'group',
-          orientation: 'row',
-          alignment: ['fill', 'fill'],
-          alignChildren: ['fill', 'fill'],
-          children: {
-            checkVersion: {
-              type: 'Button',
-              text: loc(sp.checkVersion),
-              enabled: 1
-            },
-            openLink: {
-              type: 'Button',
-              text: loc(sp.link),
-              enabled: 1
             }
           }
         }
@@ -299,6 +330,26 @@ module.exports = function() {
 
   _('*').each(function(e) {
     switch (e.id) {
+      case 'addIssue':
+        e.onClick = function() {
+          if (sp.lang === 'ch') {
+            var shouldOpen = confirm(loc(sp.issueDesc))
+            if (shouldOpen) {
+              sp.openLink(sp.githubIssue)
+            } else {
+              sp.openLink(sp.issueLink)
+            }
+          } else {
+            alert(loc(sp.issueDesc))
+            sp.openLink(sp.githubIssue)
+          }
+        }
+        break
+      case 'sourceCode':
+        e.onClick = function() {
+          sp.openLink(sp.sourceCodeLink)
+        }
+        break
       case 'ratioText':
         e.text = (1 / sp.gridViewScale).toString()
         e.onChange = function() {

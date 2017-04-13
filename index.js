@@ -2,6 +2,8 @@ try {
   (function(global) {
     // create singleton helper object for script,and store it into Global
     require('src/singleton')
+    // i18n
+    require('src/i18n')
     // Add methods to objects
     require('src/polyfill')
     // Save default presets if there isn't, then load presets and parse them
@@ -10,8 +12,6 @@ try {
     require('src/startup')
     // core saving and generating library for ae layer
     require('lib/AfterEffectsLayer')
-    // i18n
-    require('src/i18n')
     // color picker library for selecting colr
     require('lib/HelperScripts')
     require('lib/GridView')
