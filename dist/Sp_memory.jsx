@@ -6802,7 +6802,7 @@ module.exports = function () {
       try {
         if (sp.preComposeValue === false && activeCompLayersArr.length === 1 && activeCompLayersArr[0].source instanceof CompItem) {
           activeCompLayersArr[0].selected = true;
-          app.executeCommand(app.findMenuCommandId('Fit to Comp'));
+          app.executeCommand(2156);
           activeCompLayersArr[0].selected = false;
         }
       } catch (err) {
