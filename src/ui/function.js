@@ -750,11 +750,12 @@ module.exports = function() {
     sp.gv.refresh()
   }
   this.winClose = function() {
-    var thisStr = sp.win.size[0].toString() + ',' + sp.win.size[1].toString()
-    sp.saveSetting('winSize', thisStr)
-    thisStr = sp.win.location[0].toString() + ',' + sp.win.location[1].toString()
-    sp.saveSetting('winLocation', thisStr)
-
+    try {
+      var thisStr = sp.win.size[0].toString() + ',' + sp.win.size[1].toString()
+      sp.saveSetting('winSize', thisStr)
+      thisStr = sp.win.location[0].toString() + ',' + sp.win.location[1].toString()
+      sp.saveSetting('winLocation', thisStr)
+    } catch (err) {}
     sp.renderTaskArray.forEach(function(item, index) {
       app.cancelTask(item)
     })
