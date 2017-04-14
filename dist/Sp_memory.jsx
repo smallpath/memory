@@ -4450,17 +4450,18 @@ module.exports = function () {
     this.print() << cout;
   };
 
-  var encoding = 'UTF-8';
+  var encoding = sp.os === 'mac' ? 'UTF-8' : '';
 
   File.prototype.writee = function (str) {
     this.open('w');
-    this.encoding = encoding;
+    if (encoding) this.encoding = encoding;
     this.write(str);
     this.close();
   };
 
   File.prototype.readd = function () {
     this.open('r');
+    if (encoding) this.encoding = encoding;
     var temp = this.read();
     this.close();
     return temp;

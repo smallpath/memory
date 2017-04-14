@@ -2,4 +2,8 @@ node_modules
 
 Sp_memory
 
+dist/*
+
+!dist/Sp_memory.jsx
+
 *.log
