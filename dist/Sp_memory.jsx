@@ -1891,8 +1891,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 var commandNameArr = [];
                 var i;
                 for (i = 0; i < group.length(); i++) {
-                  layerStyleArr.push(currentXML.child(i)['@matchName']);
-                  commandNameArr.push(currentXML.child(i)['@name']);
+                  layerStyleArr.push(currentXML.child(i)['@matchName'].toString());
+                  commandNameArr.push(currentXML.child(i)['@name'].toString());
                 }
 
                 for (i = 0; i < layerStyleArr.length; i++) {
@@ -3224,11 +3224,11 @@ function GridView(parent, attrs) {
         var font = ScriptUI.newFont('Microsoft YaHei', ScriptUI.FontStyle.REGULAR, e.itemFontSize * e.scale * 0.6);
 
         var trickWidthForCC2014 = 20;
-        var itemWidth = e.itemSize[0];
+        var trickForOther = 0;
         for (i = 0; i < items.length; i++) {
           item = items[i];
           if (!shouldDrawArr[i]) continue;
-          var textRect = g.measureString(item.text, font, itemWidth);
+          var textRect = g.measureString(item.text, font);
           var thisText = item.text;
           var totalText = item.text;
           var base = textRect.width - item.imageRect[2] - e.spacing[0] * 2;
@@ -3236,7 +3236,7 @@ function GridView(parent, attrs) {
             if (base >= -trickWidthForCC2014) {
               for (var j = 0; j < item.text.length; j++) {
                 thisText = item.text.slice(0, totalText.length - 2 - j);
-                textRect = g.measureString(thisText, font, itemWidth);
+                textRect = g.measureString(thisText, font);
                 var newBase = textRect.width - item.imageRect[2] - e.spacing[0] * 2;
                 if (newBase < -trickWidthForCC2014) {
                   break;
@@ -3244,12 +3244,12 @@ function GridView(parent, attrs) {
               }
             }
           } else if (e.version !== 'CC2014') {
-            if (base >= 5) {
+            if (base >= trickForOther) {
               for (j = 0; j < item.text.length; j++) {
                 thisText = item.text.slice(0, totalText.length - 2 - j);
-                textRect = g.measureString(thisText, font, itemWidth);
+                textRect = g.measureString(thisText, font);
                 newBase = textRect.width - item.imageRect[2] - e.spacing[0] * 2;
-                if (newBase < 5) {
+                if (newBase < trickForOther) {
                   break;
                 }
               }
@@ -3260,7 +3260,6 @@ function GridView(parent, attrs) {
           if (!isNaN(value) && value.toString() === thisText) {
             thisText += ' ';
           }
-
           if (e.version === 'CC2014') {
             g.drawString(thisText, fontPen, item.rect[0] + item.fontRect[0], item.rect[1] + item.fontRect[1] - e.scrollBarValue - 10, font);
           } else {
