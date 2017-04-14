@@ -25,7 +25,9 @@ end tell`
         onBuildEnd: function() {
           osascript(appleScriptContent, {
             type: 'AppleScript'
-          }).pipe(process.stdout)
+          }, (err, data) => {
+            if (err) console.error(err)
+          })
         }
       })
     )
