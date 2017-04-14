@@ -54,8 +54,11 @@ module.exports = (function() {
     this.print() << cout
   }
 
+  var encoding = 'UTF-8'
+
   File.prototype.writee = function(str) {    // method to write file
     this.open('w')
+    this.encoding = encoding
     this.write(str)
     this.close()
   }

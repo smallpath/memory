@@ -32,7 +32,7 @@ module.exports = function() {
 
   if (sp.lang === 'ch') { var maxWidth = 180 } else { maxWidth = 190 }
 
-  var shortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, Math.ceil(length / 2) * space + 2], {
+  var shortMenu = new Window('palette', '', [0, 0, maxWidth, Math.ceil(length / 2) * space + 2], {
     borderless: true
   })
 

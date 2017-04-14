@@ -4450,8 +4450,11 @@ module.exports = function () {
     this.print() << cout;
   };
 
+  var encoding = 'UTF-8';
+
   File.prototype.writee = function (str) {
     this.open('w');
+    this.encoding = encoding;
     this.write(str);
     this.close();
   };
@@ -5693,7 +5696,7 @@ function translate(thisObj, expProps) {
     if (hahaxml.settings.version !== '1.6') thisFile.remove();
   }
   var iii;
-  if (!thisFile.exists) {
+  if (!thisFile.exists || thisFile.length === -1) {
     var newxml = new XML('<WhiteList></WhiteList>');
     newxml.settings.version = '1.6';
     newxml.settings.author = 'Smallpath';
@@ -6189,10 +6192,7 @@ function translate(thisObj, expProps) {
   };
 
   if (typeof expProps === 'undefined') {
-    if (winW instanceof Window) {
-      winW.center();
-      winW.show();
-    } else {
+    if (winW instanceof Window) {} else {
       winW.layout.layout(true);
     }
   } else {
@@ -7683,7 +7683,7 @@ module.exports = function () {
     maxWidth = 190;
   }
 
-  var shortMenu = new Window('palette', 'huhu', [0, 0, maxWidth, Math.ceil(length / 2) * space + 2], {
+  var shortMenu = new Window('palette', '', [0, 0, maxWidth, Math.ceil(length / 2) * space + 2], {
     borderless: true
   });
 
