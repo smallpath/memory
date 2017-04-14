@@ -4450,18 +4450,14 @@ module.exports = function () {
     this.print() << cout;
   };
 
-  var encoding = sp.os === 'mac' ? 'UTF-8' : '';
-
   File.prototype.writee = function (str) {
     this.open('w');
-    if (encoding) this.encoding = encoding;
     this.write(str);
     this.close();
   };
 
   File.prototype.readd = function () {
     this.open('r');
-    if (encoding) this.encoding = encoding;
     var temp = this.read();
     this.close();
     return temp;
@@ -5694,7 +5690,7 @@ function translate(thisObj, expProps) {
   if (thisFile.exists) {
     var content = thisFile.readd();
     var hahaxml = new XML(content);
-    if (hahaxml.settings.version !== '1.6') thisFile.remove();
+    if (hahaxml.settings.version.toString() !== '1.6') thisFile.remove();
   }
   var iii;
   if (!thisFile.exists || thisFile.length === -1) {
@@ -5703,6 +5699,9 @@ function translate(thisObj, expProps) {
     newxml.settings.author = 'Smallpath';
     for (iii = 0; iii < allWords.length; iii++) {
       newxml.words.words[iii] = allWords[iii];
+    }
+    if (sp.os === 'mac') {
+      thisFile.encoding = 'UTF-8';
     }
     thisFile.writee(newxml);
   }
@@ -6193,7 +6192,10 @@ function translate(thisObj, expProps) {
   };
 
   if (typeof expProps === 'undefined') {
-    if (winW instanceof Window) {} else {
+    if (winW instanceof Window) {
+      winW.center();
+      winW.show();
+    } else {
       winW.layout.layout(true);
     }
   } else {

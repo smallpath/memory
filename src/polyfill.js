@@ -54,18 +54,14 @@ module.exports = (function() {
     this.print() << cout
   }
 
-  var encoding = sp.os === 'mac' ? 'UTF-8' : ''
-
   File.prototype.writee = function(str) {    // method to write file
     this.open('w')
-    if (encoding) this.encoding = encoding
     this.write(str)
     this.close()
   }
 
   File.prototype.readd = function() {      // method to read from file
     this.open('r')
-    if (encoding) this.encoding = encoding
     var temp = this.read()
     this.close()
     return temp
