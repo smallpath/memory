@@ -1,6 +1,9 @@
 var webpack = require('webpack')
 var path = require('path')
 var packages = require('../package.json')
+var os = require('os')
+var osascript = require('osascript').eval
+var WebpackShellPlugin = require('./WebpackShellPlugin')
 var plugins = [
   new webpack.DefinePlugin({
     'process.env.VERSION': JSON.stringify(packages.version)
@@ -8,18 +11,34 @@ var plugins = [
 ]
 
 var isDev = process.env.NODE_ENV !== 'production'
+var targetScript = path.join(__dirname, '../dist/Sp_memory.jsx')
 if (isDev) {
   var ae = require('after-effects')
-  var afterfx = path.join(ae.scriptsDir, '../afterfx.exe')
-  var WebpackShellPlugin = require('./WebpackShellPlugin')
+  var isMac = os.platform() === 'darwin'
+  if (isMac) {
+    var aeFolderName = path.basename(path.join(ae.scriptsDir, '../'))
+    let appleScriptContent = `tell application "${aeFolderName}"
+  DoScriptFile "${targetScript}"
+end tell`
+    plugins.push(
+      new WebpackShellPlugin({
+        onBuildEnd: function() {
+          osascript(appleScriptContent, {
+            type: 'AppleScript'
+          }).pipe(process.stdout)
+        }
+      })
+    )
+  } else {
+    var afterfx = path.join(ae.scriptsDir, '../afterfx.exe')
+    let shell = `"${afterfx}" -r ${targetScript}`
 
-  var shell = `"${afterfx}" -r ${path.join(__dirname, '../dist/Sp_memory.jsx')}`
-
-  plugins.push(
-    new WebpackShellPlugin({
-      onBuildEnd: [shell]
-    })
-  )
+    plugins.push(
+      new WebpackShellPlugin({
+        onBuildEnd: [shell]
+      })
+    )
+  }
 }
 
 module.exports = {

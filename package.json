@@ -40,6 +40,7 @@
     "eslint-plugin-node": "^4.2.2",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
+    "osascript": "^1.2.0",
     "webpack": "^2.3.3"
   }
 }

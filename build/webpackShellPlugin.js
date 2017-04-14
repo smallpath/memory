@@ -9,7 +9,6 @@ function puts(error, stdout, stderr) {
 
 function WebpackShellPlugin(options) {
   var defaultOptions = {
-    onBuildStart: [],
     onBuildEnd: []
   }
 
@@ -19,15 +18,11 @@ function WebpackShellPlugin(options) {
 WebpackShellPlugin.prototype.apply = function(compiler) {
   const options = this.options
 
-  compiler.plugin('compilation', compilation => {
-    if (options.onBuildStart.length) {
-      options.onBuildStart.forEach(script => exec(script, puts))
-    }
-  })
-
   compiler.plugin('emit', (compilation, callback) => {
     if (options.onBuildEnd.length) {
       options.onBuildEnd.forEach(script => exec(script, puts))
+    } else if (typeof options.onBuildEnd === 'function') {
+      options.onBuildEnd()
     }
     callback()
   })
