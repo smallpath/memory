@@ -7218,11 +7218,10 @@ module.exports = function () {
     sp.droplist.size = [sp.win.size[0] * scale - parentDroplistWidth - spacing * 2, sp.win.innerGroup.size[1] - 3];
     sp.droplist.location.x = parentDroplistWidth;
     sp.droplist.itemSize.width = (sp.droplist.size.width - 27 * scale) / scale;
-
     sp.parentDroplist.size.width = parentDroplistWidth;
     sp.parentDroplist.size.height = sp.droplist.size.height;
+    sp.parentDroplist.location.y = 0;
     sp.parentDroplist.itemSize.width = (parentDroplistWidth - 27 * scale) / scale;
-
     sp.gv.refresh();
   };
   this.winClose = function () {
