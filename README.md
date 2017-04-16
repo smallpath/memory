@@ -1,10 +1,9 @@
-## [English Document](https://smallpath.github.io/Memory/#/en/)
-
 ## Memory
 这是后期合成软件Adobe After Effects的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
 ## 文档
-https://smallpath.github.io/Memory
+- [中文文档](https://smallpath.github.io/Memory)
+- [English Document](https://smallpath.github.io/Memory/#/en/)
 
 ## 3.1 TODO
 
