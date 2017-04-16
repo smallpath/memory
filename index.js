@@ -37,6 +37,8 @@ try {
     var parentDroplist = sp.parentDroplist = innerGroup.add('Dropdownlist{}')
     var droplist = sp.droplist = innerGroup.add('Dropdownlist{}')
     var gv = sp.gv = new GridView(outterGroup)
+    var screen = $.screens[0].toString().split('-').pop().split(':')
+    outterGroup.maximumSize = innerGroup.maximumSize = [parseInt(screen[0]), parseInt(screen[1])]
 
     // Set GridView's attributes
     gv.scale = sp.gridViewScale

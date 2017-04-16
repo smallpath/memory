@@ -3048,6 +3048,8 @@ function GridView(parent, attrs) {
       var GV = e.GV = parent.add("group{orientation: 'stack', alignment: ['fill','fill'], margins: 0, spacing: 0}");
       var list = e.list = GV.add("button{alignment:['fill','fill']}");
       var eventRect = e.eventRect = GV.add("group{alignment:['fill','fill']}");
+      var screen = $.screens[0].toString().split('-').pop().split(':');
+      GV.maximumSize = list.maximumSize = eventRect.maximumSize = [parseInt(screen[0]), parseInt(screen[1])];
 
       eventRect.addEventListener('mousedown', function (event) {
         e.event.mouseMoving = false;
@@ -5316,6 +5318,8 @@ try {
         var parentDroplist = sp.parentDroplist = innerGroup.add('Dropdownlist{}');
         var droplist = sp.droplist = innerGroup.add('Dropdownlist{}');
         var gv = sp.gv = new GridView(outterGroup);
+        var screen = $.screens[0].toString().split('-').pop().split(':');
+        outterGroup.maximumSize = innerGroup.maximumSize = [parseInt(screen[0]), parseInt(screen[1])];
 
         gv.scale = sp.gridViewScale;
         gv.limitText = sp.getSettingAsBool('limitText');
@@ -7260,7 +7264,7 @@ module.exports = function () {
     if (event.button === 2 && event.detail === 1 && event.altKey === false) {
       var currentPosition = [event.screenX, event.screenY];
       var screenString = $.screens[0].toString();
-      var finalPositionXString = (screenString.toString().match(/-(\w*?)\:/) || [])[1];
+      var finalPositionXString = (screenString.match(/-(\w*?)\:/) || [])[1];
 
       if (currentPosition[0] + 180 > parseInt(finalPositionXString)) {
         currentPosition = [event.screenX - 180, event.screenY];

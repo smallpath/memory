@@ -784,7 +784,7 @@ module.exports = function() {
     if (event.button === 2 && event.detail === 1 && event.altKey === false) {
       var currentPosition = [event.screenX, event.screenY]
       var screenString = $.screens[0].toString()
-      var finalPositionXString = (screenString.toString().match(/-(\w*?)\:/) || [])[1]
+      var finalPositionXString = (screenString.match(/-(\w*?)\:/) || [])[1]
 
       if (currentPosition[0] + 180 > parseInt(finalPositionXString)) {
         currentPosition = [event.screenX - 180, event.screenY]
