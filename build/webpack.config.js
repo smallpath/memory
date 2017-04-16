@@ -1,23 +1,37 @@
-var webpack = require('webpack')
-var path = require('path')
-var packages = require('../package.json')
-var os = require('os')
-var osascript = require('osascript').eval
-var WebpackShellPlugin = require('./WebpackShellPlugin')
-var plugins = [
+const webpack = require('webpack')
+const path = require('path')
+const packages = require('../package.json')
+const os = require('os')
+const osascript = require('osascript').eval
+const WebpackShellPlugin = require('./webpackShellPlugin')
+const WebpackWrapPlugin = require('./webpackWrapPlugin')
+const plugins = [
   new webpack.DefinePlugin({
     'process.env.VERSION': JSON.stringify(packages.version)
+  }),
+  new WebpackWrapPlugin({
+    prefix: '/****/ (function(memoryGlobal) {',
+    suffix: '/****/ })(this)'
+  }),
+  new webpack.BannerPlugin({
+    banner: `  ${packages.name} ${packages.version}
+
+  ${packages.description}
+
+  repository: ${packages.homepage.replace('#readme', '')}
+  issues: ${packages.bugs.url}`
   })
 ]
 
-var isDev = process.env.NODE_ENV !== 'production'
-var targetScript = path.join(__dirname, '../dist/Sp_memory.jsx')
+const isDev = process.env.NODE_ENV !== 'production'
+const targetScript = path.join(__dirname, '../dist/Sp_memory.jsx')
+
 if (isDev) {
-  var ae = require('after-effects')
-  var isMac = os.platform() === 'darwin'
+  const ae = require('after-effects')
+  const isMac = os.platform() === 'darwin'
   if (isMac) {
-    var aeFolderName = path.basename(path.join(ae.scriptsDir, '../'))
-    let appleScriptContent = `tell application "${aeFolderName}"
+    const aeFolderName = path.basename(path.join(ae.scriptsDir, '../'))
+    const appleScriptContent = `tell application "${aeFolderName}"
   DoScriptFile "${targetScript}"
 end tell`
     plugins.push(
@@ -32,8 +46,8 @@ end tell`
       })
     )
   } else {
-    var afterfx = path.join(ae.scriptsDir, '../afterfx.exe')
-    let shell = `"${afterfx}" -r ${targetScript}`
+    const afterfx = path.join(ae.scriptsDir, '../afterfx.exe')
+    const shell = `"${afterfx}" -r ${targetScript}`
 
     plugins.push(
       new WebpackShellPlugin({

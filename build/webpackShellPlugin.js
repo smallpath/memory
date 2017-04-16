@@ -1,6 +1,6 @@
 'use strict'
 
-var exec = require('child_process').exec
+const exec = require('child_process').exec
 
 function puts(error, stdout, stderr) {
   if (error) {}
@@ -8,7 +8,7 @@ function puts(error, stdout, stderr) {
 }
 
 function WebpackShellPlugin(options) {
-  var defaultOptions = {
+  const defaultOptions = {
     onBuildEnd: []
   }
 

@@ -1,3 +1,12 @@
+/*!
+ *   memory 3.0.10
+ * 
+ *   a script for adobe after effects to save any layers
+ * 
+ *   repository: https://github.com/Smallpath/Memory
+ *   issues: https://github.com/Smallpath/Memory/issues
+ */
+/****/ (function(memoryGlobal) {
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -5361,7 +5370,7 @@ try {
 
         var observeSingleton = __webpack_require__(9);
         observeSingleton(sp);
-    })(undefined);
+    })(memoryGlobal);
 } catch (err) {
     alert('Line #' + err.line.toString() + '\r\n' + err.toString());
 }
@@ -7866,3 +7875,4 @@ module.exports = function () {
 
 /***/ })
 /******/ ]);
+/****/ })(this)

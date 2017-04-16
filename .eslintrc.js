@@ -42,7 +42,8 @@ module.exports = {
     "KeyframeEase": true,
     "PropertyValueType": true,
     "MarkerValue": true,
-    "PurgeTarget": true
+    "PurgeTarget": true,
+    "memoryGlobal": true
   },
   // add your custom rules here
   'rules': {

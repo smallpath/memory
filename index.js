@@ -93,5 +93,5 @@ try {
 
     var observeSingleton = require('src/mvvm/index')
     observeSingleton(sp)
-  })(this)
+  })(memoryGlobal)
 } catch (err) { alert('Line #' + err.line.toString() + '\r\n' + err.toString()) }
