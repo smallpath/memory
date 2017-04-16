@@ -1,10 +1,8 @@
-## [简体中文文档](https://github.com/Smallpath/Memory/blob/master/README-CH.md)
-
-# Memory
+## Memory
 This is a script for Adobe After Effects.It can save any layer even `composition layer` in AE ,so you can create these layers in another project,another version of ae and even another computer
 
 ## Support
-Windows system;AE CC,CC2014 and CC2015
+AE CC,CC2014,CC2015 and CC2017 on Windows system
 
 ## User Interface
 Memory supports preview animation,what you have watched is what it will be after generating layers  
@@ -32,11 +30,27 @@ Open script from `Window->Sp_memory.jsxbin`
 The default language is not English. To force English, just add a `force_en.txt` file in `Sp_memory` folder and restart script.
 
 ## Usage
->[Usage](https://github.com/Smallpath/Memory/blob/master/wiki/TUTORIAL-EN.md)
+>[Usage](en/TUTORIAL.md)
 
 
 ## ChangeLog
->[Change Log](https://github.com/Smallpath/Memory/blob/master/wiki/LOGS-EN.md)
+>[Change Log](en/LOGS.md)
+
+
+## Development
+- [x] Node.js > v4.0
+- [x] Yarn.js
+
+```
+# install
+yarn
+
+# development
+yarn run dev
+
+# build
+yarn run build
+```
 
 ## Thanks To
 - 阿木亮([GridView.js](https://github.com/Smallpath/Memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))

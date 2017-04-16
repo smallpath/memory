@@ -1,37 +1,8 @@
-## [English Document](https://smallpath.github.io/memory/#/en/)
-
 ## Memory
 这是后期合成软件[Adobe After Effects](https://en.wikipedia.org/wiki/Adobe_After_Effects)的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
-## 链接
-- [文档](https://smallpath.github.io/memory)
-
-## 3.1 TODO
-
-## 优化
-- [x] 更换打包工具以提供直观的报错定位
-- [x] 支持存储视频, 去除素材的大小限制
-- [x] 生成层进度条
-- [x] 存储层进度条
-- [x] 进度条显示脚本耗时
-- [x] 存储预览进度条
-- [x] 优化预览CPU占用
-- [x] 生成单个预合成时直接拉伸至当前合成大小
-- [x] 增加允许截取工作区预览的检测框
-- [x] 修复检查更新功能
-- [x] 增加自动更新功能
-- [x] 增加windows缩放比例参数
-
-## bugfix
-- [x] 修复音频层关键帧未生成的问题
-- [x] 修复windows缩放比例不为1时的界面越界问题
-- [x] 修复界面中一些特殊文字的错位问题
-- [x] 修复windows禁止字符导致预览存储失败的问题
-- [x] 修复最小化时关掉脚本导致的脚本大小归零的问题
-- [x] 修复windows特殊字符串导致的模块,组以及元素生成失败的问题
-- [x] 修复mac CC2017中表达式翻译无法使用的问题
-- [x] 修复setInterpolationTypeAtKey的关键帧生成报错
-- [ ] 修复非1080p的右键菜单越界的问题
+## 环境要求
+Windows系统, AE版本为CC,CC2014,CC2015,CC2017
 
 ## 脚本界面
 支持动态预览元素内容  
@@ -49,8 +20,40 @@
 6. 支持自定义预设,脚本提供插件,遮罩,动画器等9种属性组的自由搭配选项
 7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CC上正确地生成
 
-## 环境要求
-Windows系统;AE版本为CC,CC2014与CC2015
+## 脚本安装
+进入[此页面](https://raw.githubusercontent.com/Smallpath/Memory/master/dist/Sp_memory.jsx),通过`右键->另存为`进行脚本的下载  
+请将`Sp_memory.jsx`脚本放置在你的AE脚本文件夹中,通常在`path\to\ae\Support Files\Scripts\ScriptUI Panels`  
+在AE中打开`窗口`菜单中的`Sp_memory.jsx`即可
+
+注: [Release](https://github.com/Smallpath/Memory/releases)页面中包含三个拥有预览动画的素材包用于演示,请在解压后,在脚本界面上`右键->导入组`并全选素材文件
+
+## 常见使用问题
+- 脚本无法新建组与保存层,错误代码提示1251  
+  - win8-win10用户请使用管理员权限运行AE  
+  - 如果是首次使用脚本,请在AE中打开`编辑->预选项->一般`,勾选`允许脚本访问文件与网络`  
+  
+- 我存储的素材如何备份?
+  - 直接备份脚本同目录的`Sp_memory`文件夹即可
+  
+- v3版本无法预览之前存储的元素,应该怎样解决?
+  - `右键->重载组内预览动画`,即可进行预览动画的生成
+  
+- v2支持CS3至CC2015,为什么v3只支持CC至CC2015?
+  - 因为预览特性对AE环境非常苛刻,目前只有CC及以上版本能够通过测试
+  - 但是,v3存储的元素,一样能够正确导出到v2中并进行层的生成
+  
+- Sp_memory v3是否有更多的`Motion Graphics`素材包以供下载?
+  - 因为版权原因,v3只提供三个素材包作为示范,用户可以通过`右键->自动存储每一层`功能来批量存储`Motion Graphics`
+
+- AE CC2015.3 使用Memory无法存储, 错误代码提示1321
+  - Memory v3.0不向上兼容, 只有经过测试的版本才会加上支持. 开发版本已经添加了CC2015.3, 请查看脚本安装部分进行安装
+
+
+## 脚本使用教程
+>[文字教程](TUTORIAL.md)
+
+## 版本更新记录
+>[更新历史](LOGS.md)
 
 # 开发
 - [x] Node.js > v4.0
@@ -67,11 +70,11 @@ yarn run dev
 yarn run build
 ```
 
-## 感谢
+# 感谢
 - 阿木亮([GridView.js](https://github.com/Smallpath/Memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
 - 水果硬糖([UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
 
-## License
+# License
 ```
 Copyright (C) 2015 Smallpath
 
@@ -88,5 +91,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
-## 反馈
+# 反馈
 脚本使用中遇到任何问题,请新开issue,或联系smallpath2013@gmail.com
