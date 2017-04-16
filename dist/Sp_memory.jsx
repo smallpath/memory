@@ -3,8 +3,8 @@
  * 
  *   a script for adobe after effects to save any layers
  * 
- *   repository: https://github.com/Smallpath/Memory
- *   issues: https://github.com/Smallpath/Memory/issues
+ *   repository: https://github.com/smallpath/memory
+ *   issues: https://github.com/smallpath/memory/issues
  */
 /****/ (function(memoryGlobal) {
 /******/ (function(modules) { // webpackBootstrap
@@ -4218,8 +4218,8 @@ sp.extend(sp, {
   newVersionNotFind: { en: 'No new version! v', ch: '已是最新版 v' },
   link: { en: 'Weibo', ch: '作者微博' },
   about: {
-    en: 'Made by:Smallpath\nE-mail:smallpath2013@gmail.com\nSource Code:\ngithub.com/Smallpath/Memory\n\nDoubleClick:generate new layers or properties on selected layers from selected element.\nRightClick:call the shortcut menu.\nCtrl/Alt+RightClick:save selected layers as a new element.\nShift+Rightclick:call the up and down window\n\nShortcutkey when script runs as Window:\nKey \'D\' or \'Delete\':delete selected element.\nKey \'F\': overlap selected element.\nKey \'Up\':drop up selected element.\nKey \'Down\':drop down selected element.',
-    ch: '\u4F5C\u8005:\n    Smallpath\n\u90AE\u7BB1:\n    smallpath2013@gmail.com\n\u6E90\u7801\u6258\u7BA1\u5730\u5740:\ngithub.com/Smallpath/Memory\n\n\u53F3\u952E\u70B9\u51FB:\u547C\u51FA\u53F3\u952E\u83DC\u5355.\n\u53CC\u51FB:\u4ECE\u9009\u4E2D\u5143\u7D20\u521B\u5EFA\u5C42\u6216\u521B\u5EFA\u6548\u679C.\nCtrl/Alt+\u53F3\u952E\u70B9\u51FB:\u4ECE\u9009\u4E2D\u7684\u5C42\u8BFB\u53D6\u5C42\u4FE1\u606F\u4EE5\u521B\u5EFA\u65B0\u5143\u7D20.\nShift+\u53F3\u952E:\u5524\u51FA\u79FB\u52A8\u5143\u7D20\u7684\u7A97\u53E3\n\n\u7A97\u53E3\u6A21\u5F0F\u8FD0\u884C\u811A\u672C\u65F6:\nD\u952E:\u5220\u9664\u9009\u4E2D\u5143\u7D20.\nF\u952E:\u8986\u76D6\u9009\u4E2D\u5143\u7D20.\n\u4E0A\u952E:\u4E0A\u79FB\u9009\u4E2D\u5143\u7D20.\n\u4E0B\u952E:\u4E0B\u79FB\u9009\u4E2D\u5143\u7D20.'
+    en: 'Made by:smallpath\nE-mail:smallpath2013@gmail.com\nSource Code:\ngithub.com/smallpath/memory\n\nDoubleClick:generate new layers or properties on selected layers from selected element.\nRightClick:call the shortcut menu.\nCtrl/Alt+RightClick:save selected layers as a new element.\nShift+Rightclick:call the up and down window\n\nShortcutkey when script runs as Window:\nKey \'D\' or \'Delete\':delete selected element.\nKey \'F\': overlap selected element.\nKey \'Up\':drop up selected element.\nKey \'Down\':drop down selected element.',
+    ch: '\u4F5C\u8005:\n    smallpath\n\u90AE\u7BB1:\n    smallpath2013@gmail.com\n\u6E90\u7801\u6258\u7BA1\u5730\u5740:\ngithub.com/smallpath/memory\n\n\u53F3\u952E\u70B9\u51FB:\u547C\u51FA\u53F3\u952E\u83DC\u5355.\n\u53CC\u51FB:\u4ECE\u9009\u4E2D\u5143\u7D20\u521B\u5EFA\u5C42\u6216\u521B\u5EFA\u6548\u679C.\nCtrl/Alt+\u53F3\u952E\u70B9\u51FB:\u4ECE\u9009\u4E2D\u7684\u5C42\u8BFB\u53D6\u5C42\u4FE1\u606F\u4EE5\u521B\u5EFA\u65B0\u5143\u7D20.\nShift+\u53F3\u952E:\u5524\u51FA\u79FB\u52A8\u5143\u7D20\u7684\u7A97\u53E3\n\n\u7A97\u53E3\u6A21\u5F0F\u8FD0\u884C\u811A\u672C\u65F6:\nD\u952E:\u5220\u9664\u9009\u4E2D\u5143\u7D20.\nF\u952E:\u8986\u76D6\u9009\u4E2D\u5143\u7D20.\n\u4E0A\u952E:\u4E0A\u79FB\u9009\u4E2D\u5143\u7D20.\n\u4E0B\u952E:\u4E0B\u79FB\u9009\u4E2D\u5143\u7D20.'
   },
   refresh: {
     en: 'Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp\'s time first.',
@@ -5645,7 +5645,7 @@ function translate(thisObj, expProps) {
     about: { en: 'About', ch: '关于' },
     editBtn: { en: 'Edit hot words', ch: '编辑关键词' },
     str: {
-      en: 'This script can fix wrong expressions caused by different language version of AE.By Smallpath',
+      en: 'This script can fix wrong expressions caused by different language version of AE.By smallpath',
       ch: '外文工程表达式报错?本脚本可以快速解决这个问题~ @秋风_小径'
     },
     ok: { en: 'Ok', ch: '确认' },
@@ -5708,7 +5708,7 @@ function translate(thisObj, expProps) {
   if (!thisFile.exists || thisFile.length === -1) {
     var newxml = new XML('<WhiteList></WhiteList>');
     newxml.settings.version = '1.6';
-    newxml.settings.author = 'Smallpath';
+    newxml.settings.author = 'smallpath';
     for (iii = 0; iii < allWords.length; iii++) {
       newxml.words.words[iii] = allWords[iii];
     }

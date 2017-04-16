@@ -1,4 +1,4 @@
-## Memory
+## memory
 这是后期合成软件Adobe After Effects的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
 ## 环境要求
@@ -6,9 +6,9 @@ Windows系统, AE版本为CC,CC2014,CC2015,CC2017
 
 ## 界面演示
 支持动态预览元素内容, 支持窗口大小自适应, 同时拥有方便的**右键菜单**来节省界面空间  
-![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.gif)  
-![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/2.gif)  
-![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.PNG)  
+![screenshot7](https://raw.githubusercontent.com/smallpath/memory/master/screenshot/1.gif)  
+![screenshot8](https://raw.githubusercontent.com/smallpath/memory/master/screenshot/2.gif)  
+![screenshot1](https://raw.githubusercontent.com/smallpath/memory/master/screenshot/1.PNG)  
 
 ## 功能
 1. 脚本界面支持预览动画,可以设置预览动画的帧率和帧数
@@ -20,7 +20,7 @@ Windows系统, AE版本为CC,CC2014,CC2015,CC2017
 7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CC上正确地生成
 
 ## 安装
-进入 [版本页面](https://github.com/Smallpath/Memory/releases), 下载最新版本的`Sp_memory.zip`  
+进入 [版本页面](https://github.com/smallpath/memory/releases), 下载最新版本的`Sp_memory.zip`  
 请将`Sp_memory.jsx`脚本放置在你的AE脚本文件夹中, 通常在`path\to\ae\Support Files\Scripts\ScriptUI Panels`   
 在AE中打开`窗口`菜单中的`Sp_memory.jsx`即可  
 
@@ -51,7 +51,7 @@ Windows系统, AE版本为CC,CC2014,CC2015,CC2017
   - win8-win10用户请使用管理员权限运行AE  
   - 如果是首次使用脚本,请在AE中打开`编辑->预选项->一般`,勾选`允许脚本访问文件与网络`  
 - AE CC2015.3 使用Memory无法存储, 错误代码提示1321
-  - Memory v3.0不向上兼容, 只有经过测试的版本才会加上支持. 开发版本已经添加了CC2015.3, 请查看脚本安装部分进行安装
+  - memory v3.0不向上兼容, 只有经过测试的版本才会加上支持. 开发版本已经添加了CC2015.3, 请查看脚本安装部分进行安装
 
 ### 使用相关
 - 手动存储每一个合成非常麻烦, 有更好的办法吗?
@@ -89,12 +89,12 @@ yarn run build
 windows上开发时, 建议对AE窗口使用`ctrl + \`快捷键, 否则自动刷新每次都会缩放AE窗口
 
 # 感谢
-- 阿木亮([GridView.js](https://github.com/Smallpath/Memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
-- 水果硬糖([UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
+- 阿木亮([GridView.js](https://github.com/smallpath/memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/smallpath/memory/blob/master/lib/UIParser.js))
+- 水果硬糖([UIParser.js](https://github.com/smallpath/memory/blob/master/lib/UIParser.js))
 
 # License
 ```
-Copyright (C) 2015 Smallpath
+Copyright (C) 2015 smallpath
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -110,4 +110,4 @@ limitations under the License.
 ```
 
 # 反馈
-脚本使用中遇到任何问题, 请[新开issue](https://github.com/Smallpath/Memory/issues/new), 或联系smallpath2013@gmail.com
+脚本使用中遇到任何问题, 请[新开issue](https://github.com/smallpath/memory/issues/new), 或联系smallpath2013@gmail.com

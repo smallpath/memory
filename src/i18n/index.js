@@ -58,10 +58,10 @@ sp.extend(sp, {
   link: { en: 'Weibo', ch: '作者微博' },
   about: {
     en:
-    `Made by:Smallpath
+    `Made by:smallpath
 E-mail:smallpath2013@gmail.com
 Source Code:
-github.com/Smallpath/Memory
+github.com/smallpath/memory
 
 DoubleClick:generate new layers or properties on selected layers from selected element.
 RightClick:call the shortcut menu.
@@ -75,11 +75,11 @@ Key 'Up':drop up selected element.
 Key 'Down':drop down selected element.`,
     ch:
     `作者:
-    Smallpath
+    smallpath
 邮箱:
     smallpath2013@gmail.com
 源码托管地址:
-github.com/Smallpath/Memory
+github.com/smallpath/memory
 
 右键点击:呼出右键菜单.
 双击:从选中元素创建层或创建效果.

@@ -5,10 +5,10 @@ Open `Sp_memory.jsxbin` from `AE->Window->Sp_memory.jsxbin`
 
 #### Palette type
 `AE->File->Scripts->Run script file` to open `Sp_memory.jsxbin`.  
-In this type, Memory supports shortcut keys.More infomation in the Memory setting window
+In this type, memory supports shortcut keys.More infomation in the memory setting window
 
 ## Item
-The element in Memory panel is called `Item`
+The element in memory panel is called `Item`
 
 ## Save layer
 `Right Click->New item` to save selected layers into a new item  
@@ -48,12 +48,12 @@ Create layer:
 
 ## Reload previews of group
 `Right Click->Help scripts->Reload previews of group` to reload previews of group if there is no previews  
-Option is the max number of frames.Memory will cut the layers from 0 to the max number if you input it.
+Option is the max number of frames.memory will cut the layers from 0 to the max number if you input it.
 
 ## Fix expression errors
 `Right Click->Help scripts->Fix expression errors` to fix expression errors caused by using different language of AE  
 Language supported includes Chinese,English,Japanese and ADBE(Adobe general identifier)  
-If there are wrong expressions when create layer,Memory will call this script to fix them.
+If there are wrong expressions when create layer,memory will call this script to fix them.
 
 ## Preview all/selected
 If there is items being selected , the preview button in Right-click menu will be `Preview selected`  
@@ -62,10 +62,10 @@ You can select items by using `Ctrl` and `Shift`
 
 ## Import picture
 `Right Click->Import picture` to import image to selected item  
-Memory will scale the picture to the size of thumbnail
+memory will scale the picture to the size of thumbnail
 
 ## Import group
-`Right Click->Import group` to import groups to Memory
+`Right Click->Import group` to import groups to memory
 
 ## Add group
 `Right Click->New group` to add a new group  
@@ -89,7 +89,7 @@ Cut selected group to other module
 Export groups.Support multi-select
 
 #### Empty temp folder
-Empty the material folder which is created by Memory using 'Save material' feature
+Empty the material folder which is created by memory using 'Save material' feature
 
 #### Limit the text
 Decide whether limit the text of item to avoid overflow.Default: true
@@ -98,7 +98,7 @@ Decide whether limit the text of item to avoid overflow.Default: true
 Whether update thumbnail when cover item.This is just thunmnail.To avoid updating preview, make sure `Right Click-Save preview` is not checked
 
 #### Enable new type of thumb
-In CC and CC,Memory can save another type of thumb.This thumbnail is exactly the screenshot of `Composition Window` of AE
+In CC and CC,memory can save another type of thumb.This thumbnail is exactly the screenshot of `Composition Window` of AE
 
 #### Deleting alert
 Whether alert when delete items.Default: true
@@ -109,7 +109,7 @@ Since the speed of saveing preview in CC2015 is 10 times faster than other AE ve
 
 #### The folder name of collect feature
 This is the name of the main folder in `Project Window`  
-Memory will collect the Comp layers created by script to the main folder 
+memory will collect the Comp layers created by script to the main folder 
 
 #### The group name that can enable 'Only property'
 If the name of group is included here, then `Right Click->Only property` will be checked when change groups
@@ -118,12 +118,12 @@ If the name of group is included here, then `Right Click->Only property` will be
 To change script language to 中文 or English
 
 #### Check version
-Check updates for Memory
+Check updates for memory
 
 ## Preset setting
 `Right Click->Preset setting` to open preset window  
 'Only property' and 'Empty property' will be here.  
-You can edit them by yourself to use  the powerful preset feather of Memory
+You can edit them by yourself to use  the powerful preset feather of memory
 
 #### Only property
 If `Right Click->Only property` is checked ,decide the property groups that will be created  

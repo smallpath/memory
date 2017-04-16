@@ -1,10 +1,10 @@
-## Memory
+## memory
 这是后期合成软件Adobe After Effects的层存储脚本,你可以将AE中任何层(包括合成层)保存下来,以便在其他工程中,在其他版本的AE中,甚至在其他电脑中生成新的层
 
 ## 文档
-- [中文文档](https://smallpath.github.io/Memory)
-- [安装](https://smallpath.github.io/Memory/#/?id=脚本安装)
-- [English Document](https://smallpath.github.io/Memory/#/en/)
+- [中文文档](https://smallpath.github.io/memory)
+- [安装](https://smallpath.github.io/memory/#/?id=脚本安装)
+- [English Document](https://smallpath.github.io/memory/#/en/)
 
 ## 3.1 TODO
 
@@ -46,7 +46,7 @@
 
 ## 脚本界面
 支持动态预览元素内容, 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间  
-![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.gif)  
+![screenshot7](https://raw.githubusercontent.com/smallpath/memory/master/screenshot/1.gif)  
 
 ## 环境要求
 Windows系统;AE版本为CC,CC2014,CC2015和CC2017
@@ -67,12 +67,12 @@ yarn run build
 ```
 
 ## 感谢
-- 阿木亮([GridView.js](https://github.com/Smallpath/Memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
-- 水果硬糖([UIParser.js](https://github.com/Smallpath/Memory/blob/master/lib/UIParser.js))
+- 阿木亮([GridView.js](https://github.com/smallpath/memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/smallpath/memory/blob/master/lib/UIParser.js))
+- 水果硬糖([UIParser.js](https://github.com/smallpath/memory/blob/master/lib/UIParser.js))
 
 ## License
 ```
-Copyright (C) 2015 Smallpath
+Copyright (C) 2015 smallpath
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
