@@ -27,7 +27,7 @@ If your windows is win8 or win10, make sure AE is running under the administrato
 In AE, go to `Edit->Preferences->General`,make sure `Allow scripts to write File and access Network` is checked  
 Open script from `Window->Sp_memory.jsxbin`
 
-The default language is not English. To force English, just add a `force_en.txt` file in `Sp_memory` folder and restart script.
+!> The default language is not English. To force English, just add a `force_en.txt` file in `Sp_memory` folder and restart script.
 
 ## Usage
 >[Usage](en/TUTORIAL.md)

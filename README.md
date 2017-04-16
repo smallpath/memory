@@ -3,9 +3,12 @@
 
 ## 文档
 - [中文文档](https://smallpath.github.io/Memory)
+- [安装](https://smallpath.github.io/Memory/#/?id=脚本安装)
 - [English Document](https://smallpath.github.io/Memory/#/en/)
 
 ## 3.1 TODO
+
+已全部完成, 正在测试中
 
 ## 优化
 - [x] 更换打包工具以提供直观的报错定位
@@ -30,14 +33,7 @@
 - [x] 修复windows特殊字符串导致的模块,组以及元素生成失败的问题
 - [x] 修复mac CC2017中表达式翻译无法使用的问题
 - [x] 修复setInterpolationTypeAtKey的关键帧生成报错
-- [ ] 修复非1080p的右键菜单越界的问题
-
-## 脚本界面
-支持动态预览元素内容  
-![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.gif)  
-![screenshot8](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/2.gif)  
-支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间  
-![screenshot1](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.PNG)  
+- [x] 修复非1080p的右键菜单越界的问题
 
 ## 脚本功能
 1. 脚本界面支持预览动画,可以设置预览动画的帧率和帧数
@@ -48,10 +44,14 @@
 6. 支持自定义预设,脚本提供插件,遮罩,动画器等9种属性组的自由搭配选项
 7. 存储得到的数据兼容于AE任何版本,例如,用本脚本在CC2015上存储的一个工程,可以在CC上正确地生成
 
-## 环境要求
-Windows系统;AE版本为CC,CC2014与CC2015
+## 脚本界面
+支持动态预览元素内容, 支持窗口大小自适应,同时拥有方便的**右键菜单**来节省界面空间  
+![screenshot7](https://raw.githubusercontent.com/Smallpath/Memory/master/screenshot/1.gif)  
 
-# 开发
+## 环境要求
+Windows系统;AE版本为CC,CC2014,CC2015和CC2017
+
+## 开发
 - [x] Node.js > v4.0
 - [x] Yarn.js
 

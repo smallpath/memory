@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>memory - a script for adobe after effects to save any layers</title>
+  <title>Sp_memory - a script for adobe after effects to save any layers</title>
   <meta name="description" content="a script for adobe after effects to save any layers">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
@@ -16,10 +16,23 @@
 </body>
 <script>
   window.$docsify = {
-    name: 'memory',
+    name: 'Memory',
     repo: 'https://Smallpath@github.com/Smallpath/Memory',
-    loadNavbar: true
+    loadNavbar: true,
+    auto2top: true,
+    search: {
+      noData: {
+        '/en/': 'No results!',
+        '/': '没有结果!'
+      },
+      paths: 'auto',
+      placeholder: {
+        '/en/': 'Search',
+        '/': '搜索'
+      }
+    },
   }
 </script>
 <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+<script src="//unpkg.com/docsify/lib/plugins/search.js"></script>
 </html>
