@@ -3,7 +3,7 @@
 
 ## 文档
 - [中文文档](https://smallpath.github.io/memory)
-- [安装](https://smallpath.github.io/memory/#/?id=脚本安装)
+- [安装](https://smallpath.github.io/memory/#/?id=安装)
 - [English Document](https://smallpath.github.io/memory/#/en/)
 
 ## 3.1 TODO
