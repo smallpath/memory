@@ -88,26 +88,5 @@ yarn run build
 ```
 windows上开发时, 建议对AE窗口使用`ctrl + \`快捷键, 否则自动刷新每次都会缩放AE窗口
 
-# 感谢
-- 阿木亮([GridView.js](https://github.com/smallpath/memory/blob/master/lib/GridView.js),[UIParser.js](https://github.com/smallpath/memory/blob/master/lib/UIParser.js))
-- 水果硬糖([UIParser.js](https://github.com/smallpath/memory/blob/master/lib/UIParser.js))
-
-# License
-```
-Copyright (C) 2015 smallpath
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
-
-# 反馈
+## 反馈
 脚本使用中遇到任何问题, 请[新开issue](https://github.com/smallpath/memory/issues/new), 或联系smallpath2013@gmail.com

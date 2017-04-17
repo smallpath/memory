@@ -6,35 +6,6 @@
 - [安装](https://smallpath.github.io/memory/#/?id=安装)
 - [English Document](https://smallpath.github.io/memory/#/en/)
 
-## 3.1 TODO
-
-已全部完成, 正在测试中
-
-## 优化
-- [x] 更换打包工具以提供直观的报错定位
-- [x] 支持存储视频, 去除素材的大小限制
-- [x] 生成层进度条
-- [x] 存储层进度条
-- [x] 进度条显示脚本耗时
-- [x] 存储预览进度条
-- [x] 优化预览CPU占用
-- [x] 生成单个预合成时直接拉伸至当前合成大小
-- [x] 增加允许截取工作区预览的检测框
-- [x] 修复检查更新功能
-- [x] 增加自动更新功能
-- [x] 增加windows缩放比例参数
-
-## bugfix
-- [x] 修复音频层关键帧未生成的问题
-- [x] 修复windows缩放比例不为1时的界面越界问题
-- [x] 修复界面中一些特殊文字的错位问题
-- [x] 修复windows禁止字符导致预览存储失败的问题
-- [x] 修复最小化时关掉脚本导致的脚本大小归零的问题
-- [x] 修复windows特殊字符串导致的模块,组以及元素生成失败的问题
-- [x] 修复mac CC2017中表达式翻译无法使用的问题
-- [x] 修复setInterpolationTypeAtKey的关键帧生成报错
-- [x] 修复非1080p的右键菜单越界的问题
-
 ## 脚本功能
 1. 支持动态预览元素内容, 支持窗口大小自适应,同时拥有方便的右键菜单来节省界面空间  
 2. 支持一切层的存储与生成,包括形状层,文字层,图片音频层,甚至`合成层`
@@ -79,6 +50,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-## 反馈
-脚本使用中遇到任何问题,请新开issue,或联系smallpath2013@gmail.com
