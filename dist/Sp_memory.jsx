@@ -1,5 +1,5 @@
 /*!
- *   memory 3.0.10
+ *   memory 3.0.11
  * 
  *   a script for adobe after effects to save any layers
  * 
@@ -4593,8 +4593,8 @@ module.exports = function () {
   sp.prototype = {
 
     scriptName: 'Sp_memory',
-    scriptVersion: "3.0.10",
-    version: "3.0.10",
+    scriptVersion: "3.0.11",
+    version: "3.0.11",
     slash: '/',
 
     setting: app.settings,
