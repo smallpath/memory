@@ -1,19 +1,14 @@
 try {
   (function(global) {
-    // create singleton helper object for script,and store it into Global
     require('src/singleton')
-    // i18n
     require('src/i18n')
-    // Add methods to objects
     require('src/polyfill')
-    // Save default presets if there isn't, then load presets and parse them
     require('src/preset')
-    // startup script for sp_memory
     require('src/startup')
-    // core saving and generating library for ae layer
     require('lib/AfterEffectsLayer')
-    // color picker library for selecting colr
-    require('lib/HelperScripts')
+    require('lib/Translate')
+    require('lib/ReloadPic')
+    require('lib/AutoSave')
     require('lib/GridView')
     require('lib/UIParser')
     var helpers = require('src/index')

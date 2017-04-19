@@ -88,7 +88,6 @@ module.exports = function() {
   shortMenu['helperScripts'].add('item', loc(sp.expressionTranslate))
   shortMenu['helperScripts'].add('item', loc(sp.reloadGroup))
   shortMenu['helperScripts'].add('item', loc(sp.saveEachLayer))
-  shortMenu['helperScripts'].add('item', loc(sp.cutLength))
   shortMenu['helperScripts'].selection = 0
 
   shortMenu['helperScripts'].onChange = shortMenu['helperScripts'].onChanging = function() {
@@ -103,11 +102,7 @@ module.exports = function() {
 
         // auto save every layer in current comp,one layer as one element
         this.selection.index === 3 &&
-        $.global.autoSave() ||
-
-        // cut layers' length by opacity and comp length
-        this.selection.index === 4 &&
-        $.global.cutLength()
+        $.global.autoSave()
     } catch (err) {
       err.printa()
     }

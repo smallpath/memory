@@ -72,7 +72,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 14);
+/******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -82,9 +82,9 @@
 "use strict";
 
 
-var moduleWindow = __webpack_require__(24);
-var moveGroupWindow = __webpack_require__(25);
-var outputGroupWindow = __webpack_require__(27);
+var moduleWindow = __webpack_require__(22);
+var moveGroupWindow = __webpack_require__(23);
+var outputGroupWindow = __webpack_require__(25);
 var checkVersion = __webpack_require__(1);
 
 module.exports = function () {
@@ -2808,6 +2808,36 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 "use strict";
 
 
+$.global.autoSave = autoSave;
+function autoSave() {
+  if (confirm(loc(sp.auto)) === false) return;
+  if (!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
+  if (!sp.droplist.selection) return;
+
+  try {
+    var preRenameValue = sp.autoNameValue;
+    sp.autoNameValue = true;
+    for (var i = 0; i < app.project.activeItem.numLayers; i++) {
+      for (var j = 1; j <= app.project.activeItem.numLayers; j++) {
+        app.project.activeItem.layer(j).selected = false;
+      }
+      app.project.activeItem.layer(i + 1).selected = true;
+      sp.fns.newItem();
+      app.project.activeItem.layer(i + 1).selected = false;
+    }
+    sp.autoNameValue = preRenameValue;
+  } catch (err) {}
+  sp.droplist.notify('onChange');
+  sp.gv.refresh();
+}
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 $.global.GridView = GridView;
 function GridView(parent, attrs) {
   var keepRef = this;
@@ -3457,2092 +3487,7 @@ function GridView(parent, attrs) {
 }
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-__webpack_require__(18);
-__webpack_require__(16);
-__webpack_require__(17);
-__webpack_require__(15);
-
-/***/ }),
 /* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-$.global.UIParser = UIParser;
-function UIParser(global) {
-  var _ = global._ = function (selector) {
-    if (_.isUI(selector.type)) {
-      return _.extend([selector], _.proto);
-    }
-    return _.proto.find(selector);
-  };
-  _.global = global;
-
-  _.root = {
-    children: []
-  };
-  _.windows = _.root.children;
-  _.extend = function (target, source) {
-    for (var i in source) {
-      target[i] = source[i];
-    }return target;
-  };
-  _.dir = function (obj) {
-    var str = '';
-    for (var i in obj) {
-      str += i + ' : ' + _typeof(obj[i]) + '\n';
-    }return str;
-  };
-  _.removeWin = function (id) {
-    for (var i = 0; i < _.windows.length; i++) {
-      if (_.windows[i].id === id) _.windows.splice(i, 1);
-    }
-  };
-  _.proto = {
-    find: function find(selector, recursive) {
-      var matchs = [];
-      var elements = 'length' in this ? this : [_.root];
-      if (!selector) return _.extend(elements, _.proto);
-
-      if (typeof selector === 'string') {
-        var selectors = _.formalSelector(selector);
-        for (var i = 0; i < selectors.length; i++) {
-          var match = elements;
-          var process = _.parserSelector(selectors[i]);
-          for (var j = 0; j < process.length; j++) {
-            if (!process[j][3] && _.proto[process[j][4]]) {
-              match = _.proto[process[j][4]].call(match, process[j][5]);
-            } else {
-              match = _.findElementsByProp(match, process[j][0], process[j][1], process[j][2]);
-            }
-          }
-          matchs = _.merge(match, matchs);
-        }
-      } else if (typeof selector === 'function') {
-        if (!recursive) recursive = 1;
-        matchs = _.findElementsByFn(elements, selector, recursive);
-      }
-
-      return _.extend(matchs, _.proto);
-    },
-    filter: function filter(selector) {
-      var matchs = [];
-      var elements = 'length' in this ? this : [_.root];
-      if (!selector) return _.extend(elements, _.proto);
-
-      if (typeof selector === 'string') {
-        var selectors = _.formalSelector(selector);
-        for (var i = 0; i < selectors.length; i++) {
-          var match = elements;
-          var process = _.parserSelector(selectors[i]);
-          for (var j = 0; j < process.length; j++) {
-            if (!process[j][3] && _.proto[process[j][4]]) {
-              match = _.proto[process[j][4]].call(match, process[j][5]);
-            } else {
-              match = _.findElementsByProp(match, process[j][0], process[j][1]);
-            }
-          }
-          matchs = _.merge(match, matchs);
-        }
-      } else if (typeof selector === 'function') {
-        matchs = _.filterElementsByFn(elements, selector);
-      }
-
-      return _.extend(matchs, _.proto);
-    },
-    style: function style(_style, target) {
-      if (!target) target = this;
-      for (var i = 0; i < target.length; i++) {
-        for (var j in _style) {
-          if (target[i].type === j) _.proto.style(_style[j], [target[i]]);else target[i][j] = _style[j];
-        }
-      }
-    },
-    each: function each(command) {
-      for (var i = 0; i < this.length; i++) {
-        command(this[i]);
-      }
-    },
-    setAttr: function setAttr(prop, value) {
-      this.each(function (e) {
-        e[prop] = value;
-      });
-    },
-    getAttr: function getAttr(prop) {
-      if (this.length) return this[0][prop];
-    },
-    children: function children(selector) {
-      return this.find(selector || '>*');
-    },
-    parent: function parent() {
-      if (this.length > 0 && this[0].parent) return this[0].parent;else return _.extend([], _.proto);
-    },
-    on: function on(event, fn, useCapture) {
-      this.each(function (e) {
-        e.addEventListener(event, fn, useCapture);
-      });
-    },
-    exe: function exe(fn, args) {
-      this.each(function (e) {
-        e[fn].apply(e, args);
-      });
-    },
-    addUI: function addUI() {
-      return _.addUI.apply(this[0], arguments);
-    },
-    first: function first() {
-      return _.extend([this[0]], _.proto);
-    },
-    last: function last() {
-      return _.extend([this[this.length - 1]], _.proto);
-    },
-    eq: function eq(index) {
-      if (index < this.length && index >= 0) {
-        return _.extend([this[index]], _.proto);
-      } else {
-        return _.extend([], _.proto);
-      }
-    },
-    layout: function layout() {
-      this.each(function (e) {
-        _.layout(e);
-      });
-    },
-    remove: function remove() {
-      this.each(function (e) {
-        e.parent.remove(e);
-      });
-    },
-    empty: function empty() {
-      this.children().remove();
-    }
-  };
-
-  _.createUI = function (UIJson) {
-    if (!UIJson) return;
-    var ISPANEL = global instanceof Panel;
-    if (ISPANEL) {
-      var _newElement = _.addUI(UIJson, global);
-      _.root.children.push(global);
-      global.layout.layout(true);
-      return _newElement;
-    } else {
-      return _.newWindow(UIJson);
-    }
-  };
-
-  _.newWindow = function (UIJson) {
-    if (!UIJson) return;
-    var newWindows = [];
-    for (var i in UIJson) {
-      var json = UIJson[i];
-      if (_.isWindow(UIJson[i].type)) {
-        var s = json.type;
-        if (json.properties) s += '{properties:' + _.JSON.stringify(json.properties) + '}';
-        var newWindow = _.root.children[_.root.children.length] = new Window(s);
-        newWindows.push(newWindow);
-        if (!json.id) newWindow.id = i;
-
-        for (var j in json) {
-          if (j === 'type' || j === 'properties' || j === 'children') continue;
-          newWindow[j] = json[j];
-        }
-
-        if (json.children) _.addUI(json.children, newWindow);
-      }
-    }
-    return _.extend(newWindows, _.proto);
-  };
-
-  _.addUI = function (UIJson, parent) {
-    if (!UIJson) return;
-    if (!parent) parent = this;
-
-    var newItem = [];
-    for (var i in UIJson) {
-      var json = UIJson[i];
-      if (_.isElement(json.type)) {
-        var s = json.type;
-        if (json.properties) s += '{properties:' + _.JSON.stringify(json.properties) + '}';
-        var newElement = parent.add(s);
-        if (!json.id) newElement.id = i;
-
-        for (var j in json) {
-          if (j === 'type' || j === 'properties' || j === 'children') continue;
-          newElement[j] = json[j];
-        }
-        newItem.push(newElement);
-
-        if (_.isContainer(json.type) && json.children) arguments.callee(json.children, newElement);
-      }
-    }
-    return _.extend(newItem, _.proto);
-  };
-
-  _.isWindow = function (type) {
-    var winType = ['window', 'palette', 'dialog', 'Window', 'Palette', 'Dialog'];
-    var len = winType.length;
-    for (var i = 0; i < len; i++) {
-      if (type === winType[i]) return true;
-    }
-    return false;
-  };
-
-  _.isContainer = function (type) {
-    var winType = ['window', 'palette', 'dialog', 'group', 'panel', 'tabbedpanel', 'treeview', 'dropdownlist', 'listbox', 'listitem', 'tab', 'node', 'Window', 'Palette', 'Dialog', 'Group', 'Panel', 'TabbedPanel', 'Treeview', 'DropDownList', 'ListBox', 'ListItem', 'Tab', 'Node'];
-    var len = winType.length;
-    for (var i = 0; i < len; i++) {
-      if (type === winType[i]) return true;
-    }
-    return false;
-  };
-
-  _.isElement = function (type) {
-    var winType = ['panel', 'tabbedpanel', 'tab', 'group', 'button', 'checkbox', 'dropdownlist', 'edittext', 'flashplayer', 'iconbutton', 'image', 'item', 'listbox', 'listitem', 'progressbar', 'radiobutton', 'scrollbar', 'slider', 'statictext', 'treeview', 'tab', 'node', 'Panel', 'TabbedPanel', 'Tab', 'Group', 'Button', 'CheckBox', 'DropDownList', 'EditText', 'FlashPlayer', 'IconButton', 'Image', 'Item', 'ListBox', 'ListItem', 'ProgressBar', 'RadioButton', 'Scrollbar', 'Slider', 'StaticText', 'Treeview', 'Tab', 'Node'];
-    var len = winType.length;
-    for (var i = 0; i < len; i++) {
-      if (type === winType[i]) return true;
-    }
-    return false;
-  };
-
-  _.isUI = function (type) {
-    if (_.isWindow(type) || _.isElement(type)) return true;
-    return false;
-  };
-
-  _.findElementsByProp = function (elements, prop, value, recursive) {
-    var matchs = [];
-    for (var i = 0; i < elements.length; i++) {
-      if (elements[i].children) var atoms = elements[i].children;else if (elements[i].items) atoms = elements[i].items;else continue;
-      var match = [];
-      for (var j = 0; j < atoms.length; j++) {
-        if (atoms[j][prop] && (value === '' || atoms[j][prop].toString() === value)) {
-          match.push(atoms[j]);
-        }
-        if (recursive && (atoms[j].children || atoms[j].items)) {
-          var temp = arguments.callee([atoms[j]], prop, value, 1);
-          match = _.merge(temp, match);
-        }
-      }
-      matchs = _.merge(match, matchs);
-    }
-    return matchs;
-  };
-  _.findElementsByFn = function (elements, fn, recursive) {
-    var match = [];
-    for (var i = 0; i < elements.length; i++) {
-      if (elements[i].children) var atoms = elements[i].children;else if (elements[i].items) atoms = elements[i].items;else continue;
-      for (var j = 0; j < atoms.length; j++) {
-        if (fn(atoms[j])) match.push(atoms[j]);
-        if (recursive && (atoms[j].children || atoms[j].items)) {
-          var temp = arguments.callee(atoms[j].children, fn, 1);
-          match = _.merge(temp, match);
-        }
-      }
-    }
-    return match;
-  };
-  _.filterElementByProp = function (elements, prop, value) {
-    var matchs = [];
-    for (var i = 0; i < elements.length; i++) {
-      if (elements[i][prop] && (value === '' || elements[i][prop].toString() === value)) {
-        matchs.push(elements[i]);
-      }
-    }
-    return matchs;
-  };
-  _.filterElementByFn = function (elements, fn) {
-    var matchs = [];
-    for (var i = 0; i < elements.length; i++) {
-      if (fn(elements[i])) matchs.push(elements[i]);
-    }
-    return matchs;
-  };
-  _.formalSelector = function (selector) {
-    return selector.replace(/[\s\]\)]\w*/g, '').replace(/[\#\.\[\:\=]+(?=[\#\.\[\]\,\:\=\>\*])/g, '').replace(/\*+\w*/g, '*').replace(/\,+\w*/g, ',').replace(/\>+\w*/g, '>').replace(/^\w*\,/g, '').split(/\,/g);
-  };
-  _.parserSelector = function (selector) {
-    var sign, content, prop, value, func, param, doFind;
-    var recursive = 1;
-    var process = [];
-    var parts = selector.replace(/(?=[\#\.\[\:\>\*])/g, '@').replace(/^\@/, '').split('@');
-
-    for (var i = 0; i < parts.length; i++) {
-      if (parts[i] === '>') {
-        recursive = 0;
-        i++;
-      }
-
-      sign = parts[i][0];
-      content = parts[i].substr(1);
-      prop = value = func = param = '';
-      doFind = 1;
-
-      switch (sign) {
-        case '*':
-          prop = 'type';break;
-        case '#':
-          prop = 'id';value = content;break;
-        case '.':
-          prop = 'type';value = content;break;
-        case '[':
-          var p = content.split('=');
-          prop = p[0];
-          if (p.length === 2) value = p[1];
-          break;
-        case ':':
-          var fn = content.split('(');
-          func = fn[0];
-          if (fn.length === 2) param = fn[1];
-          doFind = 0;
-          break;
-      }
-      process.push([prop, value, recursive, doFind, func, param]);
-      recursive = 1;
-    }
-
-    return process;
-  };
-  _.merge = function (newArray, oldArray) {
-    var temp = [];
-    var b = 1;
-    for (var i = 0; i < newArray.length; i++) {
-      for (var j = 0; j < oldArray.length; j++) {
-        if (newArray[i] === oldArray[j]) {
-          b = 0;
-          break;
-        }
-      }
-      if (b) temp.push(newArray[i]);
-    }
-    return oldArray.concat(temp);
-  };
-
-  _.layout = function (e) {
-    e.margins = 0;
-    e.spacing = 5;
-    if (e.align) {
-      switch (e.align) {
-        case 'fill':
-        case 'fill_fill':
-          e.alignment = ['fill', 'fill'];break;
-
-        case 'center':
-        case 'center_center':
-          e.alignment = ['center', 'center'];break;
-
-        case 'left_fill':
-        case 'left':
-          e.alignment = ['left', 'fill'];break;
-        case 'center_fill':
-          e.alignment = ['center', 'fill'];break;
-        case 'right_fill':
-        case 'right':
-          e.alignment = ['right', 'fill'];break;
-
-        case 'fill_top':
-        case 'top':
-          e.alignment = ['fill', 'top'];break;
-        case 'fill_center':
-          e.alignment = ['fill', 'center'];break;
-        case 'fill_bottom':
-        case 'bottom':
-          e.alignment = ['fill', 'bottom'];break;
-
-        case 'left_center':
-          e.alignment = ['left', 'center'];break;
-        case 'right_center':
-          e.alignment = ['right', 'center'];break;
-        case 'center_top':
-          e.alignment = ['center', 'top'];break;
-        case 'center_bottom':
-          e.alignment = ['center', 'bottom'];break;
-
-        case 'left_top':
-          e.alignment = ['left', 'top'];break;
-        case 'left_bottom':
-          e.alignment = ['left', 'bottom'];break;
-        case 'right_top':
-          e.alignment = ['right', 'top'];break;
-        case 'right_bottom':
-          e.alignment = ['right', 'bottom'];break;
-      }
-    }
-  };
-  _.extend(_.windows, _.proto);
-
-  _.JSON = {
-    parse: function parse(strJSON) {
-      return eval('(' + strJSON + ')');
-    },
-    stringify: function () {
-      var toString = Object.prototype.toString;
-      var isArray = Array.isArray || function (a) {
-        return toString.call(a) === '[object Array]';
-      };
-      var escMap = { '"': '\\"', '\\': '\\\\', '\b': '\\b', '\f': '\\f', '\n': '\\n', '\r': '\\r', '\t': '\\t' };
-      var escFunc = function escFunc(m) {
-        return escMap[m] || '\\u' + (m.charCodeAt(0) + 0x10000).toString(16).substr(1);
-      };
-      var escRE = /[\\"\u0000-\u001F\u2028\u2029]/g;
-      return function stringify(value) {
-        if (value == null) {
-          return 'null';
-        } else if (typeof value === 'number') {
-          return isFinite(value) ? value.toString() : 'null';
-        } else if (typeof value === 'boolean') {
-          return value.toString();
-        } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
-          if (typeof value.toJSON === 'function') {
-            return stringify(value.toJSON());
-          } else if (isArray(value)) {
-            var res = '[';
-            for (var i = 0; i < value.length; i++) {
-              res += (i ? ', ' : '') + stringify(value[i]);
-            }return res + ']';
-          } else if (toString.call(value) === '[object Object]') {
-            var tmp = [];
-            for (var k in value) {
-              if (value.hasOwnProperty(k)) tmp.push(stringify(k) + ': ' + stringify(value[k]));
-            }
-            return '{' + tmp.join(', ') + '}';
-          }
-        }
-        return '"' + value.toString().replace(escRE, escFunc) + '"';
-      };
-    }()
-  };
-  _.xml = {
-    read: function read(xmlFile) {
-      xmlFile.open('r');
-      var xmlString = xmlFile.read();
-      var myXML = new XML(xmlString);
-      xmlFile.close();
-
-      return myXML;
-    }
-  };
-
-  _.folder = {
-    create: function create(path) {
-      var newFolder = new Folder(path);
-      newFolder.create();
-
-      return newFolder;
-    },
-    remove: function remove(folder, option) {
-      switch (option) {
-        case 0:
-        case 1:
-          break;
-        default:
-          {
-            folder.remove();
-          }
-      }
-    }
-  };
-
-  _.file = {
-    help: function help() {
-      var str = 'file:\n';
-      str += 'read(path) 参数: path 路径字符串 读取文本文件，返回String对象\n';
-      str += 'create(path， text) 参数: path 路径字符串，text 内容字符串 创建文本文件，返回File对象\n';
-      str += 'getFileFromFolder(folder, format) 参数: folder 文件夹，format 格式如\'png|jpg\' 从文件夹获取文件\n';
-      str += 'help() 返回帮助信息\n';
-      str += 'alertHelp() 弹出帮助信息\n';
-      return str;
-    },
-    read: function read(file) {
-      file.open('r');
-      var myString = file.read();
-      file.close();
-
-      return myString;
-    },
-    create: function create(path, text) {
-      var newFile = new File(path);
-      newFile.open('w');
-      newFile.encoding = 'UTF-8';
-      if (text !== null) {
-        newFile.write(text);
-      }
-      newFile.close();
-
-      return newFile;
-    }
-  };
-
-  _.dropdownlist = {
-    addItem: function addItem(list, array) {
-      for (var i = 0; i < array.length; i++) {
-        if (array[i] === null) {
-          list.add('separator');
-        } else {
-          list.add('item', array[i]);
-        }
-      }
-      return list;
-    }
-  };
-
-  _.project = {
-    getActiveComp: function getActiveComp() {
-      var thisComp = app.project.activeItem;
-      if (thisComp instanceof CompItem) {
-        return thisComp;
-      }
-      return null;
-    },
-    getSelectedLayers: function getSelectedLayers() {
-      var thisComp = app.project.activeItem;
-      if (!(thisComp instanceof CompItem) || thisComp.selectedLayers.length === 0) {
-        return false;
-      }
-      return thisComp.selectedLayers;
-    },
-    findLayer: function findLayer(name, comp) {
-      if (!comp) comp = app.project.activeItem;
-      if (!(comp instanceof CompItem)) return false;
-
-      var l = comp.layers;
-      if (l.length === 0) return false;
-
-      for (var i = 1; i <= l.length; i++) {
-        if (l[i].name === name) return l[i];
-      }
-      return false;
-    },
-    getItemById: function getItemById(id) {
-      for (var i = 1; i <= app.project.numItems; i++) {
-        if (app.project.item(i).id === parseInt(id)) {
-          return app.project.item(i);
-        }
-      }
-
-      return false;
-    },
-    lookItemInProjectPanel: function lookItemInProjectPanel(item) {
-      for (var i = 1; i <= app.project.numItems; i++) {
-        if (app.project.item(i).selected) {
-          app.project.item(i).selected = 0;
-        }
-      }
-      item.selected = 1;
-    },
-    looklayerInComp: function looklayerInComp(layer) {
-      var myComp = layer.containingComp;
-      if (parseInt(app.version) > 9) {
-        myComp.openInViewer();
-      }
-      var sl = myComp.selectedLayers;
-      for (var i = 0; i < sl.length; i++) {
-        sl[i].selected = 0;
-      }
-      layer.selected = 1;
-    }
-  };
-
-  _.app = {
-    allowAccessFile: function allowAccessFile() {
-      if (isSecurityPrefSet()) return true;
-      alert('脚本正在请求文件写入或访问网络，请到"首选项->常规"确保"允许脚本写入文件和访问网络"一项被勾选');
-      try {
-        app.executeCommand(2359);
-      } catch (e) {
-        alert(e);
-      }
-      if (isSecurityPrefSet()) {
-        return true;
-      } else {
-        return false;
-      }
-
-      function isSecurityPrefSet() {
-        try {
-          var securitySetting = app.preferences.getPrefAsLong('Main Pref Section', 'Pref_SCRIPTING_FILE_NETWORK_SECURITY');
-          return securitySetting === 1;
-        } catch (e) {
-          return securitySetting === 1;
-        }
-      }
-    },
-    getOS: function getOS() {
-      if ($.os.indexOf('Windows') > -1) return 'windows';else if ($.os.indexOf('Mac') > -1) return 'Mac';else return '';
-    }
-  };
-
-  _.window = {
-    resize: function resize(window) {
-      window.layout.layout(true);
-      window.layout.resize();
-      window.onResizing = window.onResize = function () {
-        this.layout.resize();
-      };
-    }
-  };
-
-  _.array = {
-    invert: function invert(array) {
-      var newArray = [];
-      for (var i = 0; i < array.length; i++) {
-        newArray[i] = array[array.length - 1 - i];
-      }
-      return newArray;
-    },
-    random: function random(array) {
-      var newArray = [];
-      for (var i = 0; i < array.length; i++) {
-        var start = Math.round(Math.random() * newArray.length);
-        newArray.splice(start, 0, array[i]);
-      }
-      return newArray;
-    },
-    find: function find(array, item) {
-      for (var i = 0; i < array.length; i++) {
-        if (array[i] === item) return i;
-      }
-      return -1;
-    },
-    merge: function merge(array1, array2) {
-      var temp = [];
-      var b = 1;
-      for (var i = 0; i < array1.length; i++) {
-        for (var j = 0; j < array2.length; j++) {
-          if (array1[i] === array2[j]) {
-            b = 0;
-            break;
-          }
-        }
-        if (b) temp.push(array1[i]);
-      }
-      return array2.concat(temp);
-    }
-  };
-
-  _.check = {
-    isNumber: function isNumber(str) {
-      var myNum = parseFloat(str);
-      if (isNaN(myNum)) {
-        return 0;
-      } else {
-        return myNum;
-      }
-    }
-
-  };
-
-  _.alertHelp = UIParser.alertHelp;
-  for (var i in _) {
-    _[i].alertHelp = _.alertHelp;
-  }
-
-  return _;
-};
-
-UIParser.alertHelp = function () {
-  if (this.help) alert(this.help());else alert('No Help!');
-};
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-sp.extend(sp, {
-  settings: { en: 'Setting', ch: '设置' },
-  groupName: { en: 'Group name :', ch: '组名 :' },
-  elementName: { en: 'Element Name :', ch: '元素名 :' },
-  changeName: { en: 'Rename item', ch: '重命名元素' },
-  importPicture: { en: 'Import picture', ch: '导入图片' },
-  importFile: { en: 'Import file', ch: '导入组' },
-  exportFile: { en: 'Export file', ch: '导出组' },
-  addGroup: { en: 'New group', ch: '新建组' },
-  deleteGroup: { en: 'Remove group', ch: '删除组' },
-  addElement: { en: 'New item', ch: '新建元素' },
-  deleteElement: { en: 'Remove item', ch: '删除元素' },
-  create: { en: 'New layer', ch: '生成层' },
-  cover: { en: 'Cover item', ch: '覆盖元素' },
-  isShow: { en: 'Show text', ch: '显示文字' },
-  isAlert: { en: 'Deleting Alert', ch: '删除时警告' },
-  isPrecomp: { en: 'Pre-compose', ch: '预合成' },
-  isOffset: { en: 'Save material', ch: '存储素材' },
-  isName: { en: 'Auto rename', ch: '自动取名' },
-  isEffect: { en: 'Only property', ch: '仅生成效果' },
-  cleanProperty: { en: 'Empty prop', ch: '清空属性组' },
-  offsetKey: { en: 'Shift keyframe', ch: '关键帧偏移' },
-  sureDelete: { en: 'Are you sure to delete it?', ch: '确认删除?' },
-  helperScripts: { en: 'Help scripts', ch: '辅助脚本' },
-  expressionTranslate: { en: 'Fix expression errors', ch: '表达式翻译' },
-  script: { en: 'Sp_palette v1.0', ch: '形状层画板' },
-  reloadGroup: { en: 'Reload previews of group', ch: '重载组内预览动画' },
-  saveEachLayer: { en: 'Save every layer in active comp', ch: '自动存储每一层' },
-  cutLength: { en: 'Cut layer length', ch: '裁剪层长度' },
-  blankName: { en: 'Name should not be empty!', ch: '名字不应为空!' },
-  existName: { en: 'Element with the same name exists already!', ch: '相同名字的元素已存在!' },
-  overWritten: { en: 'File with the same name exists already!', ch: '相同名字的文件已存在!' },
-  inputName: { en: 'Please input your name!', ch: '请输入名字!' },
-  alertSpe: { en: 'There are special symbols in selectedLayers,please rename them first!', ch: '选中层名字有特殊符号,请首先重命名选中层!' },
-  deleteFolder: { en: 'Empty temp folder', ch: '清空素材文件夹' },
-  changeGroupName: { en: 'Change name of group', ch: '重命名选中组' },
-  deleteOk: { en: 'Clean folder successfully!', ch: '清空文件夹完毕!' },
-  yushe: { en: 'Preset Setting', ch: '预设设置' },
-  jinOne: { en: 'Please select groups that will be created on selectedLayers', ch: '请选择在仅生成效果时要在选中层上生成的属性组' },
-  jinTwo: { en: 'Please select groups that will be empty on selectedLayers before creating Properties', ch: '请选择在仅生成效果之前要清空的选中层的属性组' },
-  isSureGroup: { en: 'What you are deleting is a Group.\rAre you sure?', ch: '你正在删除的是一个组.\r确定删除吗?' },
-  isSureGroup2: { en: 'Repeat!\rWhat you are deleting is a Group.\rAre you sure?\r', ch: '重复!\r你正在删除的是一个组.\r确定删除吗?' },
-  _1: { en: 'Mask', ch: '遮罩' },
-  _2: { en: 'Effect', ch: '效果' },
-  _3: { en: 'Transform', ch: '变换' },
-  _4: { en: 'Material options', ch: '3D材质选项' },
-  _5: { en: 'Layer styles', ch: '图层样式' },
-  _6: { en: 'Shape content', ch: '形状层形状组' },
-  _7: { en: 'Text animators', ch: '文字层动画器' },
-  _8: { en: 'Light options', ch: '灯光选项' },
-  _9: { en: 'Camera options', ch: '摄像机选项' },
-  setName: { en: 'Please input the name.', ch: '请输入名字' },
-  checkVersion: { en: 'Check version', ch: '检查更新' },
-  newVersionFind: { en: 'New version found,please download the new version ', ch: '存在新版本,请下载最新版v' },
-  newVersionNotFind: { en: 'No new version! v', ch: '已是最新版 v' },
-  link: { en: 'Weibo', ch: '作者微博' },
-  about: {
-    en: 'Made by:smallpath\nE-mail:smallpath2013@gmail.com\nSource Code:\ngithub.com/smallpath/memory\n\nDoubleClick:generate new layers or properties on selected layers from selected element.\nRightClick:call the shortcut menu.\nCtrl/Alt+RightClick:save selected layers as a new element.\nShift+Rightclick:call the up and down window\n\nShortcutkey when script runs as Window:\nKey \'D\' or \'Delete\':delete selected element.\nKey \'F\': overlap selected element.\nKey \'Up\':drop up selected element.\nKey \'Down\':drop down selected element.',
-    ch: '\u4F5C\u8005:\n    smallpath\n\u90AE\u7BB1:\n    smallpath2013@gmail.com\n\u6E90\u7801\u6258\u7BA1\u5730\u5740:\ngithub.com/smallpath/memory\n\n\u53F3\u952E\u70B9\u51FB:\u547C\u51FA\u53F3\u952E\u83DC\u5355.\n\u53CC\u51FB:\u4ECE\u9009\u4E2D\u5143\u7D20\u521B\u5EFA\u5C42\u6216\u521B\u5EFA\u6548\u679C.\nCtrl/Alt+\u53F3\u952E\u70B9\u51FB:\u4ECE\u9009\u4E2D\u7684\u5C42\u8BFB\u53D6\u5C42\u4FE1\u606F\u4EE5\u521B\u5EFA\u65B0\u5143\u7D20.\nShift+\u53F3\u952E:\u5524\u51FA\u79FB\u52A8\u5143\u7D20\u7684\u7A97\u53E3\n\n\u7A97\u53E3\u6A21\u5F0F\u8FD0\u884C\u811A\u672C\u65F6:\nD\u952E:\u5220\u9664\u9009\u4E2D\u5143\u7D20.\nF\u952E:\u8986\u76D6\u9009\u4E2D\u5143\u7D20.\n\u4E0A\u952E:\u4E0A\u79FB\u9009\u4E2D\u5143\u7D20.\n\u4E0B\u952E:\u4E0B\u79FB\u9009\u4E2D\u5143\u7D20.'
-  },
-  refresh: {
-    en: 'Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp\'s time first.',
-    ch: '\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u9884\u89C8\u52A8\u753B:\n##\u8BF7\u7528\u672C\u529F\u80FD\u5BF9\u975E3.x\u7248\u672C\u4FDD\u5B58\u7684\u7EC4\u8FDB\u884C\u751F\u6210\u9884\u89C8\u52A8\u753B\u7684\u64CD\u4F5C:\n\n\u6B64\u529F\u80FD\u5C06\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u4E3B\u7F29\u7565\u56FE\u548C\u9884\u89C8\u52A8\u753B,\u5176\u4E2D\u4E3B\u7F29\u7565\u56FE\u4E3A\u5F53\u524D\u5408\u6210\u7684\u5F53\u524D\u65F6\u95F4\u70B9\u7684\u753B\u9762\n\n\u6CE8\u610F:\u6B64\u529F\u80FD\u5C06\u8017\u8D39\u5927\u91CF\u65F6\u95F4,\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n'
-  },
-  auto: {
-    en: 'This script helps you simplify you saving proccess\rIt will save every layer in active comp as a new element.',
-    ch: '\u6279\u91CF\u5B58\u50A8\u529F\u80FD:\n\n\u8FD9\u4F1A\u5C06\u5F53\u524D\u5408\u6210\u4E2D\u6BCF\u4E00\u5C42\u90FD\u5206\u522B\u5B58\u50A8\u4E3A\u4E00\u4E2A\u65B0\u5143\u7D20.\n\n\u6B64\u529F\u80FD\u53EF\u4EE5\u5E2E\u52A9\u4F60\u5FEB\u901F\u5B58\u50A8\u65B0\u5143\u7D20,\u5341\u5206\u9002\u5408\u5B58\u50A8\u5927\u91CF\u7684MG\u5408\u6210\u5C42\n\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u6765\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n' },
-  cutLengthTwo: {
-    en: 'This script will cut every layer in current comp, related to opacity for common layer and content length for comp layer.',
-    ch: '此功能将会裁剪当前合成中每一层的长度,根据普通层的透明度与合成层内容的长度.'
-  },
-  output: { en: 'Export groups', ch: '批量导出组' },
-  ok: { en: 'Ok', ch: '确定' },
-  cancel: { en: 'Cancel', ch: '取消' },
-  complete: { en: 'Complete!', ch: '导出完成!' },
-  showText: { en: 'Show text', ch: '显示文字' },
-  ui1: { en: 'The newer UI', ch: '新界面' },
-  ui2: { en: 'The older UI', ch: '旧界面' },
-  sys: { en: 'Script find that Sp_memory v1.4 has been used the first time.\rPlease select the UI type,Yes for new UI and No for previous UI.', ch: '脚本检测到Sp_memory v1.4首次被使用.\r请选择脚本界面,Yes为新界面,No为旧界面.' },
-  uiC: { en: 'Please restart script,ui will be changed.', ch: '界面已更新,请重启脚本' },
-  from: { en: 'Range is 0.', ch: '元素下标范围为:0' },
-  ud: { en: 'Up and down', ch: '上下移动选中元素' },
-  up: { en: 'Up', ch: '上移' },
-  down: { en: 'Down', ch: '下移' },
-  jmp: { en: 'Jump', ch: '跳转' },
-  coverChange: { en: 'Update thumb when cover', ch: '覆盖时更新缩略图' },
-  folderName: { en: 'The folder name of collect feature:', ch: '收集生成层时的工程栏文件夹名:' },
-  effectName: { en: 'The group name that enable Only property :', ch: '默认开启仅生成效果的组名:' },
-  limitText: { en: 'Limit the text for UI', ch: '限制主窗口界面的文字长度' },
-  scriptSetting: { en: 'Setting', ch: '设置' },
-  settingPre: { en: 'Preference', ch: '预设' },
-  thumbType: { en: 'Enable new type of thumb', ch: '缩略图包含合成栏图层轮廓' },
-  addModule: { en: 'New module', ch: '新建模块' },
-  deleteModule: { en: 'Remove module', ch: '删除模块' },
-  deleteModuleAlert: {
-    en: 'Dangerous!\r\nYou are deleting a module!\r\nAll groups in this module will be removed!\r\nDo you really want to remove this module?',
-    ch: '警告!\r\n你正在删除一个模块!\r\n所有包含在此模块中的组都将被删除!\r\n你想要继续删除吗?'
-  },
-  addAlert: { en: 'Repeart:\r\n', ch: '重复:\r\n' },
-  move: { en: 'Cut selected group to other module', ch: '剪切选中组到其他模块' },
-  editModule: { en: 'Move module or rename module', ch: '改变模块顺序或重命名模块' },
-  changeModuleName: { en: 'Change module name', ch: '重命名选中模块' },
-  moduleHelpTip: { en: "press key 'Up' and 'Down can move the selected module' ", ch: '方向上下键可移动选中模块' },
-  quit: { en: 'Quit', ch: '退出' },
-  selectGroupFirst: { en: 'Please select a group first!', ch: '请先选中一个组!' },
-  selectModuleFirst: { en: 'Please select a module first!', ch: '请先选中一个模块!' },
-  frameSecondText: { en: 'The milliseconds length of frame continues when preview:', ch: '预览时一张图片持续的毫秒数:' },
-  frameNumText: { en: 'The number of picture sequence generated for preview', ch: '生成供预览的图片序列时图片的数量:' },
-  reloadNeedFrames: {
-    en: "Please input the max frames which will be used to correct the duration of Preview.Keep blank if you don't what this feature",
-    ch: '请输入最大帧数,这将被用来使预览动画的时间范围更加准确\r\n不输入则将不进行校准'
-  },
-  needComp: { en: 'Please select a comp first', ch: '脚本需要一个合成,当前合成不存在!' },
-  previewAll: { en: 'Preview all', ch: '预览全部' },
-  previewSelected: { en: 'Preview selected', ch: '预览选中' },
-  needElement: { en: 'Please select a element in the group', ch: '组内元素未被选中,请首先选中一个元素' },
-  needElements: { en: 'Please select at least one element in the group', ch: '组内元素未被选中,请至少选中一个元素' },
-  needLayers: { en: 'Please select at least one layer in the current comp', ch: '请选中至少一个层' },
-  needModule: { en: 'Please create a module first', ch: '请先新建一个模块' },
-  isSavePreview: { en: 'Save preview', ch: '存储预览' },
-  searchWindow: { en: 'Search', ch: '搜索' },
-  getReport: { en: 'Get report', ch: '生成报告' },
-  creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
-  creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
-  creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第 ' },
-  creatingProcessAfter: { en: ' layer', ch: ' 层' },
-  savingReport: { en: 'Saving cost: ', ch: '总存储耗时: ' },
-  savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
-  savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第 ' },
-  savingProcessAfter: { en: ' layer', ch: ' 层' },
-  second: { en: ' second', ch: ' 秒' },
-  previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
-  previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
-  previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' },
-  searchButton: { en: 'search', ch: '搜索' },
-  searchText: { en: 'input name', ch: '输入元素名称' },
-  setRatioText: { en: 'notify the scale of UI for high-DPI windows', ch: '设置主界面windows放大比例' },
-  setRatioHelptip: {
-    en: 'AE scriptUI may be scaled wrong in high-DPI windows from CC2013 to CC2015.0',
-    ch: 'windows文字缩放比例大于1时, AE脚本界面会自动放大, 导致本脚本界面越界'
-  },
-  setRatioWarning: {
-    en: 'Please only change it when your text ratio does not equal to 1. Restart script to make sense',
-    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启脚本后生效'
-  },
-  saveWorkarea: {
-    en: 'Workarea',
-    ch: '预览工作区'
-  },
-  tryVersionFind: {
-    en: 'It seems that you are using the beta version which is not released yet. v',
-    ch: '未发现新版本, 你正在使用尚未发布的试用版 v'
-  },
-  shouldUpdateScript: {
-    en: 'Would you like to upgrade to new version now?\r\n it will cost some time while ae will not response\r\n',
-    ch: '现在开始更新新版本吗?\r\n\r\n脚本大小为300KB, 下载时AE会停止响应数十秒时间.\r\n选否则可以选择通过浏览器下载'
-  },
-  shouldDownloadScript: {
-    en: 'Would you like to download new version now?',
-    ch: '是否通过浏览器自行下载最新版本?\r\n打开网页后右键另存为脚本文件即可'
-  },
-  downloaded: {
-    en: 'Update success! To make it work, just restart script',
-    ch: '升级成功, 请重启脚本'
-  },
-  generalOption: {
-    en: 'General',
-    ch: '一般选项'
-  },
-  otherOption: {
-    en: 'Other',
-    ch: '其他'
-  },
-  sourceCode: {
-    en: 'Source Code',
-    ch: '脚本源码'
-  },
-  addIssue: {
-    en: 'Report bug',
-    ch: '上报错误'
-  },
-  issueDesc: {
-    en: 'Notice that error log is in Sp_memory/tempFile/error.txt',
-    ch: '核心错误日志在Sp_memory/tempFile/error.txt当中, 这可以帮助作者定位错误\r\n\r\n你可以在Github或贴吧中报告错误, 在Github上报的错误将会被优先解决\r\n\r\n选择"Yes"前往Github, 选择"No"前往贴吧'
-  },
-  checkVersionOnStartupText: {
-    en: 'Check version on startup',
-    ch: '脚本启动时检查更新'
-  }
-});
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  progressFactory: __webpack_require__(21),
-  previewProgress: __webpack_require__(2),
-  settingWindow: __webpack_require__(0),
-  fns: __webpack_require__(23)
-};
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var mvvm = __webpack_require__(22);
-
-var nameBlackList = ['win', 'gv', 'isOutside', 'previewHelper', 'isLoopPreview', 'droplist', 'parentDroplist', 'menu'];
-
-function watch(name, oldValue, newValue) {
-  if (typeof oldValue === 'function') {
-    return oldValue;
-  } else if (typeof newValue === 'boolean') {
-    var settingName = name.replace('Value', '');
-
-    if ($.global.sp.haveSetting(settingName)) {
-      $.global.sp.saveSetting(settingName, newValue);
-      return newValue;
-    } else {
-      return oldValue;
-    }
-  } else {
-    return newValue;
-  }
-}
-
-module.exports = function (obj) {
-  return mvvm.observer(obj, watch, nameBlackList);
-};
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function () {
-  __webpack_require__(19);
-
-  sp.extend(sp, {
-    forEach: function forEach(xml, callback, context) {
-      if (!(xml instanceof XML)) return;
-      var i, len;
-      for (i = 0, len = xml.children().length(); i < len; i++) {
-        if (callback.call(context, xml.child(i), i, xml) === false) {
-          break;
-        }
-      }
-    }
-  });
-
-  String.prototype.trim = String.prototype.trim || function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-  };
-
-  Array.prototype.includes = function (value) {
-    for (var i = 0, len = this.length; i < len; i++) {
-      if (this[i] === value) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  Array.prototype.forEach = function (callback, context) {
-    if (Object.prototype.toString.call(this) === '[object Array]') {
-      var i, len;
-      for (i = 0, len = this.length; i < len; i++) {
-        if (typeof callback === 'function' && Object.prototype.hasOwnProperty.call(this, i)) {
-          if (callback.call(context, this[i], i, this) === false) {
-            break;
-          }
-        }
-      }
-    }
-  };
-
-  Error.prototype.print = Error.prototype.print || function () {
-    return 'Line #' + this.line.toString() + '\r\n' + this.toString();
-  };
-
-  Error.prototype.printc = Error.prototype.printc || function () {
-    cout << '\n---------';
-    cout << this.print();
-    cout << '---------\n';
-  };
-
-  Error.prototype.printa = Error.prototype.printa || function () {
-    this.print() << cout;
-  };
-
-  File.prototype.writee = function (str) {
-    this.open('w');
-    this.write(str);
-    this.close();
-  };
-
-  File.prototype.readd = function () {
-    this.open('r');
-    var temp = this.read();
-    this.close();
-    return temp;
-  };
-
-  Array.prototype.pushh = function (str) {
-    this.push(str);
-    return this;
-  };
-
-  sp.deleteThisFolder = function (folder) {
-    var waitClFile = folder.getFiles();
-    for (var i = 0; i < waitClFile.length; i++) {
-      if (waitClFile[i] instanceof Folder) {
-        sp.deleteThisFolder(waitClFile[i]);
-        waitClFile[i].remove();
-      } else {
-        waitClFile[i].remove();
-      }
-    }
-  };
-}();
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function () {
-  var keyNameArr = [];
-  var valueArr = [];
-
-  for (var i = 1; i <= 9; i++) {
-    keyNameArr.push('_1_' + i);
-    if (i === 1 || i === 2 || i === 5) {
-      valueArr.push('1');
-    } else {
-      valueArr.push('0');
-    }
-  }
-
-  for (i = 1; i <= 9; i++) {
-    keyNameArr.push('_2_' + i);
-    valueArr.push('0');
-  }
-
-  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview').pushh('gridViewScale').pushh('saveWorkarea').pushh('checkVersionOnStartup');
-
-  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true').pushh('1').pushh('false').pushh('false');
-
-  keyNameArr.forEach(function (item, index) {
-    var value = valueArr[index];
-    if (sp.haveSetting(item) === false) sp.saveSetting(item, value);
-  });
-
-  sp.deleteAlertValue = true;
-
-  sp.showThumbValue = sp.getSettingAsBool('showThumb');
-  sp.preComposeValue = sp.getSettingAsBool('preCompose');
-  sp.saveMaterialValue = sp.getSettingAsBool('saveMaterial');
-  sp.autoNameValue = sp.getSettingAsBool('autoName');
-  sp.onlyEffectValue = sp.getSettingAsBool('onlyEffect');
-  sp.cleanGroupValue = sp.getSettingAsBool('cleanGroup');
-  sp.offsetKeyframeValue = sp.getSettingAsBool('offsetKeyframe');
-  sp.savePreviewValue = sp.getSettingAsBool('savePreview');
-  sp.saveWorkareaValue = sp.getSettingAsBool('saveWorkarea');
-
-  sp.thumbTypeValue = sp.getSettingAsBool('thumbType');
-  sp.coverChangeValue = sp.getSettingAsBool('coverChange');
-
-  sp.frameSecond = parseInt(sp.getSetting('frameSecond'));
-  sp.frameNum = parseInt(sp.getSetting('frameNum'));
-  sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'));
-  sp.checkVersionOnStartupValue = sp.getSettingAsBool('checkVersionOnStartup');
-
-  !sp.scriptFolder.exists && sp.scriptFolder.create();
-  !sp.roamingFolder.exists && sp.roamingFolder.create();
-  !sp.materialFolder.exists && sp.materialFolder.create();
-
-  var loc = function loc(string) {
-    if (sp.lang === 0) {
-      sp.lang = sp.getSetting('language');
-
-      if (sp.isForceEnglish()) {
-        sp.lang = 'en';
-      }
-    }
-    return string[sp.lang];
-  };
-
-  $.global.loc = loc;
-
-  sp.extend(sp, {
-    beyondCS6: true,
-    versionUpdateInfo: {
-      ch: '\u5C42\u5B58\u50A8\u811A\u672CSp_Memory 3.0 @\u79CB\u98CE_\u5C0F\u5F84\n\n\u529F\u80FD\u6DFB\u52A0:\n1.\u9ED8\u8BA4\u5F00\u542F\u9884\u89C8\u52A8\u753B\u529F\u80FD\n2.\u5B58\u50A8\u5C42\u65F6\u9ED8\u8BA4\u5B58\u50A8\u9884\u89C8\u52A8\u753B,\u53EF\u8BBE\u5B9A\u9884\u89C8\u7684\u5E27\u7387\u548C\u5E27\u6570\n3.\u5BFC\u5165\u5BFC\u51FA\u529F\u80FD\u652F\u6301\u9884\u89C8\u52A8\u753B\n3.\u6DFB\u52A0\u7EC4\u7684\u5206\u7C7B-\u6A21\u5757\n\n\u53F3\u952E\u83DC\u5355\u65B0\u589E:\n1.\u9884\u89C8\u5168\u90E8/\u9884\u89C8\u9009\u4E2D\n2.\u65B0\u5EFA\u6A21\u5757\n3.\u5220\u9664\u6A21\u5757\n\n\n\u5C0F\u63D0\u793A:\n1.\u57283.x\u7248\u672C\u524D\u4FDD\u5B58\u7684\u7EC4,\u53EF\u4EE5\u7528"\u53F3\u952E->\u8F85\u52A9\u811A\u672C->\u91CD\u8F7D\u7EC4\u5185\u9884\u89C8\u52A8\u753B"\u6765\u4E3A\u7EC4\u6240\u6709\u5143\u7D20\u8FDB\u884C\u6279\u91CF\u751F\u6210\u9884\u89C8\u52A8\u753B\n2.\u53EF\u4F7F\u7528ctrl\u4E0Eshift\u5BF9\u5143\u7D20\u8FDB\u884C\u81EA\u7531\u9009\u62E9,\u4E4B\u540E\u53F3\u952E->\u9884\u89C8\u9009\u4E2D,\u5373\u53EF\u540C\u65F6\u9884\u89C8\u6240\u6709\u88AB\u9009\u4E2D\u5143\u7D20\u7684\u52A8\u753B\n3.\u5728\u672A\u9009\u4E2D\u4EFB\u4F55\u5143\u7D20\u65F6,\u53F3\u952E->\u9884\u89C8\u5168\u90E8,\u5373\u53EF\u9884\u89C8\u7EC4\u5185\u7684\u5168\u90E8\u5143\u7D20\u7684\u52A8\u753B\n4.\u5728\u8BBE\u7F6E\u7A97\u53E3\u4E2D,\u9009\u4E2D\u4E00\u4E2A\u7EC4,\u4E4B\u540E\u70B9\u51FB"\u526A\u5207\u9009\u4E2D\u7EC4\u5230\u5176\u4ED6\u6A21\u5757",\u53EF\u5C06\u7EC4\u79FB\u52A8\u5230\u5176\u4ED6\u6A21\u5757\u4E2D\n\n\n',
-      en: 'Sp_memory 3.0 @smallpath\n                    \nNew Feature:\n1.Enable preview element\n2.Create preview animation while saving layers,you can set the frame rate and frame number\n3.Export/Import group support preview animation\n4.Add module - the group of group\n\nTips:\n1.When your group is saved  before v3.0,you can use "RightClick->Helper scripts->Reload previews of group" to create all the preview animation\n2.Use ctrl key and shift key to select element,then use "RightClick->Preview selected" to preview the animations of selected element at the same time.\n3.When there isn\'t any element being selected, us "RightClick->Preview all" to preview all the animations of group.\n4.To cut the group from its module into another module,use "Cut selected group to other module" in the settings window\n                    \n'
-    }
-  });
-
-  if (sp.haveSetting('version') === false || sp.getSetting('version') < sp.version) {
-    alert(loc(sp.versionUpdateInfo));
-  }
-  sp.saveSetting('version', sp.version);
-}();
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var request = __webpack_require__(20);
-
-module.exports = function () {
-  var sp = function sp() {
-    return new sp.prototype.init();
-  };
-
-  sp.prototype = {
-
-    scriptName: 'Sp_memory',
-    scriptVersion: "3.0.11",
-    version: "3.0.11",
-    slash: '/',
-
-    setting: app.settings,
-    inXml: null,
-
-    isCC2015: !!(app.version.indexOf('13.5') !== -1 || app.version.indexOf('13.6') !== -1 || app.version.indexOf('13.7') !== -1 || app.version.indexOf('13.8') !== -1 || app.version.indexOf('14') !== -1),
-
-    ui: 1,
-    lang: 0,
-
-    sourceCodeLink: 'https://github.com/smallpath/memory',
-    githubIssue: 'https://github.com/smallpath/memory/issues',
-    issueLink: 'https://tieba.baidu.com/p/4462854806',
-    checkVersionLink: 'https://api.github.com/repos/smallpath/memory/git/refs/tags',
-    downloadLinkPrefix: 'https://raw.githubusercontent.com/smallpath/memory/v',
-    downloadLinkSuffix: '/dist/Sp_memory.jsx',
-    weiboLink: 'http://weibo.com/u/3893928357',
-
-    noImage: '\x89PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\0d\0\0\0<\b\x06\0\0\0\x90?\x1F\xCE\0\0\t/IDATx\x9C\xED\x9BiL\x13]\x17\xC7\xFF\xED\xB0\xB4u\x01,QpA\x94\xB4\xFAA\x89J\t\xA8X5b\x1E\x8D1~0\xD1D\xFC 1\xA81FI\x8C\x9A(\x89\x8D\x0B.\x89!j\x88\xB2\x18\x17\xF0\x93Jp%\x1A\xC5\x88\x80\xDA\xD4\x05\x85Z!\x80\x82\x16D,\xB6,-]8\xCF\x07_&\x8E-L\xCD\xD3\xF7y\xE7\xD5\xF9%7\xE9\x9C{\xEE\x99\xE5?w\xEE\x9Ds\xA7\x12\0\x04\x11\xC1 \xFD_\x1F\x80\b\x17Q\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\fQ\x10\x81\x11\xC4\xE7 \x95J1z\xF4h\x84\x84\x84x\xD5\x11\x11\\.\x17\xACV+\x88\xFE\xCC\f\x8CD"\x01\x000\f\x03\xB9\\\x8E\xD0\xD0PH\xA5\xDE\xF7\xB9\xD3\xE9\x84\xCDf\xC3\xC0\xC0\xC0\xB0\xF1x\x05\x19=z4222\x10\x17\x17\x87\xFE\xFE~N\x9D\xCB\xE5BSS\x13\n\x0B\x0B\xE1t:\x7F\xE5<~+\xA4R)"""\x90\x92\x92\x82\xE4\xE4d\xC8d2N}hh(\x1A\x1B\x1BQPP\x80o\xDF\xBE\r\x1B\x8BW\x10\xB9\\\x8E\xA4\xA4$8\x1C\x0E\x98L&N\x9D\xDB\xEDF[[\x1B\xAF\xEA\xBF;\x83O\n\x8B\xC5\x82\xF7\xEF\xDF#44\x94S\xAF\xD1h\x90\x9C\x9C\x8C\xE2\xE2b^A\x80\xEF\xD9\xDE!Ktt4\x15\x15\x15\xD1\xFA\xF5\xEB\x87\xF5\x13\xCB\xD0e\xFD\xFA\xF5TTTD\xD1\xD1\xD1\xBC\xBE\xE2\xA0.0DA\x04\x06\xAF \x83\xCFG\xB7\xDB\xFDo\x1C\xCFo\x89\xDB\xED\x86\xCB\xE5\xF2k&\xCA+\x88\xD3\xE9\x84\xC9dBGGG@\x0E\xEEO\xA4\xA3\xA3\x03&\x93\xC9\xAF\x99\xA8\x04<K\xB8\x12\x89\x04\xC1\xC1\xC1\xF0x<\xF0x<\x81:\xC6?\n\x86a\xC00\x8C_\xBD\x84W\x10\x91\x7F\x17qP\x17\x18\xA2 \x02C\x14D`\xF0\xA6N\xFC%66\x16\x1F?~\xF4\x9A\x1EO\x9B6\r2\x99\f555\x1C{RR\x12\xD2\xD2\xD2 \x95JQRR\x82\xF2\xF2\xF2!cGEEA\xADV\xA3\xA2\xA2\x02\x000n\xDC8X\xADV8\x1C\x0E/\xDFQ\xA3F!((\b]]]^u\x87\x0F\x1FFnn.\xCCf\xF3\x90\xFB\n\x0B\x0B\xC3\xF6\xED\xDB1a\xC2\x04\xB4\xB5\xB5\xE1\xE4\xC9\x93\x9Ct\xC7\xDC\xB9s\x11\x1E\x1E\xCEic2\x99\xD0\xDC\xDC<d\xCC_% \xE9\x81\xA2\xA2"\xBA|\xF9\xB2\x97\xBD\xB4\xB4\x94***\xD8m\x86a\xE8\xC6\x8D\x1Bd\xB7\xDB\xA9\xBD\xBD\x9D\xCCf3\xF5\xF7\xF7SEE\x05\x8D\x1C9\xD2g\xEC\xEC\xECljmme\xB7sss)\'\'\xC7\xA7\xEF\xC5\x8B\x17\xE9\xD0\xA1C^v\x86a\xA8\xA9\xA9\x89\xF2\xF3\xF3\x87<\x87={\xF6\x90\xD9l&\x87\xC3Af\xB3\x99\xFA\xFA\xFA\xA8\xA3\xA3\x83rssY\x9F\xB7o\xDF\xD2\xCF\\\xBAt)`i\x96\x80=\xB2\xFA\xFA\xFA\xB0j\xD5*\xA4\xA7\xA7s\xECn\xB7\x9B3\xFF\xBEr\xE5\n\xB4Z-rrr\x10\x13\x13\x83I\x93&A\xA7\xD3A\xADV\xE3\xEE\xDD\xBBC\xC6w\xB9\\\xECo\xA5R\x89\xD4\xD4T/\x1F\x86a0w\xEE\\DGG{\xD5m\xDA\xB4\t\xB1\xB1\xB1\x987o\x9E\xCF\xF8\x1B6l@VV\x16>~\xFC\x88\xA5K\x97b\xFC\xF8\xF1\xD0h4\xD0\xEB\xF5\xD8\xB8q#\x8A\x8A\x8A\0|\x7F/\xBBy\xF3&\xB4Z-[\xF6\xED\xDB7\xFC\xC5\xF9E\x02\xA2l^^\x1E\xD9\xEDvjmm\xA5\x98\x98\x18\xD6~\xF5\xEAU\xBA\x7F\xFF>\x01\xA0\xF8\xF8x\xEA\xE9\xE9!\x9DN\xE7\xD5>##\x83\xFA\xFA\xFA|&1\xB3\xB3\xB3\xA9\xA9\xA9\x89\xDD.++#\xB7\xDBMiii\x1C\xBF\xCC\xCCL\x1A\x18\x18\xA0\xD2\xD2R\xAF\x18\xE5\xE5\xE5T__Ov\xBB\x9D\x96/_\xCE\xA9\x93H$T[[K\x06\x83\x81\x18\x86\xF1j{\xE2\xC4\tJHH \0TSSC\x05\x05\x05\x01\xEB\x11?\x97\x80\x0E\xEAF\xA3\x11N\xA7\x13W\xAE\\a\x17n~d\xDB\xB6m0\x9B\xCD8p\xE0\x80W]AA\x01jkk\xB1z\xF5j\xDE\xFDDFF\xA2\xBB\xBB\x1B\x1B7n\xE4\xD8\xD7\xACY\x03\x9B\xCD\x86\xB0\xB00\x8E=**\ns\xE6\xCC\xC1\xE5\xCB\x97a2\x99\xB0u\xEBVN\xBDV\xAB\x85J\xA5\xC2\xA1C\x87|\xBE\xFC\xEE\xDC\xB9\x13\xCF\x9F?\xE7=\xAE@\x10PA\\.\x17v\xEC\xD8\x81\xE9\xD3\xA7\xE3\xCC\x993^\xF5QQQhnn\x1Er\xFD\xA4\xB1\xB1\x11J\xA5\x92w?c\xC7\x8EEyy94\x1A\r\xE2\xE2\xE2\0\0\x89\x89\x89\x88\x8F\x8FGuu5"##9\xFE:\x9D\x0E\xBD\xBD\xBD8v\xEC\x18\xAA\xAA\xAA\xA0\xD1h8\x8BH\x8B\x17/\x86\xC5b\xC1\xF5\xEB\xD7\xFD:\xCF\xB5k\xD7\xE2\xEB\xD7\xAFl9{\xF6\xAC_\xED\xFC!`\xB3\xACAn\xDD\xBA\x85\x0B\x17. ==\xDDkL\x18L\x1F\f\x85\xCB\xE5Bpp\xF0\xB0\xF1CBB\x10\x11\x11\x81\xE3\xC7\x8FC\xA5R\xE1\xE0\xC1\x83X\xB7n\x1D\xF6\xEE\xDD\x0B\xA3\xD1\x88\xABW\xAF\xE2\xC8\x91#\x9C6\xF3\xE6\xCD\x83\xDB\xEDFqq1\x14\n\x05\x94J%v\xEF\xDE\xCD\xF6\xD4\xC1\xD4\xD0\xCFi\x8D\xDA\xDAZv\xE9Z&\x93a\xD9\xB2e\0\xBE\xDF8eee\xAC\xDF\x9D;wx\xAE\x8A\xFF\xFCW\xDEC233\xF1\xFA\xF5k\x9C8q\x82s\'Z,\x16L\x9E<y\xC8v\x93\'O\x86\xC5b\x196vll,\xA4R)\xDE\xBD{\x87\xBBw\xEFb\xC1\x82\x05\b\x0F\x0F\xC7\xFC\xF9\xF3q\xFD\xFAu<y\xF2\x04#G\x8Ed{\xC9\x8A\x15+\xA0R\xA9\xE0v\xBB1{\xF6lL\x9B6\r\x16\x8B\x05\x7F\xFD\xF5\x17\x1B\xF3\xF1\xE3\xC7\x18;v,\xB4Z-g_\xF7\xEE\xDD\xC3\xC3\x87\x0F\xD1\xD2\xD2\x02\xA5R\x89/_\xBE\0\0\f\x06\x03\xF6\xEE\xDD\xCB\x96\xCA\xCA\xCA_\xBEF\xC3\x11\xB0A\xFD\xE9\xD3\xA7\xECvTT\x14}\xF8\xF0\x81\xACV+;\xA8/Y\xB2\x84\xECv;m\xDE\xBC\xD9\xAB}JJ\n\xD9l6\xCA\xCC\xCC\x1CvPOOO\xA7\xF6\xF6v\x02@\n\x85\x82>\x7F\xFELF\xA3\x91ZZZ(88\x98d2\x19uwwSjj*\x01\xA0[\xB7n\xD1\xCB\x97/9\xF1\xB6l\xD9B===\xA4V\xAB\t\xF8>%\xAE\xAF\xAF\xA7G\x8F\x1E\xF9<\xB7\x92\x92\x12\xAA\xAB\xAB\xFB\xFF\x1B\xD4\x7F\xA4\xBD\xBD\x1D\xBBv\xED\xE2\xD8\x1E<x\0\x83\xC1\0\x9DN\x87\xB4\xB44\xD6\xBEh\xD1"\x9C?\x7F\x1E\xEF\xDF\xBF\xC7\xA9S\xA7\x86\x8D;c\xC6\f\xF6N\xED\xEB\xEBCee%T*\x15***\xE0r\xB9\xE0p8`\xB1X\xA0\xD1h\xA0P(\x90\x90\x90\x80\xAA\xAA*N\x8C\xFC\xFC|\xB4\xB5\xB5\xB1\xD3U\x8F\xC7\x83s\xE7\xCE!11\x11\xA5\xA5\xA5\x90\xCB\xE5\xAC\xEF\xFE\xFD\xFB\x91\x9A\x9A\x8A\xDB\xB7o\xB3\xB6\x90\x90\x10\x84\x87\x87\xB3\xE5\xE75\xF4\x7FJ@\x94\xCD\xCF\xCF\'\xBD^\xEF\xD3\xFEc\xCF\x89\x88\x88 \xBD^O\x0E\x87\x83\xDE\xBCyC\xAF^\xBD\xA2\xDE\xDE^\xAA\xAB\xAB#\x95J\xE53vvv6577\x13\0*..\xE6\xBCh\xCE\x9A5\x8B\xACV+M\x9D:\x95\xB5\xBDx\xF1\x82\n\x0B\x0B\xE9\xF0\xE1\xC3\xD4\xD5\xD5Ec\xC6\x8C\xF1\x8AY\\\\L\r\r\r$\x91HX\xDB\xE9\xD3\xA7\xC9j\xB5\xD2\xA7O\x9F\xE8\xC9\x93\'d4\x1A\xC9n\xB7\xD3\x8D\x1B7X\xBF7o\xDEPww7uuu\xB1%///`=\x84\x01\xA0\x0B\x84\xAA===\xF8\xF0\xE1\x83\xD7\xF4\xF0\xF6\xED\xDB\xE8\xEC\xECd\xBFXq8\x1C(,,\x84\xCDf\x83B\xA1@WW\x17JJJ\x90\x96\x96\x86\xCE\xCEN\x9F\xB1\x07g3\xD5\xD5\xD5\x18\x18\x18\xC0\xF3\xE7\xCFQWW\x07\xE0{Olhh@uu5\xEB\xDF\xDF\xDF\x8Fg\xCF\x9E\xA1\xB3\xB3\x13\xD5\xD5\xD5>\x9F\xF1\x06\x83\x012\x99\fz\xBD\x9E}q-++\xC3\xBD{\xF7\xA0T*\xE1v\xBB\xD1\xDA\xDA\x8A\xA3G\x8F"++\x8Bm\x17\x14\x14\x04\xA3\xD1\b\x83\xC1\xC0\x96k\xD7\xAE\xA1\xA5\xA5\xE5\x9F]\xC0\xFF \xAE\x87\b\f1\xDB+0DA\x04\x06\xAF \x12\x89\x04\f\xC3\xF8\xFC^U\xC4?\xA4R)\x18\x86\xF1\x99N\xF2\xF2\xE5s`\x18\x06\x91\x91\x91\x181bD@\x0E\xEEOd\xC4\x88\x11\x88\x8C\x8C\x04\xC30\xBC\xBE\xBC\x82(\x14\n\xA4\xA6\xA6B\xADV\x07\xE4\xE0\xFED\xD4j5\x96.]\n\x85B\xC1\xEB\xCB+\x88\\.\xC7\xC2\x85\x0B\xD9$\x9E\xC8\xAF\x13\x17\x17\x07\xADV\xCBy\xE1\x1C\n^A\xA4R)\xE4r\xB9\xCF\xFF\x87\x88\xF8GHH\b\xE4r\xB9_\xE3\xB08R\x0B\fQ\x10\x81\xE1\xD7z\x88B\xA1\xC0\xCA\x95+1q\xE2D\x8E}0\xBDPRR2\xEC:\xC7\xEF\x8ET*EXX\x18\x12\x12\x120s\xE6L\xAFd\xE3\xEC\xD9\xB3\x11\x14\xE4\xDF\xD2\x13\xAF\x97\xDDn\xC7\xB3g\xCF0}\xFAt\xAF\x81\xDD\xE9t\xC2\xE3\xF1\xF85\xBF\xFE]\x91H$\xEC\xF7\xCFJ\xA5\x12S\xA6L\xF1\x1A\xBC{{{a2\x99`\xB7\xDB\xF9\xE3\x81\'\x97%\xFE\xE9sx\x02\xFD\xA7O1\xB9(0\xC4A]`\x88\x82\b\fQ\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\x8C\xBF\x01O\xC5\x98\x01\xABf\xE6Y\0\0\0\0IEND\xAEB`\x82',
-
-    xmlFileNames: [],
-    xmlGroupNames: [],
-    xmlCurrentFileNames: [],
-
-    layerTypePropertyArr: [],
-    layerTypePropertyValueArr: [],
-
-    expPropertyArr: [],
-
-    layerArr: [],
-    layerParentNameArr: [],
-
-    init: function init() {
-      return this;
-    },
-
-    extend: function extend(target, source) {
-      for (var i in source) {
-        target[i] = source[i];
-      }return target;
-    }
-
-  };
-
-  sp.prototype.extend(sp.prototype, {
-
-    scriptFile: new File($.fileName),
-    scriptFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory'),
-    materialFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'tempFile'),
-    settingsFile: new File(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'settings.xml'),
-    imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'image'),
-    roamingFolder: new Folder(Folder.userData.fullName + sp.prototype.slash + 'Aescripts' + sp.prototype.slash + 'Sp_memory'),
-
-    isOutside: true,
-    isLoopPreview: false,
-    previewHelper: {},
-    renderTaskArray: [],
-    preImageArr: [],
-    newItemOrCover: 'newItem',
-
-    haveSetting: function haveSetting(keyName) {
-      return this.setting.haveSetting(this.scriptName, keyName);
-    },
-
-    saveSetting: function saveSetting(keyName, value) {
-      this.setting.saveSetting(this.scriptName, keyName, value);
-    },
-
-    getSetting: function getSetting(keyName) {
-      return this.setting.getSetting(this.scriptName, keyName);
-    },
-
-    getSettingAsBool: function getSettingAsBool(keyName) {
-      return this.getSetting(keyName) === 'true';
-    },
-
-    getFileByName: function getFileByName(name) {
-      var string = this.scriptFolder.toString() + this.slash + name + '.xml';
-      var file = new File(string);
-      return file;
-    },
-
-    isForceEnglish: function isForceEnglish() {
-      var string = this.scriptFolder.toString() + this.slash + 'force_en.txt';
-      var file = new File(string);
-      return file.exists;
-    },
-
-    getImageFolderByName: function getImageFolderByName(name) {
-      var string = this.imageFolder.toString() + this.slash + name + '';
-      var folder = new Folder(string);
-      if (!folder.exists) {
-        folder.create();
-      }
-      return folder;
-    },
-
-    getImage: function getImage(groupName, imageName) {
-      var folder = this.getImageFolderByName(groupName);
-      if (!folder.exists) {
-        folder.create();
-      }
-      var string = folder.toString() + this.slash + imageName + '.png';
-      var file = new File(string);
-      if (file.exists) {
-        return file;
-      } else {
-        return this.noImage;
-      }
-    },
-
-    getImageFile: function getImageFile(groupName, imageName) {
-      var folder = this.getImageFolderByName(groupName);
-      if (!folder.exists) {
-        folder.create();
-      }
-      var string = folder.toString() + this.slash + imageName + '.png';
-      var file = new File(string);
-      return file;
-    },
-
-    getGlobalIndexFromFileName: function getGlobalIndexFromFileName(name) {
-      var content = new XML(this.settingsFile.readd());
-      var thisIndex = -1;
-      this.forEach(content.ListItems, function (item, index) {
-        if (item.toString() === name) {
-          thisIndex = index;
-        }
-      });
-      return thisIndex;
-    },
-
-    os: $.os.indexOf('Win') !== -1 ? 'win' : 'mac',
-
-    openLink: function openLink(url) {
-      var cmd = '';
-      if ($.os.indexOf('Win') !== -1) {
-        cmd += 'explorer ' + url;
-      } else {
-        cmd += 'open "' + url + '"';
-      }
-      try {
-        system.callSystem(cmd);
-      } catch (e) {}
-    },
-
-    request: request,
-
-    getVersion: function getVersion() {
-      try {
-        var response = request('GET', this.checkVersionLink, '');
-
-        var data = eval('(' + response + ')');
-        var latestTag = 0;
-
-        data.forEach(function (item, index) {
-          var tagArr = item.ref.match(/v(.*?)$/i);
-          if (tagArr.length >= 1) {
-            var tag = tagArr[1];
-            if (latestTag <= tag) latestTag = tag;
-          }
-        });
-        return latestTag;
-      } catch (err) {
-        return -1;
-      }
-    },
-
-    compareSemver: function compareSemver(a, b) {
-      var pa = a.split('.');
-      var pb = b.split('.');
-      for (var i = 0; i < 3; i++) {
-        var na = Number(pa[i]);
-        var nb = Number(pb[i]);
-        if (na > nb) return 1;
-        if (nb > na) return -1;
-        if (!isNaN(na) && isNaN(nb)) return 1;
-        if (isNaN(na) && !isNaN(nb)) return -1;
-      }
-      return 0;
-    }
-
-  });
-
-  sp.prototype.extend(sp.prototype, {
-    filterName: function filterName(str) {
-      return str.trim().replace(/[<>:"\/\\|?*]+/g, '_');
-    },
-    getTimeInfoArr: function getTimeInfoArr(comp) {
-      var layers = [];
-      if (comp.selectedLayers.length === 0) {
-        for (var i = 0; i < comp.numLayers; i++) {
-          if (comp.layer(i + 1).enabled === true) {
-            layers.push(comp.layer(i + 1));
-          }
-        }
-      } else {
-        for (i = 0; i < comp.selectedLayers.length; i++) {
-          if (comp.selectedLayers[i].enabled === true) {
-            layers.push(comp.selectedLayers[i]);
-          }
-        }
-      }
-
-      var inPointArr = [];
-      var outPointArr = [];
-
-      for (i = 0; i < layers.length; i++) {
-        var layer = layers[i];
-        inPointArr.push(layer.inPoint);
-        outPointArr.push(layer.outPoint);
-      }
-
-      if (layers.length === 0) return null;
-      inPointArr.sort(function (a, b) {
-        return a - b;
-      });
-      outPointArr.sort(function (a, b) {
-        return a - b;
-      });
-
-      return [inPointArr[0], outPointArr[outPointArr.length - 1]];
-    },
-    swap: function swap(a, b) {
-      var tempA = a.text;
-      a.text = b.text;
-      b.text = tempA;
-    },
-    lookUpTextInChildren: function lookUpTextInChildren(text, children) {
-      var len = children.length;
-      for (var i = 0; i < len; i++) {
-        if (children[i].text === text) {
-          return true;
-        }
-      }
-      return false;
-    },
-
-    lookUpInArray: function lookUpInArray(text, arr) {
-      var len = arr.length;
-      for (var i = 0; i < len; i++) {
-        if (arr[i] === text) {
-          return true;
-        }
-      }
-      return false;
-    },
-    lookUpInItem: function lookUpInItem(text, items) {
-      var len = items.length;
-      for (var i = 1; i <= len; i++) {
-        if (items[i].name === text) {
-          return [true, items[i]];
-        }
-      }
-      return [false, null];
-    },
-    deleteIndexAndReload: function deleteIndexAndReload(deleteIndex) {
-      var settingxml = new XML(this.settingsFile.readd());
-      this.forEach(settingxml.ParentGroup, function (item, index) {
-        for (var j = 0, len = item.children().length(); j < len; j++) {
-          var thisItem = item.child(j);
-          if (parseInt(thisItem.toString()) === deleteIndex) {
-            thisItem.setLocalName('waitToDelete');
-            delete item.waitToDelete;
-          }
-        }
-      });
-      this.forEach(settingxml.ParentGroup, function (item, index) {
-        for (var j = 0, len = item.children().length(); j < len; j++) {
-          var thisItem = item.child(j);
-          if (parseInt(thisItem.toString()) > deleteIndex) {
-            item.insertChildBefore(thisItem, new XML('<Index>' + (parseInt(thisItem.toString()) - 1).toString() + '</Index>'));
-            thisItem.setLocalName('waitToDelete');
-            delete item.waitToDelete;
-          }
-        }
-      });
-
-      this.settingsFile.writee(settingxml);
-    },
-    reloadParentDroplist: function reloadParentDroplist() {
-      this.parentDroplist.removeAll();
-      var settingxml = new XML(this.settingsFile.readd());
-      this.xmlGroupNames.length = 0;
-      this.forEach(settingxml.ParentGroup, function (item, index) {
-        this.push(item['@groupName'].toString());
-      }, this.xmlGroupNames);
-      this.xmlGroupNames.forEach(function (item, index) {
-        this.add('item', item);
-      }, this.parentDroplist);
-      var ratio = 1 / this.gv.scale - 1;
-      var addedSeparatorLength = Math.ceil(ratio * this.xmlGroupNames.length);
-      for (var i = 0; i < addedSeparatorLength; i++) {
-        this.parentDroplist.add('separator');
-      }
-
-      this.reloadDroplist();
-    },
-    reloadDroplist: function reloadDroplist() {
-      this.droplist.removeAll();
-      this.gv.removeAll();
-      var parentSelection = parseInt(this.getSetting('parentSelection'));
-      var groupName = this.xmlGroupNames[parentSelection];
-
-      var settingxml = new XML(this.settingsFile.readd());
-      this.xmlFileNames.length = 0;
-      this.xmlCurrentFileNames.length = 0;
-
-      var indexArr = [];
-
-      this.forEach(settingxml.ParentGroup, function (item, index) {
-        if (item['@groupName'].toString() === groupName) {
-          for (var j = 0; j < item.children().length(); j++) {
-            indexArr.push(parseInt(item.child(j).toString()));
-          }
-        }
-      });
-
-      var listArr = [];
-      this.forEach(settingxml.ListItems, function (item, index) {
-        this.push(item.toString());
-      }, this.xmlFileNames);
-      for (var i = 0, len = indexArr.length; i < len; i++) {
-        listArr.push(settingxml.ListItems.child(indexArr[i]).toString());
-      }
-      listArr.forEach(function (item, index) {
-        this.add('item', item);
-      }, this.droplist);
-      var ratio = 1 / this.gv.scale - 1;
-      var addedSeparatorLength = Math.ceil(ratio * listArr.length);
-      for (i = 0; i < addedSeparatorLength; i++) {
-        this.droplist.add('separator');
-      }
-
-      this.xmlCurrentFileNames = listArr;
-    },
-    cropImage: function cropImage(fi, inImageFileA) {
-      var f = new ImportOptions();
-      f.file = fi;
-      f.forceAlphabetical = false;
-      f.importAs = ImportAsType.FOOTAGE;
-      f.sequence = false;
-      f = app.project.importFile(f);
-      var tempComp3 = app.project.items.addComp('tempComp', 100, 60, 1, 5, 30);
-      var BGtemp3 = tempComp3.layers.addSolid([0, 0, 0], 'BG', tempComp3.width, tempComp3.height, 1, 10800);
-      var ima = tempComp3.layers.add(f);
-      var scaleX = 10000 / ima.source.width;
-      var scaleY = 6000 / ima.source.height;
-      if (scaleX / 60 < scaleY / 100) {
-        ima.transform.scale.setValue([scaleX, scaleX]);
-      } else {
-        ima.transform.scale.setValue([scaleY, scaleY]);
-      }
-      tempComp3.saveFrameToPng(0, inImageFileA);
-      f.remove();
-      try {
-        if (BGtemp3.source.parentFolder.numItems === 1) {
-          var BGparent = BGtemp3.source.parentFolder;
-          BGtemp3.source.remove();
-          BGparent.remove();
-        } else {
-          BGtemp3.source.remove();
-        }
-      } catch (err) {}
-      tempComp3.remove();
-    },
-
-    savePng2: function savePng2(pngPath) {
-      app.beginSuppressDialogs();
-      var comps = app.project.activeItem;
-      var timeArr = this.getTimeInfoArr(comps);
-      var layers = comps.selectedLayers;
-      var jishushuzu = [];
-      var waitToPre = [];
-      var tempComp2 = app.project.items.addComp('tempComp2', comps.width, comps.height, comps.pixelAspect, comps.duration, comps.frameRate);
-      var BGtemp = tempComp2.layers.addSolid([0, 0, 0], 'BG', 100, 60, 1, 10800);
-      var cunLengthA = layers.length;
-      var iq;
-      for (iq = 0; iq < layers.length; iq++) {
-        jishushuzu.push(layers[iq].index);
-      }
-      for (iq = 0; iq < layers.length; iq++) {
-        var wocaoName = layers[iq].name;
-        waitToPre[waitToPre.length] = layers[iq].duplicate();
-        waitToPre[iq].name = wocaoName;
-      }
-      var wwwww = [];
-      for (iq = 0; iq < cunLengthA; iq++) {
-        wwwww.push(waitToPre[iq].index);
-      }
-      var precomposeComp = comps.layers.precompose(wwwww, 'tempA', true);
-      comps.layer('tempA').copyToComp(tempComp2);
-      comps.layer('tempA').remove();
-      for (iq = 0; iq < cunLengthA; iq++) {
-        comps.layer(jishushuzu[iq]).selected = true;
-      }
-      try {
-        tempComp2.layer(1).solo = false;
-      } catch (err) {}
-      var preVVVV = tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').value;
-      tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').setValue([100 / tempComp2.width * preVVVV[0], 60 / tempComp2.height * preVVVV[1]]);
-      tempComp2.width = 100;
-      tempComp2.height = 60;
-      BGtemp.property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
-      tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
-      var nameStr = '';
-      pngPath = File(pngPath);
-
-      var isNewItem = this.newItemOrCover === 'newItem';
-      var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
-      if (isNewItem || isCover) {
-        if (isNewItem) {
-          while (pngPath.exists) {
-            pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
-            pngPath = File(pngPath);
-          }
-        }
-        try {
-          tempComp2.saveFrameToPng(comps.time, pngPath);
-        } catch (err) {}
-      }
-
-      if (this.savePreviewValue === true) {
-        tempComp2.layer(1).inPoint = timeArr[0];
-        tempComp2.layer(1).outPoint = timeArr[1];
-        tempComp2.layer(2).inPoint = timeArr[0];
-        tempComp2.layer(2).outPoint = timeArr[1];
-        timeArr = this.getTimeInfoArr(tempComp2);
-        var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
-        !targetFolder.exists && targetFolder.create();
-        var num = this.frameNum;
-        this.willSavePreviews(num + 1);
-        var workAreaStart = comps.workAreaStart;
-        var workAreaDuration = comps.workAreaDuration;
-        for (var i = 0; i < num + 1; i++) {
-          try {
-            var time;
-            if (this.saveWorkareaValue === true) {
-              time = workAreaStart + i * workAreaDuration / num;
-            } else {
-              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
-            }
-            var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
-            tempComp2.saveFrameToPng(time, seqPath);
-            this.didSavePreview();
-            app.purge(PurgeTarget.IMAGE_CACHES);
-          } catch (err) {}
-        }
-        this.didSavePreviews();
-      }
-      BGtemp.source.remove();
-      tempComp2.remove();
-      precomposeComp.remove();
-      try {
-        nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
-      } catch (err) {}
-      app.endSuppressDialogs(false);
-      return encodeURIComponent(nameStr);
-    },
-    savePng: function savePng(pngPath) {
-      try {
-        app.beginSuppressDialogs();
-        var comps = app.project.activeItem;
-        var layers = comps.selectedLayers;
-        var inArr = [];
-        for (var i = 0; i < layers.length; i++) {
-          inArr.push(layers[i].index);
-        }
-        var otherIndexArr = [];
-        var otherEnabledArr = [];
-        for (i = 0; i < comps.numLayers; i++) {
-          var thisLayer = comps.layer(i + 1);
-          if (inArr.toString().indexOf(thisLayer.index) === -1) {
-            otherEnabledArr.push(thisLayer.enabled);
-            otherIndexArr.push(thisLayer.index);
-            try {
-              thisLayer.enabled = false;
-            } catch (err) {}
-          }
-        }
-        var nameStr = '';
-        pngPath = File(pngPath);
-        var isNewItem = this.newItemOrCover === 'newItem';
-        var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
-        if (isNewItem || isCover) {
-          if (isNewItem) {
-            while (pngPath.exists) {
-              pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
-              pngPath = File(pngPath);
-            }
-          }
-          if (this.thumbTypeValue === true) {
-            app.activeViewer.views[0].saveBlittedImageToPng(comps.time, pngPath, 1000, "what's this? I don't know");
-          } else {
-            comps.saveFrameToPng(comps.time, pngPath);
-          }
-          this.cropImage(pngPath, pngPath);
-        }
-        if (this.savePreviewValue === true) {
-          var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
-          !targetFolder.exists && targetFolder.create();
-          var num = this.frameNum;
-          this.willSavePreviews(num + 1);
-          var workAreaStart = comps.workAreaStart;
-          var workAreaDuration = comps.workAreaDuration;
-          var timeArr = this.getTimeInfoArr(comps);
-          for (i = 0; i < num + 1; i++) {
-            var time;
-            if (this.saveWorkareaValue === true) {
-              time = workAreaStart + i * workAreaDuration / num;
-            } else {
-              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
-            }
-            var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
-
-            if (this.thumbTypeValue) {
-              app.activeViewer.views[0].saveBlittedImageToPng(time, seqPath, 1000, "what's this? I don't know");
-            } else {
-              comps.saveFrameToPng(time, seqPath);
-            }
-            this.cropImage(seqPath, seqPath);
-            this.didSavePreview();
-            app.purge(PurgeTarget.IMAGE_CACHES);
-          }
-          this.didSavePreviews();
-        }
-        for (i = 0; i < otherIndexArr.length; i++) {
-          try {
-            thisLayer = comps.layer(otherIndexArr[i]);
-            thisLayer.enabled = otherEnabledArr[i];
-          } catch (err) {}
-        }
-        app.endSuppressDialogs(false);
-        nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
-        return encodeURIComponent(nameStr);
-      } catch (err) {
-        alert(err.line.toString() + err.toString());
-      }
-    }
-
-  });
-
-  sp.prototype.extend(sp.prototype, {
-
-    newLayers: function newLayers(elementXml, comp, options) {
-      try {
-        var layerArr = $.layer(elementXml, options).toLayer(comp);
-      } catch (err) {
-        writeLn(err.print());
-      }
-      return layerArr;
-    },
-
-    getXmlFromLayers: function getXmlFromLayers(layers, itemName, sp) {
-      var options = {
-        isSaveMaterial: sp.saveMaterialValue
-      };
-      return $.layer(layers, options).toXML(itemName);
-    },
-
-    newProperties: function newProperties(xml, selectedLayers, isCleanGroup, isKeyframeOffset) {
-      isCleanGroup = isCleanGroup || false;
-      isKeyframeOffset = isKeyframeOffset || false;
-
-      var layerXml = new XML(xml);
-
-      var options = {};
-      options.newPropertiesSettingArr = [];
-      options.cleanPropertiesSettingArr = [];
-
-      options.isCleanGroup = isCleanGroup;
-      options.isKeyframeOffset = isKeyframeOffset;
-
-      for (var i = 1; i <= 9; i++) {
-        if (sp.prototype.getSetting('_1_' + i) === '1') {
-          options.newPropertiesSettingArr.push(1);
-        } else {
-          options.newPropertiesSettingArr.push(0);
-        }
-
-        if (sp.prototype.getSetting('_2_' + i) === '1') {
-          options.cleanPropertiesSettingArr.push(1);
-        } else {
-          options.cleanPropertiesSettingArr.push(0);
-        }
-      }
-
-      $.layer.newProperties(layerXml.child(0).Properties, selectedLayers, options);
-    },
-
-    saveItemToFile: function saveItemToFile(file, xml, position) {
-      var content = file.readd();
-      var newXml = new XML(content);
-      if (content.length === 0) newXml = new XML('<tree></tree>');
-      if (typeof position === 'undefined') {
-        newXml.appendChild(xml);
-      } else {
-        newXml.appendChild(xml);
-        var newInsertxml = new XML(newXml.child(newXml.children().length() - 1));
-        newXml.insertChildAfter(newXml.child(position), newInsertxml);
-        newXml.child(position).setLocalName('waitToDelete');
-        newXml.child(newXml.children().length() - 1).setLocalName('waitToDelete');
-        delete newXml.waitToDelete;
-      }
-      file.writee(newXml);
-    }
-
-  });
-
-  sp.prototype.init.prototype = sp.prototype;
-  $.global.sp = sp();
-  return $.global.sp;
-}();
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function () {
-  if (!sp.settingsFile.exists || sp.settingsFile.length === 0) {
-    if (sp.settingsFile.exists) sp.settingsFile.remove();
-    var settingsText = '<settings>\
-  <ListItems/>\
-  <ParentGroup/>\
-</settings>';
-    var newsettingsxml = new XML(settingsText);
-    var allFiles = sp.scriptFolder.getFiles();
-    newsettingsxml.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
-    var i = 0;
-    allFiles.forEach(function (item, index) {
-      if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
-        newsettingsxml.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
-        newsettingsxml.ParentGroup.child(0).appendChild(new XML('<Index>' + i + '</Index>'));
-        i++;
-      }
-    });
-    sp.settingsFile.writee(newsettingsxml);
-  }
-
-  var content = new XML(sp.settingsFile.readd());
-  if (!content.hasOwnProperty('ParentGroup')) {
-    content.appendChild(new XML('<ParentGroup/>'));
-  }
-  if (content.ParentGroup.children().length() === 0) {
-    content.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
-    sp.forEach(content.ListItems, function (item, index) {
-      content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
-    });
-    sp.settingsFile.writee(content);
-  }
-
-  content = new XML(sp.settingsFile.readd());
-  if (!content.hasOwnProperty('ListItems')) {
-    content.appendChild(new XML('<ListItems/>'));
-  }
-  if (content.ListItems.children().length() === 0) {
-    allFiles = sp.scriptFolder.getFiles();
-    allFiles.forEach(function (item, index) {
-      if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
-        content.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
-        content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
-      }
-    });
-  }
-  if (content.ListItems.children().length() === 0) {
-    content.ListItems.appendChild(new XML('<Name>Default</Name>'));
-    content.ParentGroup.child(0).appendChild(new XML('<Index>' + 0 + '</Index>'));
-    var file = sp.getFileByName('Default');
-    sp.getImageFolderByName('Default');
-    var str = '<tree></tree>';
-    file.writee(str);
-  }
-
-  sp.settingsFile.writee(content);
-}();
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-try {
-    (function (global) {
-        __webpack_require__(12);
-
-        __webpack_require__(7);
-
-        __webpack_require__(10);
-
-        __webpack_require__(11);
-
-        __webpack_require__(13);
-
-        __webpack_require__(3);
-
-        __webpack_require__(5);
-        __webpack_require__(4);
-        __webpack_require__(6);
-        var helpers = __webpack_require__(8);
-
-        $.layer.slash = sp.slash;
-        $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
-        $.layer.translate = $.global.translate;
-
-        sp.fns = new helpers.fns();
-
-        $.global.callbackBeforeWebpackBuild && $.global.callbackBeforeWebpackBuild();
-        if (!(global instanceof Panel)) {
-            $.global.callbackBeforeWebpackBuild = function () {
-                win.close();
-            };
-        }
-        var win = sp.win = global instanceof Panel ? global : new Window('window', sp.scriptName, undefined, { resizeable: true });
-        var outterGroup = sp.win.outterGroup = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}");
-        var innerGroup = sp.win.innerGroup = outterGroup.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}");
-        var parentDroplist = sp.parentDroplist = innerGroup.add('Dropdownlist{}');
-        var droplist = sp.droplist = innerGroup.add('Dropdownlist{}');
-        var gv = sp.gv = new GridView(outterGroup);
-        var screen = $.screens[0].toString().split('-').pop().split(':');
-        outterGroup.maximumSize = innerGroup.maximumSize = [parseInt(screen[0]), parseInt(screen[1])];
-
-        gv.scale = sp.gridViewScale;
-        gv.limitText = sp.getSettingAsBool('limitText');
-        gv.showText = sp.showThumbValue;
-        gv.version = parseInt(app.version.split('.')[0]) === 12 || parseInt(app.version.split('.')[0]) === 14 ? 'CC' : 'CC2014';
-
-        gv.leftClick = sp.fns.leftClick;
-        gv.rightClick = sp.fns.rightClick;
-        gv.leftDoubleClick = sp.fns.newLayer;
-        gv.mouseMove = sp.fns.moveOver;
-        parentDroplist.onChange = sp.fns.parentDroplistChange;
-        droplist.onChange = sp.fns.droplistChange;
-
-        sp.reloadParentDroplist();
-        var selection = parseInt(sp.getSetting('parentSelection'));
-        parentDroplist.selection = selection <= parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
-        selection = parseInt(sp.getSetting('thisSelection'));
-        droplist.selection = selection <= droplist.items.length - 1 && selection >= 0 ? selection : 0;
-
-        sp.renderTaskArray.forEach(function (item, index) {
-            app.cancelTask(item);
-        });
-        sp.renderTaskArray.length = 0;
-        sp.previewHelper = {};
-
-        win.onResize = win.onResizing = sp.fns.winResize;
-
-        if (win instanceof Panel) {
-            win.layout.layout(1);
-        } else {
-            var ratio = sp.gv.scale;
-            var location = sp.getSetting('winLocation').split(',');
-            win.location = [parseInt(location[0]), parseInt(location[1])];
-            if (win.location[0] <= 0 || win.location[1] <= 0) {
-                win.location = [100, 200];
-            }
-            win.show();
-            var size = sp.getSetting('winSize').split(',');
-            win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio];
-            if (win.size[0] <= 0 || win.size[1] <= 0) {
-                win.size = [240, 500];
-            }
-            win.onClose = sp.fns.winClose;
-        }
-
-        win.onResize();
-
-        if (sp.checkVersionOnStartupValue) {
-            var checkVersionFunc = __webpack_require__(1)(win, true);
-            checkVersionFunc();
-        }
-
-        var observeSingleton = __webpack_require__(9);
-        observeSingleton(sp);
-    })(memoryGlobal);
-} catch (err) {
-    alert('Line #' + err.line.toString() + '\r\n' + err.toString());
-}
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-$.global.autoSave = autoSave;
-function autoSave() {
-  if (confirm(loc(sp.auto)) === false) return;
-  if (!(app.project.activeItem instanceof CompItem)) return alert(loc(sp.needComp));
-  if (!sp.droplist.selection) return;
-
-  if (app.project.activeItem.numLayers !== 0) {
-    var specialFolder = sp.getImageFolderByName(sp.droplist.selection.text);
-    specialFolder.execute();
-  }
-
-  try {
-    var preRenameValue = sp.autoNameValue;
-    sp.autoNameValue = true;
-    for (var i = 0; i < app.project.activeItem.numLayers; i++) {
-      for (var j = 1; j <= app.project.activeItem.numLayers; j++) {
-        app.project.activeItem.layer(j).selected = false;
-      }
-      app.project.activeItem.layer(i + 1).selected = true;
-      sp.fns.newItem();
-      app.project.activeItem.layer(i + 1).selected = false;
-    }
-    sp.autoNameValue = preRenameValue;
-  } catch (err) {}
-  sp.droplist.notify('onChange');
-  sp.gv.refresh();
-}
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-$.global.cutLength = cutLength;
-function cutLength() {
-  if (confirm(loc(sp.cutLength)) === false) return;
-  var thisComp = app.project.activeItem;
-
-  Array.prototype.search = function (isZero) {
-    var isOk = false;
-    var b;
-    if (isZero === 0) {
-      for (b = 0; b < this.length - 1; b++) {
-        if (this[b] === 0 && this[b + 1] > 0) {
-          isOk = true;
-          break;
-        }
-      }
-      if (isOk === true) {
-        return b;
-      } else {
-        return -1;
-      }
-    } else if (isZero === 100) {
-      for (b = this.length - 1; b > 0; b--) {
-        if (this[b - 1] > 0 && this[b] === 0) {
-          isOk = true;
-          break;
-        }
-      }
-      if (isOk === true) {
-        return b;
-      } else {
-        return -1;
-      }
-    }
-  };
-  app.beginUndoGroup('Undo crop');
-  try {
-    cutLayers(thisComp, {});
-  } catch (err) {}
-  app.endUndoGroup();
-  clearOutput();
-  writeLn('Complete!');
-
-  function cutLayers(comp, obj) {
-    try {
-      if (obj.hasOwnProperty('_' + comp.id)) {} else {
-        obj['_' + comp.id] = {
-          inPointArr: [],
-          outPointArr: []
-        };
-      }
-    } catch (err) {}
-
-    for (var i = 0; i < comp.layers.length; i++) {
-      try {
-        if (comp.layer(i + 1).source instanceof CompItem) {
-          if (obj.hasOwnProperty('_' + comp.layer(i + 1).source.id)) {} else {
-            cutLayers(comp.layer(i + 1).source, obj);
-          }
-          try {
-            obj['_' + comp.layer(i + 1).source.id].inPointArr.sort(function (a, b) {
-              return a - b;
-            });
-          } catch (err) {}
-          try {
-            obj['_' + comp.layer(i + 1).source.id].outPointArr.sort(function (a, b) {
-              return b - a;
-            });
-          } catch (err) {}
-          if (comp.layer(i + 1).inPoint - comp.layer(i + 1).startTime < obj['_' + comp.layer(i + 1).source.id].inPointArr[0]) {
-            try {
-              comp.layer(i + 1).inPoint = comp.layer(i + 1).startTime + obj['_' + comp.layer(i + 1).source.id].inPointArr[0];
-            } catch (err) {}
-          }
-          if (comp.layer(i + 1).outPoint - comp.layer(i + 1).startTime < obj['_' + comp.layer(i + 1).source.id].outPointArr[0]) {
-            try {
-              comp.layer(i + 1).outPoint = comp.layer(i + 1).startTime + obj['_' + comp.layer(i + 1).source.id].outPointArr[0];
-            } catch (err) {}
-          }
-        }
-        try {
-          obj['_' + comp.id].inPointArr.push(comp.layer(i + 1).inPoint);
-        } catch (err) {}
-        try {
-          obj['_' + comp.id].outPointArr.push(comp.layer(i + 1).outPoint);
-        } catch (err) {}
-        cut(comp.layer(i + 1));
-      } catch (err) {}
-    }
-  }
-
-  function cut(layer) {
-    var thisOpa = layer.transform.opacity;
-    var thisKeysNum = thisOpa.numKeys;
-    var arr = [];
-    for (var a = 0; a < thisKeysNum; a++) {
-      arr.push(thisOpa.keyValue(a + 1));
-    }
-    if (arr.length === 0) {
-      if (thisOpa.value === 0) {
-        layer.inPoint = 0;
-        layer.outPoint = 0 + layer.containingComp.frameDuration;
-      }
-    } else if (arr.length === 1) {
-      if (arr[0] === 0) {
-        layer.inPoint = thisOpa.keyTime(1);
-        layer.outPoint = thisOpa.keyTime(1) + layer.containingComp.frameDuration;
-      }
-    } else if (arr.length > 1) {
-      if (arr.search(0) !== -1) {
-        if (layer.inPoint < thisOpa.keyTime(arr.search(0) + 1) && arr.search(0) === 0) {
-          layer.inPoint = thisOpa.keyTime(arr.search(0) + 1);
-        }
-      }
-      if (thisOpa.keyValue(thisKeysNum) === 0) {
-        layer.outPoint = thisOpa.keyTime(thisKeysNum);
-      } else {}
-    }
-  }
-}
-
-/***/ }),
-/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5570,10 +3515,6 @@ function reloadPic() {
   sp.autoNameValue = true;
   var preCompValue = sp.preComposeValue;
   sp.preComposeValue = false;
-  if (sp.gv.children.length !== 0) {
-    var specialFolder = sp.getImageFolderByName(sp.droplist.selection.text);
-    specialFolder.execute();
-  }
 
   for (var i = 0; i < sp.gv.children.length; i++) {
     try {
@@ -5623,7 +3564,7 @@ function reloadPic() {
 }
 
 /***/ }),
-/* 18 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6333,7 +4274,1686 @@ function translate(thisObj, expProps) {
 }
 
 /***/ }),
-/* 19 */
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+$.global.UIParser = UIParser;
+function UIParser(global) {
+  var _ = global._ = function (selector) {
+    if (_.isUI(selector.type)) {
+      return _.extend([selector], _.proto);
+    }
+    return _.proto.find(selector);
+  };
+  _.global = global;
+
+  _.root = {
+    children: []
+  };
+  _.windows = _.root.children;
+  _.extend = function (target, source) {
+    for (var i in source) {
+      target[i] = source[i];
+    }return target;
+  };
+  _.dir = function (obj) {
+    var str = '';
+    for (var i in obj) {
+      str += i + ' : ' + _typeof(obj[i]) + '\n';
+    }return str;
+  };
+  _.removeWin = function (id) {
+    for (var i = 0; i < _.windows.length; i++) {
+      if (_.windows[i].id === id) _.windows.splice(i, 1);
+    }
+  };
+  _.proto = {
+    find: function find(selector, recursive) {
+      var matchs = [];
+      var elements = 'length' in this ? this : [_.root];
+      if (!selector) return _.extend(elements, _.proto);
+
+      if (typeof selector === 'string') {
+        var selectors = _.formalSelector(selector);
+        for (var i = 0; i < selectors.length; i++) {
+          var match = elements;
+          var process = _.parserSelector(selectors[i]);
+          for (var j = 0; j < process.length; j++) {
+            if (!process[j][3] && _.proto[process[j][4]]) {
+              match = _.proto[process[j][4]].call(match, process[j][5]);
+            } else {
+              match = _.findElementsByProp(match, process[j][0], process[j][1], process[j][2]);
+            }
+          }
+          matchs = _.merge(match, matchs);
+        }
+      } else if (typeof selector === 'function') {
+        if (!recursive) recursive = 1;
+        matchs = _.findElementsByFn(elements, selector, recursive);
+      }
+
+      return _.extend(matchs, _.proto);
+    },
+    filter: function filter(selector) {
+      var matchs = [];
+      var elements = 'length' in this ? this : [_.root];
+      if (!selector) return _.extend(elements, _.proto);
+
+      if (typeof selector === 'string') {
+        var selectors = _.formalSelector(selector);
+        for (var i = 0; i < selectors.length; i++) {
+          var match = elements;
+          var process = _.parserSelector(selectors[i]);
+          for (var j = 0; j < process.length; j++) {
+            if (!process[j][3] && _.proto[process[j][4]]) {
+              match = _.proto[process[j][4]].call(match, process[j][5]);
+            } else {
+              match = _.findElementsByProp(match, process[j][0], process[j][1]);
+            }
+          }
+          matchs = _.merge(match, matchs);
+        }
+      } else if (typeof selector === 'function') {
+        matchs = _.filterElementsByFn(elements, selector);
+      }
+
+      return _.extend(matchs, _.proto);
+    },
+    style: function style(_style, target) {
+      if (!target) target = this;
+      for (var i = 0; i < target.length; i++) {
+        for (var j in _style) {
+          if (target[i].type === j) _.proto.style(_style[j], [target[i]]);else target[i][j] = _style[j];
+        }
+      }
+    },
+    each: function each(command) {
+      for (var i = 0; i < this.length; i++) {
+        command(this[i]);
+      }
+    },
+    setAttr: function setAttr(prop, value) {
+      this.each(function (e) {
+        e[prop] = value;
+      });
+    },
+    getAttr: function getAttr(prop) {
+      if (this.length) return this[0][prop];
+    },
+    children: function children(selector) {
+      return this.find(selector || '>*');
+    },
+    parent: function parent() {
+      if (this.length > 0 && this[0].parent) return this[0].parent;else return _.extend([], _.proto);
+    },
+    on: function on(event, fn, useCapture) {
+      this.each(function (e) {
+        e.addEventListener(event, fn, useCapture);
+      });
+    },
+    exe: function exe(fn, args) {
+      this.each(function (e) {
+        e[fn].apply(e, args);
+      });
+    },
+    addUI: function addUI() {
+      return _.addUI.apply(this[0], arguments);
+    },
+    first: function first() {
+      return _.extend([this[0]], _.proto);
+    },
+    last: function last() {
+      return _.extend([this[this.length - 1]], _.proto);
+    },
+    eq: function eq(index) {
+      if (index < this.length && index >= 0) {
+        return _.extend([this[index]], _.proto);
+      } else {
+        return _.extend([], _.proto);
+      }
+    },
+    layout: function layout() {
+      this.each(function (e) {
+        _.layout(e);
+      });
+    },
+    remove: function remove() {
+      this.each(function (e) {
+        e.parent.remove(e);
+      });
+    },
+    empty: function empty() {
+      this.children().remove();
+    }
+  };
+
+  _.createUI = function (UIJson) {
+    if (!UIJson) return;
+    var ISPANEL = global instanceof Panel;
+    if (ISPANEL) {
+      var _newElement = _.addUI(UIJson, global);
+      _.root.children.push(global);
+      global.layout.layout(true);
+      return _newElement;
+    } else {
+      return _.newWindow(UIJson);
+    }
+  };
+
+  _.newWindow = function (UIJson) {
+    if (!UIJson) return;
+    var newWindows = [];
+    for (var i in UIJson) {
+      var json = UIJson[i];
+      if (_.isWindow(UIJson[i].type)) {
+        var s = json.type;
+        if (json.properties) s += '{properties:' + _.JSON.stringify(json.properties) + '}';
+        var newWindow = _.root.children[_.root.children.length] = new Window(s);
+        newWindows.push(newWindow);
+        if (!json.id) newWindow.id = i;
+
+        for (var j in json) {
+          if (j === 'type' || j === 'properties' || j === 'children') continue;
+          newWindow[j] = json[j];
+        }
+
+        if (json.children) _.addUI(json.children, newWindow);
+      }
+    }
+    return _.extend(newWindows, _.proto);
+  };
+
+  _.addUI = function (UIJson, parent) {
+    if (!UIJson) return;
+    if (!parent) parent = this;
+
+    var newItem = [];
+    for (var i in UIJson) {
+      var json = UIJson[i];
+      if (_.isElement(json.type)) {
+        var s = json.type;
+        if (json.properties) s += '{properties:' + _.JSON.stringify(json.properties) + '}';
+        var newElement = parent.add(s);
+        if (!json.id) newElement.id = i;
+
+        for (var j in json) {
+          if (j === 'type' || j === 'properties' || j === 'children') continue;
+          newElement[j] = json[j];
+        }
+        newItem.push(newElement);
+
+        if (_.isContainer(json.type) && json.children) arguments.callee(json.children, newElement);
+      }
+    }
+    return _.extend(newItem, _.proto);
+  };
+
+  _.isWindow = function (type) {
+    var winType = ['window', 'palette', 'dialog', 'Window', 'Palette', 'Dialog'];
+    var len = winType.length;
+    for (var i = 0; i < len; i++) {
+      if (type === winType[i]) return true;
+    }
+    return false;
+  };
+
+  _.isContainer = function (type) {
+    var winType = ['window', 'palette', 'dialog', 'group', 'panel', 'tabbedpanel', 'treeview', 'dropdownlist', 'listbox', 'listitem', 'tab', 'node', 'Window', 'Palette', 'Dialog', 'Group', 'Panel', 'TabbedPanel', 'Treeview', 'DropDownList', 'ListBox', 'ListItem', 'Tab', 'Node'];
+    var len = winType.length;
+    for (var i = 0; i < len; i++) {
+      if (type === winType[i]) return true;
+    }
+    return false;
+  };
+
+  _.isElement = function (type) {
+    var winType = ['panel', 'tabbedpanel', 'tab', 'group', 'button', 'checkbox', 'dropdownlist', 'edittext', 'flashplayer', 'iconbutton', 'image', 'item', 'listbox', 'listitem', 'progressbar', 'radiobutton', 'scrollbar', 'slider', 'statictext', 'treeview', 'tab', 'node', 'Panel', 'TabbedPanel', 'Tab', 'Group', 'Button', 'CheckBox', 'DropDownList', 'EditText', 'FlashPlayer', 'IconButton', 'Image', 'Item', 'ListBox', 'ListItem', 'ProgressBar', 'RadioButton', 'Scrollbar', 'Slider', 'StaticText', 'Treeview', 'Tab', 'Node'];
+    var len = winType.length;
+    for (var i = 0; i < len; i++) {
+      if (type === winType[i]) return true;
+    }
+    return false;
+  };
+
+  _.isUI = function (type) {
+    if (_.isWindow(type) || _.isElement(type)) return true;
+    return false;
+  };
+
+  _.findElementsByProp = function (elements, prop, value, recursive) {
+    var matchs = [];
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i].children) var atoms = elements[i].children;else if (elements[i].items) atoms = elements[i].items;else continue;
+      var match = [];
+      for (var j = 0; j < atoms.length; j++) {
+        if (atoms[j][prop] && (value === '' || atoms[j][prop].toString() === value)) {
+          match.push(atoms[j]);
+        }
+        if (recursive && (atoms[j].children || atoms[j].items)) {
+          var temp = arguments.callee([atoms[j]], prop, value, 1);
+          match = _.merge(temp, match);
+        }
+      }
+      matchs = _.merge(match, matchs);
+    }
+    return matchs;
+  };
+  _.findElementsByFn = function (elements, fn, recursive) {
+    var match = [];
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i].children) var atoms = elements[i].children;else if (elements[i].items) atoms = elements[i].items;else continue;
+      for (var j = 0; j < atoms.length; j++) {
+        if (fn(atoms[j])) match.push(atoms[j]);
+        if (recursive && (atoms[j].children || atoms[j].items)) {
+          var temp = arguments.callee(atoms[j].children, fn, 1);
+          match = _.merge(temp, match);
+        }
+      }
+    }
+    return match;
+  };
+  _.filterElementByProp = function (elements, prop, value) {
+    var matchs = [];
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i][prop] && (value === '' || elements[i][prop].toString() === value)) {
+        matchs.push(elements[i]);
+      }
+    }
+    return matchs;
+  };
+  _.filterElementByFn = function (elements, fn) {
+    var matchs = [];
+    for (var i = 0; i < elements.length; i++) {
+      if (fn(elements[i])) matchs.push(elements[i]);
+    }
+    return matchs;
+  };
+  _.formalSelector = function (selector) {
+    return selector.replace(/[\s\]\)]\w*/g, '').replace(/[\#\.\[\:\=]+(?=[\#\.\[\]\,\:\=\>\*])/g, '').replace(/\*+\w*/g, '*').replace(/\,+\w*/g, ',').replace(/\>+\w*/g, '>').replace(/^\w*\,/g, '').split(/\,/g);
+  };
+  _.parserSelector = function (selector) {
+    var sign, content, prop, value, func, param, doFind;
+    var recursive = 1;
+    var process = [];
+    var parts = selector.replace(/(?=[\#\.\[\:\>\*])/g, '@').replace(/^\@/, '').split('@');
+
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] === '>') {
+        recursive = 0;
+        i++;
+      }
+
+      sign = parts[i][0];
+      content = parts[i].substr(1);
+      prop = value = func = param = '';
+      doFind = 1;
+
+      switch (sign) {
+        case '*':
+          prop = 'type';break;
+        case '#':
+          prop = 'id';value = content;break;
+        case '.':
+          prop = 'type';value = content;break;
+        case '[':
+          var p = content.split('=');
+          prop = p[0];
+          if (p.length === 2) value = p[1];
+          break;
+        case ':':
+          var fn = content.split('(');
+          func = fn[0];
+          if (fn.length === 2) param = fn[1];
+          doFind = 0;
+          break;
+      }
+      process.push([prop, value, recursive, doFind, func, param]);
+      recursive = 1;
+    }
+
+    return process;
+  };
+  _.merge = function (newArray, oldArray) {
+    var temp = [];
+    var b = 1;
+    for (var i = 0; i < newArray.length; i++) {
+      for (var j = 0; j < oldArray.length; j++) {
+        if (newArray[i] === oldArray[j]) {
+          b = 0;
+          break;
+        }
+      }
+      if (b) temp.push(newArray[i]);
+    }
+    return oldArray.concat(temp);
+  };
+
+  _.layout = function (e) {
+    e.margins = 0;
+    e.spacing = 5;
+    if (e.align) {
+      switch (e.align) {
+        case 'fill':
+        case 'fill_fill':
+          e.alignment = ['fill', 'fill'];break;
+
+        case 'center':
+        case 'center_center':
+          e.alignment = ['center', 'center'];break;
+
+        case 'left_fill':
+        case 'left':
+          e.alignment = ['left', 'fill'];break;
+        case 'center_fill':
+          e.alignment = ['center', 'fill'];break;
+        case 'right_fill':
+        case 'right':
+          e.alignment = ['right', 'fill'];break;
+
+        case 'fill_top':
+        case 'top':
+          e.alignment = ['fill', 'top'];break;
+        case 'fill_center':
+          e.alignment = ['fill', 'center'];break;
+        case 'fill_bottom':
+        case 'bottom':
+          e.alignment = ['fill', 'bottom'];break;
+
+        case 'left_center':
+          e.alignment = ['left', 'center'];break;
+        case 'right_center':
+          e.alignment = ['right', 'center'];break;
+        case 'center_top':
+          e.alignment = ['center', 'top'];break;
+        case 'center_bottom':
+          e.alignment = ['center', 'bottom'];break;
+
+        case 'left_top':
+          e.alignment = ['left', 'top'];break;
+        case 'left_bottom':
+          e.alignment = ['left', 'bottom'];break;
+        case 'right_top':
+          e.alignment = ['right', 'top'];break;
+        case 'right_bottom':
+          e.alignment = ['right', 'bottom'];break;
+      }
+    }
+  };
+  _.extend(_.windows, _.proto);
+
+  _.JSON = {
+    parse: function parse(strJSON) {
+      return eval('(' + strJSON + ')');
+    },
+    stringify: function () {
+      var toString = Object.prototype.toString;
+      var isArray = Array.isArray || function (a) {
+        return toString.call(a) === '[object Array]';
+      };
+      var escMap = { '"': '\\"', '\\': '\\\\', '\b': '\\b', '\f': '\\f', '\n': '\\n', '\r': '\\r', '\t': '\\t' };
+      var escFunc = function escFunc(m) {
+        return escMap[m] || '\\u' + (m.charCodeAt(0) + 0x10000).toString(16).substr(1);
+      };
+      var escRE = /[\\"\u0000-\u001F\u2028\u2029]/g;
+      return function stringify(value) {
+        if (value == null) {
+          return 'null';
+        } else if (typeof value === 'number') {
+          return isFinite(value) ? value.toString() : 'null';
+        } else if (typeof value === 'boolean') {
+          return value.toString();
+        } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+          if (typeof value.toJSON === 'function') {
+            return stringify(value.toJSON());
+          } else if (isArray(value)) {
+            var res = '[';
+            for (var i = 0; i < value.length; i++) {
+              res += (i ? ', ' : '') + stringify(value[i]);
+            }return res + ']';
+          } else if (toString.call(value) === '[object Object]') {
+            var tmp = [];
+            for (var k in value) {
+              if (value.hasOwnProperty(k)) tmp.push(stringify(k) + ': ' + stringify(value[k]));
+            }
+            return '{' + tmp.join(', ') + '}';
+          }
+        }
+        return '"' + value.toString().replace(escRE, escFunc) + '"';
+      };
+    }()
+  };
+
+  return _;
+};
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+sp.extend(sp, {
+  settings: { en: 'Setting', ch: '设置' },
+  groupName: { en: 'Group name :', ch: '组名 :' },
+  elementName: { en: 'Element Name :', ch: '元素名 :' },
+  changeName: { en: 'Rename item', ch: '重命名元素' },
+  importPicture: { en: 'Import picture', ch: '导入图片' },
+  importFile: { en: 'Import file', ch: '导入组' },
+  exportFile: { en: 'Export file', ch: '导出组' },
+  addGroup: { en: 'New group', ch: '新建组' },
+  deleteGroup: { en: 'Remove group', ch: '删除组' },
+  addElement: { en: 'New item', ch: '新建元素' },
+  deleteElement: { en: 'Remove item', ch: '删除元素' },
+  create: { en: 'New layer', ch: '生成层' },
+  cover: { en: 'Cover item', ch: '覆盖元素' },
+  isShow: { en: 'Show text', ch: '显示文字' },
+  isAlert: { en: 'Deleting Alert', ch: '删除时警告' },
+  isPrecomp: { en: 'Pre-compose', ch: '预合成' },
+  isOffset: { en: 'Save material', ch: '存储素材' },
+  isName: { en: 'Auto rename', ch: '自动取名' },
+  isEffect: { en: 'Only property', ch: '仅生成效果' },
+  cleanProperty: { en: 'Empty prop', ch: '清空属性组' },
+  offsetKey: { en: 'Shift keyframe', ch: '关键帧偏移' },
+  sureDelete: { en: 'Are you sure to delete it?', ch: '确认删除?' },
+  helperScripts: { en: 'Help scripts', ch: '辅助脚本' },
+  expressionTranslate: { en: 'Fix expression errors', ch: '表达式翻译' },
+  script: { en: 'Sp_palette v1.0', ch: '形状层画板' },
+  reloadGroup: { en: 'Reload previews of group', ch: '重载组内预览动画' },
+  saveEachLayer: { en: 'Save every layer in active comp', ch: '自动存储每一层' },
+  cutLength: { en: 'Cut layer length', ch: '裁剪层长度' },
+  blankName: { en: 'Name should not be empty!', ch: '名字不应为空!' },
+  existName: { en: 'Element with the same name exists already!', ch: '相同名字的元素已存在!' },
+  overWritten: { en: 'File with the same name exists already!', ch: '相同名字的文件已存在!' },
+  inputName: { en: 'Please input your name!', ch: '请输入名字!' },
+  alertSpe: { en: 'There are special symbols in selectedLayers,please rename them first!', ch: '选中层名字有特殊符号,请首先重命名选中层!' },
+  deleteFolder: { en: 'Empty temp folder', ch: '清空素材文件夹' },
+  changeGroupName: { en: 'Change name of group', ch: '重命名选中组' },
+  deleteOk: { en: 'Clean folder successfully!', ch: '清空文件夹完毕!' },
+  yushe: { en: 'Preset Setting', ch: '预设设置' },
+  jinOne: { en: 'Please select groups that will be created on selectedLayers', ch: '请选择在仅生成效果时要在选中层上生成的属性组' },
+  jinTwo: { en: 'Please select groups that will be empty on selectedLayers before creating Properties', ch: '请选择在仅生成效果之前要清空的选中层的属性组' },
+  isSureGroup: { en: 'What you are deleting is a Group.\rAre you sure?', ch: '你正在删除的是一个组.\r确定删除吗?' },
+  isSureGroup2: { en: 'Repeat!\rWhat you are deleting is a Group.\rAre you sure?\r', ch: '重复!\r你正在删除的是一个组.\r确定删除吗?' },
+  _1: { en: 'Mask', ch: '遮罩' },
+  _2: { en: 'Effect', ch: '效果' },
+  _3: { en: 'Transform', ch: '变换' },
+  _4: { en: 'Material options', ch: '3D材质选项' },
+  _5: { en: 'Layer styles', ch: '图层样式' },
+  _6: { en: 'Shape content', ch: '形状层形状组' },
+  _7: { en: 'Text animators', ch: '文字层动画器' },
+  _8: { en: 'Light options', ch: '灯光选项' },
+  _9: { en: 'Camera options', ch: '摄像机选项' },
+  setName: { en: 'Please input the name.', ch: '请输入名字' },
+  checkVersion: { en: 'Check version', ch: '检查更新' },
+  newVersionFind: { en: 'New version found,please download the new version ', ch: '存在新版本,请下载最新版v' },
+  newVersionNotFind: { en: 'No new version! v', ch: '已是最新版 v' },
+  link: { en: 'Weibo', ch: '作者微博' },
+  about: {
+    en: 'Made by:smallpath\nE-mail:smallpath2013@gmail.com\nSource Code:\ngithub.com/smallpath/memory\n\nDoubleClick:generate new layers or properties on selected layers from selected element.\nRightClick:call the shortcut menu.\nCtrl/Alt+RightClick:save selected layers as a new element.\nShift+Rightclick:call the up and down window\n\nShortcutkey when script runs as Window:\nKey \'D\' or \'Delete\':delete selected element.\nKey \'F\': overlap selected element.\nKey \'Up\':drop up selected element.\nKey \'Down\':drop down selected element.',
+    ch: '\u4F5C\u8005:\n    smallpath\n\u90AE\u7BB1:\n    smallpath2013@gmail.com\n\u6E90\u7801\u6258\u7BA1\u5730\u5740:\ngithub.com/smallpath/memory\n\n\u53F3\u952E\u70B9\u51FB:\u547C\u51FA\u53F3\u952E\u83DC\u5355.\n\u53CC\u51FB:\u4ECE\u9009\u4E2D\u5143\u7D20\u521B\u5EFA\u5C42\u6216\u521B\u5EFA\u6548\u679C.\nCtrl/Alt+\u53F3\u952E\u70B9\u51FB:\u4ECE\u9009\u4E2D\u7684\u5C42\u8BFB\u53D6\u5C42\u4FE1\u606F\u4EE5\u521B\u5EFA\u65B0\u5143\u7D20.\nShift+\u53F3\u952E:\u5524\u51FA\u79FB\u52A8\u5143\u7D20\u7684\u7A97\u53E3\n\n\u7A97\u53E3\u6A21\u5F0F\u8FD0\u884C\u811A\u672C\u65F6:\nD\u952E:\u5220\u9664\u9009\u4E2D\u5143\u7D20.\nF\u952E:\u8986\u76D6\u9009\u4E2D\u5143\u7D20.\n\u4E0A\u952E:\u4E0A\u79FB\u9009\u4E2D\u5143\u7D20.\n\u4E0B\u952E:\u4E0B\u79FB\u9009\u4E2D\u5143\u7D20.'
+  },
+  refresh: {
+    en: 'Please run this script to refresh pictures only when your group has been created with wrong thumbnails(such as all black)\rIt will spent a lot of time.\rNew thumbnails will be created at the time of active comp,so set your comp\'s time first.',
+    ch: '\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u9884\u89C8\u52A8\u753B:\n##\u8BF7\u7528\u672C\u529F\u80FD\u5BF9\u975E3.x\u7248\u672C\u4FDD\u5B58\u7684\u7EC4\u8FDB\u884C\u751F\u6210\u9884\u89C8\u52A8\u753B\u7684\u64CD\u4F5C:\n\n\u6B64\u529F\u80FD\u5C06\u751F\u6210\u7EC4\u5185\u6240\u6709\u5143\u7D20\u7684\u4E3B\u7F29\u7565\u56FE\u548C\u9884\u89C8\u52A8\u753B,\u5176\u4E2D\u4E3B\u7F29\u7565\u56FE\u4E3A\u5F53\u524D\u5408\u6210\u7684\u5F53\u524D\u65F6\u95F4\u70B9\u7684\u753B\u9762\n\n\u6CE8\u610F:\u6B64\u529F\u80FD\u5C06\u8017\u8D39\u5927\u91CF\u65F6\u95F4,\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n'
+  },
+  auto: {
+    en: 'This script helps you simplify you saving proccess\rIt will save every layer in active comp as a new element.',
+    ch: '\u6279\u91CF\u5B58\u50A8\u529F\u80FD:\n\n\u8FD9\u4F1A\u5C06\u5F53\u524D\u5408\u6210\u4E2D\u6BCF\u4E00\u5C42\u90FD\u5206\u522B\u5B58\u50A8\u4E3A\u4E00\u4E2A\u65B0\u5143\u7D20.\n\n\u6B64\u529F\u80FD\u53EF\u4EE5\u5E2E\u52A9\u4F60\u5FEB\u901F\u5B58\u50A8\u65B0\u5143\u7D20,\u5341\u5206\u9002\u5408\u5B58\u50A8\u5927\u91CF\u7684MG\u5408\u6210\u5C42\n\u811A\u672C\u4F1A\u5F39\u51FA\u56FE\u7247\u6587\u4EF6\u5939,\u4F60\u53EF\u4EE5\u6839\u636E\u5176\u4E2D\u7684\u56FE\u7247\u6765\u5224\u65AD\u9884\u89C8\u52A8\u753B\u7684\u751F\u6210\u8FDB\u5EA6\n' },
+  cutLengthTwo: {
+    en: 'This script will cut every layer in current comp, related to opacity for common layer and content length for comp layer.',
+    ch: '此功能将会裁剪当前合成中每一层的长度,根据普通层的透明度与合成层内容的长度.'
+  },
+  output: { en: 'Export groups', ch: '批量导出组' },
+  ok: { en: 'Ok', ch: '确定' },
+  cancel: { en: 'Cancel', ch: '取消' },
+  complete: { en: 'Complete!', ch: '导出完成!' },
+  showText: { en: 'Show text', ch: '显示文字' },
+  ui1: { en: 'The newer UI', ch: '新界面' },
+  ui2: { en: 'The older UI', ch: '旧界面' },
+  sys: { en: 'Script find that Sp_memory v1.4 has been used the first time.\rPlease select the UI type,Yes for new UI and No for previous UI.', ch: '脚本检测到Sp_memory v1.4首次被使用.\r请选择脚本界面,Yes为新界面,No为旧界面.' },
+  uiC: { en: 'Please restart script,ui will be changed.', ch: '界面已更新,请重启脚本' },
+  from: { en: 'Range is 0.', ch: '元素下标范围为:0' },
+  ud: { en: 'Up and down', ch: '上下移动选中元素' },
+  up: { en: 'Up', ch: '上移' },
+  down: { en: 'Down', ch: '下移' },
+  jmp: { en: 'Jump', ch: '跳转' },
+  coverChange: { en: 'Update thumb when cover', ch: '覆盖时更新缩略图' },
+  folderName: { en: 'The folder name of collect feature:', ch: '收集生成层时的工程栏文件夹名:' },
+  effectName: { en: 'The group name that enable Only property :', ch: '默认开启仅生成效果的组名:' },
+  limitText: { en: 'Limit the text for UI', ch: '限制主窗口界面的文字长度' },
+  scriptSetting: { en: 'Setting', ch: '设置' },
+  settingPre: { en: 'Preference', ch: '预设' },
+  thumbType: { en: 'Enable new type of thumb', ch: '缩略图包含合成栏图层轮廓' },
+  addModule: { en: 'New module', ch: '新建模块' },
+  deleteModule: { en: 'Remove module', ch: '删除模块' },
+  deleteModuleAlert: {
+    en: 'Dangerous!\r\nYou are deleting a module!\r\nAll groups in this module will be removed!\r\nDo you really want to remove this module?',
+    ch: '警告!\r\n你正在删除一个模块!\r\n所有包含在此模块中的组都将被删除!\r\n你想要继续删除吗?'
+  },
+  addAlert: { en: 'Repeart:\r\n', ch: '重复:\r\n' },
+  move: { en: 'Cut selected group to other module', ch: '剪切选中组到其他模块' },
+  editModule: { en: 'Move module or rename module', ch: '改变模块顺序或重命名模块' },
+  changeModuleName: { en: 'Change module name', ch: '重命名选中模块' },
+  moduleHelpTip: { en: "press key 'Up' and 'Down can move the selected module' ", ch: '方向上下键可移动选中模块' },
+  quit: { en: 'Quit', ch: '退出' },
+  selectGroupFirst: { en: 'Please select a group first!', ch: '请先选中一个组!' },
+  selectModuleFirst: { en: 'Please select a module first!', ch: '请先选中一个模块!' },
+  frameSecondText: { en: 'The milliseconds length of frame continues when preview:', ch: '预览时一张图片持续的毫秒数:' },
+  frameNumText: { en: 'The number of picture sequence generated for preview', ch: '生成供预览的图片序列时图片的数量:' },
+  reloadNeedFrames: {
+    en: "Please input the max frames which will be used to correct the duration of Preview.Keep blank if you don't what this feature",
+    ch: '请输入最大帧数,这将被用来使预览动画的时间范围更加准确\r\n不输入则将不进行校准'
+  },
+  needComp: { en: 'Please select a comp first', ch: '脚本需要一个合成,当前合成不存在!' },
+  previewAll: { en: 'Preview all', ch: '预览全部' },
+  previewSelected: { en: 'Preview selected', ch: '预览选中' },
+  needElement: { en: 'Please select a element in the group', ch: '组内元素未被选中,请首先选中一个元素' },
+  needElements: { en: 'Please select at least one element in the group', ch: '组内元素未被选中,请至少选中一个元素' },
+  needLayers: { en: 'Please select at least one layer in the current comp', ch: '请选中至少一个层' },
+  needModule: { en: 'Please create a module first', ch: '请先新建一个模块' },
+  isSavePreview: { en: 'Save preview', ch: '存储预览' },
+  searchWindow: { en: 'Search', ch: '搜索' },
+  getReport: { en: 'Get report', ch: '生成报告' },
+  creatingReport: { en: 'Creating cost: ', ch: '生成层耗时: ' },
+  creatingProcessTitle: { en: 'Now generating...', ch: '少女祈祷中...' },
+  creatingProcessingPrefix: { en: 'Processing the ', ch: '正在生成第 ' },
+  creatingProcessAfter: { en: ' layer', ch: ' 层' },
+  savingReport: { en: 'Saving cost: ', ch: '总存储耗时: ' },
+  savingProcessTitle: { en: 'Now saving...', ch: '少女祈祷中...' },
+  savingProcessingPrefix: { en: 'Processing the ', ch: '正在存储第 ' },
+  savingProcessAfter: { en: ' layer', ch: ' 层' },
+  second: { en: ' second', ch: ' 秒' },
+  previewTitle: { en: 'Save preview', ch: '少女祈祷中...' },
+  previewPrefix: { en: 'Saving preview: ', ch: '正在存储预览图片: ' },
+  previewTime: { en: 'Saving cost: ', ch: '存储预览耗时: ' },
+  searchButton: { en: 'search', ch: '搜索' },
+  searchText: { en: 'input name', ch: '输入元素名称' },
+  setRatioText: { en: 'notify the scale of UI for high-DPI windows', ch: '设置主界面windows放大比例' },
+  setRatioHelptip: {
+    en: 'AE scriptUI may be scaled wrong in high-DPI windows from CC2013 to CC2015.0',
+    ch: 'windows文字缩放比例大于1时, AE脚本界面会自动放大, 导致本脚本界面越界'
+  },
+  setRatioWarning: {
+    en: 'Please only change it when your text ratio does not equal to 1. Restart script to make sense',
+    ch: '请仅当你的windows文字缩放比例不为1且本脚本界面越界的情况下, 才修改此参数, 重启脚本后生效'
+  },
+  saveWorkarea: {
+    en: 'Workarea',
+    ch: '预览工作区'
+  },
+  tryVersionFind: {
+    en: 'It seems that you are using the beta version which is not released yet. v',
+    ch: '未发现新版本, 你正在使用尚未发布的试用版 v'
+  },
+  shouldUpdateScript: {
+    en: 'Would you like to upgrade to new version now?\r\n it will cost some time while ae will not response\r\n',
+    ch: '现在开始更新新版本吗?\r\n\r\n脚本大小为300KB, 下载时AE会停止响应数十秒时间.\r\n选否则可以选择通过浏览器下载'
+  },
+  shouldDownloadScript: {
+    en: 'Would you like to download new version now?',
+    ch: '是否通过浏览器自行下载最新版本?\r\n打开网页后右键另存为脚本文件即可'
+  },
+  downloaded: {
+    en: 'Update success! To make it work, just restart script',
+    ch: '升级成功, 请重启脚本'
+  },
+  generalOption: {
+    en: 'General',
+    ch: '一般选项'
+  },
+  otherOption: {
+    en: 'Other',
+    ch: '其他'
+  },
+  sourceCode: {
+    en: 'Source Code',
+    ch: '脚本源码'
+  },
+  addIssue: {
+    en: 'Report bug',
+    ch: '上报错误'
+  },
+  issueDesc: {
+    en: 'Notice that error log is in Sp_memory/tempFile/error.txt',
+    ch: '核心错误日志在Sp_memory/tempFile/error.txt当中, 这可以帮助作者定位错误\r\n\r\n你可以在Github或贴吧中报告错误, 在Github上报的错误将会被优先解决\r\n\r\n选择"Yes"前往Github, 选择"No"前往贴吧'
+  },
+  checkVersionOnStartupText: {
+    en: 'Check version on startup',
+    ch: '脚本启动时检查更新'
+  }
+});
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  progressFactory: __webpack_require__(19),
+  previewProgress: __webpack_require__(2),
+  settingWindow: __webpack_require__(0),
+  fns: __webpack_require__(21)
+};
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var mvvm = __webpack_require__(20);
+
+var nameBlackList = ['win', 'gv', 'isOutside', 'previewHelper', 'isLoopPreview', 'droplist', 'parentDroplist', 'menu'];
+
+function watch(name, oldValue, newValue) {
+  if (typeof oldValue === 'function') {
+    return oldValue;
+  } else if (typeof newValue === 'boolean') {
+    var settingName = name.replace('Value', '');
+
+    if ($.global.sp.haveSetting(settingName)) {
+      $.global.sp.saveSetting(settingName, newValue);
+      return newValue;
+    } else {
+      return oldValue;
+    }
+  } else {
+    return newValue;
+  }
+}
+
+module.exports = function (obj) {
+  return mvvm.observer(obj, watch, nameBlackList);
+};
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function () {
+  __webpack_require__(17);
+
+  sp.extend(sp, {
+    forEach: function forEach(xml, callback, context) {
+      if (!(xml instanceof XML)) return;
+      var i, len;
+      for (i = 0, len = xml.children().length(); i < len; i++) {
+        if (callback.call(context, xml.child(i), i, xml) === false) {
+          break;
+        }
+      }
+    }
+  });
+
+  String.prototype.trim = String.prototype.trim || function () {
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+  };
+
+  Array.prototype.includes = function (value) {
+    for (var i = 0, len = this.length; i < len; i++) {
+      if (this[i] === value) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  Array.prototype.forEach = function (callback, context) {
+    if (Object.prototype.toString.call(this) === '[object Array]') {
+      var i, len;
+      for (i = 0, len = this.length; i < len; i++) {
+        if (typeof callback === 'function' && Object.prototype.hasOwnProperty.call(this, i)) {
+          if (callback.call(context, this[i], i, this) === false) {
+            break;
+          }
+        }
+      }
+    }
+  };
+
+  Error.prototype.print = Error.prototype.print || function () {
+    return 'Line #' + this.line.toString() + '\r\n' + this.toString();
+  };
+
+  Error.prototype.printc = Error.prototype.printc || function () {
+    cout << '\n---------';
+    cout << this.print();
+    cout << '---------\n';
+  };
+
+  Error.prototype.printa = Error.prototype.printa || function () {
+    this.print() << cout;
+  };
+
+  File.prototype.writee = function (str) {
+    this.open('w');
+    this.write(str);
+    this.close();
+  };
+
+  File.prototype.readd = function () {
+    this.open('r');
+    var temp = this.read();
+    this.close();
+    return temp;
+  };
+
+  Array.prototype.pushh = function (str) {
+    this.push(str);
+    return this;
+  };
+
+  sp.deleteThisFolder = function (folder) {
+    var waitClFile = folder.getFiles();
+    for (var i = 0; i < waitClFile.length; i++) {
+      if (waitClFile[i] instanceof Folder) {
+        sp.deleteThisFolder(waitClFile[i]);
+        waitClFile[i].remove();
+      } else {
+        waitClFile[i].remove();
+      }
+    }
+  };
+}();
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function () {
+  var keyNameArr = [];
+  var valueArr = [];
+
+  for (var i = 1; i <= 9; i++) {
+    keyNameArr.push('_1_' + i);
+    if (i === 1 || i === 2 || i === 5) {
+      valueArr.push('1');
+    } else {
+      valueArr.push('0');
+    }
+  }
+
+  for (i = 1; i <= 9; i++) {
+    keyNameArr.push('_2_' + i);
+    valueArr.push('0');
+  }
+
+  keyNameArr.pushh('thisSelection').pushh('limitText').pushh('thumbType').pushh('winLocation').pushh('winSize').pushh('coverChange').pushh('folderName').pushh('effectName').pushh('deleteAlert').pushh('preCompose').pushh('saveMaterial').pushh('autoName').pushh('onlyEffect').pushh('cleanGroup').pushh('offsetKeyframe').pushh('language').pushh('showThumb').pushh('parentSelection').pushh('frameSecond').pushh('frameNum').pushh('savePreview').pushh('gridViewScale').pushh('saveWorkarea').pushh('checkVersionOnStartup');
+
+  valueArr.pushh('1').pushh('true').pushh('false').pushh('200,500').pushh('300,500').pushh('false').pushh('Sp_memory Folder').pushh('Effects,Effect,effect,effects,特效,效果').pushh('true').pushh('false').pushh('true').pushh('true').pushh('false').pushh('false').pushh('false').pushh('ch').pushh('true').pushh('0').pushh('33').pushh('30').pushh('true').pushh('1').pushh('false').pushh('false');
+
+  keyNameArr.forEach(function (item, index) {
+    var value = valueArr[index];
+    if (sp.haveSetting(item) === false) sp.saveSetting(item, value);
+  });
+
+  sp.deleteAlertValue = true;
+
+  sp.showThumbValue = sp.getSettingAsBool('showThumb');
+  sp.preComposeValue = sp.getSettingAsBool('preCompose');
+  sp.saveMaterialValue = sp.getSettingAsBool('saveMaterial');
+  sp.autoNameValue = sp.getSettingAsBool('autoName');
+  sp.onlyEffectValue = sp.getSettingAsBool('onlyEffect');
+  sp.cleanGroupValue = sp.getSettingAsBool('cleanGroup');
+  sp.offsetKeyframeValue = sp.getSettingAsBool('offsetKeyframe');
+  sp.savePreviewValue = sp.getSettingAsBool('savePreview');
+  sp.saveWorkareaValue = sp.getSettingAsBool('saveWorkarea');
+
+  sp.thumbTypeValue = sp.getSettingAsBool('thumbType');
+  sp.coverChangeValue = sp.getSettingAsBool('coverChange');
+
+  sp.frameSecond = parseInt(sp.getSetting('frameSecond'));
+  sp.frameNum = parseInt(sp.getSetting('frameNum'));
+  sp.gridViewScale = parseFloat(sp.getSetting('gridViewScale'));
+  sp.checkVersionOnStartupValue = sp.getSettingAsBool('checkVersionOnStartup');
+
+  !sp.scriptFolder.exists && sp.scriptFolder.create();
+  !sp.roamingFolder.exists && sp.roamingFolder.create();
+  !sp.materialFolder.exists && sp.materialFolder.create();
+
+  var loc = function loc(string) {
+    if (sp.lang === 0) {
+      sp.lang = sp.getSetting('language');
+
+      if (sp.isForceEnglish()) {
+        sp.lang = 'en';
+      }
+    }
+    return string[sp.lang];
+  };
+
+  $.global.loc = loc;
+
+  sp.extend(sp, {
+    beyondCS6: true,
+    versionUpdateInfo: {
+      ch: '\u5C42\u5B58\u50A8\u811A\u672CSp_Memory 3.0 @\u79CB\u98CE_\u5C0F\u5F84\n\n\u529F\u80FD\u6DFB\u52A0:\n1.\u9ED8\u8BA4\u5F00\u542F\u9884\u89C8\u52A8\u753B\u529F\u80FD\n2.\u5B58\u50A8\u5C42\u65F6\u9ED8\u8BA4\u5B58\u50A8\u9884\u89C8\u52A8\u753B,\u53EF\u8BBE\u5B9A\u9884\u89C8\u7684\u5E27\u7387\u548C\u5E27\u6570\n3.\u5BFC\u5165\u5BFC\u51FA\u529F\u80FD\u652F\u6301\u9884\u89C8\u52A8\u753B\n3.\u6DFB\u52A0\u7EC4\u7684\u5206\u7C7B-\u6A21\u5757\n\n\u53F3\u952E\u83DC\u5355\u65B0\u589E:\n1.\u9884\u89C8\u5168\u90E8/\u9884\u89C8\u9009\u4E2D\n2.\u65B0\u5EFA\u6A21\u5757\n3.\u5220\u9664\u6A21\u5757\n\n\n\u5C0F\u63D0\u793A:\n1.\u57283.x\u7248\u672C\u524D\u4FDD\u5B58\u7684\u7EC4,\u53EF\u4EE5\u7528"\u53F3\u952E->\u8F85\u52A9\u811A\u672C->\u91CD\u8F7D\u7EC4\u5185\u9884\u89C8\u52A8\u753B"\u6765\u4E3A\u7EC4\u6240\u6709\u5143\u7D20\u8FDB\u884C\u6279\u91CF\u751F\u6210\u9884\u89C8\u52A8\u753B\n2.\u53EF\u4F7F\u7528ctrl\u4E0Eshift\u5BF9\u5143\u7D20\u8FDB\u884C\u81EA\u7531\u9009\u62E9,\u4E4B\u540E\u53F3\u952E->\u9884\u89C8\u9009\u4E2D,\u5373\u53EF\u540C\u65F6\u9884\u89C8\u6240\u6709\u88AB\u9009\u4E2D\u5143\u7D20\u7684\u52A8\u753B\n3.\u5728\u672A\u9009\u4E2D\u4EFB\u4F55\u5143\u7D20\u65F6,\u53F3\u952E->\u9884\u89C8\u5168\u90E8,\u5373\u53EF\u9884\u89C8\u7EC4\u5185\u7684\u5168\u90E8\u5143\u7D20\u7684\u52A8\u753B\n4.\u5728\u8BBE\u7F6E\u7A97\u53E3\u4E2D,\u9009\u4E2D\u4E00\u4E2A\u7EC4,\u4E4B\u540E\u70B9\u51FB"\u526A\u5207\u9009\u4E2D\u7EC4\u5230\u5176\u4ED6\u6A21\u5757",\u53EF\u5C06\u7EC4\u79FB\u52A8\u5230\u5176\u4ED6\u6A21\u5757\u4E2D\n\n\n',
+      en: 'Sp_memory 3.0 @smallpath\n                    \nNew Feature:\n1.Enable preview element\n2.Create preview animation while saving layers,you can set the frame rate and frame number\n3.Export/Import group support preview animation\n4.Add module - the group of group\n\nTips:\n1.When your group is saved  before v3.0,you can use "RightClick->Helper scripts->Reload previews of group" to create all the preview animation\n2.Use ctrl key and shift key to select element,then use "RightClick->Preview selected" to preview the animations of selected element at the same time.\n3.When there isn\'t any element being selected, us "RightClick->Preview all" to preview all the animations of group.\n4.To cut the group from its module into another module,use "Cut selected group to other module" in the settings window\n                    \n'
+    }
+  });
+
+  if (sp.haveSetting('version') === false || sp.getSetting('version') < sp.version) {
+    alert(loc(sp.versionUpdateInfo));
+  }
+  sp.saveSetting('version', sp.version);
+}();
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var request = __webpack_require__(18);
+
+module.exports = function () {
+  var sp = function sp() {
+    return new sp.prototype.init();
+  };
+
+  sp.prototype = {
+
+    scriptName: 'Sp_memory',
+    scriptVersion: "3.0.11",
+    version: "3.0.11",
+    slash: '/',
+
+    setting: app.settings,
+    inXml: null,
+
+    isCC2015: !!(app.version.indexOf('13.5') !== -1 || app.version.indexOf('13.6') !== -1 || app.version.indexOf('13.7') !== -1 || app.version.indexOf('13.8') !== -1 || app.version.indexOf('14') !== -1),
+
+    ui: 1,
+    lang: 0,
+
+    sourceCodeLink: 'https://github.com/smallpath/memory',
+    githubIssue: 'https://github.com/smallpath/memory/issues',
+    issueLink: 'https://tieba.baidu.com/p/4462854806',
+    checkVersionLink: 'https://api.github.com/repos/smallpath/memory/git/refs/tags',
+    downloadLinkPrefix: 'https://raw.githubusercontent.com/smallpath/memory/v',
+    downloadLinkSuffix: '/dist/Sp_memory.jsx',
+    weiboLink: 'http://weibo.com/u/3893928357',
+
+    noImage: '\x89PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\0d\0\0\0<\b\x06\0\0\0\x90?\x1F\xCE\0\0\t/IDATx\x9C\xED\x9BiL\x13]\x17\xC7\xFF\xED\xB0\xB4u\x01,QpA\x94\xB4\xFAA\x89J\t\xA8X5b\x1E\x8D1~0\xD1D\xFC 1\xA81FI\x8C\x9A(\x89\x8D\x0B.\x89!j\x88\xB2\x18\x17\xF0\x93Jp%\x1A\xC5\x88\x80\xDA\xD4\x05\x85Z!\x80\x82\x16D,\xB6,-]8\xCF\x07_&\x8E-L\xCD\xD3\xF7y\xE7\xD5\xF9%7\xE9\x9C{\xEE\x99\xE5?w\xEE\x9Ds\xA7\x12\0\x04\x11\xC1 \xFD_\x1F\x80\b\x17Q\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\fQ\x10\x81\x11\xC4\xE7 \x95J1z\xF4h\x84\x84\x84x\xD5\x11\x11\\.\x17\xACV+\x88\xFE\xCC\f\x8CD"\x01\x000\f\x03\xB9\\\x8E\xD0\xD0PH\xA5\xDE\xF7\xB9\xD3\xE9\x84\xCDf\xC3\xC0\xC0\xC0\xB0\xF1x\x05\x19=z4222\x10\x17\x17\x87\xFE\xFE~N\x9D\xCB\xE5BSS\x13\n\x0B\x0B\xE1t:\x7F\xE5<~+\xA4R)"""\x90\x92\x92\x82\xE4\xE4d\xC8d2N}hh(\x1A\x1B\x1BQPP\x80o\xDF\xBE\r\x1B\x8BW\x10\xB9\\\x8E\xA4\xA4$8\x1C\x0E\x98L&N\x9D\xDB\xEDF[[\x1B\xAF\xEA\xBF;\x83O\n\x8B\xC5\x82\xF7\xEF\xDF#44\x94S\xAF\xD1h\x90\x9C\x9C\x8C\xE2\xE2b^A\x80\xEF\xD9\xDE!Ktt4\x15\x15\x15\xD1\xFA\xF5\xEB\x87\xF5\x13\xCB\xD0e\xFD\xFA\xF5TTTD\xD1\xD1\xD1\xBC\xBE\xE2\xA0.0DA\x04\x06\xAF \x83\xCFG\xB7\xDB\xFDo\x1C\xCFo\x89\xDB\xED\x86\xCB\xE5\xF2k&\xCA+\x88\xD3\xE9\x84\xC9dBGGG@\x0E\xEEO\xA4\xA3\xA3\x03&\x93\xC9\xAF\x99\xA8\x04<K\xB8\x12\x89\x04\xC1\xC1\xC1\xF0x<\xF0x<\x81:\xC6?\n\x86a\xC00\x8C_\xBD\x84W\x10\x91\x7F\x17qP\x17\x18\xA2 \x02C\x14D`\xF0\xA6N\xFC%66\x16\x1F?~\xF4\x9A\x1EO\x9B6\r2\x99\f555\x1C{RR\x12\xD2\xD2\xD2 \x95JQRR\x82\xF2\xF2\xF2!cGEEA\xADV\xA3\xA2\xA2\x02\x000n\xDC8X\xADV8\x1C\x0E/\xDFQ\xA3F!((\b]]]^u\x87\x0F\x1FFnn.\xCCf\xF3\x90\xFB\n\x0B\x0B\xC3\xF6\xED\xDB1a\xC2\x04\xB4\xB5\xB5\xE1\xE4\xC9\x93\x9Ct\xC7\xDC\xB9s\x11\x1E\x1E\xCEic2\x99\xD0\xDC\xDC<d\xCC_% \xE9\x81\xA2\xA2"\xBA|\xF9\xB2\x97\xBD\xB4\xB4\x94***\xD8m\x86a\xE8\xC6\x8D\x1Bd\xB7\xDB\xA9\xBD\xBD\x9D\xCCf3\xF5\xF7\xF7SEE\x05\x8D\x1C9\xD2g\xEC\xEC\xECljmme\xB7sss)\'\'\xC7\xA7\xEF\xC5\x8B\x17\xE9\xD0\xA1C^v\x86a\xA8\xA9\xA9\x89\xF2\xF3\xF3\x87<\x87={\xF6\x90\xD9l&\x87\xC3Af\xB3\x99\xFA\xFA\xFA\xA8\xA3\xA3\x83rssY\x9F\xB7o\xDF\xD2\xCF\\\xBAt)`i\x96\x80=\xB2\xFA\xFA\xFA\xB0j\xD5*\xA4\xA7\xA7s\xECn\xB7\x9B3\xFF\xBEr\xE5\n\xB4Z-rrr\x10\x13\x13\x83I\x93&A\xA7\xD3A\xADV\xE3\xEE\xDD\xBBC\xC6w\xB9\\\xECo\xA5R\x89\xD4\xD4T/\x1F\x86a0w\xEE\\DGG{\xD5m\xDA\xB4\t\xB1\xB1\xB1\x987o\x9E\xCF\xF8\x1B6l@VV\x16>~\xFC\x88\xA5K\x97b\xFC\xF8\xF1\xD0h4\xD0\xEB\xF5\xD8\xB8q#\x8A\x8A\x8A\0|\x7F/\xBBy\xF3&\xB4Z-[\xF6\xED\xDB7\xFC\xC5\xF9E\x02\xA2l^^\x1E\xD9\xEDvjmm\xA5\x98\x98\x18\xD6~\xF5\xEAU\xBA\x7F\xFF>\x01\xA0\xF8\xF8x\xEA\xE9\xE9!\x9DN\xE7\xD5>##\x83\xFA\xFA\xFA|&1\xB3\xB3\xB3\xA9\xA9\xA9\x89\xDD.++#\xB7\xDBMiii\x1C\xBF\xCC\xCCL\x1A\x18\x18\xA0\xD2\xD2R\xAF\x18\xE5\xE5\xE5T__Ov\xBB\x9D\x96/_\xCE\xA9\x93H$T[[K\x06\x83\x81\x18\x86\xF1j{\xE2\xC4\tJHH \0TSSC\x05\x05\x05\x01\xEB\x11?\x97\x80\x0E\xEAF\xA3\x11N\xA7\x13W\xAE\\a\x17n~d\xDB\xB6m0\x9B\xCD8p\xE0\x80W]AA\x01jkk\xB1z\xF5j\xDE\xFDDFF\xA2\xBB\xBB\x1B\x1B7n\xE4\xD8\xD7\xACY\x03\x9B\xCD\x86\xB0\xB00\x8E=**\ns\xE6\xCC\xC1\xE5\xCB\x97a2\x99\xB0u\xEBVN\xBDV\xAB\x85J\xA5\xC2\xA1C\x87|\xBE\xFC\xEE\xDC\xB9\x13\xCF\x9F?\xE7=\xAE@\x10PA\\.\x17v\xEC\xD8\x81\xE9\xD3\xA7\xE3\xCC\x993^\xF5QQQhnn\x1Er\xFD\xA4\xB1\xB1\x11J\xA5\x92w?c\xC7\x8EEyy94\x1A\r\xE2\xE2\xE2\0\0\x89\x89\x89\x88\x8F\x8FGuu5"##9\xFE:\x9D\x0E\xBD\xBD\xBD8v\xEC\x18\xAA\xAA\xAA\xA0\xD1h8\x8BH\x8B\x17/\x86\xC5b\xC1\xF5\xEB\xD7\xFD:\xCF\xB5k\xD7\xE2\xEB\xD7\xAFl9{\xF6\xAC_\xED\xFC!`\xB3\xACAn\xDD\xBA\x85\x0B\x17. ==\xDDkL\x18L\x1F\f\x85\xCB\xE5Bpp\xF0\xB0\xF1CBB\x10\x11\x11\x81\xE3\xC7\x8FC\xA5R\xE1\xE0\xC1\x83X\xB7n\x1D\xF6\xEE\xDD\x0B\xA3\xD1\x88\xABW\xAF\xE2\xC8\x91#\x9C6\xF3\xE6\xCD\x83\xDB\xEDFqq1\x14\n\x05\x94J%v\xEF\xDE\xCD\xF6\xD4\xC1\xD4\xD0\xCFi\x8D\xDA\xDAZv\xE9Z&\x93a\xD9\xB2e\0\xBE\xDF8eee\xAC\xDF\x9D;wx\xAE\x8A\xFF\xFCW\xDEC233\xF1\xFA\xF5k\x9C8q\x82s\'Z,\x16L\x9E<y\xC8v\x93\'O\x86\xC5b\x196vll,\xA4R)\xDE\xBD{\x87\xBBw\xEFb\xC1\x82\x05\b\x0F\x0F\xC7\xFC\xF9\xF3q\xFD\xFAu<y\xF2\x04#G\x8Ed{\xC9\x8A\x15+\xA0R\xA9\xE0v\xBB1{\xF6lL\x9B6\r\x16\x8B\x05\x7F\xFD\xF5\x17\x1B\xF3\xF1\xE3\xC7\x18;v,\xB4Z-g_\xF7\xEE\xDD\xC3\xC3\x87\x0F\xD1\xD2\xD2\x02\xA5R\x89/_\xBE\0\0\f\x06\x03\xF6\xEE\xDD\xCB\x96\xCA\xCA\xCA_\xBEF\xC3\x11\xB0A\xFD\xE9\xD3\xA7\xECvTT\x14}\xF8\xF0\x81\xACV+;\xA8/Y\xB2\x84\xECv;m\xDE\xBC\xD9\xAB}JJ\n\xD9l6\xCA\xCC\xCC\x1CvPOOO\xA7\xF6\xF6v\x02@\n\x85\x82>\x7F\xFELF\xA3\x91ZZZ(88\x98d2\x19uwwSjj*\x01\xA0[\xB7n\xD1\xCB\x97/9\xF1\xB6l\xD9B===\xA4V\xAB\t\xF8>%\xAE\xAF\xAF\xA7G\x8F\x1E\xF9<\xB7\x92\x92\x12\xAA\xAB\xAB\xFB\xFF\x1B\xD4\x7F\xA4\xBD\xBD\x1D\xBBv\xED\xE2\xD8\x1E<x\0\x83\xC1\0\x9DN\x87\xB4\xB44\xD6\xBEh\xD1"\x9C?\x7F\x1E\xEF\xDF\xBF\xC7\xA9S\xA7\x86\x8D;c\xC6\f\xF6N\xED\xEB\xEBCee%T*\x15***\xE0r\xB9\xE0p8`\xB1X\xA0\xD1h\xA0P(\x90\x90\x90\x80\xAA\xAA*N\x8C\xFC\xFC|\xB4\xB5\xB5\xB1\xD3U\x8F\xC7\x83s\xE7\xCE!11\x11\xA5\xA5\xA5\x90\xCB\xE5\xAC\xEF\xFE\xFD\xFB\x91\x9A\x9A\x8A\xDB\xB7o\xB3\xB6\x90\x90\x10\x84\x87\x87\xB3\xE5\xE75\xF4\x7FJ@\x94\xCD\xCF\xCF\'\xBD^\xEF\xD3\xFEc\xCF\x89\x88\x88 \xBD^O\x0E\x87\x83\xDE\xBCyC\xAF^\xBD\xA2\xDE\xDE^\xAA\xAB\xAB#\x95J\xE53vvv6577\x13\0*..\xE6\xBCh\xCE\x9A5\x8B\xACV+M\x9D:\x95\xB5\xBDx\xF1\x82\n\x0B\x0B\xE9\xF0\xE1\xC3\xD4\xD5\xD5Ec\xC6\x8C\xF1\x8AY\\\\L\r\r\r$\x91HX\xDB\xE9\xD3\xA7\xC9j\xB5\xD2\xA7O\x9F\xE8\xC9\x93\'d4\x1A\xC9n\xB7\xD3\x8D\x1B7X\xBF7o\xDEPww7uuu\xB1%///`=\x84\x01\xA0\x0B\x84\xAA===\xF8\xF0\xE1\x83\xD7\xF4\xF0\xF6\xED\xDB\xE8\xEC\xECd\xBFXq8\x1C(,,\x84\xCDf\x83B\xA1@WW\x17JJJ\x90\x96\x96\x86\xCE\xCEN\x9F\xB1\x07g3\xD5\xD5\xD5\x18\x18\x18\xC0\xF3\xE7\xCFQWW\x07\xE0{Olhh@uu5\xEB\xDF\xDF\xDF\x8Fg\xCF\x9E\xA1\xB3\xB3\x13\xD5\xD5\xD5>\x9F\xF1\x06\x83\x012\x99\fz\xBD\x9E}q-++\xC3\xBD{\xF7\xA0T*\xE1v\xBB\xD1\xDA\xDA\x8A\xA3G\x8F"++\x8Bm\x17\x14\x14\x04\xA3\xD1\b\x83\xC1\xC0\x96k\xD7\xAE\xA1\xA5\xA5\xE5\x9F]\xC0\xFF \xAE\x87\b\f1\xDB+0DA\x04\x06\xAF \x12\x89\x04\f\xC3\xF8\xFC^U\xC4?\xA4R)\x18\x86\xF1\x99N\xF2\xF2\xE5s`\x18\x06\x91\x91\x91\x181bD@\x0E\xEEOd\xC4\x88\x11\x88\x8C\x8C\x04\xC30\xBC\xBE\xBC\x82(\x14\n\xA4\xA6\xA6B\xADV\x07\xE4\xE0\xFED\xD4j5\x96.]\n\x85B\xC1\xEB\xCB+\x88\\.\xC7\xC2\x85\x0B\xD9$\x9E\xC8\xAF\x13\x17\x17\x07\xADV\xCBy\xE1\x1C\n^A\xA4R)\xE4r\xB9\xCF\xFF\x87\x88\xF8GHH\b\xE4r\xB9_\xE3\xB08R\x0B\fQ\x10\x81\xE1\xD7z\x88B\xA1\xC0\xCA\x95+1q\xE2D\x8E}0\xBDPRR2\xEC:\xC7\xEF\x8ET*EXX\x18\x12\x12\x120s\xE6L\xAFd\xE3\xEC\xD9\xB3\x11\x14\xE4\xDF\xD2\x13\xAF\x97\xDDn\xC7\xB3g\xCF0}\xFAt\xAF\x81\xDD\xE9t\xC2\xE3\xF1\xF85\xBF\xFE]\x91H$\xEC\xF7\xCFJ\xA5\x12S\xA6L\xF1\x1A\xBC{{{a2\x99`\xB7\xDB\xF9\xE3\x81\'\x97%\xFE\xE9sx\x02\xFD\xA7O1\xB9(0\xC4A]`\x88\x82\b\fQ\x10\x81!\n"0DA\x04\x86(\x88\xC0\x10\x05\x11\x18\xA2 \x02C\x14D`\x88\x82\b\x8C\xBF\x01O\xC5\x98\x01\xABf\xE6Y\0\0\0\0IEND\xAEB`\x82',
+
+    xmlFileNames: [],
+    xmlGroupNames: [],
+    xmlCurrentFileNames: [],
+
+    layerTypePropertyArr: [],
+    layerTypePropertyValueArr: [],
+
+    expPropertyArr: [],
+
+    layerArr: [],
+    layerParentNameArr: [],
+
+    init: function init() {
+      return this;
+    },
+
+    extend: function extend(target, source) {
+      for (var i in source) {
+        target[i] = source[i];
+      }return target;
+    }
+
+  };
+
+  sp.prototype.extend(sp.prototype, {
+
+    scriptFile: new File($.fileName),
+    scriptFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory'),
+    materialFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'tempFile'),
+    settingsFile: new File(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'settings.xml'),
+    imageFolder: new Folder(File($.fileName).parent.fsName + sp.prototype.slash + 'Sp_memory' + sp.prototype.slash + 'image'),
+    roamingFolder: new Folder(Folder.userData.fullName + sp.prototype.slash + 'Aescripts' + sp.prototype.slash + 'Sp_memory'),
+
+    isOutside: true,
+    isLoopPreview: false,
+    previewHelper: {},
+    renderTaskArray: [],
+    preImageArr: [],
+    newItemOrCover: 'newItem',
+
+    haveSetting: function haveSetting(keyName) {
+      return this.setting.haveSetting(this.scriptName, keyName);
+    },
+
+    saveSetting: function saveSetting(keyName, value) {
+      this.setting.saveSetting(this.scriptName, keyName, value);
+    },
+
+    getSetting: function getSetting(keyName) {
+      return this.setting.getSetting(this.scriptName, keyName);
+    },
+
+    getSettingAsBool: function getSettingAsBool(keyName) {
+      return this.getSetting(keyName) === 'true';
+    },
+
+    getFileByName: function getFileByName(name) {
+      var string = this.scriptFolder.toString() + this.slash + name + '.xml';
+      var file = new File(string);
+      return file;
+    },
+
+    isForceEnglish: function isForceEnglish() {
+      var string = this.scriptFolder.toString() + this.slash + 'force_en.txt';
+      var file = new File(string);
+      return file.exists;
+    },
+
+    getImageFolderByName: function getImageFolderByName(name) {
+      var string = this.imageFolder.toString() + this.slash + name + '';
+      var folder = new Folder(string);
+      if (!folder.exists) {
+        folder.create();
+      }
+      return folder;
+    },
+
+    getImage: function getImage(groupName, imageName) {
+      var folder = this.getImageFolderByName(groupName);
+      if (!folder.exists) {
+        folder.create();
+      }
+      var string = folder.toString() + this.slash + imageName + '.png';
+      var file = new File(string);
+      if (file.exists) {
+        return file;
+      } else {
+        return this.noImage;
+      }
+    },
+
+    getImageFile: function getImageFile(groupName, imageName) {
+      var folder = this.getImageFolderByName(groupName);
+      if (!folder.exists) {
+        folder.create();
+      }
+      var string = folder.toString() + this.slash + imageName + '.png';
+      var file = new File(string);
+      return file;
+    },
+
+    getGlobalIndexFromFileName: function getGlobalIndexFromFileName(name) {
+      var content = new XML(this.settingsFile.readd());
+      var thisIndex = -1;
+      this.forEach(content.ListItems, function (item, index) {
+        if (item.toString() === name) {
+          thisIndex = index;
+        }
+      });
+      return thisIndex;
+    },
+
+    os: $.os.indexOf('Win') !== -1 ? 'win' : 'mac',
+
+    openLink: function openLink(url) {
+      var cmd = '';
+      if ($.os.indexOf('Win') !== -1) {
+        cmd += 'explorer ' + url;
+      } else {
+        cmd += 'open "' + url + '"';
+      }
+      try {
+        system.callSystem(cmd);
+      } catch (e) {}
+    },
+
+    request: request,
+
+    getVersion: function getVersion() {
+      try {
+        var response = request('GET', this.checkVersionLink, '');
+
+        var data = eval('(' + response + ')');
+        var latestTag = 0;
+
+        data.forEach(function (item, index) {
+          var tagArr = item.ref.match(/v(.*?)$/i);
+          if (tagArr.length >= 1) {
+            var tag = tagArr[1];
+            if (latestTag <= tag) latestTag = tag;
+          }
+        });
+        return latestTag;
+      } catch (err) {
+        return -1;
+      }
+    },
+
+    compareSemver: function compareSemver(a, b) {
+      var pa = a.split('.');
+      var pb = b.split('.');
+      for (var i = 0; i < 3; i++) {
+        var na = Number(pa[i]);
+        var nb = Number(pb[i]);
+        if (na > nb) return 1;
+        if (nb > na) return -1;
+        if (!isNaN(na) && isNaN(nb)) return 1;
+        if (isNaN(na) && !isNaN(nb)) return -1;
+      }
+      return 0;
+    }
+
+  });
+
+  sp.prototype.extend(sp.prototype, {
+    filterName: function filterName(str) {
+      return str.trim().replace(/[<>:"\/\\|?*]+/g, '_');
+    },
+    getTimeInfoArr: function getTimeInfoArr(comp) {
+      var layers = [];
+      if (comp.selectedLayers.length === 0) {
+        for (var i = 0; i < comp.numLayers; i++) {
+          if (comp.layer(i + 1).enabled === true) {
+            layers.push(comp.layer(i + 1));
+          }
+        }
+      } else {
+        for (i = 0; i < comp.selectedLayers.length; i++) {
+          if (comp.selectedLayers[i].enabled === true) {
+            layers.push(comp.selectedLayers[i]);
+          }
+        }
+      }
+
+      var inPointArr = [];
+      var outPointArr = [];
+
+      for (i = 0; i < layers.length; i++) {
+        var layer = layers[i];
+        inPointArr.push(layer.inPoint);
+        outPointArr.push(layer.outPoint);
+      }
+
+      if (layers.length === 0) return null;
+      inPointArr.sort(function (a, b) {
+        return a - b;
+      });
+      outPointArr.sort(function (a, b) {
+        return a - b;
+      });
+
+      return [inPointArr[0], outPointArr[outPointArr.length - 1]];
+    },
+    swap: function swap(a, b) {
+      var tempA = a.text;
+      a.text = b.text;
+      b.text = tempA;
+    },
+    lookUpTextInChildren: function lookUpTextInChildren(text, children) {
+      var len = children.length;
+      for (var i = 0; i < len; i++) {
+        if (children[i].text === text) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    lookUpInArray: function lookUpInArray(text, arr) {
+      var len = arr.length;
+      for (var i = 0; i < len; i++) {
+        if (arr[i] === text) {
+          return true;
+        }
+      }
+      return false;
+    },
+    lookUpInItem: function lookUpInItem(text, items) {
+      var len = items.length;
+      for (var i = 1; i <= len; i++) {
+        if (items[i].name === text) {
+          return [true, items[i]];
+        }
+      }
+      return [false, null];
+    },
+    deleteIndexAndReload: function deleteIndexAndReload(deleteIndex) {
+      var settingxml = new XML(this.settingsFile.readd());
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        for (var j = 0, len = item.children().length(); j < len; j++) {
+          var thisItem = item.child(j);
+          if (parseInt(thisItem.toString()) === deleteIndex) {
+            thisItem.setLocalName('waitToDelete');
+            delete item.waitToDelete;
+          }
+        }
+      });
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        for (var j = 0, len = item.children().length(); j < len; j++) {
+          var thisItem = item.child(j);
+          if (parseInt(thisItem.toString()) > deleteIndex) {
+            item.insertChildBefore(thisItem, new XML('<Index>' + (parseInt(thisItem.toString()) - 1).toString() + '</Index>'));
+            thisItem.setLocalName('waitToDelete');
+            delete item.waitToDelete;
+          }
+        }
+      });
+
+      this.settingsFile.writee(settingxml);
+    },
+    reloadParentDroplist: function reloadParentDroplist() {
+      this.parentDroplist.removeAll();
+      var settingxml = new XML(this.settingsFile.readd());
+      this.xmlGroupNames.length = 0;
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        this.push(item['@groupName'].toString());
+      }, this.xmlGroupNames);
+      this.xmlGroupNames.forEach(function (item, index) {
+        this.add('item', item);
+      }, this.parentDroplist);
+      var ratio = 1 / this.gv.scale - 1;
+      var addedSeparatorLength = Math.ceil(ratio * this.xmlGroupNames.length);
+      for (var i = 0; i < addedSeparatorLength; i++) {
+        this.parentDroplist.add('separator');
+      }
+
+      this.reloadDroplist();
+    },
+    reloadDroplist: function reloadDroplist() {
+      this.droplist.removeAll();
+      this.gv.removeAll();
+      var parentSelection = parseInt(this.getSetting('parentSelection'));
+      var groupName = this.xmlGroupNames[parentSelection];
+
+      var settingxml = new XML(this.settingsFile.readd());
+      this.xmlFileNames.length = 0;
+      this.xmlCurrentFileNames.length = 0;
+
+      var indexArr = [];
+
+      this.forEach(settingxml.ParentGroup, function (item, index) {
+        if (item['@groupName'].toString() === groupName) {
+          for (var j = 0; j < item.children().length(); j++) {
+            indexArr.push(parseInt(item.child(j).toString()));
+          }
+        }
+      });
+
+      var listArr = [];
+      this.forEach(settingxml.ListItems, function (item, index) {
+        this.push(item.toString());
+      }, this.xmlFileNames);
+      for (var i = 0, len = indexArr.length; i < len; i++) {
+        listArr.push(settingxml.ListItems.child(indexArr[i]).toString());
+      }
+      listArr.forEach(function (item, index) {
+        this.add('item', item);
+      }, this.droplist);
+      var ratio = 1 / this.gv.scale - 1;
+      var addedSeparatorLength = Math.ceil(ratio * listArr.length);
+      for (i = 0; i < addedSeparatorLength; i++) {
+        this.droplist.add('separator');
+      }
+
+      this.xmlCurrentFileNames = listArr;
+    },
+    cropImage: function cropImage(fi, inImageFileA) {
+      var f = new ImportOptions();
+      f.file = fi;
+      f.forceAlphabetical = false;
+      f.importAs = ImportAsType.FOOTAGE;
+      f.sequence = false;
+      f = app.project.importFile(f);
+      var tempComp3 = app.project.items.addComp('tempComp', 100, 60, 1, 5, 30);
+      var BGtemp3 = tempComp3.layers.addSolid([0, 0, 0], 'BG', tempComp3.width, tempComp3.height, 1, 10800);
+      var ima = tempComp3.layers.add(f);
+      var scaleX = 10000 / ima.source.width;
+      var scaleY = 6000 / ima.source.height;
+      if (scaleX / 60 < scaleY / 100) {
+        ima.transform.scale.setValue([scaleX, scaleX]);
+      } else {
+        ima.transform.scale.setValue([scaleY, scaleY]);
+      }
+      tempComp3.saveFrameToPng(0, inImageFileA);
+      f.remove();
+      try {
+        if (BGtemp3.source.parentFolder.numItems === 1) {
+          var BGparent = BGtemp3.source.parentFolder;
+          BGtemp3.source.remove();
+          BGparent.remove();
+        } else {
+          BGtemp3.source.remove();
+        }
+      } catch (err) {}
+      tempComp3.remove();
+    },
+
+    savePng2: function savePng2(pngPath) {
+      app.beginSuppressDialogs();
+      var comps = app.project.activeItem;
+      var timeArr = this.getTimeInfoArr(comps);
+      var layers = comps.selectedLayers;
+      var jishushuzu = [];
+      var waitToPre = [];
+      var tempComp2 = app.project.items.addComp('tempComp2', comps.width, comps.height, comps.pixelAspect, comps.duration, comps.frameRate);
+      var BGtemp = tempComp2.layers.addSolid([0, 0, 0], 'BG', 100, 60, 1, 10800);
+      var cunLengthA = layers.length;
+      var iq;
+      for (iq = 0; iq < layers.length; iq++) {
+        jishushuzu.push(layers[iq].index);
+      }
+      for (iq = 0; iq < layers.length; iq++) {
+        var wocaoName = layers[iq].name;
+        waitToPre[waitToPre.length] = layers[iq].duplicate();
+        waitToPre[iq].name = wocaoName;
+      }
+      var wwwww = [];
+      for (iq = 0; iq < cunLengthA; iq++) {
+        wwwww.push(waitToPre[iq].index);
+      }
+      var precomposeComp = comps.layers.precompose(wwwww, 'tempA', true);
+      comps.layer('tempA').copyToComp(tempComp2);
+      comps.layer('tempA').remove();
+      for (iq = 0; iq < cunLengthA; iq++) {
+        comps.layer(jishushuzu[iq]).selected = true;
+      }
+      try {
+        tempComp2.layer(1).solo = false;
+      } catch (err) {}
+      var preVVVV = tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').value;
+      tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Scale').setValue([100 / tempComp2.width * preVVVV[0], 60 / tempComp2.height * preVVVV[1]]);
+      tempComp2.width = 100;
+      tempComp2.height = 60;
+      BGtemp.property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
+      tempComp2.layer(1).property('ADBE Transform Group').property('ADBE Position').setValue([50, 30]);
+      var nameStr = '';
+      pngPath = File(pngPath);
+
+      var isNewItem = this.newItemOrCover === 'newItem';
+      var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
+      if (isNewItem || isCover) {
+        if (isNewItem) {
+          while (pngPath.exists) {
+            pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
+            pngPath = File(pngPath);
+          }
+        }
+        try {
+          tempComp2.saveFrameToPng(comps.time, pngPath);
+        } catch (err) {}
+      }
+
+      if (this.savePreviewValue === true) {
+        tempComp2.layer(1).inPoint = timeArr[0];
+        tempComp2.layer(1).outPoint = timeArr[1];
+        tempComp2.layer(2).inPoint = timeArr[0];
+        tempComp2.layer(2).outPoint = timeArr[1];
+        timeArr = this.getTimeInfoArr(tempComp2);
+        var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
+        !targetFolder.exists && targetFolder.create();
+        var num = this.frameNum;
+        this.willSavePreviews(num + 1);
+        var workAreaStart = comps.workAreaStart;
+        var workAreaDuration = comps.workAreaDuration;
+        for (var i = 0; i < num + 1; i++) {
+          try {
+            var time;
+            if (this.saveWorkareaValue === true) {
+              time = workAreaStart + i * workAreaDuration / num;
+            } else {
+              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+            }
+            var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
+            tempComp2.saveFrameToPng(time, seqPath);
+            this.didSavePreview();
+            app.purge(PurgeTarget.IMAGE_CACHES);
+          } catch (err) {}
+        }
+        this.didSavePreviews();
+      }
+      BGtemp.source.remove();
+      tempComp2.remove();
+      precomposeComp.remove();
+      try {
+        nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
+      } catch (err) {}
+      app.endSuppressDialogs(false);
+      return encodeURIComponent(nameStr);
+    },
+    savePng: function savePng(pngPath) {
+      try {
+        app.beginSuppressDialogs();
+        var comps = app.project.activeItem;
+        var layers = comps.selectedLayers;
+        var inArr = [];
+        for (var i = 0; i < layers.length; i++) {
+          inArr.push(layers[i].index);
+        }
+        var otherIndexArr = [];
+        var otherEnabledArr = [];
+        for (i = 0; i < comps.numLayers; i++) {
+          var thisLayer = comps.layer(i + 1);
+          if (inArr.toString().indexOf(thisLayer.index) === -1) {
+            otherEnabledArr.push(thisLayer.enabled);
+            otherIndexArr.push(thisLayer.index);
+            try {
+              thisLayer.enabled = false;
+            } catch (err) {}
+          }
+        }
+        var nameStr = '';
+        pngPath = File(pngPath);
+        var isNewItem = this.newItemOrCover === 'newItem';
+        var isCover = this.newItemOrCover === 'cover' && this.coverChangeValue === true;
+        if (isNewItem || isCover) {
+          if (isNewItem) {
+            while (pngPath.exists) {
+              pngPath = pngPath.toString().split('.')[0].toString() + '_' + '.png';
+              pngPath = File(pngPath);
+            }
+          }
+          if (this.thumbTypeValue === true) {
+            app.activeViewer.views[0].saveBlittedImageToPng(comps.time, pngPath, 1000, "what's this? I don't know");
+          } else {
+            comps.saveFrameToPng(comps.time, pngPath);
+          }
+          this.cropImage(pngPath, pngPath);
+        }
+        if (this.savePreviewValue === true) {
+          var targetFolder = new Folder(pngPath.toString().replace(/.png/i, '') + '_seq');
+          !targetFolder.exists && targetFolder.create();
+          var num = this.frameNum;
+          this.willSavePreviews(num + 1);
+          var workAreaStart = comps.workAreaStart;
+          var workAreaDuration = comps.workAreaDuration;
+          var timeArr = this.getTimeInfoArr(comps);
+          for (i = 0; i < num + 1; i++) {
+            var time;
+            if (this.saveWorkareaValue === true) {
+              time = workAreaStart + i * workAreaDuration / num;
+            } else {
+              time = timeArr[0] + i * (timeArr[1] - timeArr[0]) / num;
+            }
+            var seqPath = new File(targetFolder.toString() + this.slash + i.toString() + '.png');
+
+            if (this.thumbTypeValue) {
+              app.activeViewer.views[0].saveBlittedImageToPng(time, seqPath, 1000, "what's this? I don't know");
+            } else {
+              comps.saveFrameToPng(time, seqPath);
+            }
+            this.cropImage(seqPath, seqPath);
+            this.didSavePreview();
+            app.purge(PurgeTarget.IMAGE_CACHES);
+          }
+          this.didSavePreviews();
+        }
+        for (i = 0; i < otherIndexArr.length; i++) {
+          try {
+            thisLayer = comps.layer(otherIndexArr[i]);
+            thisLayer.enabled = otherEnabledArr[i];
+          } catch (err) {}
+        }
+        app.endSuppressDialogs(false);
+        nameStr = decodeURIComponent(File(pngPath).displayName.split('.')[0].toString());
+        return encodeURIComponent(nameStr);
+      } catch (err) {
+        alert(err.line.toString() + err.toString());
+      }
+    }
+
+  });
+
+  sp.prototype.extend(sp.prototype, {
+
+    newLayers: function newLayers(elementXml, comp, options) {
+      try {
+        var layerArr = $.layer(elementXml, options).toLayer(comp);
+      } catch (err) {
+        writeLn(err.print());
+      }
+      return layerArr;
+    },
+
+    getXmlFromLayers: function getXmlFromLayers(layers, itemName, sp) {
+      var options = {
+        isSaveMaterial: sp.saveMaterialValue
+      };
+      return $.layer(layers, options).toXML(itemName);
+    },
+
+    newProperties: function newProperties(xml, selectedLayers, isCleanGroup, isKeyframeOffset) {
+      isCleanGroup = isCleanGroup || false;
+      isKeyframeOffset = isKeyframeOffset || false;
+
+      var layerXml = new XML(xml);
+
+      var options = {};
+      options.newPropertiesSettingArr = [];
+      options.cleanPropertiesSettingArr = [];
+
+      options.isCleanGroup = isCleanGroup;
+      options.isKeyframeOffset = isKeyframeOffset;
+
+      for (var i = 1; i <= 9; i++) {
+        if (sp.prototype.getSetting('_1_' + i) === '1') {
+          options.newPropertiesSettingArr.push(1);
+        } else {
+          options.newPropertiesSettingArr.push(0);
+        }
+
+        if (sp.prototype.getSetting('_2_' + i) === '1') {
+          options.cleanPropertiesSettingArr.push(1);
+        } else {
+          options.cleanPropertiesSettingArr.push(0);
+        }
+      }
+
+      $.layer.newProperties(layerXml.child(0).Properties, selectedLayers, options);
+    },
+
+    saveItemToFile: function saveItemToFile(file, xml, position) {
+      var content = file.readd();
+      var newXml = new XML(content);
+      if (content.length === 0) newXml = new XML('<tree></tree>');
+      if (typeof position === 'undefined') {
+        newXml.appendChild(xml);
+      } else {
+        newXml.appendChild(xml);
+        var newInsertxml = new XML(newXml.child(newXml.children().length() - 1));
+        newXml.insertChildAfter(newXml.child(position), newInsertxml);
+        newXml.child(position).setLocalName('waitToDelete');
+        newXml.child(newXml.children().length() - 1).setLocalName('waitToDelete');
+        delete newXml.waitToDelete;
+      }
+      file.writee(newXml);
+    }
+
+  });
+
+  sp.prototype.init.prototype = sp.prototype;
+  $.global.sp = sp();
+  return $.global.sp;
+}();
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function () {
+  if (!sp.settingsFile.exists || sp.settingsFile.length === 0) {
+    if (sp.settingsFile.exists) sp.settingsFile.remove();
+    var settingsText = '<settings>\
+  <ListItems/>\
+  <ParentGroup/>\
+</settings>';
+    var newsettingsxml = new XML(settingsText);
+    var allFiles = sp.scriptFolder.getFiles();
+    newsettingsxml.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
+    var i = 0;
+    allFiles.forEach(function (item, index) {
+      if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
+        newsettingsxml.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
+        newsettingsxml.ParentGroup.child(0).appendChild(new XML('<Index>' + i + '</Index>'));
+        i++;
+      }
+    });
+    sp.settingsFile.writee(newsettingsxml);
+  }
+
+  var content = new XML(sp.settingsFile.readd());
+  if (!content.hasOwnProperty('ParentGroup')) {
+    content.appendChild(new XML('<ParentGroup/>'));
+  }
+  if (content.ParentGroup.children().length() === 0) {
+    content.ParentGroup.appendChild(new XML("<item groupName='Default'/>"));
+    sp.forEach(content.ListItems, function (item, index) {
+      content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
+    });
+    sp.settingsFile.writee(content);
+  }
+
+  content = new XML(sp.settingsFile.readd());
+  if (!content.hasOwnProperty('ListItems')) {
+    content.appendChild(new XML('<ListItems/>'));
+  }
+  if (content.ListItems.children().length() === 0) {
+    allFiles = sp.scriptFolder.getFiles();
+    allFiles.forEach(function (item, index) {
+      if (item.toString().indexOf('.xml') !== -1 && item.name.indexOf('settings.xml') === -1) {
+        content.ListItems.appendChild(new XML('<Name>' + item.displayName.replace('.xml', '') + '</Name>'));
+        content.ParentGroup.child(0).appendChild(new XML('<Index>' + index.toString() + '</Index>'));
+      }
+    });
+  }
+  if (content.ListItems.children().length() === 0) {
+    content.ListItems.appendChild(new XML('<Name>Default</Name>'));
+    content.ParentGroup.child(0).appendChild(new XML('<Index>' + 0 + '</Index>'));
+    var file = sp.getFileByName('Default');
+    sp.getImageFolderByName('Default');
+    var str = '<tree></tree>';
+    file.writee(str);
+  }
+
+  sp.settingsFile.writee(content);
+}();
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+try {
+    (function (global) {
+        __webpack_require__(14);
+        __webpack_require__(9);
+        __webpack_require__(12);
+        __webpack_require__(13);
+        __webpack_require__(15);
+        __webpack_require__(3);
+        __webpack_require__(7);
+        __webpack_require__(6);
+        __webpack_require__(4);
+        __webpack_require__(5);
+        __webpack_require__(8);
+        var helpers = __webpack_require__(10);
+
+        $.layer.slash = sp.slash;
+        $.layer.tempFolder = new Folder(sp.scriptFolder.toString() + $.layer.slash + 'tempFile');
+        $.layer.translate = $.global.translate;
+
+        sp.fns = new helpers.fns();
+
+        $.global.callbackBeforeWebpackBuild && $.global.callbackBeforeWebpackBuild();
+        if (!(global instanceof Panel)) {
+            $.global.callbackBeforeWebpackBuild = function () {
+                win.close();
+            };
+        }
+        var win = sp.win = global instanceof Panel ? global : new Window('window', sp.scriptName, undefined, { resizeable: true });
+        var outterGroup = sp.win.outterGroup = win.add("Group{orientation: 'column', alignment: ['fill','fill'],spacing:0,margins:0}");
+        var innerGroup = sp.win.innerGroup = outterGroup.add("Group{orientation: 'row', alignment: ['fill','fill'],spacing:0,margins:0}");
+        var parentDroplist = sp.parentDroplist = innerGroup.add('Dropdownlist{}');
+        var droplist = sp.droplist = innerGroup.add('Dropdownlist{}');
+        var gv = sp.gv = new GridView(outterGroup);
+        var screen = $.screens[0].toString().split('-').pop().split(':');
+        outterGroup.maximumSize = innerGroup.maximumSize = [parseInt(screen[0]), parseInt(screen[1])];
+
+        gv.scale = sp.gridViewScale;
+        gv.limitText = sp.getSettingAsBool('limitText');
+        gv.showText = sp.showThumbValue;
+        gv.version = parseInt(app.version.split('.')[0]) === 12 || parseInt(app.version.split('.')[0]) === 14 ? 'CC' : 'CC2014';
+
+        gv.leftClick = sp.fns.leftClick;
+        gv.rightClick = sp.fns.rightClick;
+        gv.leftDoubleClick = sp.fns.newLayer;
+        gv.mouseMove = sp.fns.moveOver;
+        parentDroplist.onChange = sp.fns.parentDroplistChange;
+        droplist.onChange = sp.fns.droplistChange;
+
+        sp.reloadParentDroplist();
+        var selection = parseInt(sp.getSetting('parentSelection'));
+        parentDroplist.selection = selection <= parentDroplist.items.length - 1 && selection >= 0 ? selection : 0;
+        selection = parseInt(sp.getSetting('thisSelection'));
+        droplist.selection = selection <= droplist.items.length - 1 && selection >= 0 ? selection : 0;
+
+        sp.renderTaskArray.forEach(function (item, index) {
+            app.cancelTask(item);
+        });
+        sp.renderTaskArray.length = 0;
+        sp.previewHelper = {};
+
+        win.onResize = win.onResizing = sp.fns.winResize;
+
+        if (win instanceof Panel) {
+            win.layout.layout(1);
+        } else {
+            var ratio = sp.gv.scale;
+            var location = sp.getSetting('winLocation').split(',');
+            win.location = [parseInt(location[0]), parseInt(location[1])];
+            if (win.location[0] <= 0 || win.location[1] <= 0) {
+                win.location = [100, 200];
+            }
+            win.show();
+            var size = sp.getSetting('winSize').split(',');
+            win.size = [parseInt(size[0]) * ratio, parseInt(size[1]) * ratio];
+            if (win.size[0] <= 0 || win.size[1] <= 0) {
+                win.size = [240, 500];
+            }
+            win.onClose = sp.fns.winClose;
+        }
+
+        win.onResize();
+
+        if (sp.checkVersionOnStartupValue) {
+            var checkVersionFunc = __webpack_require__(1)(win, true);
+            checkVersionFunc();
+        }
+
+        var observeSingleton = __webpack_require__(11);
+        observeSingleton(sp);
+    })(memoryGlobal);
+} catch (err) {
+    alert('Line #' + err.line.toString() + '\r\n' + err.toString());
+}
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6370,7 +5990,7 @@ var cout = $.global.cout = new OperatorOverload(function (operand, rev) {
 $.global.cout = cout;
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6402,7 +6022,7 @@ module.exports = function (method, endpoint, query) {
 };
 
 /***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6469,7 +6089,7 @@ $.layer.didCreateLayers = function () {
 module.exports = progressFactory;
 
 /***/ }),
-/* 22 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6501,14 +6121,14 @@ function observer(obj, callback, nameBlackList, index) {
 }
 
 /***/ }),
-/* 23 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var creatRightClickMenu = __webpack_require__(29);
-var moveItemWindow = __webpack_require__(26);
+var creatRightClickMenu = __webpack_require__(27);
+var moveItemWindow = __webpack_require__(24);
 
 module.exports = function () {
   var keepRef = this;
@@ -7285,7 +6905,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 24 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7394,7 +7014,7 @@ module.exports = function (groupItem, win, callback) {
 };
 
 /***/ }),
-/* 25 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7455,7 +7075,7 @@ module.exports = function (xmlItem, groupItem, win) {
 };
 
 /***/ }),
-/* 26 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7524,7 +7144,7 @@ module.exports = function (cu) {
 };
 
 /***/ }),
-/* 27 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7616,7 +7236,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 28 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7673,14 +7293,14 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 29 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var settingWindow = __webpack_require__(0);
-var presetWindow = __webpack_require__(28);
+var presetWindow = __webpack_require__(26);
 
 module.exports = function () {
   var itemList = [{ name: loc(sp.settings), type: 'button' }, { name: 'helperScripts', type: 'dropdownlist' }, { name: 'preview', type: 'button' }, { name: loc(sp.yushe), type: 'button' }, { name: loc(sp.changeName), type: 'button' }, { name: loc(sp.importPicture), type: 'button' }, { name: loc(sp.addModule), type: 'button' }, { name: loc(sp.deleteModule), type: 'button' }, { name: loc(sp.importFile), type: 'button' }, { name: loc(sp.exportFile), type: 'button' }, { name: loc(sp.addGroup), type: 'button' }, { name: loc(sp.deleteGroup), type: 'button' }, { name: loc(sp.addElement), type: 'button' }, { name: loc(sp.cover), type: 'button' }, { name: loc(sp.create), type: 'button' }, { name: loc(sp.deleteElement), type: 'button' }, { name: loc(sp.isShow), type: 'checkbox' }, { name: loc(sp.isName), type: 'checkbox', id: 'autoName' }, { name: loc(sp.isSavePreview), type: 'checkbox', id: 'savePreview' }, { name: loc(sp.isOffset), type: 'checkbox', id: 'saveMaterial' }, { name: loc(sp.isPrecomp), type: 'checkbox', id: 'preCompose' }, { name: loc(sp.isEffect), type: 'checkbox', id: 'onlyEffect' }, { name: loc(sp.cleanProperty), type: 'checkbox', id: 'cleanGroup' }, { name: loc(sp.offsetKey), type: 'checkbox', id: 'offsetKeyframe' }, { name: loc(sp.saveWorkarea), type: 'checkbox', id: 'saveWorkarea' }];
@@ -7736,12 +7356,11 @@ module.exports = function () {
   shortMenu['helperScripts'].add('item', loc(sp.expressionTranslate));
   shortMenu['helperScripts'].add('item', loc(sp.reloadGroup));
   shortMenu['helperScripts'].add('item', loc(sp.saveEachLayer));
-  shortMenu['helperScripts'].add('item', loc(sp.cutLength));
   shortMenu['helperScripts'].selection = 0;
 
   shortMenu['helperScripts'].onChange = shortMenu['helperScripts'].onChanging = function () {
     try {
-      this.selection.index === 1 && $.global.translate() || this.selection.index === 2 && $.global.reloadPic() || this.selection.index === 3 && $.global.autoSave() || this.selection.index === 4 && $.global.cutLength();
+      this.selection.index === 1 && $.global.translate() || this.selection.index === 2 && $.global.reloadPic() || this.selection.index === 3 && $.global.autoSave();
     } catch (err) {
       err.printa();
     }
