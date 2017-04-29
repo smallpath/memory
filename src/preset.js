@@ -113,42 +113,44 @@ module.exports = (function() {
     beyondCS6: true,
     versionUpdateInfo: {
       ch:
-      `层存储脚本Sp_Memory 3.0 @秋风_小径
+      `层存储脚本Sp_Memory ${process.env.VERSION} @秋风_小径
 
-功能添加:
-1.默认开启预览动画功能
-2.存储层时默认存储预览动画,可设定预览的帧率和帧数
-3.导入导出功能支持预览动画
-3.添加组的分类-模块
+>> 优化
+- 更换打包工具以提供直观的报错定位
+- 支持存储视频, 去除素材的大小限制
+- 生成层进度条
+- 存储层进度条
+- 进度条显示脚本耗时
+- 存储预览进度条
+- 优化预览CPU占用
+- 生成单个预合成时直接拉伸至当前合成大小
+- 增加允许截取工作区预览的检测框
+- 修复检查更新功能
+- 增加自动更新功能
+- 增加windows缩放比例参数
 
-右键菜单新增:
-1.预览全部/预览选中
-2.新建模块
-3.删除模块
-
-
-小提示:
-1.在3.x版本前保存的组,可以用"右键->辅助脚本->重载组内预览动画"来为组所有元素进行批量生成预览动画
-2.可使用ctrl与shift对元素进行自由选择,之后右键->预览选中,即可同时预览所有被选中元素的动画
-3.在未选中任何元素时,右键->预览全部,即可预览组内的全部元素的动画
-4.在设置窗口中,选中一个组,之后点击"剪切选中组到其他模块",可将组移动到其他模块中
-
-
+>> 漏洞修复
+- 修复音频层关键帧未生成的问题
+- 修复windows缩放比例不为1时的界面越界问题
+- 修复界面中一些特殊文字的错位问题
+- 修复windows禁止字符导致预览存储失败的问题
+- 修复最小化时关掉脚本导致的脚本大小归零的问题
+- 修复windows特殊字符串导致的模块,组以及元素生成失败的问题
+- 修复mac CC2017中表达式翻译无法使用的问题
+- 修复setInterpolationTypeAtKey的关键帧生成报错
+- 修复非1080p的右键菜单越界的问题
 `,
-      en: `Sp_memory 3.0 @smallpath
+      en: `Sp_memory ${process.env.VERSION} @smallpath
                     
 New Feature:
-1.Enable preview element
-2.Create preview animation while saving layers,you can set the frame rate and frame number
-3.Export/Import group support preview animation
-4.Add module - the group of group
-
-Tips:
-1.When your group is saved  before v3.0,you can use "RightClick->Helper scripts->Reload previews of group" to create all the preview animation
-2.Use ctrl key and shift key to select element,then use "RightClick->Preview selected" to preview the animations of selected element at the same time.
-3.When there isn't any element being selected, us "RightClick->Preview all" to preview all the animations of group.
-4.To cut the group from its module into another module,use "Cut selected group to other module" in the settings window
-                    
+1. Move to new pack tool to provide useful error stack trace
+2. Add support to media material layer and remove the size limit of any material
+3. Add progress bar to creating and saving process, together with saving previews
+4. Add check box to support saving previews in workarea
+5. Add support for windows font scale ratio to solve problem on AE CC2015
+6. Fit to comp when only one comp layer is generated
+7. Add auto updating feature and checkbox for starting checking
+8. Optimize cpu rank while previewing          
 `
     }
   })
