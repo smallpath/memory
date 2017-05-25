@@ -6846,6 +6846,8 @@ module.exports = function () {
     sp.parentDroplist.size.height = sp.droplist.size.height;
     sp.parentDroplist.location.y = 0;
     sp.parentDroplist.itemSize.width = (parentDroplistWidth - 27 * scale) / scale;
+    var screen = $.screens[0].toString().split('-').pop().split(':');
+    sp.droplist.maximumSize = sp.parentDroplist.maximumSize = [undefined, parseInt(screen[1]) - 100];
     sp.gv.refresh();
   };
   this.winClose = function () {
