@@ -874,6 +874,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
   };
 
+  var imagePattern = new RegExp('(ai|bmp|bw|cin|cr2|crw|dcr|dng|dib|dpx|eps|erf|exr|gif|hdr|icb|iff|jpe|jpeg|jpg|mos|mrw|nef|orf|pbm|pef|pct|pcx|pdf|pic|pict|png|ps|psd|pxr|raf|raw|rgb|rgbe|rla|rle|rpf|sgi|srf|tdi|tga|tif|tiff|vda|vst|x3f|xyze)', 'i');
   $.layer.extend($.layer.prototype, {
 
     getLayerAttr: function getLayerAttr(index) {
@@ -904,10 +905,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             layerInfo.solidColor = mainSource.color;
           } else if (mainSource instanceof FileSource && !isNullLayer && !isComp) {
             layerInfo.sound = thisLayer.hasAudio;
-            if (layerInfo.sound) {
+
+            if (thisLayer.hasAudio) {
               layerInfo.type = 'VideoWithSound';
             } else {
-              layerInfo.type = 'VideoWithoutSound';
+              var suffix = mainSource.file.toString() || '';
+              var matched = suffix.split('.').pop();
+              if (mainSource.isStill === true) {
+                layerInfo.type = 'VideoWithoutSound';
+              } else if (matched) {
+                layerInfo.type = 'VideoWithoutSound';
+                layerInfo.sequence = 'true';
+              } else {
+                layerInfo.type = 'VideoWithoutSound';
+              }
             }
           } else if (isComp) {
             layerInfo.type = 'Comp';
@@ -1014,7 +1025,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return layerInfo;
     },
 
-    getMaterial: function getMaterial(layerInfo, helperObj, thisLayer) {
+    getMaterial: function getMaterial(layerInfo, helperObj, thisLayer, isSequence) {
       var file = layerInfo.file = thisLayer.source.mainSource.file;
       if (this.isSaveMaterial === false) return layerInfo;
 
@@ -1029,6 +1040,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             var fileContent = thisFile.read();
             thisFile.close();
             layerInfo.fileBin = encode(fileContent);
+            if (layerInfo.sequence.toString() === 'true') {
+              var fileArr = $.layer.testForSequence(thisFile);
+              if (fileArr.length !== 0) {
+                var outter = new XML('<fileBinSeq></fileBinSeq>');
+
+                $.layer.forEach.call(fileArr, function (sequenceFile, index) {
+                  try {
+                    var tempXmlBigHere = new XML('<imgName>' + encode(sequenceFile.name) + '</imgName>');
+
+                    var temp = new XML('<imgInfo></imgInfo>');
+                    temp.appendChild(tempXmlBigHere);
+
+                    outter.appendChild(temp);
+                  } catch (err) {}
+                });
+                layerInfo.fileBinSeq = outter;
+              }
+            }
           } catch (err) {}
         } catch (err) {}
       }
@@ -1846,6 +1875,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
       }
       if (layer instanceof AVLayer) {
+        try {
+          if (xml.sequence.toString() === 'true') {
+            layer.source.replaceWithSequence(new File(xml.file.toString()), false);
+          }
+        } catch (err) {
+          $.writeln(err.toString());
+        }
         return layer;
       } else {
         layer = thisComp.layers.addSolid([0, 0, 0], 'fail due to not instanceof AVLayer', 100, 100, 1);
@@ -2721,6 +2757,25 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     $.layer.layerArr = [];
     $.layer.layerParentNameArr = [];
     $.layer.errorInfoArr = [];
+  };
+
+  $.layer.testForSequence = function (file) {
+    var searcher = new RegExp('\\d{4,}');
+    var files = file.parent.getFiles();
+    var defaultResult = searcher.exec(file.name);
+    if (!defaultResult) return [];
+    var prefix = file.name.replace(defaultResult[0], '');
+    var finalFiles = [];
+    for (var i = 0; i < files.length; i++) {
+      var currentResult = searcher.exec(files[i].name);
+      if (currentResult) {
+        var testName = files[i].name.replace(currentResult[0], '');
+        if (testName === prefix) {
+          finalFiles.push(files[i]);
+        }
+      }
+    }
+    return finalFiles;
   };
 
   $.layer.writeErrorFile = function () {
@@ -6509,7 +6564,6 @@ module.exports = function () {
       }
 
       var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp);
-
       sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text), xml);
 
       var item = sp.gv.add(decodeURIComponent(itemName), sp.getImage(sp.droplist.selection.text, itemName));
@@ -6846,8 +6900,7 @@ module.exports = function () {
     sp.parentDroplist.size.height = sp.droplist.size.height;
     sp.parentDroplist.location.y = 0;
     sp.parentDroplist.itemSize.width = (parentDroplistWidth - 27 * scale) / scale;
-    var screen = $.screens[0].toString().split('-').pop().split(':');
-    sp.droplist.maximumSize = sp.parentDroplist.maximumSize = [undefined, parseInt(screen[1]) - 100];
+
     sp.gv.refresh();
   };
   this.winClose = function () {

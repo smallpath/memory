@@ -430,7 +430,6 @@ module.exports = function() {
       }
 
       var xml = sp.getXmlFromLayers(thisComp.selectedLayers, itemName, sp)
-
       sp.saveItemToFile(sp.getFileByName(sp.droplist.selection.text), xml)
 
       var item = sp.gv.add(decodeURIComponent(itemName), sp.getImage(sp.droplist.selection.text, itemName))
@@ -746,8 +745,10 @@ module.exports = function() {
     sp.parentDroplist.size.height = sp.droplist.size.height
     sp.parentDroplist.location.y = 0 // fix margin error for mac
     sp.parentDroplist.itemSize.width = (parentDroplistWidth - 27 * scale) / scale
-    var screen = $.screens[0].toString().split('-').pop().split(':')
-    sp.droplist.maximumSize = sp.parentDroplist.maximumSize = [undefined, parseInt(screen[1]) - 100]
+    // var screen = $.screens[0].toString().split('-').pop().split(':')
+    // var max = parseInt(screen[1]) - 500
+    // if (sp.droplist.size[1] >= max) sp.droplist.size[1] = max
+    // if (sp.parentDroplist.size[1] >= max) sp.parentDroplist.size[1] = max
     sp.gv.refresh()
   }
   this.winClose = function() {
