@@ -90,5 +90,12 @@ try {
 
     var observeSingleton = require('src/mvvm/index')
     observeSingleton(sp)
+
+    app.onError && app.onError(function(err) {
+      alert(`警告, Sp_memory检测到AE报错, 内容如下:
+${err.toString()}
+
+请尽量将层分散存储在不同组内`)
+    })
   })(memoryGlobal)
 } catch (err) { alert('Line #' + err.line.toString() + '\r\n' + err.toString()) }

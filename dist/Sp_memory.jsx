@@ -6002,6 +6002,10 @@ try {
 
         var observeSingleton = __webpack_require__(11);
         observeSingleton(sp);
+
+        app.onError && app.onError(function (err) {
+            alert('\u8B66\u544A, Sp_memory\u68C0\u6D4B\u5230AE\u62A5\u9519, \u5185\u5BB9\u5982\u4E0B:\n' + err.toString() + '\n\n\u8BF7\u5C3D\u91CF\u5C06\u5C42\u5206\u6563\u5B58\u50A8\u5728\u4E0D\u540C\u7EC4\u5185');
+        });
     })(memoryGlobal);
 } catch (err) {
     alert('Line #' + err.line.toString() + '\r\n' + err.toString());
