@@ -1435,6 +1435,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (isFirstStage) {
         comp = layers[0].containingComp;
       } else {
+        if (layers && layers.length === 0) return new XML('<Comptent name="' + (elementName || 'Default') + '"></Comptent>');
         comp = layers[1].containingComp;
       }
 
