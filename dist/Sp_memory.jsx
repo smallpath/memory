@@ -5233,7 +5233,7 @@ module.exports = function () {
     setting: app.settings,
     inXml: null,
 
-    isCC2015: !!(app.version.indexOf('13.5') !== -1 || app.version.indexOf('13.6') !== -1 || app.version.indexOf('13.7') !== -1 || app.version.indexOf('13.8') !== -1 || app.version.indexOf('14') !== -1 || app.version.indexOf('15') !== -1),
+    isCC2015: !!(app.version.indexOf('13.5') !== -1 || app.version.indexOf('13.6') !== -1 || app.version.indexOf('13.7') !== -1 || app.version.indexOf('13.8') !== -1 || app.version.indexOf('14') !== -1 || app.version.indexOf('15') !== -1 || app.version.indexOf('16') !== -1),
 
     ui: 1,
     lang: 0,
