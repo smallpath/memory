@@ -22,7 +22,8 @@ module.exports = (function() {
       app.version.indexOf('13.7') !== -1 ||
       app.version.indexOf('13.8') !== -1 ||
       app.version.indexOf('14') !== -1 ||
-      app.version.indexOf('15') !== -1
+      app.version.indexOf('15') !== -1 ||
+      app.version.indexOf('16') !== -1
     )),
 
     ui: 1,
